@@ -23,6 +23,11 @@ npm install -g truffle
 ```
 
 ## Project setup
+Install the git submodule holding the smart contracts.
+```
+git submodule init
+git submodule update
+```
 Install the necessary node packages with npm or yarn.
 ```
 npm install
