@@ -1,37 +1,51 @@
 <template>
   <div class="home">
-    <h1>This is the homepage</h1>
-    Balance: {{ balance }}
+    <h1>Homepage</h1>
+    <p>Balance: <strong>{{ balance }}</strong></p>
+    <button v-on:click="onClickAddMinter()">Make me minter</button>
   </div>
 </template>
 
 <script>
+import THXToken from '../../build/contracts/THXToken.json'
+import Web3 from 'web3'
+import TruffleContract from 'truffle-contract'
 
 export default {
   name: 'home',
+  data: function () {
+    return {
+      balance: 0,
+      accounts: [],
+      providerURL: "http://localhost:8545"
+    }
+  },
   methods: {
     init() {
-
-      // Verify that web3 is available
       if (typeof web3 !== 'undefined') {
         web3 = new Web3(web3.currentProvider);
       } else {
         web3 = new Web3(new Web3.providers.HttpProvider(this.providerURL))
       }
 
-      // Let's request the balance for the MetaMask account
-      const accounts = web3.eth.accounts
+      web3.eth.getAccounts((error, result) => {
+        this.accounts = result
 
-      // Ethereum blockchain interactions from JS can only be Promises,
-      // set them up for every web3.eth method you want to use.
-      this.getBalance(accounts[0]).then((result) => {
-        // Since this method returns a BigNumber convert it to a Number first
-        var balanceInWei = result.toNumber()
-
-        // Calculate the amount of ETH represented by this Number, be careful! a string is returned:)
-        this.balance = web3.fromWei(balanceInWei, 'ether')
+        this.getBalance(this.accounts[0]).then((result) => {
+          this.balance = web3.utils.fromWei(result, 'ether')
+        })
       })
+    },
+    onClickAddMinter() {
+      const TruffleContract = require('truffle-contract')
+      const THXTokenContract = TruffleContract(THXToken)
 
+      THXTokenContract.setProvider(web3.currentProvider)
+      THXTokenContract.defaults({ from: web3.eth.defaultAccount })
+      THXTokenContract.deployed().then((instance) => {
+        // @TODO Fix the issues logged in browser console
+        instance.addMinter(this.accounts[0], { from: this.accounts[0] })
+      })
     },
     getBalance (address) {
       return new Promise (function (resolve, reject) {
@@ -43,12 +57,6 @@ export default {
           }
         })
       })
-    }
-  },
-  data: function () {
-    return {
-      balance: 0,
-      providerURL: "http://localhost:8545"
     }
   },
   mounted() {

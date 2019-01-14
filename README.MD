@@ -94,9 +94,19 @@ Make sure to have the addon installed and click the icon in your Chrome browser.
 1. Select the **Localhost 8545** network.
 2. Import an account with the private key shown in your console after starting Ganache CLI
 
+## Contract Migrations
+Make sure to compile your Solidity contracts and migrate them on the local Ganache network. Only then the VueJS can read the contracts (due to the created json files in the build folder).
+```
+truffle migrate --network ganache
+```
+
 ## Known issues
 Browser console logs some error, but they don't affect functionality.
 ```
 The script has an unsupported MIME type ('text/html').
 Failed to load resource: net::ERR_INSECURE_RESPONSE
 ```
+
+## Usefull links
+
+* (How to integratie JS with Smart Contracts)[https://github.com/trufflesuite/truffle/tree/develop/packages/truffle-contract]
