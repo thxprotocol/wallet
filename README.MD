@@ -1,36 +1,47 @@
 # Client - THX
 
-## Current know issues
-* Browser console logs
-```
-The script has an unsupported MIME type ('text/html').
-Failed to load resource: net::ERR_INSECURE_RESPONSE
-```
-
-
 ## Description
 This repository contains the VueJS demo application that will represent the THX Wallet app. The application used the Truffle development framework to implement the web3.js library to set up a connection with MetaMask, obtain an ETH address and transact with a local Ganache/Geth blockchain.
 
-## Install the MetaMask Chrome Addon
+## Index
+1. Installation
+  1. MetaMask Chrome Addon
+  2. Ganache UI or Ganache CLI
+  3. Truffle Development Toolkit
+  4. VueJS app
+2. Run VueJS app
+3. Run Ganache CLI
+4. Run MetaMask
+
+## Installation
+You need to install these applications to simulate a decentralized blockchain application on your local machine.
+
+* Make sure to have the LTS NodeJS version installed (tested on 10.)
+
+### MetaMask Chrome Addon
 Follow the installation instructions carefully and store the backup phrase in your password manager.
+
 * [MetaMask Chrome Addon Installer](https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn)
 
-## Install Ganache UI or Ganache CLI
+### Ganache CLI
 This is your local blockchain.
-* [Ganache UI Installer](https://truffleframework.com/ganache) and follow the instructions.
+
 * [Ganache CLI Documentation](https://github.com/trufflesuite/ganache-cli)
+
 ```
 npm install -g ganache-cli
 ```
 
-## Install Truffle globally
+### Truffle Development Toolkit
 This is the development toolkit we use for compiling the Solidity code used by the Smart Contracts.
-[Read more about the framework](https://github.com/trufflesuite/truffle)
+
+* [Read more about the framework](https://github.com/trufflesuite/truffle)
+
 ```
 npm install -g truffle
 ```
 
-## Project setup
+### VueJS app
 Install the git submodule holding the smart contracts.
 ```
 git submodule init
@@ -41,31 +52,27 @@ Install the necessary node packages with npm or yarn.
 npm install
 ```
 
-## Project maintenance
+## Run applications
+
+### VueJS app
 Use these commands to maintain the project, create production builds, run tests and lint code.
 
-### Compiles and hot-reloads for development
 ```
+# Compiles and hot-reloads for development
 npm run serve
-```
 
-### Compiles and minifies for production
-```
+# Compiles and minifies for production
 npm run build
-```
 
-### Run your tests
-```
+# Run your tests
 npm run test
-```
 
-### Lints and fixes files
-```
+# Lints and fixes files
 npm run lint
 ```
 
-## Run Ganache CLI
-Start the Ganache blockchain and make sure it runs on port `8545` that is configured for network `ganache` in `./truffle.js`.
+### Run Ganache CLI
+Start the Ganache blockchain (with 5 user accounts that hold 500 ETH each) and make sure the network runs on port `8545`. The port that is configured for network `ganache` in the file `./truffle.js`.
 ```
 ganache-cli --accounts=5 --defaultBalanceEther=500 --gasPrice=10225000000 --gasLimit=8500000
 ```
@@ -73,10 +80,23 @@ The CLI will show you a list of Private keys like this:
 ```
 Private Keys
 ==================
-(0) 0x5ea301f0398dd2cd7664e66645c9300f3b4f6196cbabd54e1fb86c37bc753a29
-(1) 0x3d66acbe328aed737d4d661b63c9c94ac8434c9a847e5d451b8b14e4bf4698ff
-(2) 0x68c4ff9c55290d2f269259c90310534a9ea88986bbdc4af24cd8af4a78df1fdf
-(3) 0x00f40b7dd48e1411eb9058f1b9f55f91a6ab1f696b9ed079f103d95cb651e828
-(4) 0x5c3046fce1dad3564fe2e90f303ba61d7cc3da0c02ed2af5d9a8cb5efc63b98a
+(0) 0x5f1dbafefc649a149ef39012a28b0648baa0a12696d329c99ab46928a00e6bda
+(1) 0xdc0f0fdcd19e90b405a5bcaffddceaa37c17e2fa044c569bca41daa95299cafb
+(2) 0x2afe8a56203eaae88bb5eba1ecc9b79c00c1f55addc9e141c9bfae637d9a30ce
+(3) 0xb92d16caabec881a9513be259ad33e80d474c867da9e0e6fa36ffd5227e337dc
+(4) 0xd5c7c7ddf437265bee80cb46a675ce94267d51fee87fe827c3750565cda3365e
 ```
-Copy the first to your clipboard and use it in MetaMask to import an account. See that your balance is about 500 ETH.
+Copy the first to your clipboard and use it to import an account in MetaMask. See that your balance is about 500 ETH.
+
+### MetaMask
+Make sure to have the addon installed and click the icon in your Chrome browser.
+
+1. Select the **Localhost 8545** network.
+2. Import an account with the private key shown in your console after starting Ganache CLI
+
+## Known issues
+Browser console logs some error, but they don't affect functionality.
+```
+The script has an unsupported MIME type ('text/html').
+Failed to load resource: net::ERR_INSECURE_RESPONSE
+```
