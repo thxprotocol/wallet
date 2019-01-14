@@ -4,14 +4,14 @@
 This repository contains the VueJS demo application that will represent the THX Wallet app. The application used the Truffle development framework to implement the web3.js library to set up a connection with MetaMask, obtain an ETH address and transact with a local Ganache/Geth blockchain.
 
 ## Index
-1. Installation
+* Installation
   1. MetaMask Chrome Addon
-  2. Ganache UI or Ganache CLI
+  2. Ganache CLI
   3. Truffle Development Toolkit
   4. VueJS app
-2. Run VueJS app
-3. Run Ganache CLI
-4. Run MetaMask
+* Run VueJS app
+* Run Ganache CLI
+* Run MetaMask
 
 ## Installation
 You need to install these applications to simulate a decentralized blockchain application on your local machine.
