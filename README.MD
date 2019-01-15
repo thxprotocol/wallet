@@ -54,23 +54,6 @@ npm install
 
 ## Run applications
 
-### VueJS app
-Use these commands to maintain the project, create production builds, run tests and lint code.
-
-```
-# Compiles and hot-reloads for development
-npm run serve
-
-# Compiles and minifies for production
-npm run build
-
-# Run your tests
-npm run test
-
-# Lints and fixes files
-npm run lint
-```
-
 ### Run Ganache CLI
 Start the Ganache blockchain (with 5 user accounts that hold 500 ETH each) and make sure the network runs on port `8545`. The port that is configured for network `ganache` in the file `./truffle.js`.
 ```
@@ -98,6 +81,23 @@ Make sure to have the addon installed and click the icon in your Chrome browser.
 Make sure to compile your Solidity contracts and migrate them on the local Ganache network. Only then the VueJS can read the contracts (due to the created json files in the build folder).
 ```
 truffle migrate --network ganache
+```
+
+### VueJS app
+Use these commands to maintain the project, create production builds, run tests and lint code.
+
+```
+# Compiles and hot-reloads for development
+npm run serve
+
+# Compiles and minifies for production
+npm run build
+
+# Run your tests
+npm run test
+
+# Lints and fixes files
+npm run lint
 ```
 
 ## Known issues
