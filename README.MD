@@ -59,16 +59,16 @@ Start the Ganache blockchain (with 5 user accounts that hold 500 ETH each) and m
 ```
 ganache-cli --accounts=5 --defaultBalanceEther=500 --gasPrice=10225000000 --gasLimit=8500000
 ```
+
 The CLI will show you a list of Private keys like this:
 ```
 Private Keys
 ==================
 (0) 0x5f1dbafefc649a149ef39012a28b0648baa0a12696d329c99ab46928a00e6bda
 (1) 0xdc0f0fdcd19e90b405a5bcaffddceaa37c17e2fa044c569bca41daa95299cafb
-(2) 0x2afe8a56203eaae88bb5eba1ecc9b79c00c1f55addc9e141c9bfae637d9a30ce
-(3) 0xb92d16caabec881a9513be259ad33e80d474c867da9e0e6fa36ffd5227e337dc
-(4) 0xd5c7c7ddf437265bee80cb46a675ce94267d51fee87fe827c3750565cda3365e
+...
 ```
+
 Copy the first to your clipboard and use it to import an account in MetaMask. See that your balance is about 500 ETH.
 
 ### MetaMask
@@ -101,12 +101,9 @@ npm run lint
 ```
 
 ## Known issues
-Browser console logs some error, but they don't affect functionality.
-```
-The script has an unsupported MIME type ('text/html').
-Failed to load resource: net::ERR_INSECURE_RESPONSE
-```
+none
 
-## Usefull links
+## Documentation
 
-* [How to integrate JS with Smart Contracts](https://github.com/trufflesuite/truffle/tree/develop/packages/truffle-contract)
+* [Solidity](https://solidity.readthedocs.io/en/v0.5.0/)
+* [web3.js](https://web3js.readthedocs.io/en/1.0/)
