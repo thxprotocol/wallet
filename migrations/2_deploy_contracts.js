@@ -3,5 +3,5 @@ const RewardPool = artifacts.require('./RewardPool.sol')
 
 module.exports = async (deployer, network, accounts) => {
   await deployer.deploy(THXToken)
-  await deployer.deploy(RewardPool)
+  await deployer.deploy(RewardPool, "Greenpeace Greenwire", THXToken.address)
 }

@@ -100,6 +100,12 @@ npm run test
 npm run lint
 ```
 
+## Tasks
+
+* The THX Wallet UI needs to be implemented.
+* The list of Reward Structs in the RewardPool contract needs to be able to support multiple rewards of various types per beneficiary address.
+* A splash screen should be shown when you have received a reward. See how to use contract events for this.
+
 ## Known issues
 ```
 Error: MetaMask - RPC Error: Internal JSON-RPC error.

@@ -2,24 +2,46 @@
   <div class="home">
     <h1>Homepage</h1>
     <hr>
-    <div v-for="balance in balances">
+    <div v-bind:key="balance.address" v-for="balance in balances">
       <p>Address: <strong>{{ balance.address }}</strong></p>
       <p>Balance (ETH): <strong>{{ balance.ethBalance }}</strong></p>
       <p>Balance (THX): <strong>{{ balance.tokenBalance }}</strong></p>
     </div>
     <hr>
+    <h2>{{ poolName }}</h2>
     <p>Address: <strong>{{ rewardPoolAddress }}</strong></p>
     <p>Balance Pool (THX): <strong>{{ tokenBalancePool }}</strong></p>
+    <ul>
+      <li v-bind:key="reward.beneficiary" v-for="reward in rewards">
+        <p>
+          Slug: <strong>{{ reward.slug }}</strong><br />
+          Beneficiary: <strong>{{ reward.beneficiary }}</strong><br />
+          Amount: <strong>{{ reward.amount }}</strong><br />
+          State: <strong>{{ reward.state }}</strong>
+        </p>
+        <p>
+          <button v-on:click="rejectReward(reward.beneficiary)">Reject</button>
+          <button v-on:click="approveReward(reward.beneficiary)">Approve</button>
+          <button v-on:click="withdrawReward(this.accounts[0])"
+        </p>
+      </li>
+    </ul>
     <hr>
 
     <form v-on:submit="onMintForAccount()">
-      <input v-model="mintForAccountAmount" type="number" min="0" /><br />
+      <input v-model="mintForAccountAmount" type="number" min="0"/><br />
       <button type="submit">Mint {{ mintForAccountAmount }} THX for yourself</button>
     </form>
 
     <form v-on:submit="onTransferToPool()">
       <input v-model="transferToPoolAmount" type="number" min="0" v-if="balances[0]" v-bind:max="balances[0].tokenBalance" /><br />
       <button type="submit">Transfer {{ transferToPoolAmount }} THX to the pool</button>
+    </form>
+
+    <form v-on:submit="createReward()">
+      <input v-model="rewardSlug" type="text" placeholder="reward_type" /><br />
+      <input v-model="rewardAmount" type="number" min="0" v-bind:max="tokenBalancePool" /><br />
+      <button type="submit">Suggest Reward!</button>
     </form>
 
   </div>
@@ -36,6 +58,7 @@ export default {
   name: 'home',
   data: function () {
     return {
+      poolName: "",
       providerURL: "http://localhost:8545",
       ethBalanceAccount0: 0,
       tokenBalanceAccount0: 0,
@@ -44,12 +67,15 @@ export default {
       tokenBalancePool: 0,
       accounts: [],
       balances: [],
+      rewards: [],
       tokenAddress: null,
       rewardPoolAddress: null,
       tokenInstance: null,
       RewardPoolInstance: null,
       transferToPoolAmount: 0,
-      mintForAccountAmount: 0
+      mintForAccountAmount: 0,
+      rewardSlug: "",
+      rewardAmount: 0
     }
   },
   mounted() {
@@ -74,14 +100,51 @@ export default {
       this.tokenInstance = new web3.eth.Contract(TokenJSON.abi, this.tokenAddress)
       this.rewardPoolInstance = new web3.eth.Contract(RewardPoolJSON.abi, this.rewardPoolAddress)
 
+      this.poolName = await this.rewardPoolInstance.methods.name().call();
+
       // Retrieve the accounts available on the network
       await web3.eth.getAccounts((error, accounts) => {
         // Store the accounts
         this.accounts = accounts
       })
 
+      // Update the rewards.
+      this.updateRewards()
+
       // Update the balances for account 0
       this.updateBalances()
+    },
+    async updateRewards() {
+      this.rewards = []
+
+      // @TODO This part requires a solution for storing the rewards in contract
+      var listLength = await this.rewardPoolInstance.methods.count().call()
+
+      for (var i = 0; i < listLength; i++) {
+        // Display the current reward state. @TODO Should not return duplicates
+        let index = await this.rewardPoolInstance.methods.rewardList(i).call()
+
+        // Display the current reward state
+        let reward = await this.rewardPoolInstance.methods.rewards(index).call()
+
+        this.rewards.push(reward)
+      }
+
+    },
+    async createReward() {
+      var tx = await this.rewardPoolInstance.methods.add(this.rewardSlug, this.rewardAmount).send({from: this.accounts[0]})
+
+      this.updateRewards()
+    },
+    async approveReward(account) {
+      await this.rewardPoolInstance.methods.approve(account).send({from: this.accounts[0]})
+
+      this.updateRewards()
+      this.updateBalances()
+    },
+    async rejectReward(account) {
+      await this.rewardPoolInstance.methods.reject(account).send({from: this.accounts[0]})
+      this.updateRewards()
     },
     async updateBalances() {
       this.balances = []
@@ -106,14 +169,11 @@ export default {
       // Mint 1000 THX for account 0. Make sure to call from account 0 that has the MinterRole
       await this.tokenInstance.methods.mint(this.accounts[0], this.mintForAccountAmount).send({from: this.accounts[0]})
 
-      // Update the balances for account 0
       this.updateBalances()
     },
     async onTransferToPool() {
-      // Mint 1000 THX for account 0. Make sure to call from account 0 that has the MinterRole
       await this.tokenInstance.methods.transfer(this.rewardPoolAddress, this.transferToPoolAmount).send({from: this.accounts[0]})
 
-      // Update the balances for account 0
       this.updateBalances()
     }
   }
