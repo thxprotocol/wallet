@@ -109,4 +109,4 @@ Failed to load resource: net::ERR_INSECURE_RESPONSE
 
 ## Usefull links
 
-* (How to integratie JS with Smart Contracts)[https://github.com/trufflesuite/truffle/tree/develop/packages/truffle-contract]
+* [How to integrate JS with Smart Contracts](https://github.com/trufflesuite/truffle/tree/develop/packages/truffle-contract)
