@@ -4,3 +4,16 @@ body {
   padding: 1rem;
   font-family: 'Avenir';
 }
+
+input,
+textarea {
+  padding: .5rem;
+  margin-bottom: .5rem;
+}
+
+button {
+  padding: .5rem;
+  border-radius: 5px;
+  background-color: #EFEFEF;
+  margin-bottom: .5rem;
+}
