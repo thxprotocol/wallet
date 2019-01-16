@@ -101,7 +101,10 @@ npm run lint
 ```
 
 ## Known issues
-none
+```
+Error: MetaMask - RPC Error: Internal JSON-RPC error.
+```
+**Solution:** Toggle between the main network (or any other) and you Localhost 8545 network to reconnect to the RPC. Make sure to import your account with it's private key.
 
 ## Documentation
 

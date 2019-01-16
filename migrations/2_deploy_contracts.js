@@ -1,7 +1,7 @@
 const THXToken = artifacts.require('./THXToken.sol')
-const Escrow = artifacts.require('./escrow/Escrow.sol')
+const RewardPool = artifacts.require('./RewardPool.sol')
 
 module.exports = async (deployer, network, accounts) => {
   await deployer.deploy(THXToken)
-  await deployer.deploy(Escrow)
+  await deployer.deploy(RewardPool)
 }
