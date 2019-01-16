@@ -33,7 +33,7 @@ npm install -g ganache-cli
 ```
 
 ### Truffle Development Toolkit
-This is the development toolkit we use for compiling the Solidity code used by the Smart Contracts.
+This is the development toolkit we use for compiling the .sol (Solidity) and deploying them on the network.
 
 * [Read more about the framework](https://github.com/trufflesuite/truffle)
 
