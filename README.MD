@@ -9,9 +9,14 @@ This repository contains the VueJS demo application that will represent the THX 
   2. Ganache CLI
   3. Truffle Development Toolkit
   4. VueJS app
-* Run VueJS app
-* Run Ganache CLI
-* Run MetaMask
+* Applications
+  1. Run Ganache CLI
+  2. Run MetaMask
+* Contract Migrations
+* VueJS App
+* Open Tasks
+* Known issues
+* Documentation
 
 ## Installation
 You need to install these applications to simulate a decentralized blockchain application on your local machine.
@@ -25,21 +30,20 @@ Follow the installation instructions carefully and store the backup phrase in yo
 
 ### Ganache CLI
 This is your local blockchain.
-
-* [Ganache CLI Documentation](https://github.com/trufflesuite/ganache-cli)
-
 ```
 npm install -g ganache-cli
 ```
 
+* [Ganache CLI Documentation](https://github.com/trufflesuite/ganache-cli)
+
 ### Truffle Development Toolkit
 This is the development toolkit we use for compiling the .sol (Solidity) and deploying them on the network.
-
-* [Read more about the framework](https://github.com/trufflesuite/truffle)
-
 ```
 npm install -g truffle
 ```
+
+* [Read more about the framework](https://github.com/trufflesuite/truffle)
+
 
 ### VueJS app
 Install the git submodule holding the smart contracts.
@@ -52,7 +56,7 @@ Install the necessary node packages with npm or yarn.
 npm install
 ```
 
-## Run applications
+## Applications
 
 ### Run Ganache CLI
 Start the Ganache blockchain (with 5 user accounts that hold 500 ETH each) and make sure the network runs on port `8545`. The port that is configured for network `ganache` in the file `./truffle.js`.
@@ -83,7 +87,7 @@ Make sure to compile your Solidity contracts and migrate them on the local Ganac
 truffle migrate --network ganache
 ```
 
-### VueJS app
+## VueJS app
 Use these commands to maintain the project, create production builds, run tests and lint code.
 
 ```
@@ -100,10 +104,10 @@ npm run test
 npm run lint
 ```
 
-## Tasks
+## Open Tasks
 
 * The THX Wallet UI needs to be implemented.
-* The list of Reward Structs in the RewardPool contract needs to be able to support multiple rewards of various types per beneficiary address.
+* ~~The list of Reward Structs in the RewardPool contract needs to be able to support multiple rewards of various types per beneficiary address.~~
 * A splash screen should be shown when you have received a reward. See how to use contract events for this and probably store the state client side.
 * Improve Solidity typing for properties and refactor standard contracts.
 * Investigate the impact of long lists of rewards in terms of tx cost calculation.

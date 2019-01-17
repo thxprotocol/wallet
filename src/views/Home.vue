@@ -12,17 +12,17 @@
     <p>Address: <strong>{{ rewardPoolAddress }}</strong></p>
     <p>Balance Pool (THX): <strong>{{ tokenBalancePool }}</strong></p>
     <ul>
-      <li v-bind:key="reward.beneficiary" v-for="reward in rewards">
+      <li v-bind:key="reward.id" v-for="reward in rewards">
         <p>
+          ID: <strong>{{ reward.id }}</strong><br />
           Slug: <strong>{{ reward.slug }}</strong><br />
           Beneficiary: <strong>{{ reward.beneficiary }}</strong><br />
           Amount: <strong>{{ reward.amount }}</strong><br />
           State: <strong>{{ reward.state }}</strong>
         </p>
         <p>
-          <button v-on:click="rejectReward(reward.beneficiary)">Reject</button>
-          <button v-on:click="approveReward(reward.beneficiary)">Approve</button>
-          <button v-on:click="withdrawReward(this.accounts[0])"
+          <button v-on:click="rejectReward(reward.id)">Reject</button>
+          <button v-on:click="approveReward(reward.id)">Approve</button>
         </p>
       </li>
     </ul>
@@ -34,7 +34,7 @@
       <button type="submit">Mint {{ mintForAccountAmount }} THX for yourself</button>
     </form>
 
-    <h3>Token transer:</h3>
+    <h3>Pool deposit:</h3>
     <form v-on:submit="onTransferToPool()">
       <input v-model="transferToPoolAmount" type="number" min="0" v-if="balances[0]" v-bind:max="balances[0].tokenBalance" /><br />
       <button type="submit">Transfer {{ transferToPoolAmount }} THX to the Reward Pool</button>
@@ -81,20 +81,17 @@ export default {
       rewardAmount: 0
     }
   },
-  mounted() {
-    this.init()
-  },
-  methods: {
-    async init() {
-      if (typeof web3 !== 'undefined') {
-        web3 = new Web3(web3.currentProvider);
-      } else {
-        web3 = new Web3(new Web3.providers.HttpProvider(this.providerURL))
-      }
+  async mounted() {
+    if (typeof web3 !== 'undefined') {
+      web3 = new Web3(web3.currentProvider);
+    } else {
+      web3 = new Web3(new Web3.providers.HttpProvider(this.providerURL))
+    }
 
-      // Get the network id
-      const nid = await web3.eth.net.getId()
+    // Get the network id
+    const nid = await web3.eth.net.getId()
 
+    if (typeof TokenJSON.networks[nid] != 'undefined' && typeof RewardPoolJSON.networks[nid] != 'undefined') {
       // Get the contract addresses
       this.tokenAddress = TokenJSON.networks[nid].address
       this.rewardPoolAddress = RewardPoolJSON.networks[nid].address
@@ -102,6 +99,16 @@ export default {
       // Create an instance from the THXToken Contract abi and contract address on the current network
       this.tokenInstance = new web3.eth.Contract(TokenJSON.abi, this.tokenAddress)
       this.rewardPoolInstance = new web3.eth.Contract(RewardPoolJSON.abi, this.rewardPoolAddress)
+
+      this.init()
+    }
+    else {
+      console.log('Migrate your contracts first!')
+    }
+
+  },
+  methods: {
+    async init() {
 
       this.poolName = await this.rewardPoolInstance.methods.name().call();
 
@@ -120,34 +127,29 @@ export default {
     async updateRewards() {
       this.rewards = []
 
-      // @TODO This part requires a solution for storing the rewards in contract
-      // @TODO The question might also be; do we need to store those rewards in contract?:)
-      var beneficiaries = await this.rewardPoolInstance.methods.count().call()
+      var amountOfRewards = parseInt( await this.rewardPoolInstance.methods.count().call() )
 
-      for (var i = 0; i < beneficiaries; i++) {
+      for (var i = 0; i < amountOfRewards; i++) {
         // Display the current reward state. @TODO Should not return duplicates.
-        let index = await this.rewardPoolInstance.methods.beneficiaries(i).call()
-
-        // Display the current reward state
-        let reward = await this.rewardPoolInstance.methods.rewards(index).call()
+        let reward = await this.rewardPoolInstance.methods.rewards(i).call()
 
         this.rewards.push(reward)
       }
 
     },
     async createReward() {
-      var tx = await this.rewardPoolInstance.methods.add(this.rewardSlug, this.rewardAmount).send({from: this.accounts[0]})
+      await this.rewardPoolInstance.methods.add(this.rewardSlug, this.rewardAmount).send({from: this.accounts[0]})
 
       this.updateRewards()
     },
-    async approveReward(account) {
-      await this.rewardPoolInstance.methods.approve(account).send({from: this.accounts[0]})
+    async approveReward(id) {
+      await this.rewardPoolInstance.methods.approve(id).send({from: this.accounts[0]})
 
       this.updateRewards()
       this.updateBalances()
     },
-    async rejectReward(account) {
-      await this.rewardPoolInstance.methods.reject(account).send({from: this.accounts[0]})
+    async rejectReward(id) {
+      await this.rewardPoolInstance.methods.reject(id).send({from: this.accounts[0]})
       this.updateRewards()
     },
     async updateBalances() {
@@ -177,6 +179,9 @@ export default {
     },
     async onTransferToPool() {
       await this.tokenInstance.methods.transfer(this.rewardPoolAddress, this.transferToPoolAmount).send({from: this.accounts[0]})
+
+      // @TODO This deposit method still reverts...
+      // await this.rewardPoolInstance.methods.deposit(this.transferToPoolAmount).send({from: this.accounts[0]})
 
       this.updateBalances()
     }
