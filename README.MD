@@ -5,13 +5,17 @@ This repository contains the VueJS demo application that will represent the THX 
 
 ## Index
 * Installation
+
   1. MetaMask Chrome Addon
   2. Ganache CLI
   3. Truffle Development Toolkit
   4. VueJS app
+
 * Applications
+
   1. Run Ganache CLI
   2. Run MetaMask
+
 * Contract Migrations
 * VueJS App
 * Open Tasks
