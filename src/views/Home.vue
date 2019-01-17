@@ -28,20 +28,23 @@
     </ul>
     <hr>
 
+    <h3>Mint tokens:</h3>
     <form v-on:submit="onMintForAccount()">
       <input v-model="mintForAccountAmount" type="number" min="0"/><br />
       <button type="submit">Mint {{ mintForAccountAmount }} THX for yourself</button>
     </form>
 
+    <h3>Token transer:</h3>
     <form v-on:submit="onTransferToPool()">
       <input v-model="transferToPoolAmount" type="number" min="0" v-if="balances[0]" v-bind:max="balances[0].tokenBalance" /><br />
-      <button type="submit">Transfer {{ transferToPoolAmount }} THX to the pool</button>
+      <button type="submit">Transfer {{ transferToPoolAmount }} THX to the Reward Pool</button>
     </form>
 
+    <h3>Create reward:</h3>
     <form v-on:submit="createReward()">
       <input v-model="rewardSlug" type="text" placeholder="reward_type" /><br />
       <input v-model="rewardAmount" type="number" min="0" v-bind:max="tokenBalancePool" /><br />
-      <button type="submit">Suggest Reward!</button>
+      <button type="submit">Create Reward!</button>
     </form>
 
   </div>
@@ -118,11 +121,12 @@ export default {
       this.rewards = []
 
       // @TODO This part requires a solution for storing the rewards in contract
-      var listLength = await this.rewardPoolInstance.methods.count().call()
+      // @TODO The question might also be; do we need to store those rewards in contract?:)
+      var beneficiaries = await this.rewardPoolInstance.methods.count().call()
 
-      for (var i = 0; i < listLength; i++) {
-        // Display the current reward state. @TODO Should not return duplicates
-        let index = await this.rewardPoolInstance.methods.rewardList(i).call()
+      for (var i = 0; i < beneficiaries; i++) {
+        // Display the current reward state. @TODO Should not return duplicates.
+        let index = await this.rewardPoolInstance.methods.beneficiaries(i).call()
 
         // Display the current reward state
         let reward = await this.rewardPoolInstance.methods.rewards(index).call()
