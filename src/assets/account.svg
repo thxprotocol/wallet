@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="86px" height="86px" viewBox="0 0 86 86" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 47.1 (45422) - http://www.bohemiancoding.com/sketch -->
+    <title>Group 14</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="APP-v2" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group-14" transform="translate(-10.000000, -10.000000)">
+            <path d="M53,53 C64.05,53 73,44.05 73,33 C73,21.95 64.05,13 53,13 C41.95,13 33,21.95 33,33 C33,44.05 41.95,53 53,53 Z M53,63 C39.65,63 13,69.7 13,83 L13,93 L93,93 L93,83 C93,69.7 66.35,63 53,63 Z" id="Shape" stroke="#000000" stroke-width="5" fill-rule="nonzero"></path>
+            <rect id="Rectangle-8" x="0" y="0" width="105" height="105"></rect>
+        </g>
+    </g>
+</svg>
