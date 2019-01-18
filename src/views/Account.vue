@@ -27,14 +27,7 @@
 </template>
 
 <script>
-/*globals web3:true*/
-import Web3 from 'web3'
-
 import NetworkService from '../services/NetworkService.js'
-
-import TokenJSON from '../../build/contracts/THXToken.json'
-import RewardPoolJSON from '../../build/contracts/RewardPool.json'
-
 import Header from '../components/Header.vue'
 
 export default {
@@ -56,7 +49,7 @@ export default {
     }
   },
   mounted() {
-    new NetworkService(web3).connect().then(async (network) => {
+    new NetworkService().connect().then(async (network) => {
       this.network = network
       this.init()
     })
@@ -76,7 +69,7 @@ export default {
         return this.$refs.header.updateBalance()
       })
     },
-    async onTransferToPool() {
+    onTransferToPool() {
       const token = this.network.instances.token;
 
       // @TODO This deposit method still reverts...

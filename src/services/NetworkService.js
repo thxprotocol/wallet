@@ -1,24 +1,23 @@
-/*globals web3:true*/
+/*global web3*/
 import Web3 from 'web3'
 
 import TokenJSON from '../../build/contracts/THXToken.json'
 import RewardPoolJSON from '../../build/contracts/RewardPool.json'
 
 export default class NetworkService {
-  constructor(web3) {
+  constructor() {
+    this.web3 = web3
+
     if (typeof web3 !== 'undefined') {
-      this.web3 = new Web3(web3.currentProvider);
+      this.web3 = new Web3(this.web3.currentProvider);
     } else {
       this.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
     }
-
     this.accounts = []
-
     this.addresses = {
       token: null,
       rewardPool: null
     }
-
     this.instances = {
       token: null,
       rewardPool: null
@@ -45,7 +44,7 @@ export default class NetworkService {
             pool: new this.web3.eth.Contract(RewardPoolJSON.abi, addresses.pool)
           }
 
-          web3.eth.getAccounts((error, accounts) => {
+          this.web3.eth.getAccounts((error, accounts) => {
             this.accounts = accounts
 
             resolve({

@@ -26,8 +26,10 @@ textarea {
 }
 
 .btn {
+  font-family: 'Exo 2';
   border: 0;
   border-radius: 10px;
+  line-height: 1;
   background-color: black;
   color: $yellow;
   margin-bottom: .5rem;
@@ -75,9 +77,10 @@ hr.dotted {
 }
 
 .section--notifications {
-  background-image: cover;
+  background-size: cover;
   background-position: center center;
   background-image: url('./assets/background.jpg');
+  background-repeat: no-repeat;
 
   &:before {
     content: "";
@@ -172,6 +175,38 @@ hr.dotted {
   list-style: none;
 }
 
+.list--nav {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  position: fixed;
+  bottom: calc(60px + 1rem);
+  text-align: center;
+  width: 100%;
+  justify-content: center;
+
+  button {
+    display: flex;
+    background: transparent;
+    border: 0;
+    font-size: 0;
+    padding: 10px;
+
+    &.active:before {
+      background-color: black;
+    }
+
+    &:before {
+      content: "";
+      display: block;
+      background: white;
+      border-radius: 50%;
+      width: 10px;
+      height: 10px;
+    }
+  }
+}
+
 .list--dotted {
   display: block;
   width: 100%;
@@ -210,6 +245,7 @@ hr.dotted {
   width: calc(100vw - 4rem);
   background-color: white;
   margin: 1rem;
+  margin-bottom: 4.5rem;
   padding: 1rem;
   border-radius: 10px;
   flex: 1 auto;

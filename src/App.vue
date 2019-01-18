@@ -4,7 +4,7 @@
     <footer class="region region--navigation">
       <nav class="navbar">
         <ul class="nav">
-          <li v-for="route in $router.options.routes" v-if="route.visible">
+          <li v-bind:key="route.name" v-for="route in $router.options.routes">
             <router-link v-bind:to="route.path">
               <img width="20" height="20" v-bind:src="assets[route.name][(route.path == $router.currentRoute.path) ? 'active' : 'default']" alt="Wallet Icon" />
             </router-link>
@@ -16,9 +16,6 @@
 </template>
 
 <script>
-/*globals web3:true*/
-import Web3 from 'web3'
-
 import WalletSrc from './assets/wallet.svg'
 import WalletActiveSrc from './assets/wallet_selected.svg'
 import NotificationsSrc from './assets/notification.svg'
@@ -48,7 +45,6 @@ export default {
   mounted() {
 
   }
-
 }
 </script>
 

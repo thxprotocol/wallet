@@ -2,7 +2,7 @@
   <article class="region region--container">
 
     <div class="list list--swipe">
-      <div v-bind:key="reward.id" v-for="reward in rewards" v-if="reward.state == 0" class="notification">
+      <div v-bind:key="reward.id" v-for="reward in rewards" class="notification">
         <h2 class="font-size-large">{{ reward.slug }}</h2>
         <p>{{ pool.name }} <strong>{{ pool.balance }} THX</strong></p>
         <hr />
@@ -19,15 +19,22 @@
           <small>State: <strong>{{ reward.state }}</strong></small>
         </p>
         <div class="notification__actions">
-          <button class="btn btn--default" v-on:click="rejectReward(reward.id)">
+          <button class="btn btn--default" v-on:click="reject(reward.id)">
             Reject
           </button>
-          <button class="btn btn--success" v-on:click="approveReward(reward.id)">
+          <button class="btn btn--success" v-on:click="approve(reward.id)">
             Approve
           </button>
         </div>
       </div>
     </div>
+
+    <ul class="list list--nav">
+      <li v-bind:key="r.id" v-for="r in rewards">
+        <button v-bind:class="`${(r.id == currentNotification) ? 'active' : ''}`">{{ r.id }}</button>
+      </li>
+    </ul>
+
   </article>
 </template>
 
@@ -43,14 +50,12 @@ export default {
         name: "",
         balance: 0
       },
-      rewards: []
+      rewards: [],
+      currentNotification: 2
     }
   },
-  created() {
-
-  },
   mounted() {
-    new NetworkService(web3).connect().then((network) => {
+    new NetworkService().connect().then((network) => {
       this.network = network
       this.init()
     })
@@ -64,31 +69,37 @@ export default {
       this.pool.name = await pool.methods.name().call()
       this.pool.balance = await token.methods.balanceOf(this.network.addresses.pool).call()
 
-      this.updateRewards()
+      this.update()
     },
-    async updateRewards() {
+    async update() {
       const pool = this.network.instances.pool;
+      const amountOfRewards = await pool.methods.count().call()
 
-      this.rewards = []
+      let rewards = []
 
-      var amountOfRewards = parseInt( await pool.methods.count().call() )
-
-      for (var i = 0; i < amountOfRewards; i++) {
-        // Display the current reward state. @TODO Should not return duplicates.
+      for (var i = 0; i < parseInt(amountOfRewards); i++) {
         let reward = await pool.methods.rewards(i).call()
 
-        this.rewards.push(reward)
+        rewards.push(reward)
       }
+
+      this.rewards = rewards.filter((r) => {
+        return r.state == 0
+      })
     },
-    approveReward(id) {
+    approve(id) {
       const pool = this.network.instances.pool;
 
-      return pool.methods.approve(id).send({from: this.network.accounts[0]}).then(this.updateRewards())
+      return pool.methods.approve(id).send({from: this.network.accounts[0]}).then(() => {
+        this.update()
+      })
     },
-    rejectReward(id) {
+    reject(id) {
       const pool = this.network.instances.pool;
 
-      return pool.methods.reject(id).send({from: this.network.accounts[0]}).then(this.updateRewards())
+      return pool.methods.reject(id).send({from: this.network.accounts[0]}).then(() => {
+        this.update()
+      })
     }
   }
 }

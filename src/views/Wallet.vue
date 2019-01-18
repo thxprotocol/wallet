@@ -13,7 +13,6 @@
 
 <script>
 import NetworkService from '../services/NetworkService.js'
-
 import Header from '../components/Header.vue'
 
 export default {
@@ -31,8 +30,8 @@ export default {
       transactions: []
     }
   },
-  async mounted() {
-    new NetworkService(web3).connect().then((network) => {
+  mounted() {
+    new NetworkService().connect().then((network) => {
       this.network = network
       this.init()
     })
@@ -42,9 +41,9 @@ export default {
       const pool = this.network.instances.pool;
 
       this.pool.name = await pool.methods.name().call()
-      this.getTX()
+      this.transactions = await this.getTransactions()
     },
-    async getTX() {
+    async getTransactions() {
       const pool = this.network.instances.pool;
 
       let transactions = []
@@ -56,10 +55,14 @@ export default {
         transactions.push(tx)
       }
 
-      // @TODO Also implement Pool deposits here
+      transactions = transactions.filter((tx) => {
+        return (parseInt(tx.state) == 3 && (tx.beneficiary.toUpperCase() == this.network.accounts[0].toUpperCase()))
+      })
+
+      // @TODO Also add Pool deposits to the list of tx
       // ...
 
-      this.transactions = transactions.reverse()
+      return transactions.reverse()
     }
   }
 }
