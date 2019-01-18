@@ -16,11 +16,45 @@ textarea {
   width: 200px;
 }
 
-button {
-  padding: .5rem;
+.btn {
+  border: 0;
   border-radius: 5px;
-  background-color: #EFEFEF;
+  background-color: black;
+  color: yellow;
   margin-bottom: .5rem;
+  margin-right: .5rem;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  height: 40px;
+  width: auto;
+  min-width: 120px;
+
+  &:last-of-type {
+    margin-right: 0;
+  }
+}
+
+.btn--default {
+  background-color: black;
+  color: yellow;
+}
+
+.btn--success {
+  background-color: yellow;
+  color: black;
+}
+
+hr {
+  border: 0;
+  height: 0;
+  border-top: 2px solid black;
+}
+
+hr.dotted {
+  border-top: 1px dotted black;
 }
 
 #app {
@@ -33,7 +67,7 @@ button {
   background-image: cover;
   background-position: center center;
   background-image: url('./assets/background.jpg');
-  
+
   &:before {
     content: "";
     display: block;
@@ -141,6 +175,41 @@ button {
 
   strong {
     float: right;
+  }
+}
+
+.badge {
+  font-size: .6rem;
+  padding: .3rem.61rem;
+  border-radius: 1rem;
+}
+
+.badge--default {
+  background: #EFEFEF;
+}
+
+.list--swipe {
+  display: flex;
+  flex-direction: row;
+}
+
+.notification {
+  width: calc(100vw - 4rem);
+  background-color: white;
+  margin: 1rem;
+  padding: 1rem;
+  border-radius: 10px;
+  flex: 1 auto;
+  display: block;
+  overflow: auto;
+
+  &__actions {
+    width: 100%;
+    display: flex;
+    
+    .btn {
+      flex: 1 50%;
+    }
   }
 }
 

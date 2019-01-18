@@ -1,27 +1,29 @@
 <template>
   <article class="region region--container">
 
-    <main class="region region--content">
-
-      <h2>{{ poolName }}</h2>
-      <p>Balance Pool (THX): <strong>{{ tokenBalancePool }}</strong></p>
-      <ul>
-        <li v-bind:key="reward.id" v-for="reward in rewards">
-          <p>
-            ID: <strong>{{ reward.id }}</strong><br />
-            Slug: <strong>{{ reward.slug }}</strong><br />
-            Beneficiary: <strong>{{ reward.beneficiary }}</strong><br />
-            Amount: <strong>{{ reward.amount }}</strong><br />
-            State: <strong>{{ reward.state }}</strong>
-          </p>
-          <p>
-            <button v-on:click="rejectReward(reward.id)">Reject</button>
-            <button v-on:click="approveReward(reward.id)">Approve</button>
-          </p>
-        </li>
-      </ul>
-
-    </main>
+    <div class="list list--swipe">
+      <div v-bind:key="reward.id" v-for="reward in rewards" class="notification">
+        <h2 class="font-size-large">{{ reward.slug }}</h2>
+        <p>{{ poolName }} <strong>{{ tokenBalancePool }} THX</strong></p>
+        <hr />
+        <p>
+          Amount:<br>
+          <strong>{{ reward.amount }}</strong> THX
+        </p>
+        <hr class="dotted" />
+        <p>
+          To:<br>
+          <span class="badge badge--default">{{ reward.beneficiary }}</span>
+        </p>
+        <p>
+          <small>State: <strong>{{ reward.state }}</strong></small>
+        </p>
+        <div class="notification__actions">
+          <button class="btn btn--default" v-on:click="rejectReward(reward.id)">Reject</button>
+          <button class="btn btn--success" v-on:click="approveReward(reward.id)">Approve</button>
+        </div>
+      </div>
+    </div>
   </article>
 </template>
 
