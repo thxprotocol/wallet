@@ -1,25 +1,25 @@
 <template>
   <article class="region region--container">
-    <Header />
+    <Header ref="header"/>
     <main class="region region--content">
 
       <h3>Mint tokens:</h3>
       <form v-on:submit="onMintForAccount()">
         <input v-model="mintForAccountAmount" type="number" min="0"/>
-        <button type="submit">Mint {{ mintForAccountAmount }} THX for yourself</button>
+        <button class="btn btn--default" type="submit">Mint {{ mintForAccountAmount }} THX</button>
       </form>
 
       <h3>Pool deposit:</h3>
       <form v-on:submit="onTransferToPool()">
-        <input v-model="transferToPoolAmount" type="number" min="0" v-if="balances[0]" v-bind:max="balances[0].tokenBalance" />
-        <button type="submit">Transfer {{ transferToPoolAmount }} THX to the Reward Pool</button>
+        <input v-model="transferToPoolAmount" type="number" min="0" v-bind:max="balance.token" />
+        <button class="btn btn--default" type="submit">Deposit {{ transferToPoolAmount }} THX</button>
       </form>
 
-      <h3>Create reward:</h3>
-      <form v-on:submit="createReward()">
+      <h3>Submit reward:</h3>
+      <form v-on:submit="submitReward()">
         <input v-model="rewardSlug" type="text" placeholder="reward_type" />
-        <input v-model="rewardAmount" type="number" min="0" v-bind:max="tokenBalancePool" />
-        <button type="submit">Create Reward!</button>
+        <input v-model="rewardAmount" type="number" min="0" v-bind:max="balance.pool" />
+        <button class="btn btn--default" type="submit">Submit Reward!</button>
       </form>
 
     </main>
@@ -29,6 +29,8 @@
 <script>
 /*globals web3:true*/
 import Web3 from 'web3'
+
+import NetworkService from '../services/NetworkService.js'
 
 import TokenJSON from '../../build/contracts/THXToken.json'
 import RewardPoolJSON from '../../build/contracts/RewardPool.json'
@@ -42,130 +44,53 @@ export default {
   },
   data: function () {
     return {
-      poolName: "",
-      providerURL: "http://localhost:8545",
-      ethBalanceAccount0: 0,
-      tokenBalanceAccount0: 0,
-      ethBalanceAccount1: 0,
-      tokenBalanceAccount1: 0,
-      tokenBalancePool: 0,
-      accounts: [],
-      balances: [],
-      rewards: [],
-      tokenAddress: null,
-      rewardPoolAddress: null,
-      tokenInstance: null,
-      RewardPoolInstance: null,
+      network: null,
+      balance: {
+        token: 0,
+        pool: 0
+      },
       transferToPoolAmount: 0,
       mintForAccountAmount: 0,
       rewardSlug: "",
       rewardAmount: 0
     }
   },
-  async mounted() {
-    if (typeof web3 !== 'undefined') {
-      web3 = new Web3(web3.currentProvider);
-    } else {
-      web3 = new Web3(new Web3.providers.HttpProvider(this.providerURL))
-    }
-
-    // Get the network id
-    const nid = await web3.eth.net.getId()
-
-    if (typeof TokenJSON.networks[nid] != 'undefined' && typeof RewardPoolJSON.networks[nid] != 'undefined') {
-      // Get the contract addresses
-      this.tokenAddress = TokenJSON.networks[nid].address
-      this.rewardPoolAddress = RewardPoolJSON.networks[nid].address
-
-      // Create an instance from the THXToken Contract abi and contract address on the current network
-      this.tokenInstance = new web3.eth.Contract(TokenJSON.abi, this.tokenAddress)
-      this.rewardPoolInstance = new web3.eth.Contract(RewardPoolJSON.abi, this.rewardPoolAddress)
-
+  mounted() {
+    new NetworkService(web3).connect().then(async (network) => {
+      this.network = network
       this.init()
-    }
-    else {
-      console.log('Migrate your contracts first!')
-    }
-
+    })
   },
   methods: {
     async init() {
+      const token = this.network.instances.token
 
-      this.poolName = await this.rewardPoolInstance.methods.name().call();
-
-      // Retrieve the accounts available on the network
-      await web3.eth.getAccounts((error, accounts) => {
-        // Store the accounts
-        this.accounts = accounts
-      })
-
-      // Update the rewards.
-      this.updateRewards()
-
-      // Update the balances for account 0
-      this.updateBalances()
+      this.balance.token = await token.methods.balanceOf(this.network.accounts[0]).call()
+      this.balance.pool = await token.methods.balanceOf(this.network.addresses.pool).call()
     },
-    async updateRewards() {
-      this.rewards = []
+    onMintForAccount() {
+      const token = this.network.instances.token
 
-      var amountOfRewards = parseInt( await this.rewardPoolInstance.methods.count().call() )
-
-      for (var i = 0; i < amountOfRewards; i++) {
-        // Display the current reward state. @TODO Should not return duplicates.
-        let reward = await this.rewardPoolInstance.methods.rewards(i).call()
-
-        this.rewards.push(reward)
-      }
-
-    },
-    async createReward() {
-      await this.rewardPoolInstance.methods.add(this.rewardSlug, this.rewardAmount).send({from: this.accounts[0]})
-
-      this.updateRewards()
-    },
-    async approveReward(id) {
-      await this.rewardPoolInstance.methods.approve(id).send({from: this.accounts[0]})
-
-      this.updateRewards()
-      this.updateBalances()
-    },
-    async rejectReward(id) {
-      await this.rewardPoolInstance.methods.reject(id).send({from: this.accounts[0]})
-      this.updateRewards()
-    },
-    async updateBalances() {
-      this.balances = []
-
-      for (var account of this.accounts) {
-        // Retrieve the amount of Wei for account 0
-        let amountInWei = await web3.eth.getBalance(account)
-
-        this.balances.push({
-          address: account,
-          // Calculate the amount of ETH from Wei
-          ethBalance: web3.utils.fromWei(amountInWei, 'ether'),
-          // Retrieve the amount of THX for account 0
-          tokenBalance: await this.tokenInstance.methods.balanceOf(account).call()
-        })
-      }
-
-      // Retrieve the amount of THX that is in the pool
-      this.tokenBalancePool = await this.tokenInstance.methods.balanceOf(this.rewardPoolAddress).call()
-    },
-    async onMintForAccount() {
       // Mint 1000 THX for account 0. Make sure to call from account 0 that has the MinterRole
-      await this.tokenInstance.methods.mint(this.accounts[0], this.mintForAccountAmount).send({from: this.accounts[0]})
-
-      this.updateBalances()
+      return token.methods.mint(this.network.accounts[0], this.mintForAccountAmount).send({from: this.network.accounts[0]}).then(() => {
+        return this.$refs.header.updateBalance()
+      })
     },
     async onTransferToPool() {
-      await this.tokenInstance.methods.transfer(this.rewardPoolAddress, this.transferToPoolAmount).send({from: this.accounts[0]})
+      const token = this.network.instances.token;
 
       // @TODO This deposit method still reverts...
       // await this.rewardPoolInstance.methods.deposit(this.transferToPoolAmount).send({from: this.accounts[0]})
 
-      this.updateBalances()
-    }
+      return token.methods.transfer(this.network.addresses.pool, this.transferToPoolAmount).send({from: this.network.accounts[0]}).then(() => {
+        return this.$refs.header.updateBalance()
+      })
+    },
+    submitReward() {
+      const pool = this.network.instances.pool;
+
+      return pool.methods.add(this.rewardSlug, this.rewardAmount).send({from: this.network.accounts[0]})
+    },
   }
 }
 </script>

@@ -12,11 +12,6 @@ export default new Router({
     {
       path: '/',
       name: 'wallet',
-      component: Wallet
-    },
-    {
-      path: '/wallet',
-      name: 'wallet',
       component: Wallet,
       visible: true
     },

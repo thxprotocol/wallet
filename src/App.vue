@@ -19,8 +19,6 @@
 /*globals web3:true*/
 import Web3 from 'web3'
 
-import RewardPoolJSON from '../build/contracts/RewardPool.json'
-
 import WalletSrc from './assets/wallet.svg'
 import WalletActiveSrc from './assets/wallet_selected.svg'
 import NotificationsSrc from './assets/notification.svg'
