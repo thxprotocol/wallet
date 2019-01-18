@@ -54,7 +54,7 @@ export default {
       currentNotification: 2
     }
   },
-  mounted() {
+  created() {
     new NetworkService().connect().then((network) => {
       this.network = network
       this.init()

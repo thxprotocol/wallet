@@ -30,7 +30,7 @@ export default {
       transactions: []
     }
   },
-  mounted() {
+  created() {
     new NetworkService().connect().then((network) => {
       this.network = network
       this.init()

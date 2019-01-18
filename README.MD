@@ -120,6 +120,12 @@ Error: MetaMask - RPC Error: Internal JSON-RPC error.
 ```
 **Solution:** Toggle between the main network (or any other) and you Localhost 8545 network to reconnect to the RPC. Make sure to import your account with it's private key.
 
+```
+Error: Possible EventEmitter memory leak detected. 101 data listeners added. Use emitter.setMaxListeners() to increase limit
+```
+VueJS compiler tells us there is a memory leak when adding listeners to the network provider. The error occurs after switching views a lot. Might be that network connection should be created on a higher level or earlier in the load.
+**Solution:** ...
+
 ## Documentation
 
 * [Solidity](https://solidity.readthedocs.io/en/v0.5.0/)

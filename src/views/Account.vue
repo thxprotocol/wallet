@@ -48,7 +48,7 @@ export default {
       rewardAmount: 0
     }
   },
-  mounted() {
+  created() {
     new NetworkService().connect().then(async (network) => {
       this.network = network
       this.init()
