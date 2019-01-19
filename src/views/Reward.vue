@@ -77,6 +77,7 @@ export default {
       let amountOfRewards = parseInt( await pool.methods.count().call() )
 
       let rewardIds = []
+      let userRewards = []
       // Grab all the ID's of rewards for this beneficiaries.
       // @TODO MAKE MORE PERFORMANT!!!!!
       // @todo defensive coding per favore.
@@ -94,30 +95,16 @@ export default {
       if (typeof lastSeen !== 'undefined') {
         localStorage.setItem('lastId', lastSeen);
       }
-      else {
-        // Nothing new.
-        return null;
-      }
 
-      // Generate an array of data.
+      // Generate an array of.
       let rewardsCount = rewardIds.length;
-      let amount = 0;
-      let rewardSlug = []
       for (var key = 0; key < rewardsCount; key++) {
         let rwrd = await pool.methods.rewards(rewardIds[key]).call()
-        amount = parseInt(amount) + parseInt(rwrd.amount);
-        rewardSlug.push(rwrd.slug);
+        userRewards.push(rwrd.id)
+        console.log(rwrd.amount)
       }
 
-      console.log("TOTAL NEW AMOUNT");
-      console.log(amount);
-
-      console.log("NEW SLUGS:");
-      for (var sluggie = 0; sluggie < rewardSlug.length; sluggie++) {
-        console.log(rewardSlug[sluggie]);
-      }
-
-      return rewardSlug;
+      return userRewards;
     }
   }
 }
