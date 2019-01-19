@@ -7,6 +7,11 @@
           {{ pool.name }} <strong>+ {{ tx.amount }}</strong>
         </li>
       </ul>
+      <!--<ul class="list list&#45;&#45;dotted" v-if="approvals">-->
+        <!--<li v-bind:key="id" v-for="id in approvals">-->
+          <!--<strong>{{ id }}</strong>-->
+        <!--</li>-->
+      <!--</ul>-->
     </main>
   </article>
 </template>
@@ -27,7 +32,8 @@ export default {
         name: "",
         balance: 0
       },
-      transactions: []
+      transactions: [],
+      approvals: []
     }
   },
   created() {
@@ -40,6 +46,7 @@ export default {
     async init() {
       const pool = this.network.instances.pool;
 
+      this.approvals = await this.getApprovedWithdrawals()
       this.pool.name = await pool.methods.name().call()
       this.transactions = await this.getTransactions()
     },
@@ -63,6 +70,20 @@ export default {
       // ...
 
       return transactions.reverse()
+    },
+    async getApprovedWithdrawals() {
+      const pool = this.network.instances.pool;
+
+      console.log(this.network.accounts[0]);
+
+      // Get all approved rewards for a certain address.
+      // let approvals = await pool.methods.getApprovedRewards(this.network.accounts[0]).call()
+      //
+      // console.log("____");
+      // console.log(approvals);
+      // console.log("____");
+
+      return []
     }
   }
 }
