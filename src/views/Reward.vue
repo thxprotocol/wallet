@@ -1,8 +1,9 @@
 <template>
   <article class="region region--container">
     <button v-on:click="close()" class="btn btn--close">Close</button>
+
     <div class="list list--swipe" v-if="rewards">
-      <div v-bind:key="reward.id" v-for="reward in rewards" class="splash">
+      <div class="splash">
         <img width="100%" height="auto" v-bind:src="assets.stars" alt="Flash Page Stars" />
         <h1 class="font-size-xl">+ {{ reward.amount }}</h1>
         <p><strong class="font-size-large">THX</strong></p>
@@ -37,9 +38,10 @@ export default {
       pool: {
         name: "",
       },
+      reward: {},
       rewards: [],
       currentReward: 0,
-      lastId: 0
+      lastId: -1
     }
   },
   created() {
@@ -57,15 +59,31 @@ export default {
     async init() {
       const pool = this.network.instances.pool;
       this.pool.name = await pool.methods.name().call()
+      this.reward = await this.getReward(this.$route.params.id)
+      this.currentReward = this.$route.params.id
       this.rewards = await this.getRewardList(this.lastId)
+    },
+    async getReward(rewardId) {
+      const pool = this.network.instances.pool
+      let loadedReward = await pool.methods.rewards(rewardId).call()
+
+      let reward = [];
+      // Get current reward data from URL.
+      if (typeof loadedReward !== 'undefined') {
+        reward.amount = loadedReward.amount;
+        reward.slug = loadedReward.slug;
+
+        return reward;
+      }
+
+      return []
     },
     close() {
       this.$router.push('/');
     },
     async getRewardList(lastId) {
-      const pool = this.network.instances.pool;
+      const pool = this.network.instances.pool
       let amountOfRewards = parseInt( await pool.methods.countRewardsOf(this.network.accounts[0]).call() )
-      // let amountOfRewards = 14; // @ TODO get the correct count from the rewardpool for all the beneficiary rewards.
       let rewardIds = []
 
       // Grab all the ID's of rewards for this beneficiaries.
@@ -74,10 +92,10 @@ export default {
         // If the reward ID of this address is new (aka the ID is higher than the last one generated) we
         // add it to the array of items the user should see.
         if (parseInt(rewardId) > parseInt(lastId)) {
-          rewardIds.push(rewardId)
+          rewardIds.push({'id': rewardId})
         }
       }
-
+      
       // Check if we have new items to show in our reward screen.
       let lastSeen = rewardIds[rewardIds.length - 1];
       if (typeof lastSeen !== 'undefined') {
@@ -89,7 +107,6 @@ export default {
       }
 
       let rewardsCount = rewardIds.length;
-      let amount = 0;
       let rewards = []
 
       // Generate an array of data to be used in the markup.
