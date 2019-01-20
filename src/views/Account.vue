@@ -83,7 +83,6 @@ export default {
       this.balance.pool = await token.methods.balanceOf(this.network.addresses.pool).call()
       this.isManager = await pool.methods.isManager(this.network.accounts[0]).call()
       this.isMinter = await token.methods.isMinter(this.network.accounts[0]).call()
-      console.log(this.isMinter);
     },
     onMintForAccount() {
       const token = this.network.instances.token
