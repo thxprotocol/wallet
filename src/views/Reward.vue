@@ -44,7 +44,7 @@ export default {
     },
     async getRewardList(lastId) {
       const pool = this.network.instances.pool;
-      let amountOfRewards = parseInt( await this.pool.methods.countRewardsOf(this.network.accounts[0]).call() )
+      let amountOfRewards = parseInt( await pool.methods.countRewardsOf(this.network.accounts[0]).call() )
       // let amountOfRewards = 14; // @ TODO get the correct count from the rewardpool for all the beneficiary rewards.
       let rewardIds = []
 

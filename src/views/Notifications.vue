@@ -73,12 +73,14 @@ export default {
     },
     async update() {
       const pool = this.network.instances.pool;
-      const amountOfRewards = await pool.methods.countRewardsOf(this.network.accounts[0]).call()
+      const amountOfRewards = await pool.methods.countRewards().call()
 
       let rewards = []
 
       for (var i = 0; i < parseInt(amountOfRewards); i++) {
         let reward = await pool.methods.rewards(i).call()
+
+        console.log(reward);
 
         rewards.push(reward)
       }
