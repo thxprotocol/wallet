@@ -58,8 +58,9 @@ export default {
         }
       }
 
+      // Check if we have new items to show in our reward screen.
       let lastSeen = rewardIds[rewardIds.length - 1];
-      if (typeof lastSeen !== 'undefined' && lastSeen !== 0) {
+      if (typeof lastSeen !== 'undefined') {
         localStorage.setItem('lastId', lastSeen);
       }
       else {
