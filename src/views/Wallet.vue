@@ -6,7 +6,7 @@
         <li v-bind:key="tx.id" v-for="tx in transactions">
           {{ pool.name }}
           <strong>
-            <span>{{ (tx.receiver == network.accounts[0]) ? '-' : '+' }}</span>
+            <span>{{ (tx.receiver == network.accounts[0]) ? '+' : '-' }}</span>
              {{ tx.amount }}
           </strong>
         </li>

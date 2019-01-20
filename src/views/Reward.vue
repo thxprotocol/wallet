@@ -1,36 +1,54 @@
 <template>
   <article class="region region--container">
-    <main class="region region--content" v-if="amount > 0">
-      <h1>+ {{ amount }}</h1>
-      <p>for:</p>
-      <ul class="list" v-if="rewards">
-        <li v-bind:key="rwrd.id" v-for="rwrd in rewards">
-          <strong>{{ rwrd.name }}</strong>
-        </li>
-      </ul>
-    </main>
+    <button v-on:click="close()" class="btn btn--close">Close</button>
+
+    <div class="list list--swipe" v-if="rewards">
+      <div class="splash">
+        <img width="100%" height="auto" v-bind:src="assets.stars" alt="Flash Page Stars" />
+        <h1 class="font-size-xl">+ {{ reward.amount }}</h1>
+        <p><strong class="font-size-large">THX</strong></p>
+        <hr />
+        <p>{{ pool.name }}</p>
+        <p>for<br/>
+        <strong>{{ reward.slug }}</strong></p>
+      </div>
+    </div>
+
+    <ul class="list list--nav">
+      <li v-bind:key="r.id" v-for="r in rewards">
+        <button v-on:click="navigateToReward(r.id)" v-bind:class="`${(r.id == currentReward) ? 'active' : ''}`">{{ r.id }}</button>
+      </li>
+    </ul>
+
   </article>
 </template>
 
 <script>
 import NetworkService from '../services/NetworkService.js'
+import StarsSrc from '../assets/flash_page_stars.svg'
 
 export default {
   name: 'reward',
   data: function () {
     return {
       network: null,
-      amount: 0,
-      rewards: {
-        name: ""
+      assets: {
+        stars: StarsSrc
       },
-      lastId: 0
+      pool: {
+        name: "",
+      },
+      reward: {},
+      rewards: [],
+      currentReward: this.$route.params.id,
+      lastRewardId: '',
+      lastId: -1
     }
   },
   created() {
     new NetworkService().connect().then((network) => {
       this.network = network
-      this.init()
+      this.init(true)
     })
   },
   mounted() {
@@ -39,13 +57,40 @@ export default {
     }
   },
   methods: {
-    async init() {
-      this.rewards = await this.getRewardList(this.lastId)
+    async init(firstTime) {
+      const pool = this.network.instances.pool;
+      this.pool.name = await pool.methods.name().call()
+      this.reward = await this.getReward(this.$route.params.id)
+      if (firstTime) {
+        this.rewards = await this.getRewardList(this.lastId)
+      }
+      this.currentReward = this.$route.params.id
+      localStorage.setItem('lastId', this.$route.params.id);
+    },
+    async getReward(rewardId) {
+      const pool = this.network.instances.pool
+      let loadedReward = await pool.methods.rewards(rewardId).call()
+
+      let reward = [];
+      // Get current reward data from URL.
+      if (typeof loadedReward !== 'undefined') {
+        reward.amount = loadedReward.amount;
+        reward.slug = loadedReward.slug;
+        return reward;
+      }
+
+      return []
+    },
+    close() {
+      this.$router.push('/');
+    },
+    navigateToReward(rewardId) {
+      this.$router.push({name: 'reward', params: { id: rewardId}});
+      this.init(false)
     },
     async getRewardList(lastId) {
-      const pool = this.network.instances.pool;
+      const pool = this.network.instances.pool
       let amountOfRewards = parseInt( await pool.methods.countRewardsOf(this.network.accounts[0]).call() )
-      // let amountOfRewards = 14; // @ TODO get the correct count from the rewardpool for all the beneficiary rewards.
       let rewardIds = []
 
       // Grab all the ID's of rewards for this beneficiaries.
@@ -54,37 +99,19 @@ export default {
         // If the reward ID of this address is new (aka the ID is higher than the last one generated) we
         // add it to the array of items the user should see.
         if (parseInt(rewardId) > parseInt(lastId)) {
-          rewardIds.push(rewardId)
+          rewardIds.push({'id': rewardId})
         }
       }
 
-      // Check if we have new items to show in our reward screen.
-      let lastSeen = rewardIds[rewardIds.length - 1];
-      if (typeof lastSeen !== 'undefined') {
-        localStorage.setItem('lastId', lastSeen);
+      if (typeof rewardIds[rewardIds.length - 1] !== "undefined") {
+        this.lastRewardId = rewardIds[rewardIds.length - 1].id;
       }
       else {
-        // Nothing new here, move to the account.
-        this.$router.push('account');
+        this.lastRewardId = lastId;
       }
 
-      let rewardsCount = rewardIds.length;
-      let amount = 0;
-      let rewardSlug = []
-
-      // Generate an array of data to be used in the markup.
-      for (var key = 0; key < rewardsCount; key++) {
-        let rwrd = await pool.methods.rewards(rewardIds[key]).call()
-        amount = parseInt(amount) + parseInt(rwrd.amount);
-        rewardSlug.push({"name": rwrd.slug});
-      }
-
-      // Update the amount.
-      this.amount = amount;
-
-      // Return the slugs of all the approved withdrawals the user got tokens for.
-      return rewardSlug;
-    },
+      return rewardIds;
+    }
   }
 }
 </script>

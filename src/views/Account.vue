@@ -22,6 +22,22 @@
         <button class="btn btn--default" type="submit">Submit Reward!</button>
       </form>
 
+      <div v-if="isManager">
+        <h3>Add manager:</h3>
+        <form v-on:submit="onAddManager()">
+          <input v-model="newManagerAddress" type="text" placeholder="account_address">
+          <button class="btn btn--default" type="submit">Add manager</button>
+        </form>
+      </div>
+
+      <div v-if="isMinter">
+        <h3>Add minter:</h3>
+        <form v-on:submit="onAddMinter()">
+          <input v-model="newMinterAddress" type="text" placeholder="account_address">
+          <button class="btn btn--default" type="submit">Add minter</button>
+        </form>
+      </div>
+
     </main>
   </article>
 </template>
@@ -38,6 +54,8 @@ export default {
   data: function () {
     return {
       network: null,
+      isManager: false,
+      isMinter: false,
       balance: {
         token: 0,
         pool: 0
@@ -45,7 +63,9 @@ export default {
       transferToPoolAmount: 0,
       mintForAccountAmount: 0,
       rewardSlug: "",
-      rewardAmount: 0
+      rewardAmount: 0,
+      newManagerAddress: "",
+      newMinterAddress: ""
     }
   },
   created() {
@@ -57,15 +77,21 @@ export default {
   methods: {
     async init() {
       const token = this.network.instances.token
+      const pool = this.network.instances.pool;
 
       this.balance.token = await token.methods.balanceOf(this.network.accounts[0]).call()
       this.balance.pool = await token.methods.balanceOf(this.network.addresses.pool).call()
+      this.isManager = await pool.methods.isManager(this.network.accounts[0]).call()
+      this.isMinter = await token.methods.isMinter(this.network.accounts[0]).call()
     },
     onMintForAccount() {
       const token = this.network.instances.token
 
-      // Mint 1000 THX for account 0. Make sure to call from account 0 that has the MinterRole
-      return token.methods.mint(this.network.accounts[0], this.mintForAccountAmount).send({from: this.network.accounts[0]}).then(() => {
+      return token.methods.mint(this.network.accounts[0], this.mintForAccountAmount).send({from: this.network.accounts[0]}).then(async () => {
+
+        this.balance.pool = await token.methods.balanceOf(this.network.addresses.pool).call()
+        this.balance.token = await token.methods.balanceOf(this.network.accounts[0]).call()
+
         return this.$refs.header.updateBalance()
       })
     },
@@ -75,17 +101,17 @@ export default {
       return pool.methods.deposit(this.transferToPoolAmount).send({from: this.network.accounts[0]}).then(() => {
         return this.$refs.header.updateBalance()
       })
-
-      // const token = this.network.instances.token;
-      // return token.methods.transfer(this.network.addresses.pool, this.transferToPoolAmount).send({from: this.network.accounts[0]}).then(() => {
-      //   return this.$refs.header.updateBalance()
-      // })
     },
-    submitReward() {
+    onAddManager() {
       const pool = this.network.instances.pool;
 
-      return pool.methods.add(this.rewardSlug, this.rewardAmount).send({from: this.network.accounts[0]})
+      return pool.methods.addManager(this.newManagerAddress).send({from: this.network.accounts[0]})
     },
+    onAddMinter() {
+      const token = this.network.instances.token;
+
+      return token.methods.addMinter(this.newMinterAddress).send({from: this.network.accounts[0]});
+    }
   }
 }
 </script>
