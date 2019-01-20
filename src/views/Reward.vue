@@ -106,18 +106,6 @@ export default {
       }
 
       return rewardIds;
-      //
-      // let rewardsCount = rewardIds.length;
-      // let rewards = []
-      //
-      // // Generate an array of data to be used in the markup.
-      // for (var key = 0; key < rewardsCount; key++) {
-      //   let rwrd = await pool.methods.rewards(rewardIds[key]).call()
-      //   rewards.push(rwrd);
-      // }
-      //
-      // // Return the slugs of all the approved withdrawals the user got tokens for.
-      // return rewards;
     },
   }
 }
