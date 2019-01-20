@@ -8,8 +8,8 @@ build:
 # The configuration of app when it is exposed to the web.
 web:
   locations:
-    "/dist/":
-      root: "build_platform"
+    "/":
+      root: "dist"
       index:
       - "index.html"
       expires: 300s
