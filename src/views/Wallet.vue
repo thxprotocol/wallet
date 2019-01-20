@@ -4,7 +4,11 @@
     <main class="region region--content">
       <ul class="list list--dotted" v-if="transactions">
         <li v-bind:key="tx.id" v-for="tx in transactions">
-          {{ pool.name }} <strong>+ {{ tx.amount }}</strong>
+          {{ pool.name }}
+          <strong>
+            <span>{{ (tx.receiver == network.accounts[0]) ? '+' : '-' }}</span>
+             {{ tx.amount }}
+          </strong>
         </li>
       </ul>
     </main>
@@ -47,20 +51,13 @@ export default {
       const pool = this.network.instances.pool;
 
       let transactions = []
-      let amountOfRewards = parseInt( await pool.methods.count().call() )
+      let amountOfTransactions = parseInt( await pool.methods.countMyTransactions().call() )
 
-      for (var i = 0; i < amountOfRewards; i++) {
-        let tx = await pool.methods.rewards(i).call()
+      for (var i = 0; i < amountOfTransactions; i++) {
+        let tx = await pool.methods.transactions(this.network.accounts[0], i).call()
 
         transactions.push(tx)
       }
-
-      transactions = transactions.filter((tx) => {
-        return (parseInt(tx.state) == 3 && (tx.beneficiary.toUpperCase() == this.network.accounts[0].toUpperCase()))
-      })
-
-      // @TODO Also add Pool deposits to the list of tx
-      // ...
 
       return transactions.reverse()
     }

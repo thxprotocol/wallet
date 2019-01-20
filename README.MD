@@ -68,8 +68,11 @@ The CLI will show you a list of Private keys like this:
 ```
 Private Keys
 ==================
-(0) 0x5f1dbafefc649a149ef39012a28b0648baa0a12696d329c99ab46928a00e6bda
-(1) 0xdc0f0fdcd19e90b405a5bcaffddceaa37c17e2fa044c569bca41daa95299cafb
+(0) 0x792ffe8b2a064959838995a8635569ae9816d6f96df451147e910721cc6e44d5
+(1) 0x945887b6f14005a9466a49342cee50d2bf70da676287b71afce986948fc26c21
+(2) 0xedc039fd1ee360574e2732c8243ec7382ac03178e42cc43d7da545d7178e52f5
+(3) 0x722621242125df05144238a4c1922137a049c7befe61f95590f41b78a8bb6e15
+(4) 0x933b57e13477f990285309facae593b3d834d5b61fb8696a35794a6c515259bc
 ...
 ```
 
@@ -106,13 +109,14 @@ npm run lint
 
 ## Open Tasks
 
-* The THX Wallet UI needs to be implemented.
+* ~~The THX Wallet UI needs to be implemented.~~
 * ~~The list of Reward Structs in the RewardPool contract needs to be able to support multiple rewards of various types per beneficiary address.~~
 * A splash screen should be shown when you have received a reward. See how to use contract events for this and probably store the state client side.
 * Improve Solidity typing for properties and refactor standard contracts.
 * Investigate the impact of long lists of rewards in terms of tx cost calculation.
 * Investigate Trust Wallet SDK and see if it can work with VueJS for this POC.
 * Deploy the contract layer on Ropsten or Rinkeby test network.
+* ~~Account without ManageRole should not see Suggested Rewards in notification list~~
 
 ## Known issues
 ```
