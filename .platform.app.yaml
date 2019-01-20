@@ -25,11 +25,15 @@ disk: 512
 mounts:
   '/build_platform': 'shared:files/build_platform'
   '/.tmp_platformsh': 'shared:files/tmp_platformsh'
+#dependencies:
+#  nodejs:
+#    yarn: "*"
 # The hooks that will be performed when the package is deployed.
 hooks:
   build: |
     set -e
-    npm install
+    nvm install 10.15.0
+    nvm use 10.15.0
     npm run build
   deploy: |
     npm run buildenvvar
