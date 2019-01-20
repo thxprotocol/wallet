@@ -44,7 +44,6 @@ export default class NetworkService {
             pool: new this.web3.eth.Contract(RewardPoolJSON.abi, addresses.pool)
           }
 
-
           this.web3.eth.getAccounts((error, accounts) => {
             this.accounts = accounts
 
