@@ -15,9 +15,6 @@
           To:<br>
           <span class="badge badge--default">{{ reward.beneficiary }}</span>
         </p>
-        <p>
-          <small>State: <strong>{{ reward.state }}</strong></small>
-        </p>
         <div class="notification__actions">
           <button class="btn btn--default" v-on:click="reject(reward.id)">
             Reject

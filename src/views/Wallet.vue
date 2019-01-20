@@ -56,19 +56,20 @@ export default {
       let amountOfWithdrawels = parseInt( await pool.methods.countWithdrawelsOf(this.network.accounts[0]).call() )
 
       for (let i = 0; i < amountOfDeposits; i++) {
-        let ref = await pool.methods.deposits(this.network.accounts[0], i).call()
+        let ref = parseInt( await pool.methods.deposits(this.network.accounts[0], i).call() )
 
         refs.push(ref)
       }
 
       for (let i = 0; i < amountOfWithdrawels; i++) {
-        let ref = await pool.methods.withdrawels(this.network.accounts[0], i).call()
+        let ref = parseInt( await pool.methods.withdrawels(this.network.accounts[0], i).call() )
 
         refs.push(ref)
       }
 
+      refs.sort((a, b) => a - b ).reverse()
+
       for (let i = 0; i < refs.length; i++) {
-        // console.log(refs[i])
         let tx = await pool.methods.transactions(refs[i]).call()
 
         transactions.push(tx)
