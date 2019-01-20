@@ -24,8 +24,14 @@
 
       <h3>Add manager:</h3>
       <form v-on:submit="onAddManager()">
-        <input v-model="accountAddress" type="text" placeholder="account_address">
+        <input v-model="newManagerAddress" type="text" placeholder="account_address">
         <button class="btn btn--default" type="submit">Add manager</button>
+      </form>
+
+      <h3>Add minter:</h3>
+      <form v-on:submit="onAddMinter()">
+        <input v-model="newMinterAddress" type="text" placeholder="account_address">
+        <button class="btn btn--default" type="submit">Add minter</button>
       </form>
 
     </main>
@@ -52,7 +58,8 @@ export default {
       mintForAccountAmount: 0,
       rewardSlug: "",
       rewardAmount: 0,
-      accountAddress: ""
+      newManagerAddress: "",
+      newMinterAddress: ""
     }
   },
   created() {
@@ -94,7 +101,12 @@ export default {
     onAddManager() {
       const pool = this.network.instances.pool;
 
-      return pool.methods.addManager(this.accountAddress).send({from: this.network.accounts[0]})
+      return pool.methods.addManager(this.newManagerAddress).send({from: this.network.accounts[0]})
+    },
+    onAddMinter() {
+      const token = this.network.instances.token;
+
+      return token.methods.addMinter(this.newMinterAddress).send({from: this.network.accounts[0]});
     }
   }
 }
