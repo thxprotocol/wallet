@@ -15,13 +15,6 @@
         <button class="btn btn--default" type="submit">Deposit {{ transferToPoolAmount }} THX</button>
       </form>
 
-      <h3>Submit reward:</h3>
-      <form v-on:submit="submitReward()">
-        <input v-model="rewardSlug" type="text" placeholder="reward_type" />
-        <input v-model="rewardAmount" type="number" min="0" v-bind:max="balance.pool" />
-        <button class="btn btn--default" type="submit">Submit Reward!</button>
-      </form>
-
       <div v-if="isManager">
         <h3>Add manager:</h3>
         <form v-on:submit="onAddManager()">
