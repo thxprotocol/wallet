@@ -15,11 +15,26 @@
         <button class="btn btn--default" type="submit">Deposit {{ transferToPoolAmount }} THX</button>
       </form>
 
+      <h3>Submit reward:</h3>
+      <form v-on:submit="submitReward()">
+        <input v-model="rewardSlug" type="text" placeholder="reward_type" />
+        <input v-model="rewardAmount" type="number" min="0" v-bind:max="balance.pool" />
+        <button class="btn btn--default" type="submit">Submit Reward!</button>
+      </form>
+
       <div v-if="isManager">
         <h3>Add manager:</h3>
         <form v-on:submit="onAddManager()">
-          <input v-model="accountAddress" type="text" placeholder="account_address">
+          <input v-model="newManagerAddress" type="text" placeholder="account_address">
           <button class="btn btn--default" type="submit">Add manager</button>
+        </form>
+      </div>
+
+      <div v-if="isMinter">
+        <h3>Add minter:</h3>
+        <form v-on:submit="onAddMinter()">
+          <input v-model="newMinterAddress" type="text" placeholder="account_address">
+          <button class="btn btn--default" type="submit">Add minter</button>
         </form>
       </div>
 
@@ -40,6 +55,7 @@ export default {
     return {
       network: null,
       isManager: false,
+      isMinter: false,
       balance: {
         token: 0,
         pool: 0
@@ -48,7 +64,8 @@ export default {
       mintForAccountAmount: 0,
       rewardSlug: "",
       rewardAmount: 0,
-      accountAddress: ""
+      newManagerAddress: "",
+      newMinterAddress: ""
     }
   },
   created() {
@@ -65,6 +82,7 @@ export default {
       this.balance.token = await token.methods.balanceOf(this.network.accounts[0]).call()
       this.balance.pool = await token.methods.balanceOf(this.network.addresses.pool).call()
       this.isManager = await pool.methods.isManager(this.network.accounts[0]).call()
+      this.isMinter = await token.methods.isMinter(this.network.accounts[0]).call()
     },
     onMintForAccount() {
       const token = this.network.instances.token
@@ -87,7 +105,12 @@ export default {
     onAddManager() {
       const pool = this.network.instances.pool;
 
-      return pool.methods.addManager(this.accountAddress).send({from: this.network.accounts[0]})
+      return pool.methods.addManager(this.newManagerAddress).send({from: this.network.accounts[0]})
+    },
+    onAddMinter() {
+      const token = this.network.instances.token;
+
+      return token.methods.addMinter(this.newMinterAddress).send({from: this.network.accounts[0]});
     }
   }
 }
