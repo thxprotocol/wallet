@@ -8,11 +8,6 @@ module.exports = {
             port: 8545,
             network_id: "*"
         },
-        geth: {
-            host: "localhost",
-            port: 7545,
-            network_id: "*"
-        },
         ropsten: {
             provider: function() {
                 return new HDWalletProvider(process.env.MNEMONIC, "https://ropsten.infura.io/v3/" + process.env.INFURA_API_KEY)
