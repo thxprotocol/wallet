@@ -2,7 +2,7 @@
 node_modules
 /dist
 /examples
-/build
+/build/contracts
 
 # local env files
 .env

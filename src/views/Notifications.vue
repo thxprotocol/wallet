@@ -76,7 +76,7 @@ export default {
       const amountOfRewards = await pool.methods.countRewards().call()
       const isManager = await pool.methods.isManager(this.network.accounts[0]).call()
 
-      if (isManager == 'true') {
+      if (isManager) {
         let rewards = []
 
         for (var i = 0; i < parseInt(amountOfRewards); i++) {
