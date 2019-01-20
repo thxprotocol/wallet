@@ -1,11 +1,13 @@
 <template>
   <article class="region region--container">
-    <main class="region region--content" v-if="amount > 0">
-      <h1>+ {{ amount }}</h1>
+    <main class="region region--content">
+      <h1>+ {{ reward.amount }}</h1>
       <p>for:</p>
-      <ul class="list" v-if="rewards">
-        <li v-bind:key="rwrd.id" v-for="rwrd in rewards">
-          <strong>{{ rwrd.name }}</strong>
+      <strong>{{ reward.name }}</strong>
+
+      <ul class="list list--nav">
+        <li v-bind:key="r.id" v-for="r in rewards">
+          <a href="{{ this.$}}"
         </li>
       </ul>
     </main>
@@ -20,11 +22,15 @@ export default {
   data: function () {
     return {
       network: null,
-      amount: 0,
-      rewards: {
+      id: 0,
+      reward:  {
+        amount: 0,
         name: ""
       },
-      lastId: 0
+      rewards: {
+        id: ""
+      },
+      lastId: -1
     }
   },
   created() {
@@ -40,12 +46,27 @@ export default {
   },
   methods: {
     async init() {
+      this.reward = await this.getReward(this.$route.params.id)
       this.rewards = await this.getRewardList(this.lastId)
     },
+    async getReward(rewardId) {
+      const pool = this.network.instances.pool
+      let loadedReward = await pool.methods.rewards(rewardId).call()
+
+      let reward = [];
+      // Get current reward data from URL.
+      if (typeof loadedReward !== 'undefined') {
+        reward.amount = loadedReward.amount;
+        reward.name = loadedReward.slug;
+
+        return reward;
+      }
+
+      return []
+    },
     async getRewardList(lastId) {
-      const pool = this.network.instances.pool;
+      const pool = this.network.instances.pool
       let amountOfRewards = parseInt( await pool.methods.countRewardsOf(this.network.accounts[0]).call() )
-      // let amountOfRewards = 14; // @ TODO get the correct count from the rewardpool for all the beneficiary rewards.
       let rewardIds = []
 
       // Grab all the ID's of rewards for this beneficiaries.
@@ -54,36 +75,11 @@ export default {
         // If the reward ID of this address is new (aka the ID is higher than the last one generated) we
         // add it to the array of items the user should see.
         if (parseInt(rewardId) > parseInt(lastId)) {
-          rewardIds.push(rewardId)
+          rewardIds.push({'id': rewardId})
         }
       }
 
-      // Check if we have new items to show in our reward screen.
-      let lastSeen = rewardIds[rewardIds.length - 1];
-      if (typeof lastSeen !== 'undefined') {
-        localStorage.setItem('lastId', lastSeen);
-      }
-      else {
-        // Nothing new here, move to the account.
-        this.$router.push('account');
-      }
-
-      let rewardsCount = rewardIds.length;
-      let amount = 0;
-      let rewardSlug = []
-
-      // Generate an array of data to be used in the markup.
-      for (var key = 0; key < rewardsCount; key++) {
-        let rwrd = await pool.methods.rewards(rewardIds[key]).call()
-        amount = parseInt(amount) + parseInt(rwrd.amount);
-        rewardSlug.push({"name": rwrd.slug});
-      }
-
-      // Update the amount.
-      this.amount = amount;
-
-      // Return the slugs of all the approved withdrawals the user got tokens for.
-      return rewardSlug;
+      return rewardIds;
     },
   }
 }

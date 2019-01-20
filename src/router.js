@@ -29,10 +29,11 @@ export default new Router({
       visible: true
     },
     {
-      path: '/reward',
+      path: '/reward/:id',
       name: 'reward',
       component: Reward,
-      visible: false
+      visible: false,
+      props: true,
     }
   ]
 })

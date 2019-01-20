@@ -80,8 +80,6 @@ export default {
       for (var i = 0; i < parseInt(amountOfRewards); i++) {
         let reward = await pool.methods.rewards(i).call()
 
-        console.log(reward);
-
         rewards.push(reward)
       }
 

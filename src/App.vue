@@ -47,7 +47,7 @@ export default {
         }
       },
       approvals: [],
-      lastId: 0
+      lastId: -1
     }
   },
   created() {
@@ -89,8 +89,8 @@ export default {
     async checkForRewards() {
       let newRewards = await this.getNewestApprovedWithdrawals(this.lastId);
 
-      if (newRewards === true) {
-        this.$router.push('Reward');
+      if (newRewards !== true && typeof newRewards !== "undefined") {
+        this.$router.push({name: 'reward', params: { id: newRewards}});
       }
 
       return null;
@@ -105,7 +105,7 @@ export default {
         // If the reward ID of this address is new (aka the ID is higher than the last one generated) we
         // add it to the array of items the user should see.
         if (parseInt(rewardId) > parseInt(lastId)) {
-          return true;
+          return rewardId;
         }
       }
 
