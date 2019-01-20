@@ -22,6 +22,12 @@
         <button class="btn btn--default" type="submit">Submit Reward!</button>
       </form>
 
+      <h3>Add manager:</h3>
+      <form v-on:submit="onAddManager()">
+        <input v-model="accountAddress" type="text" placeholder="account_address">
+        <button class="btn btn--default" type="submit">Add manager</button>
+      </form>
+
     </main>
   </article>
 </template>
@@ -45,7 +51,8 @@ export default {
       transferToPoolAmount: 0,
       mintForAccountAmount: 0,
       rewardSlug: "",
-      rewardAmount: 0
+      rewardAmount: 0,
+      accountAddress: ""
     }
   },
   created() {
@@ -84,6 +91,11 @@ export default {
 
       return pool.methods.add(this.rewardSlug, this.rewardAmount).send({from: this.network.accounts[0]})
     },
+    onAddManager() {
+      const pool = this.network.instances.pool;
+
+      return pool.methods.addManager(this.accountAddress).send({from: this.network.accounts[0]})
+    }
   }
 }
 </script>
