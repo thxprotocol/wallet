@@ -3,10 +3,11 @@
     <Header ref="header"/>
     <main class="region region--content">
 
-      <h3>Mint tokens:</h3>
-      <form v-on:submit="onMintForAccount()">
-        <input v-model="mintForAccountAmount" type="number" min="0"/>
-        <button class="btn btn--default" type="submit">Mint {{ mintForAccountAmount }} THX</button>
+      <h3>Transfer Tokens:</h3>
+      <form v-on:submit="onTransferTokens()">
+        <input v-model="transferTokensAddress" type="text" placeholder="account_address" />
+        <input v-model="transferTokensAmount" type="number" min="0" v-bind:max="balance.token" />
+        <button class="btn btn--default" type="submit">Transfer {{ transferTokensAmount }} THX</button>
       </form>
 
       <h3>Pool deposit:</h3>
@@ -24,6 +25,12 @@
       </div>
 
       <div v-if="isMinter">
+        <h3>Mint tokens:</h3>
+        <form v-on:submit="onMintForAccount()">
+          <input v-model="mintForAccountAmount" type="number" min="0"/>
+          <button class="btn btn--default" type="submit">Mint {{ mintForAccountAmount }} THX</button>
+        </form>
+
         <h3>Add minter:</h3>
         <form v-on:submit="onAddMinter()">
           <input v-model="newMinterAddress" type="text" placeholder="account_address">
@@ -58,7 +65,9 @@ export default {
       rewardSlug: "",
       rewardAmount: 0,
       newManagerAddress: "",
-      newMinterAddress: ""
+      newMinterAddress: "",
+      transferTokensAddress: "",
+      transferTokensAmount: 0
     }
   },
   created() {
@@ -76,6 +85,13 @@ export default {
       this.balance.pool = await token.methods.balanceOf(this.network.addresses.pool).call()
       this.isManager = await pool.methods.isManager(this.network.accounts[0]).call()
       this.isMinter = await token.methods.isMinter(this.network.accounts[0]).call()
+    },
+    onTransferTokens() {
+      const token = this.network.instances.token;
+
+      return token.methods.transfer(this.transferTokensAddress, this.transferTokensAmount).send({from: this.network.accounts[0]}).then(async () => {
+        return this.$refs.header.updateBalance()
+      })
     },
     onMintForAccount() {
       const token = this.network.instances.token
