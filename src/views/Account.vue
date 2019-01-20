@@ -69,7 +69,11 @@ export default {
     onMintForAccount() {
       const token = this.network.instances.token
 
-      return token.methods.mint(this.network.accounts[0], this.mintForAccountAmount).send({from: this.network.accounts[0]}).then(() => {
+      return token.methods.mint(this.network.accounts[0], this.mintForAccountAmount).send({from: this.network.accounts[0]}).then(async () => {
+
+        this.balance.pool = await token.methods.balanceOf(this.network.addresses.pool).call()
+        this.balance.token = await token.methods.balanceOf(this.network.accounts[0]).call()
+
         return this.$refs.header.updateBalance()
       })
     },
