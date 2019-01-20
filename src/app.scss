@@ -80,7 +80,7 @@ hr.dotted {
   background-color: $yellow;
 
   .list--nav {
-    bottom: 2rem;
+    bottom: 1.2rem;
 
     button {
       &:before {
@@ -299,7 +299,8 @@ hr.dotted {
   margin: 1rem;
   margin-bottom: 4.5rem;
   padding: 1rem;
-
+  overflow: auto;
+  
   img {
     max-width: 280px;
     margin-top: 2rem;
