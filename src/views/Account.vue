@@ -15,11 +15,13 @@
         <button class="btn btn--default" type="submit">Deposit {{ transferToPoolAmount }} THX</button>
       </form>
 
-      <h3>Add manager:</h3>
-      <form v-on:submit="onAddManager()">
-        <input v-model="accountAddress" type="text" placeholder="account_address">
-        <button class="btn btn--default" type="submit">Add manager</button>
-      </form>
+      <div v-if="isManager">
+        <h3>Add manager:</h3>
+        <form v-on:submit="onAddManager()">
+          <input v-model="accountAddress" type="text" placeholder="account_address">
+          <button class="btn btn--default" type="submit">Add manager</button>
+        </form>
+      </div>
 
     </main>
   </article>
@@ -37,6 +39,7 @@ export default {
   data: function () {
     return {
       network: null,
+      isManager: false,
       balance: {
         token: 0,
         pool: 0
@@ -57,9 +60,11 @@ export default {
   methods: {
     async init() {
       const token = this.network.instances.token
+      const pool = this.network.instances.pool;
 
       this.balance.token = await token.methods.balanceOf(this.network.accounts[0]).call()
       this.balance.pool = await token.methods.balanceOf(this.network.addresses.pool).call()
+      this.isManager = await pool.methods.isManager(this.network.accounts[0]).call()
     },
     onMintForAccount() {
       const token = this.network.instances.token
