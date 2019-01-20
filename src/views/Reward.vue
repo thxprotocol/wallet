@@ -1,6 +1,6 @@
 <template>
   <article class="region region--container">
-    <main class="region region--content">
+    <main class="region region--content" v-if="amount > 0">
       <h1>+ {{ amount }}</h1>
       <p>for:</p>
       <ul class="list" v-if="rewards">
