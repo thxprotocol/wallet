@@ -16,7 +16,7 @@
 
     <ul class="list list--nav">
       <li v-bind:key="r.id" v-for="r in rewards">
-        <button v-bind:class="`${(r.id == currentReward) ? 'active' : ''}`">{{ r.id }}</button>
+        <button v-on:click="navigateToReward(r.id)" v-bind:class="`${(r.id == currentReward) ? 'active' : ''}`">{{ r.id }}</button>
       </li>
     </ul>
 
@@ -40,7 +40,7 @@ export default {
       },
       reward: {},
       rewards: [],
-      currentReward: 0,
+      currentReward: this.$route.params.id,
       lastId: -1
     }
   },
@@ -73,6 +73,11 @@ export default {
         reward.amount = loadedReward.amount;
         reward.slug = loadedReward.slug;
 
+        // Check if we have new items to show in our reward screen.
+        if (typeof lastSeen !== 'undefined') {
+          localStorage.setItem('lastId', loadedReward.id);
+        }
+
         return reward;
       }
 
@@ -80,6 +85,9 @@ export default {
     },
     close() {
       this.$router.push('/');
+    },
+    navigateToReward(rewardId) {
+      this.$router.push({name: 'reward', params: { id: rewardId}});
     },
     async getRewardList(lastId) {
       const pool = this.network.instances.pool
@@ -95,28 +103,20 @@ export default {
           rewardIds.push({'id': rewardId})
         }
       }
-      
-      // Check if we have new items to show in our reward screen.
-      let lastSeen = rewardIds[rewardIds.length - 1];
-      if (typeof lastSeen !== 'undefined') {
-        localStorage.setItem('lastId', lastSeen);
-      }
-      else {
-        // Nothing new here, move to the account.
-        this.$router.push('Account');
-      }
 
-      let rewardsCount = rewardIds.length;
-      let rewards = []
-
-      // Generate an array of data to be used in the markup.
-      for (var key = 0; key < rewardsCount; key++) {
-        let rwrd = await pool.methods.rewards(rewardIds[key]).call()
-        rewards.push(rwrd);
-      }
-
-      // Return the slugs of all the approved withdrawals the user got tokens for.
-      return rewards;
+      return rewardIds;
+      //
+      // let rewardsCount = rewardIds.length;
+      // let rewards = []
+      //
+      // // Generate an array of data to be used in the markup.
+      // for (var key = 0; key < rewardsCount; key++) {
+      //   let rwrd = await pool.methods.rewards(rewardIds[key]).call()
+      //   rewards.push(rwrd);
+      // }
+      //
+      // // Return the slugs of all the approved withdrawals the user got tokens for.
+      // return rewards;
     },
   }
 }
