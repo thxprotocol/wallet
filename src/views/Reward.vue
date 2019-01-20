@@ -41,13 +41,14 @@ export default {
       reward: {},
       rewards: [],
       currentReward: this.$route.params.id,
+      lastRewardId: '',
       lastId: -1
     }
   },
   created() {
     new NetworkService().connect().then((network) => {
       this.network = network
-      this.init()
+      this.init(true)
     })
   },
   mounted() {
@@ -56,12 +57,15 @@ export default {
     }
   },
   methods: {
-    async init() {
+    async init(firstTime) {
       const pool = this.network.instances.pool;
       this.pool.name = await pool.methods.name().call()
       this.reward = await this.getReward(this.$route.params.id)
+      if (firstTime) {
+        this.rewards = await this.getRewardList(this.lastId)
+      }
       this.currentReward = this.$route.params.id
-      this.rewards = await this.getRewardList(this.lastId)
+      localStorage.setItem('lastId', this.$route.params.id);
     },
     async getReward(rewardId) {
       const pool = this.network.instances.pool
@@ -72,12 +76,6 @@ export default {
       if (typeof loadedReward !== 'undefined') {
         reward.amount = loadedReward.amount;
         reward.slug = loadedReward.slug;
-
-        // Check if we have new items to show in our reward screen.
-        if (typeof lastSeen !== 'undefined') {
-          localStorage.setItem('lastId', loadedReward.id);
-        }
-
         return reward;
       }
 
@@ -88,7 +86,7 @@ export default {
     },
     navigateToReward(rewardId) {
       this.$router.push({name: 'reward', params: { id: rewardId}});
-      this.init()
+      this.init(false)
     },
     async getRewardList(lastId) {
       const pool = this.network.instances.pool
@@ -103,6 +101,13 @@ export default {
         if (parseInt(rewardId) > parseInt(lastId)) {
           rewardIds.push({'id': rewardId})
         }
+      }
+
+      if (typeof rewardIds[rewardIds.length - 1] !== "undefined") {
+        this.lastRewardId = rewardIds[rewardIds.length - 1].id;
+      }
+      else {
+        this.lastRewardId = lastId;
       }
 
       return rewardIds;
