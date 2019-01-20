@@ -1,10 +1,11 @@
 <template>
   <article class="region region--container">
-    <Header />
     <main class="region region--content">
-      <ul class="list list--dotted" v-if="transactions">
-        <li v-bind:key="tx.id" v-for="tx in transactions">
-          {{ pool.name }} <strong>+ {{ tx.amount }}</strong>
+      <h1>+ {{ amount }}</h1>
+      <p>for:</p>
+      <ul class="list" v-if="rewards">
+        <li v-bind:key="rwrd.id" v-for="rwrd in rewards">
+          <strong>{{ rwrd.name }}</strong>
         </li>
       </ul>
     </main>
@@ -13,22 +14,16 @@
 
 <script>
 import NetworkService from '../services/NetworkService.js'
-import Header from '../components/Header.vue'
 
 export default {
-  name: 'home',
-  components: {
-    Header
-  },
+  name: 'reward',
   data: function () {
     return {
       network: null,
-      pool: {
-        name: "",
-        balance: 0
+      amount: 0,
+      rewards: {
+        name: ""
       },
-      transactions: [],
-      approvals: [],
       lastId: 0
     }
   },
@@ -45,67 +40,50 @@ export default {
   },
   methods: {
     async init() {
-      const pool = this.network.instances.pool;
-
-      this.approvals = await this.getNewestApprovedWithdrawals(this.lastId)
-      this.pool.name = await pool.methods.name().call()
-      this.transactions = await this.getTransactions()
+      this.rewards = await this.getRewardList(this.lastId)
     },
-    async getTransactions() {
+    async getRewardList(lastId) {
       const pool = this.network.instances.pool;
-
-      let transactions = []
-      let amountOfRewards = parseInt( await pool.methods.count().call() )
-
-      for (var i = 0; i < amountOfRewards; i++) {
-        let tx = await pool.methods.rewards(i).call()
-
-        transactions.push(tx)
-      }
-
-      transactions = transactions.filter((tx) => {
-        return (parseInt(tx.state) == 3 && (tx.beneficiary.toUpperCase() == this.network.accounts[0].toUpperCase()))
-      })
-
-      // @TODO Also add Pool deposits to the list of tx
-      // ...
-
-      return transactions.reverse()
-    },
-    async getNewestApprovedWithdrawals(lastId) {
-      const pool = this.network.instances.pool;
-      let amountOfRewards = parseInt( await pool.methods.count().call() )
-
+      // let amountOfRewards = parseInt( await this.pool.methods.count().call() )
+      let amountOfRewards = 14; // @ TODO get the correct count from the rewardpool for all the beneficiary rewards.
       let rewardIds = []
-      let userRewards = []
+
       // Grab all the ID's of rewards for this beneficiaries.
-      // @TODO MAKE MORE PERFORMANT!!!!!
-      // @todo defensive coding per favore.
       for (var i = 0; i < amountOfRewards; i++) {
         let rewardId = await pool.methods.beneficiaries(this.network.accounts[0], i).call()
         // If the reward ID of this address is new (aka the ID is higher than the last one generated) we
         // add it to the array of items the user should see.
-        if (rewardId > lastId) {
+        if (parseInt(rewardId) > parseInt(lastId)) {
           rewardIds.push(rewardId)
         }
       }
 
       let lastSeen = rewardIds[rewardIds.length - 1];
-
-      if (typeof lastSeen !== 'undefined') {
+      if (typeof lastSeen !== 'undefined' && lastSeen !== 0) {
         localStorage.setItem('lastId', lastSeen);
       }
-
-      // Generate an array of.
-      let rewardsCount = rewardIds.length;
-      for (var key = 0; key < rewardsCount; key++) {
-        let rwrd = await pool.methods.rewards(rewardIds[key]).call()
-        userRewards.push(rwrd.id)
-        console.log(rwrd.amount)
+      else {
+        // Nothing new here, move to the account.
+        this.$router.push('account');
       }
 
-      return userRewards;
-    }
+      let rewardsCount = rewardIds.length;
+      let amount = 0;
+      let rewardSlug = []
+
+      // Generate an array of data to be used in the markup.
+      for (var key = 0; key < rewardsCount; key++) {
+        let rwrd = await pool.methods.rewards(rewardIds[key]).call()
+        amount = parseInt(amount) + parseInt(rwrd.amount);
+        rewardSlug.push({"name": rwrd.slug});
+      }
+
+      // Update the amount.
+      this.amount = amount;
+
+      // Return the slugs of all the approved withdrawals the user got tokens for.
+      return rewardSlug;
+    },
   }
 }
 </script>

@@ -1,10 +1,10 @@
 <template>
   <div id="app" v-bind:class="`section--${$router.currentRoute.name}`">
     <router-view/>
-    <footer class="region region--navigation">
+    <footer v-if="removeFooterPaths()" class="region region--navigation">
       <nav class="navbar">
         <ul class="nav">
-          <li v-bind:key="route.name" v-for="route in $router.options.routes">
+          <li v-bind:key="route.name" v-for="route in $router.options.routes" v-if="route.visible">
             <router-link v-bind:to="route.path">
               <span v-if="route.name == 'notifications' && rewards.length > 0" class="badge badge--warning">
                 {{ rewards.length }}
@@ -45,7 +45,9 @@ export default {
           default: AccountSrc,
           active: AccountSrc
         }
-      }
+      },
+      approvals: [],
+      lastId: 0
     }
   },
   created() {
@@ -54,9 +56,18 @@ export default {
       this.init()
     })
   },
+  mounted() {
+    if (localStorage.lastId) {
+      this.lastId = localStorage.lastId;
+    }
+  },
   methods: {
     async init() {
+      this.checkForRewards()
       this.update()
+    },
+    removeFooterPaths() {
+      return this.$router.history.current["name"] !== "reward";
     },
     async update() {
       const pool = this.network.instances.pool;
@@ -73,6 +84,31 @@ export default {
       this.rewards = rewards.filter((r) => {
         return r.state == 0
       })
+    },
+    async checkForRewards() {
+      let newRewards = await this.getNewestApprovedWithdrawals(this.lastId);
+
+      if (newRewards === true) {
+        this.$router.push('Reward');
+      }
+
+      return null;
+    },
+    async getNewestApprovedWithdrawals(lastId) {
+      const pool = this.network.instances.pool;
+      let amountOfRewards = parseInt( await pool.methods.count().call() )
+
+      // Grab all the ID's of rewards for this beneficiaries.
+      for (var i = 0; i < amountOfRewards; i++) {
+        let rewardId = await pool.methods.beneficiaries(this.network.accounts[0], i).call()
+        // If the reward ID of this address is new (aka the ID is higher than the last one generated) we
+        // add it to the array of items the user should see.
+        if (parseInt(rewardId) > parseInt(lastId)) {
+          return true;
+        }
+      }
+
+      return false;
     }
   }
 }
