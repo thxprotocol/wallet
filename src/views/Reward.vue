@@ -88,6 +88,7 @@ export default {
     },
     navigateToReward(rewardId) {
       this.$router.push({name: 'reward', params: { id: rewardId}});
+      this.init()
     },
     async getRewardList(lastId) {
       const pool = this.network.instances.pool

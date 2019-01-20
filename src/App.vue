@@ -89,7 +89,7 @@ export default {
     async checkForRewards() {
       let newRewards = await this.getNewestApprovedWithdrawals(this.lastId);
 
-      if (newRewards !== true && typeof newRewards !== "undefined") {
+      if (newRewards !== false && typeof newRewards !== "undefined") {
         this.$router.push({name: 'reward', params: { id: newRewards}});
       }
 
