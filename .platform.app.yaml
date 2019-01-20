@@ -25,9 +25,9 @@ disk: 512
 mounts:
   '/build_platform': 'shared:files/build_platform'
   '/.tmp_platformsh': 'shared:files/tmp_platformsh'
-#dependencies:
-#  nodejs:
-#    yarn: "*"
+dependencies:
+  nodejs:
+    nvm: "*"
 # The hooks that will be performed when the package is deployed.
 hooks:
   build: |
