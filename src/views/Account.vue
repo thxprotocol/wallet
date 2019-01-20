@@ -70,14 +70,16 @@ export default {
       })
     },
     onTransferToPool() {
-      const token = this.network.instances.token;
+      const pool = this.network.instances.pool;
 
-      // @TODO This deposit method still reverts...
-      // await this.rewardPoolInstance.methods.deposit(this.transferToPoolAmount).send({from: this.accounts[0]})
-
-      return token.methods.transfer(this.network.addresses.pool, this.transferToPoolAmount).send({from: this.network.accounts[0]}).then(() => {
+      return pool.methods.deposit(this.transferToPoolAmount).send({from: this.network.accounts[0]}).then(() => {
         return this.$refs.header.updateBalance()
       })
+
+      // const token = this.network.instances.token;
+      // return token.methods.transfer(this.network.addresses.pool, this.transferToPoolAmount).send({from: this.network.accounts[0]}).then(() => {
+      //   return this.$refs.header.updateBalance()
+      // })
     },
     submitReward() {
       const pool = this.network.instances.pool;
