@@ -73,19 +73,22 @@ export default {
     },
     async update() {
       const pool = this.network.instances.pool;
-      const amountOfRewards = await pool.methods.count().call()
+      const amountOfRewards = await pool.methods.countRewards().call()
+      const isManager = await pool.methods.isManager(this.network.accounts[0]).call()
 
-      let rewards = []
+      if (isManager == 'true') {
+        let rewards = []
 
-      for (var i = 0; i < parseInt(amountOfRewards); i++) {
-        let reward = await pool.methods.rewards(i).call()
+        for (var i = 0; i < parseInt(amountOfRewards); i++) {
+          let reward = await pool.methods.rewards(i).call()
 
-        rewards.push(reward)
+          rewards.push(reward)
+        }
+
+        this.rewards = rewards.filter((r) => {
+          return r.state == 0
+        })
       }
-
-      this.rewards = rewards.filter((r) => {
-        return r.state == 0
-      })
     },
     approve(id) {
       const pool = this.network.instances.pool;

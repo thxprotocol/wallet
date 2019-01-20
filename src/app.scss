@@ -76,6 +76,21 @@ hr.dotted {
   height: 100%;
 }
 
+.section--reward {
+  background-color: $yellow;
+
+  .list--nav {
+    bottom: 1.2rem;
+
+    button {
+      &:before {
+        background: transparent;
+        border: 2px solid black;
+      }
+    }
+  }
+}
+
 .section--notifications {
   background-size: cover;
   background-position: center center;
@@ -254,8 +269,8 @@ hr.dotted {
 }
 
 .notification {
-  width: calc(100vw - 4rem);
   background-color: white;
+  width: calc(100vw - 4rem);
   margin: 1rem;
   margin-bottom: 4.5rem;
   padding: 1rem;
@@ -274,6 +289,53 @@ hr.dotted {
   }
 }
 
+.splash {
+  width: calc(100vw - 4rem);
+  flex: 1 auto;
+  display: block;
+  background: transparent;
+  text-align: center;
+  font-size: 1.5rem;
+  margin: 1rem;
+  margin-bottom: 4.5rem;
+  padding: 1rem;
+  overflow: auto;
+  
+  img {
+    max-width: 280px;
+    margin-top: 2rem;
+  }
+}
+
+.btn--close {
+  font-size: 0;
+  border-radius: 50%;
+  min-width: 40px;
+  width: 41px;
+  height: 41px;
+  display: block;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  transform: rotate(45deg);
+
+  &:before,
+  &:after {
+    content: '';
+    display: block;
+    width: 23px;
+    height: 2px;
+    background-color: $yellow;
+    position: absolute;
+    top: 19px;
+    left: 9px;
+  }
+
+  &:after {
+    transform: rotate(90deg)
+  }
+}
+
 .logo {
   display: block;
   width: 100%;
@@ -282,4 +344,10 @@ hr.dotted {
 .font-size-large {
   font-size: 2rem;
   font-weight: bold;
+}
+
+.font-size-xl {
+  font-size: 4rem;
+  font-weight: bold;
+  margin: 0;
 }

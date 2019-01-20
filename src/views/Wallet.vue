@@ -2,9 +2,13 @@
   <article class="region region--container">
     <Header />
     <main class="region region--content">
-      <ul class="list list--dotted" v-if="transactions">
+      <ul class="list list--dotted">
         <li v-bind:key="tx.id" v-for="tx in transactions">
-          {{ pool.name }} <strong>+ {{ tx.amount }}</strong>
+          {{ pool.name }}
+          <strong>
+            <span>{{ (tx.receiver == network.accounts[0]) ? '-' : '+' }}</span>
+             {{ tx.amount }}
+          </strong>
         </li>
       </ul>
     </main>
@@ -27,7 +31,7 @@ export default {
         name: "",
         balance: 0
       },
-      transactions: []
+      transactions: [],
     }
   },
   created() {
@@ -39,30 +43,38 @@ export default {
   methods: {
     async init() {
       const pool = this.network.instances.pool;
-
       this.pool.name = await pool.methods.name().call()
       this.transactions = await this.getTransactions()
     },
     async getTransactions() {
       const pool = this.network.instances.pool;
 
+      let refs = []
       let transactions = []
-      let amountOfRewards = parseInt( await pool.methods.count().call() )
 
-      for (var i = 0; i < amountOfRewards; i++) {
-        let tx = await pool.methods.rewards(i).call()
+      let amountOfDeposits = parseInt( await pool.methods.countDepositsOf(this.network.accounts[0]).call() )
+      let amountOfWithdrawels = parseInt( await pool.methods.countWithdrawelsOf(this.network.accounts[0]).call() )
+
+      for (let i = 0; i < amountOfDeposits; i++) {
+        let ref = await pool.methods.deposits(this.network.accounts[0], i).call()
+
+        refs.push(ref)
+      }
+
+      for (let i = 0; i < amountOfWithdrawels; i++) {
+        let ref = await pool.methods.withdrawels(this.network.accounts[0], i).call()
+
+        refs.push(ref)
+      }
+
+      for (let i = 0; i < refs.length; i++) {
+        // console.log(refs[i])
+        let tx = await pool.methods.transactions(refs[i]).call()
 
         transactions.push(tx)
       }
 
-      transactions = transactions.filter((tx) => {
-        return (parseInt(tx.state) == 3 && (tx.beneficiary.toUpperCase() == this.network.accounts[0].toUpperCase()))
-      })
-
-      // @TODO Also add Pool deposits to the list of tx
-      // ...
-
-      return transactions.reverse()
+      return transactions.sort()
     }
   }
 }
