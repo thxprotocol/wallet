@@ -71,7 +71,7 @@ export default {
     },
     async update() {
       const pool = this.network.instances.pool;
-      const amountOfRewards = await pool.methods.count().call()
+      const amountOfRewards = await pool.methods.countRewardsOf(this.network.accounts[0]).call()
 
       let rewards = []
 
@@ -96,7 +96,7 @@ export default {
     },
     async getNewestApprovedWithdrawals(lastId) {
       const pool = this.network.instances.pool;
-      let amountOfRewards = parseInt( await pool.methods.count().call() )
+      let amountOfRewards = parseInt( await pool.methods.countRewardsOf(this.network.accounts[0]).call() )
 
       // Grab all the ID's of rewards for this beneficiaries.
       for (var i = 0; i < amountOfRewards; i++) {

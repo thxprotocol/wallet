@@ -73,7 +73,8 @@ export default {
     },
     async update() {
       const pool = this.network.instances.pool;
-      const amountOfRewards = await pool.methods.count().call()
+      const amountOfRewards = await pool.methods.countRewardsOf(this.network.accounts[0]).call()
+      console.log(amountOfRewards)
 
       let rewards = []
 

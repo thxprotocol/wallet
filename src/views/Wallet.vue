@@ -46,7 +46,7 @@ export default {
       const pool = this.network.instances.pool;
 
       let transactions = []
-      let amountOfRewards = parseInt( await pool.methods.count().call() )
+      let amountOfRewards = parseInt( await pool.methods.countRewardsOf(this.network.accounts[0]).call() )
 
       for (var i = 0; i < amountOfRewards; i++) {
         let tx = await pool.methods.rewards(i).call()
