@@ -8,7 +8,8 @@
         <h1 class="font-size-xl">+ {{ reward.amount }}</h1>
         <p><strong class="font-size-large">THX</strong></p>
         <hr />
-        <p>{{ pool.name }}</p>
+        <p>Volunteers United</p>
+        <!-- <p>{{ pool.name }}</p> -->
         <p>for<br/>
         <strong>{{ reward.slug }}</strong></p>
       </div>

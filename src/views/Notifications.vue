@@ -4,7 +4,8 @@
     <div class="list list--swipe">
       <div v-bind:key="reward.id" v-for="reward in rewards" class="notification">
         <h2 class="font-size-large">{{ reward.slug }}</h2>
-        <p>{{ pool.name }} <strong>{{ pool.balance }} THX</strong></p>
+        <p>Volunteers United <strong>{{ pool.balance }} THX</strong></p>
+        <!-- <p>{{ pool.name }} <strong>{{ pool.balance }} THX</strong></p> -->
         <hr />
         <p>
           Amount:<br>
