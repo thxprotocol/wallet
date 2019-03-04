@@ -4,7 +4,8 @@
     <main class="region region--content">
       <ul class="list list--dotted">
         <li v-bind:key="tx.id" v-for="tx in transactions">
-          {{ pool.name }}
+          <!-- {{ pool.name }} -->
+          Volunteers United
           <strong>
             <span>{{ (tx.receiver == network.accounts[0]) ? '+' : '-' }}</span>
              {{ tx.amount }}
