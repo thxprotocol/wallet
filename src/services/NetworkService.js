@@ -1,22 +1,16 @@
-/*global web3*/
 import Web3 from 'web3'
-
 import TokenJSON from '../../build/contracts/THXToken.json'
 import RewardPoolJSON from '../../build/contracts/RewardPool.json'
-
-// import config from '../config.js'
+import EventService from './EventService.js';
 
 export default class NetworkService {
     constructor() {
-        this.web3 = web3
-
-        if (typeof web3 !== 'undefined') {
-            this.web3 = new Web3(this.web3.currentProvider); // @TODO When deploying make sure this is ropsten through infura since we deprecate the use of metamask
-        } else {
-            this.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
-        }
-
+        // this.web3 = new Web3("https://ropsten.infura.io/v3/350a0215b02e46639ff2ac1982de4aed");
+        this.web3 = new Web3("http://localhost:8545");
+        this.ea = new EventService();
         this.account = {}
+        this.accounts = {}
+        this.tx = {}
         this.addresses = {
             token: null,
             rewardPool: null
@@ -31,14 +25,60 @@ export default class NetworkService {
         localStorage.setItem('privateKey', privateKey);
     }
 
-    sendSignedTransaction(rawTX) {
-        return this.web3.eth.sendSignedTransaction(rawTX.rawTransaction).on('receipt', (receipt) => {
-            return receipt
+    saveTransaction(hash, description) {
+        let txList = this.state.get('tx');
+        if (!txList) txList = []
+        txList.push(hash)
+        localStorage.setItem('tx', JSON.stringify(txList));
+
+        this.ea.dispatch('tx.confirmation', {
+            hash: hash,
+            description: description,
+            confirmations: 0,
         })
     }
 
-    signTransaction(to, amount) {
-        return this.web3.eth.accounts.signTransaction({
+    sendSignedTransaction(rawTX, description) {
+        let hash;
+
+        return this.web3.eth.sendSignedTransaction(rawTX.rawTransaction)
+            .on('transactionHash', (h) => {
+                // eslint-disable-next-line
+                console.info(h)
+                hash = h;
+                this.saveTransaction(h, description);
+            })
+            .on('receipt', (receipt) => {
+                // eslint-disable-next-line
+                console.info(receipt)
+            })
+            .on('confirmation', (c) => {
+                // eslint-disable-next-line
+                console.log(c)
+                this.ea.dispatch('tx.confirmation', {
+                    hash: hash,
+                    confirmations: c,
+                });
+            })
+            .on('error', (err) => {
+                // eslint-disable-next-line
+                console.error(err)
+            });
+    }
+
+    async signContractMethod(to, data) {
+        return await this.web3.eth.accounts.signTransaction({
+            chainId: this.nid,
+            to: to,
+            data: data,
+            gas: 2000000,
+        }, localStorage.privateKey)
+    }
+
+    async signTransaction(to, amount) {
+        console.log(to)
+        return await this.web3.eth.accounts.signTransaction({
+            chainId: this.nid,
             to: to,
             value: this.web3.utils.toHex(this.web3.utils.toWei(amount, "ether")),
             gas: 2000000
@@ -55,53 +95,34 @@ export default class NetworkService {
     }
 
     connect() {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.web3.eth.net.getId().then((nid) => {
-                //
-                // this.web3.eth.getAccounts((error, accounts) => {
-                //   let instances = {
-                //     token: new this.web3.eth.Contract(config.abi.token, config.address.token),
-                //     pool: new this.web3.eth.Contract(config.abi.pool, config.address.pool)
-                //   }
-                //
-                //   resolve({
-                //     nid: nid,
-                //     addresses: config.address,
-                //     instances: instances,
-                //     accounts: accounts
-                //   })
-                // })
+                this.nid = nid;
 
                 if (typeof TokenJSON.networks[nid] != 'undefined' && typeof RewardPoolJSON.networks[nid] != 'undefined') {
-                    let addresses = {}
-                    let instances = {}
-
                     // Get the contract addresses
-                    this.adresses = addresses = {
+                    this.adresses = {
                         token: TokenJSON.networks[nid].address,
                         pool: RewardPoolJSON.networks[nid].address
                     }
 
                     // Create an instance from the THXToken Contract abi and contract address on the current network
-                    this.instances = instances = {
-                        token: new this.web3.eth.Contract(TokenJSON.abi, addresses.token),
-                        pool: new this.web3.eth.Contract(RewardPoolJSON.abi, addresses.pool)
+                    this.instances = {
+                        token: new this.web3.eth.Contract(TokenJSON.abi, this.adresses.token),
+                        pool: new this.web3.eth.Contract(RewardPoolJSON.abi, this.adresses.pool)
                     }
 
                     this.account = this.getAccount()
+                    this.accounts = [this.account.address];
 
-                    if (this.account) {
-                        resolve({nid: nid, addresses: addresses, instances: instances, accounts: [this.account.address]})
+                    if (this.accounts[0]) {
+                        resolve(true)
                     }
                     else {
-                        console.log('Submit your private key first')
-                        reject()
+                        // eslint-disable-next-line
+                        console.warn('Submit your private key first')
                     }
-
-                } else {
-                    reject()
                 }
-
             })
         })
     }

@@ -1,0 +1,86 @@
+<template>
+    <article class="region region--container">
+        <header class="region region--header">
+            <div class="logo">
+                <img width="50" height="50" v-bind:src="assets.logo" alt="THX Logo" />
+            </div>
+            <p>A token of appreciation</p>
+        </header>
+        <main class="region region--content">
+            <div class="loader" v-if="loading">Loading...</div>
+            <form class="form" v-on:submit.prevent="register" v-if="!loading">
+                <h2>Authentication</h2>
+                <div class="form-item">
+                    <input required type="text" v-model="email" class="input-text" placeholder="E-mail">
+                </div>
+                <div class="form-item">
+                    <input required type="password" v-model="password" class="input-text" placeholder="******">
+                </div>
+                <div class="form-item">
+                    <input required type="password" v-model="passwordVerify" class="input-text" placeholder="******">
+                </div>
+
+                <button class="btn btn-primary" type="submit">Create account</button>
+                <p>Or go back to <router-link to="/login">Login</router-link></p>
+            </form>
+        </main>
+    </article>
+</template>
+
+<script>
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import Logo from '../assets/thx_logo.svg'
+
+export default {
+    name: 'register',
+    data: function() {
+        return {
+            assets: {
+                logo: Logo
+            },
+            email: '',
+            password: '',
+            passwordVerify: '',
+            loading: false,
+        }
+    },
+    methods: {
+        register: function() {
+            this.loading = true;
+
+            if (this.password === this.passwordVerify) {
+                this.createAccount();
+            }
+            else {
+                alert("Your passwords do not match.");
+            }
+        },
+        createAccount() {
+            firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
+                .then((r) => {
+                    const user = {
+                        uid: r.user.uid,
+                        email: r.user.email,
+                    }
+
+                    firebase.database().ref('users').child(user.uid).set(user);
+                    this.loading = false;
+                    this.$router.replace('/');
+                })
+                .catch((err) => {
+                    if (typeof err != 'undefined') {
+                        alert("Error during account registration.")
+                    }
+                    this.loading = false;
+                })
+        }
+    }
+}
+</script>
+
+<style scoped>
+    .region--content {
+        background-color: transparent;
+    }
+</style>

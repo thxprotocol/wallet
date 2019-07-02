@@ -3,6 +3,8 @@ node_modules
 /dist
 /examples
 /build/contracts
+command
+./src/config.js
 
 # local env files
 .env

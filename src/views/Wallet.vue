@@ -1,82 +1,93 @@
 <template>
-  <article class="region region--container">
+<article class="region region--container">
     <Header />
     <main class="region region--content">
-      <ul class="list list--dotted">
-        <li v-bind:key="tx.id" v-for="tx in transactions">
+        <strong v-if="!transactions">Loading...</strong>
+        <ul class="list list--dotted" v-if="transactions">
+            <!-- <li v-bind:key="`${tx.id}`" v-for="tx in transactions">
           {{ pool.name }}
           <strong>
             <span>{{ (tx.receiver == network.accounts[0]) ? '+' : '-' }}</span>
              {{ tx.amount }}
           </strong>
-        </li>
-      </ul>
+        </li> -->
+            <li v-bind:key="`${tx.hash}`" v-for="tx in transactions">
+                <div style="overflow:hidden; display: block; text-overflow: ellipsis;">{{ tx.hash }}</div>
+                <div><small>Receiver: <strong>{{ tx.receiver }}</strong></small></div>
+                <div><small>Confirmed: <strong>{{ tx.confirmations }}</strong></small></div>
+            </li>
+        </ul>
     </main>
-  </article>
+</article>
 </template>
 
 <script>
-import NetworkService from '../services/NetworkService.js'
 import Header from '../components/Header.vue'
+import EventService from '../services/EventService.js';
+import Vue from 'vue';
+
+const THX = window.THX;
 
 export default {
-  name: 'home',
-  components: {
-    Header
-  },
-  data: function () {
-    return {
-      network: null,
-      pool: {
-        name: "",
-        balance: 0
-      },
-      transactions: [],
-    }
-  },
-  created() {
-    new NetworkService().connect().then((network) => {
-      this.network = network
-      this.init()
-    })
-  },
-  methods: {
-    async init() {
-      const pool = this.network.instances.pool;
-      this.pool.name = await pool.methods.name().call()
-      this.transactions = await this.getTransactions()
+    name: 'home',
+    components: {
+        Header
     },
-    async getTransactions() {
-      const pool = this.network.instances.pool;
+    data: function() {
+        return {
+            network: null,
+            pool: {
+                name: "",
+                balance: 0
+            },
+            transactions: {},
+            timer: null,
+            ea: new EventService(),
+        }
+    },
+    created() {
+        THX.ns.connect().then(() => this.init());
+    },
+    beforeDestroy: function() {
+        if (this.timer) clearInterval(this.timer);
+    },
+    methods: {
+        async init() {
+            const pool = THX.ns.instances.pool;
+            this.pool.name = await pool.methods.name().call();
+            const interval = 10000; // How many ms between getConfirmation calls
 
-      let refs = []
-      let transactions = []
+            if (this.timer) clearInterval(this.timer);
+            this.txList = JSON.parse(localStorage.getItem('tx'));
 
-      let amountOfDeposits = parseInt( await pool.methods.countDepositsOf(this.network.accounts[0]).call() )
-      let amountOfWithdrawels = parseInt( await pool.methods.countWithdrawelsOf(this.network.accounts[0]).call() )
+            if (this.txList) {
+                this.getConfirmations();
+                this.timer = setInterval(this.getConfirmations.bind(this), interval);
+            }
 
-      for (let i = 0; i < amountOfDeposits; i++) {
-        let ref = parseInt( await pool.methods.deposits(this.network.accounts[0], i).call() )
+            this.ea.listen('tx.confirmation', (data) => {
+                this.tx = {
+                    hash: data.detail.hash,
+                    confirmations: data.detail.confirmations
+                }
+            });
+        },
+        async getConfirmations() {
+            for (let hash of this.txList) {
+                Vue.set(this.transactions, hash, await this.getDetails(hash));
+            }
+        },
+        async getDetails(hash) {
+            const tx = await THX.ns.web3.eth.getTransaction(hash);
+            const data = THX.ns.web3.eth.abi.decodeParameters(['address'], tx.input);
+            const currentBlock = await THX.ns.web3.eth.getBlockNumber();
 
-        refs.push(ref)
-      }
-
-      for (let i = 0; i < amountOfWithdrawels; i++) {
-        let ref = parseInt( await pool.methods.withdrawels(this.network.accounts[0], i).call() )
-
-        refs.push(ref)
-      }
-
-      refs.sort((a, b) => a - b ).reverse()
-
-      for (let i = 0; i < refs.length; i++) {
-        let tx = await pool.methods.transactions(refs[i]).call()
-
-        transactions.push(tx)
-      }
-
-      return transactions.sort()
+            return {
+                receiver: data[0],
+                hash: hash,
+                confirmations: (tx.blockNumber === null) ? 0 : currentBlock - tx.blockNumber
+            }
+        }
     }
-  }
 }
 </script>

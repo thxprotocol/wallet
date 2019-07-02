@@ -111,11 +111,11 @@ npm run lint
 
 * ~~The THX Wallet UI needs to be implemented.~~
 * ~~The list of Reward Structs in the RewardPool contract needs to be able to support multiple rewards of various types per beneficiary address.~~
-* A splash screen should be shown when you have received a reward. See how to use contract events for this and probably store the state client side.
+* ~~A splash screen should be shown when you have received a reward. See how to use contract events for this and probably store the state client side.~~
 * Improve Solidity typing for properties and refactor standard contracts.
-* Investigate the impact of long lists of rewards in terms of tx cost calculation.
-* Investigate Trust Wallet SDK and see if it can work with VueJS for this POC.
-* Deploy the contract layer on Ropsten or Rinkeby test network.
+* ~~Investigate the impact of long lists of rewards in terms of tx cost calculation.~~
+* ~~Investigate Trust Wallet SDK and see if it can work with VueJS for this POC.~~
+* ~~Deploy the contract layer on Ropsten or Rinkeby test network.~~
 * ~~Account without ManageRole should not see Suggested Rewards in notification list~~
 
 ## Known issues
@@ -134,5 +134,5 @@ VueJS compiler tells us there is a memory leak when adding listeners to the netw
 
 * [Solidity](https://solidity.readthedocs.io/en/v0.5.0/)
 * [web3.js](https://web3js.readthedocs.io/en/1.0/)
-* [OpenZeppeling Smart Contracts](https://github.com/OpenZeppelin/openzeppelin-solidity.git)
+* [OpenZeppelin Smart Contracts](https://github.com/OpenZeppelin/openzeppelin-solidity.git)
 * [Trust Wallet SDK](https://github.com/TrustWallet/react-native-trust-sdk)
