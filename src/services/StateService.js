@@ -1,6 +1,6 @@
-export default class StorageService {
+export default class StateService {
     constructor() {
-        this.state = {};
+        this.state = JSON.parse(localStorage.getItem('thx'));
     }
 
     get(key) {

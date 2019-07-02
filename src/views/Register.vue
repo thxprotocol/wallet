@@ -30,6 +30,7 @@
 <script>
 import firebase from 'firebase/app';
 import 'firebase/auth';
+import 'firebase/database';
 import Logo from '../assets/thx_logo.svg'
 
 export default {

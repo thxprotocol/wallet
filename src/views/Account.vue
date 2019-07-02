@@ -3,64 +3,74 @@
     <Header ref="header" />
     <main class="region region--content">
 
+        <h3>Your details:</h3>
+        <p><small>{{account.email}}</small><br/>
+        <small>{{account.uid}}</small><br/>
+        <small>{{account.address}}</small></p>
+
         <h3>Submit private key:</h3>
-        <small>{{account}}</small>
         <form v-on:submit="onCreateAccountFromPrivateKey()">
-            <input v-model="privateKey" type="text" placeholder="privateKey">
+            <input v-model="privateKey" type="text" placeholder="0x023659u23etc">
             <button class="btn btn--default" type="submit">Connect account</button>
         </form>
 
-        <h3>Transfer Tokens:</h3>
-        <form v-on:submit="onTransferTokens()">
-            <input v-model="transferTokensAddress" type="text" placeholder="account_address" />
-            <input v-model="transferTokensAmount" type="number" min="0" v-bind:max="balance.token" />
-            <button class="btn btn--default" type="submit">Transfer {{ transferTokensAmount }} THX</button>
-        </form>
+        <button v-on:click="reset()" class="btn btn--default">Reset</button>
 
-        <h3>Pool deposit:</h3>
-        <small>Reward Pool balance: <strong>{{this.balance.pool}} THX</strong></small>
-        <form v-on:submit="onTransferToPool()">
-            <input v-model="transferToPoolAmount" type="number" min="0" v-bind:max="balance.token" />
-            <button class="btn btn--default" type="submit">Deposit {{ transferToPoolAmount }} THX</button>
-        </form>
-
-        <div v-if="isManager">
-            <h3>Add manager:</h3>
-            <form v-on:submit="onAddManager()">
-                <input v-model="newManagerAddress" type="text" placeholder="account_address">
-                <button class="btn btn--default" type="submit">Add manager</button>
+        <template v-if="account.address">
+            <h3>Transfer Tokens:</h3>
+            <form v-on:submit="onTransferTokens()">
+                <input v-model="transferTokensAddress" type="text" placeholder="account_address" />
+                <input v-model="transferTokensAmount" type="number" min="0" v-bind:max="balance.token" />
+                <button class="btn btn--default" type="submit">Transfer {{ transferTokensAmount }} THX</button>
             </form>
-        </div>
 
-        <div v-if="isMinter">
-            <h3>Mint tokens:</h3>
-            <form v-on:submit="onMintForAccount()">
-                <input v-model="mintForAccountAmount" type="number" min="0" />
-                <button class="btn btn--default" type="submit">Mint {{ mintForAccountAmount }} THX</button>
+            <h3>Pool deposit:</h3>
+            <small>Reward Pool balance: <strong>{{this.balance.pool}} THX</strong></small>
+            <form v-on:submit="onTransferToPool()">
+                <input v-model="transferToPoolAmount" type="number" min="0" v-bind:max="balance.token" />
+                <button class="btn btn--default" type="submit">Deposit {{ transferToPoolAmount }} THX</button>
             </form>
-        </div>
 
-        <div v-if="isMinter">
-            <h3>Add minter:</h3>
-            <form v-on:submit="onAddMinter()">
-                <input v-model="newMinterAddress" type="text" placeholder="account_address">
-                <button class="btn btn--default" type="submit">Add minter</button>
+            <div v-if="isManager">
+                <h3>Add manager:</h3>
+                <form v-on:submit="onAddManager()">
+                    <input v-model="newManagerAddress" type="text" placeholder="account_address">
+                    <button class="btn btn--default" type="submit">Add manager</button>
+                </form>
+            </div>
+
+            <div v-if="isMinter">
+                <h3>Mint tokens:</h3>
+                <form v-on:submit="onMintForAccount()">
+                    <input v-model="mintForAccountAmount" type="number" min="0" />
+                    <button class="btn btn--default" type="submit">Mint {{ mintForAccountAmount }} THX</button>
+                </form>
+            </div>
+
+            <div v-if="isMinter">
+                <h3>Add minter:</h3>
+                <form v-on:submit="onAddMinter()">
+                    <input v-model="newMinterAddress" type="text" placeholder="account_address">
+                    <button class="btn btn--default" type="submit">Add minter</button>
+                </form>
+            </div>
+
+            <h3>Transfer Ether:</h3>
+            <form>
+                <input v-model="transferEtherAddress" type="text" placeholder="account_address" />
+                <input v-model="transferEtherAmount" type="number" min="0" />
+                <button class="btn btn--default" v-on:click="onTransferEther()">Transfer {{ transferEtherAmount }} ETH</button>
             </form>
-        </div>
 
-        <h3>Transfer Ether:</h3>
-        <form>
-            <input v-model="transferEtherAddress" type="text" placeholder="account_address" />
-            <input v-model="transferEtherAmount" type="number" min="0" />
-            <button class="btn btn--default" v-on:click="onTransferEther()">Transfer {{ transferEtherAmount }} ETH</button>
-        </form>
-
+        </template>
 
     </main>
 </article>
 </template>
 
 <script>
+import firebase from 'firebase/app';
+import 'firebase/database';
 import EventService from '../services/EventService.js';
 import Header from '../components/Header.vue'
 
@@ -73,7 +83,6 @@ export default {
     },
     data: function() {
         return {
-            account: null,
             network: null,
             isManager: false,
             isMinter: false,
@@ -93,21 +102,42 @@ export default {
             transferEtherAmount: 0,
             tx: null,
             privateKey: (typeof localStorage.privateKey != "undefined") ? localStorage.privateKey : null,
+            account: {
+                uid: null,
+                email: null,
+                address: null,
+                privateKey: null,
+            },
             ea: new EventService(),
         }
     },
     created() {
-        THX.ns.connect().then(() => this.init());
+        const uid = firebase.auth().currentUser.uid;
+
+        THX.ns.connect().then(() => this.init()).catch(() => console.error);
+
+        firebase.database().ref('users').child(uid).once('value').then((s) => {
+            this.account.uid = s.val().uid;
+            this.account.email = s.val().email;
+        });
     },
     methods: {
         async init() {
             const token = THX.ns.instances.token
             const pool = THX.ns.instances.pool;
 
+            this.account.address = THX.ns.account.address;
+            this.account.privateKey = THX.ns.account.privateKey;
+
             this.balance.token = await token.methods.balanceOf(THX.ns.accounts[0]).call()
             this.balance.pool = await token.methods.balanceOf(pool.address).call()
             this.isManager = await pool.methods.isManager(THX.ns.accounts[0]).call()
             this.isMinter = await token.methods.isMinter(THX.ns.accounts[0]).call()
+        },
+        reset() {
+            this.privateKey = null;
+            localStorage.setItem('privateKey', "");
+            window.location.reload();
         },
         async onCreateAccountFromPrivateKey() {
             THX.ns.privateKeyToAccount(this.privateKey);

@@ -52,7 +52,7 @@ export default {
         }
     },
     created() {
-        THX.ns.connect().then(() => this.init());
+        THX.ns.connect().then(() => this.init()).catch(() => console.error);
     },
     methods: {
         async init() {
