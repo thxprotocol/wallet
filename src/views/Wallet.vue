@@ -46,6 +46,7 @@ export default {
         }
     },
     created() {
+        // eslint-disable-next-line
         THX.ns.connect().then(() => this.init()).catch(() => console.error);
     },
     beforeDestroy: function() {

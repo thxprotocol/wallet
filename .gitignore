@@ -5,6 +5,7 @@ node_modules
 /build/contracts
 command
 /src/config.js
+.firebase
 
 # local env files
 .env

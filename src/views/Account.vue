@@ -2,7 +2,7 @@
 <article class="region region--container">
     <Header ref="header" />
     <main class="region region--content">
-
+        <a href="/#/logout">Logout user</a>
         <h3>Your details:</h3>
         <p><small>{{account.email}}</small><br/>
         <small>{{account.uid}}</small><br/>
@@ -114,6 +114,7 @@ export default {
     created() {
         const uid = firebase.auth().currentUser.uid;
 
+        // eslint-disable-next-line
         THX.ns.connect().then(() => this.init()).catch(() => console.error);
 
         firebase.database().ref('users').child(uid).once('value').then((s) => {
