@@ -2,33 +2,39 @@
 <article class="region region--container">
 
     <div class="list list--swipe">
-        <div v-bind:key="reward.id" v-for="reward in rewards" class="notification">
-            <h2 class="font-size-large">{{ reward.slug }}</h2>
-            <p>{{ pool.name }} <strong>{{ pool.balance }} THX</strong></p>
-            <hr />
-            <p>
-                Amount:<br>
-                <strong>{{ reward.amount }}</strong> THX
-            </p>
-            <hr class="dotted" />
-            <p>
-                To:<br>
-                <span class="badge badge--default">{{ reward.beneficiary }}</span>
-            </p>
-            <div class="notification__actions">
-                <button class="btn btn--default" v-on:click="reject(reward.id)">
-                    Reject
-                </button>
-                <button class="btn btn--success" v-on:click="approve(reward.id)">
-                    Approve
-                </button>
-            </div>
+        <div v-bind:key="n.id" v-for="n in notifications" class="notification">
+            <template v-if="n.beneficiary">
+                <h2 class="font-size-large">
+                    {{ n.title }}
+                    <span class="badge badge--default">{{ n.state }}</span>
+                </h2>
+                <p>{{ n.description }}</p>
+                <p>{{ pool.name }} <strong>{{ pool.balance }} THX</strong></p>
+                <hr />
+                <p>
+                    Amount:<br>
+                    <strong>{{ n.amount }}</strong> THX
+                </p>
+                <hr class="dotted" />
+                <p>
+                    To:<br>
+                    <span class="badge badge--default">{{ n.beneficiary }}</span>
+                </p>
+                <div class="notification__actions">
+                    <button class="btn btn--default" v-on:click="rejectReward(n.id)">
+                        Reject
+                    </button>
+                    <button class="btn btn--success" v-on:click="approveReward(n.id)">
+                        Approve
+                    </button>
+                </div>
+            </template>
         </div>
     </div>
 
     <ul class="list list--nav">
-        <li v-bind:key="r.id" v-for="r in rewards">
-            <button v-bind:class="`${(r.id == currentNotification) ? 'active' : ''}`">{{ r.id }}</button>
+        <li v-bind:key="n.id" v-for="n in notifications">
+            <button v-bind:class="`${(n.id == currentNotification) ? 'active' : ''}`">{{ n.id }}</button>
         </li>
     </ul>
 
@@ -36,19 +42,24 @@
 </template>
 
 <script>
+import firebase from 'firebase/app';
+import 'firebase/database';
+import EventService from '../services/EventService';
+
 const THX = window.THX;
 
 export default {
     name: 'home',
     data: function() {
         return {
+            ea: new EventService(),
             network: null,
             pool: {
                 name: "",
                 balance: 0
             },
-            rewards: [],
-            currentNotification: 2
+            notifications: [],
+            currentNotification: 0,
         }
     },
     created() {
@@ -65,8 +76,35 @@ export default {
             this.pool.balance = await token.methods.balanceOf(pool.address).call()
 
             this.update()
+
+            this.ea.listen('event.RewardStateChange', this.handleRewardStateChange);
+        },
+        handleRewardStateChange() {
+            return this.update();
         },
         async update() {
+            const rewards = await this.getPendingRewards();
+            const rules = await this.getPendingRules();
+
+            this.notifications = rewards;
+        },
+        async getPendingRules() {
+            const pool = THX.ns.instances.pool;
+            const amountOfRules = await pool.methods.countRules().call()
+            const isMember = true; //await pool.methods.isMember(THX.ns.accounts[0]).call();
+
+            if (isMember) {
+                let rules = [];
+
+                for (var i = 0; i < parseInt(amountOfRules); i++) {
+                    let rule = await pool.methods.rules(i).call()
+                    rules.push(rule);
+                }
+
+                return rules.filter(r => r.state == 0);
+            }
+        },
+        async getPendingRewards() {
             const pool = THX.ns.instances.pool;
             const amountOfRewards = await pool.methods.countRewards().call()
             const isManager = await pool.methods.isManager(THX.ns.accounts[0]).call()
@@ -75,33 +113,48 @@ export default {
                 let rewards = []
 
                 for (var i = 0; i < parseInt(amountOfRewards); i++) {
-                    let reward = await pool.methods.rewards(i).call()
-
-                    rewards.push(reward)
+                    const data = await pool.methods.rewards(i).call()
+                    const reward = await this.formatReward(data);
+                    rewards.push(reward);
                 }
 
-                this.rewards = rewards.filter((r) => {
-                    return r.state == 0
-                })
+                return rewards.filter((r) => r.state == 0);
             }
         },
-        approve(id) {
-            const pool = THX.ns.instances.pool;
+        async formatReward(data) {
+            const dateTime = new Date(parseInt(data.created));
+            const amount = parseInt(data.amount);
+            const wallet = await firebase.database().ref('wallets').child(data.beneficiary).once('value');
+            const user = await firebase.database().ref('users').child( wallet.val().uid ).once('value');
+            const rule = await firebase.database().ref('rules').child( data.key ).once('value');
 
-            return pool.methods.approve(id).send({
-                from: this.network.accounts[0]
-            }).then(() => {
-                this.update()
-            })
+            return {
+                id: parseInt(data.id),
+                title: rule.val().title,
+                description: rule.val().description,
+                beneficiary: user.val().email,
+                amount: amount,
+                state: data.state,
+                time: dateTime,
+            }
         },
-        reject(id) {
+        async approveReward(id) {
             const pool = THX.ns.instances.pool;
+            const data = pool.methods.approveReward(id).encodeABI();
+            const rawTx = await THX.ns.signContractMethod(pool.address, data);
 
-            return pool.methods.reject(id).send({
-                from: THX.ns.accounts[0]
-            }).then(() => {
-                this.update()
-            })
+            await THX.ns.sendSignedTransaction(rawTx);
+
+            this.update();
+        },
+        async rejectReward(id) {
+            const pool = THX.ns.instances.pool;
+            const data = pool.methods.rejectReward(id).encodeABI();
+            const rawTx = await THX.ns.signContractMethod(pool.address, data);
+
+            await THX.ns.sendSignedTransaction(rawTx);
+
+            this.update();
         }
     }
 }

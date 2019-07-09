@@ -3,6 +3,7 @@
     <Header />
     <main class="region region--content">
         <strong v-if="!transactions">Loading...</strong>
+        {{ pool.name }}
         <ul class="list list--dotted" v-if="transactions">
             <!-- <li v-bind:key="`${tx.id}`" v-for="tx in transactions">
           {{ pool.name }}

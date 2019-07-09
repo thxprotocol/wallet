@@ -8,6 +8,7 @@ import Reward from './views/Reward.vue';
 import Login from './views/Login.vue';
 import Logout from './views/Logout.vue';
 import Register from './views/Register.vue';
+import Camera from './views/Camera.vue';
 
 Vue.use(VueRouter);
 
@@ -17,6 +18,14 @@ const router = new VueRouter({
             path: '/',
             name: 'wallet',
             component: Wallet,
+            visible: true,
+            meta: {
+                requiresAuth: true
+            }
+        }, {
+            path: '/camera',
+            name: 'camera',
+            component: Camera,
             visible: true,
             meta: {
                 requiresAuth: true

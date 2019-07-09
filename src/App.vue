@@ -4,7 +4,7 @@
     <footer v-if="removeFooterPaths()" class="region region--navigation">
         <nav class="navbar">
             <ul class="nav">
-                <li v-bind:key="route.name" v-for="route in $router.options.routes" v-if="route.visible">
+                <li v-bind:key="route.name" v-for="route in routes">
                     <router-link v-bind:to="route.path">
                         <span v-if="route.name == 'notifications' && rewards.length > 0" class="badge badge--warning">
                             {{ rewards.length }}
@@ -20,11 +20,7 @@
 
 <script>
 import NetworkService from './services/NetworkService.js'
-import WalletSrc from './assets/wallet.svg'
-import WalletActiveSrc from './assets/wallet_selected.svg'
-import NotificationsSrc from './assets/notification.svg'
-import NotificationsActiveSrc from './assets/notification_selected.svg'
-import AccountSrc from './assets/account.svg'
+import NotificationService from './services/NotificationService';
 
 /*global THX*/
 window.THX = {};
@@ -38,20 +34,29 @@ export default {
             rewards: [],
             assets: {
                 wallet: {
-                    default: WalletSrc,
-                    active: WalletActiveSrc
+                    default: require('./assets/wallet.svg'),
+                    active: require('./assets/wallet_selected.svg'),
                 },
                 notifications: {
-                    default: NotificationsSrc,
-                    active: NotificationsActiveSrc
+                    default: require('./assets/notification.svg'),
+                    active: require('./assets/notification_selected.svg'),
                 },
                 account: {
-                    default: AccountSrc,
-                    active: AccountSrc
+                    default: require('./assets/account.svg'),
+                    active: require('./assets/account.svg')
+                },
+                camera: {
+                    default: require('./assets/account.svg'),
+                    active: require('./assets/account.svg')
                 }
             },
             approvals: [],
             lastId: -1
+        }
+    },
+    computed: {
+        routes() {
+            return this.$router.options.routes.filter(item => item.visible);
         }
     },
     created() {
@@ -66,6 +71,7 @@ export default {
         async init() {
             this.checkForRewards()
             // this.update()
+            const notify = new NotificationService();
         },
         removeFooterPaths() {
             return this.$router.history.current["name"] !== "reward";

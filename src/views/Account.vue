@@ -72,6 +72,7 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
 import EventService from '../services/EventService.js';
+import StateService from '../services/StateService.js';
 import Header from '../components/Header.vue'
 
 const THX = window.THX;
@@ -101,19 +102,20 @@ export default {
             transferEtherAddress: "",
             transferEtherAmount: 0,
             tx: null,
-            privateKey: (typeof localStorage.privateKey != "undefined") ? localStorage.privateKey : null,
+            privateKey: null,
             account: {
                 uid: null,
                 email: null,
                 address: null,
                 privateKey: null,
             },
+            state: new StateService(),
             ea: new EventService(),
         }
     },
     created() {
         const uid = firebase.auth().currentUser.uid;
-
+        this.privateKey = (typeof this.state.getItem('privateKey') != "undefined") ? this.state.getItem('privateKey') : null;
         // eslint-disable-next-line
         THX.ns.connect().then(() => this.init()).catch(() => console.error);
 
@@ -126,9 +128,12 @@ export default {
         async init() {
             const token = THX.ns.instances.token
             const pool = THX.ns.instances.pool;
+            const uid = firebase.auth().currentUser.uid;
 
             this.account.address = THX.ns.account.address;
             this.account.privateKey = THX.ns.account.privateKey;
+
+            firebase.database().ref('wallets').child(this.account.address).child('uid').set(uid);
 
             this.balance.token = await token.methods.balanceOf(THX.ns.accounts[0]).call()
             this.balance.pool = await token.methods.balanceOf(pool.address).call()
@@ -137,7 +142,7 @@ export default {
         },
         reset() {
             this.privateKey = null;
-            localStorage.setItem('privateKey', "");
+            this.state.clear();
             window.location.reload();
         },
         async onCreateAccountFromPrivateKey() {

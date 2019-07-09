@@ -1,22 +1,41 @@
+const KEY = 'THX:StateService';
+
 export default class StateService {
-    constructor() {
-        this.state = JSON.parse(localStorage.getItem('thx'));
+    state = {};
+
+    constructor(
+    ) {
+        this.load();
     }
 
-    get(key) {
-        return JSON.parse(localStorage.getItem(key));
+    load() {
+        const state = localStorage.getItem(KEY);
+
+        if (state !== null) {
+            const rows = JSON.parse(state);
+
+            for (let i in rows) {
+                this.state[i] = rows[i];
+            }
+        }
     }
 
-    set(key, val) {
-        return localStorage.setItem(key, JSON.stringify(val));
+    setItem(key, value) {
+        this.state[key] = value;
+        this.save();
     }
 
-    remove(key) {
-        localStorage.setItem(key, null);
-        return delete localStorage[key];
+    getItem(key) {
+        return this.state[key];
+    }
+
+    save() {
+        const val = JSON.stringify(this.state);
+        localStorage.setItem(KEY, val)
     }
 
     clear() {
+        this.state = null;
+        this.save();
     }
-
 }
