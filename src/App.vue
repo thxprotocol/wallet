@@ -1,13 +1,16 @@
 <template>
 <div id="app" v-bind:class="`section--${$router.currentRoute.name}`">
+    <div v-if="alert" class="alert alert--warning">
+        <strong>[{{ alert.confirmations }}]</strong> {{alert.hash}} <a v-on:click="alert = null"><strong>x</strong></a>
+    </div>
     <router-view />
-    <footer v-if="removeFooterPaths()" class="region region--navigation">
+    <footer class="region region--navigation">
         <nav class="navbar">
             <ul class="nav">
                 <li v-bind:key="route.name" v-for="route in routes">
                     <router-link v-bind:to="route.path">
-                        <span v-if="route.name == 'notifications' && rewards.length > 0" class="badge badge--warning">
-                            {{ rewards.length }}
+                        <span v-if="route.name == 'notifications' && amountOfRewards > 0" class="badge badge--warning">
+                            {{ amountOfRewards }}
                         </span>
                         <img width="20" height="20" v-bind:src="assets[route.name][(route.path == $router.currentRoute.path) ? 'active' : 'default']" alt="Wallet Icon" />
                     </router-link>
@@ -19,7 +22,8 @@
 </template>
 
 <script>
-import NetworkService from './services/NetworkService.js'
+import NetworkService from './services/NetworkService';
+import EventService from './services/EventService';
 import NotificationService from './services/NotificationService';
 
 /*global THX*/
@@ -30,8 +34,8 @@ export default {
     name: 'App',
     data: function() {
         return {
-            network: null,
-            rewards: [],
+            alert: null,
+            amountOfRewards: 0,
             assets: {
                 wallet: {
                     default: require('./assets/wallet.svg'),
@@ -46,12 +50,10 @@ export default {
                     active: require('./assets/account.svg')
                 },
                 camera: {
-                    default: require('./assets/account.svg'),
-                    active: require('./assets/account.svg')
+                    default: require('./assets/qrcode.svg'),
+                    active: require('./assets/qrcode.svg')
                 }
-            },
-            approvals: [],
-            lastId: -1
+            }
         }
     },
     computed: {
@@ -62,66 +64,32 @@ export default {
     created() {
         THX.ns.connect().then(() => this.init());
     },
-    mounted() {
-        if (localStorage.lastId) {
-            this.lastId = localStorage.lastId;
-        }
-    },
     methods: {
         async init() {
-            this.checkForRewards()
-            // this.update()
-            const notify = new NotificationService();
+            const pool = THX.ns.instances.pool;
+            this.amountOfRewards = parseInt(await pool.methods.countRewards().call());
+
+            THX.notify = new NotificationService();
+
+            this.ea = new EventService();
+            this.ea.listen('event.RewardStateChanged', this.onRewardStateChange);
+            this.ea.listen('event.RuleStateChanged', this.onRuleStateChange);
+            this.ea.listen('tx.confirmation', this.onConfirmation);
         },
         removeFooterPaths() {
             return this.$router.history.current["name"] !== "reward";
         },
-        async update() {
-            const pool = THX.ns.instances.pool;
-
-            const amountOfRewards = await pool.methods.countRewardsOf(THX.ns.accounts[0]).call()
-
-            let rewards = []
-
-            for (var i = 0; i < parseInt(amountOfRewards); i++) {
-                let reward = await pool.methods.rewards(i).call()
-
-                rewards.push(reward)
+        onConfirmation(data) {
+            this.alert = {
+                hash: data.detail.hash,
+                confirmations: data.detail.confirmations,
             }
-
-            this.rewards = rewards.filter((r) => {
-                return r.state == 0
-            })
         },
-        async checkForRewards() {
-            let newRewards = await this.getNewestApprovedWithdrawals(this.lastId);
-
-            if (newRewards !== false && typeof newRewards !== "undefined") {
-                this.$router.push({
-                    name: 'reward',
-                    params: {
-                        id: newRewards
-                    }
-                });
-            }
-
-            return null;
-        },
-        async getNewestApprovedWithdrawals(lastId) {
+        async onRewardStateChange() {
             const pool = THX.ns.instances.pool;
-            let amountOfRewards = parseInt(await pool.methods.countRewardsOf(THX.ns.accounts[0]).call())
-
-            // Grab all the ID's of rewards for this beneficiaries.
-            for (var i = 0; i < amountOfRewards; i++) {
-                let rewardId = await pool.methods.beneficiaries(THX.ns.accounts[0], i).call()
-                // If the reward ID of this address is new (aka the ID is higher than the last one generated) we
-                // add it to the array of items the user should see.
-                if (parseInt(rewardId) > parseInt(lastId)) {
-                    return rewardId;
-                }
-            }
-
-            return false;
+            this.amountOfRewards = parseInt(await pool.methods.countRewards().call());
+        },
+        async onRuleStateChange() {
         }
     }
 }

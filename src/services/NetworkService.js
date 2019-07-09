@@ -1,20 +1,18 @@
 import Web3 from 'web3'
-import TokenJSON from '../../build/contracts/THXToken.json'
-import RewardPoolJSON from '../../build/contracts/RewardPool.json'
+// import TokenJSON from '../../build/contracts/THXToken.json'
+// import RewardPoolJSON from '../../build/contracts/RewardPool.json'
 
 // Ropsten infura config
-// import TokenJSON from '../contracts/THXToken.json'
-// import RewardPoolJSON from '../contracts/RewardPool.json'
+import TokenJSON from '../contracts/THXToken.json';
+import RewardPoolJSON from '../contracts/RewardPool.json';
 
 import EventService from './EventService.js';
 import StateService from './StateService.js';
 
 export default class NetworkService {
     constructor() {
-        // 0x9631698A3AA4330681E0653DF5B0F52F0E38296D67B681CE4A7FF187108A2706
-        // this.web3 = new Web3("https://ropsten.infura.io/v3/350a0215b02e46639ff2ac1982de4aed");
-
-        const provider = new Web3.providers.WebsocketProvider('ws://localhost:8545');
+        const provider = new Web3.providers.WebsocketProvider('wss://ropsten.infura.io/ws/v3/350a0215b02e46639ff2ac1982de4aed');
+        // const provider = new Web3.providers.WebsocketProvider('ws://localhost:8545');
         this.web3 = new Web3(provider);
         this.ea = new EventService();
         this.state = new StateService();
@@ -36,34 +34,13 @@ export default class NetworkService {
         window.location.reload();
     }
 
-    saveTransaction(hash, description) {
-        let txList = this.state.getItem('tx');
-
-        if (!txList) {
-            txList = []
-        } else {
-            txList = JSON.parse(txList);
-        }
-        txList.push(hash)
-
-        this.state.setItem('tx', JSON.stringify(txList));
-
-        this.ea.dispatch('tx.confirmation', {
-            hash: hash,
-            description: description,
-            confirmations: 0,
-        })
-    }
-
-    sendSignedTransaction(rawTX, description) {
+    sendSignedTransaction(rawTX) {
         let hash;
 
         return this.web3.eth.sendSignedTransaction(rawTX.rawTransaction)
             .on('transactionHash', (h) => {
                 // eslint-disable-next-line
                 console.info(h)
-                hash = h;
-                this.saveTransaction(h, description);
             })
             .on('receipt', (receipt) => {
                 // eslint-disable-next-line
@@ -71,11 +48,7 @@ export default class NetworkService {
             })
             .on('confirmation', (c) => {
                 // eslint-disable-next-line
-                console.log(c)
-                this.ea.dispatch('tx.confirmation', {
-                    hash: hash,
-                    confirmations: c,
-                });
+                if (c > 0) this.ea.dispatch('tx.confirmation', { hash: hash, confirmations: c });
             })
             .on('error', (err) => {
                 // eslint-disable-next-line

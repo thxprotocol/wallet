@@ -17,8 +17,10 @@
                 </p>
                 <hr class="dotted" />
                 <p>
-                    To:<br>
-                    <span class="badge badge--default">{{ n.beneficiary }}</span>
+                    To: <span class="badge badge--default">{{ n.beneficiary }}</span>
+                </p>
+                <p>
+                    Time: {{ n.created }}
                 </p>
                 <div class="notification__actions">
                     <button class="btn btn--default" v-on:click="rejectReward(n.id)">
@@ -77,14 +79,13 @@ export default {
 
             this.update()
 
-            this.ea.listen('event.RewardStateChange', this.handleRewardStateChange);
+            this.ea.listen('event.RewardStateChanged', this.handleRewardStateChange);
         },
         handleRewardStateChange() {
             return this.update();
         },
         async update() {
             const rewards = await this.getPendingRewards();
-            const rules = await this.getPendingRules();
 
             this.notifications = rewards;
         },
@@ -135,7 +136,7 @@ export default {
                 beneficiary: user.val().email,
                 amount: amount,
                 state: data.state,
-                time: dateTime,
+                created: dateTime,
             }
         },
         async approveReward(id) {

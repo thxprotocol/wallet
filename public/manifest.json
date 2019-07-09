@@ -1,0 +1,15 @@
+{
+  "name": "THX",
+  "short_name": "THX",
+  "theme_color": "#FDE542",
+  "background_color": "#EFEFEF",
+  "display": "standalone",
+  "orientation": "portrait",
+  "Scope": "/",
+  "start_url": "/",
+  "splash_pages": null,
+  "icons": [{
+    "src": "/pwa_icon.png",
+    "sizes": "254x254"
+  }]
+}

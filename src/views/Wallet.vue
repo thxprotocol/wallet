@@ -25,7 +25,6 @@
 <script>
 import Header from '../components/Header.vue'
 import EventService from '../services/EventService.js';
-import Vue from 'vue';
 
 const THX = window.THX;
 
@@ -50,45 +49,10 @@ export default {
         // eslint-disable-next-line
         THX.ns.connect().then(() => this.init()).catch(() => console.error);
     },
-    beforeDestroy: function() {
-        if (this.timer) clearInterval(this.timer);
-    },
     methods: {
         async init() {
             const pool = THX.ns.instances.pool;
             this.pool.name = await pool.methods.name().call();
-            const interval = 10000; // How many ms between getConfirmation calls
-
-            if (this.timer) clearInterval(this.timer);
-            this.txList = JSON.parse(localStorage.getItem('tx'));
-
-            if (this.txList) {
-                this.getConfirmations();
-                this.timer = setInterval(this.getConfirmations.bind(this), interval);
-            }
-
-            this.ea.listen('tx.confirmation', (data) => {
-                this.tx = {
-                    hash: data.detail.hash,
-                    confirmations: data.detail.confirmations
-                }
-            });
-        },
-        async getConfirmations() {
-            for (let hash of this.txList) {
-                Vue.set(this.transactions, hash, await this.getDetails(hash));
-            }
-        },
-        async getDetails(hash) {
-            const tx = await THX.ns.web3.eth.getTransaction(hash);
-            const data = THX.ns.web3.eth.abi.decodeParameters(['address'], tx.input);
-            const currentBlock = await THX.ns.web3.eth.getBlockNumber();
-
-            return {
-                receiver: data[0],
-                hash: hash,
-                confirmations: (tx.blockNumber === null) ? 0 : currentBlock - tx.blockNumber
-            }
         }
     }
 }

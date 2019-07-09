@@ -1,4 +1,3 @@
-import firebase from 'firebase/app';
 import EventService from './EventService';
 
 export default class NotificationService {
@@ -8,14 +7,14 @@ export default class NotificationService {
         const THX = window.THX;
         const pool = THX.ns.instances.pool;
 
-        pool.events.RewardStateChange({}, (error, event) => {
+        pool.events.RewardStateChanged({}, (error, event) => {
             const reward = event.returnValues;
-            this.ea.dispatch('event.RewardStateChange', reward);
+            this.ea.dispatch('event.RewardStateChanged', reward);
         });
 
-        pool.events.RuleStateChange({}, (error, event) => {
+        pool.events.RuleStateChanged({}, (error, event) => {
             const rule = event.returnValues;
-            this.ea.dispatch('event.RuleStateChange', rule);
+            this.ea.dispatch('event.RuleStateChanged', rule);
         });
 
         pool.events.Deposited({}, (error, event) => {

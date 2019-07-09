@@ -1,5 +1,6 @@
 <template>
     <article class="region region--container">
+        <div class="loader">Loading...</div>
         <qrcode-stream @decode="onDecode"></qrcode-stream>
     </article>
 </template>
@@ -54,8 +55,10 @@ export default {
 }
 </script>
 <style>
+    .wrapper,
     .inside,
     .inside video {
+        width: 100% !important;
         height: 100% !important;
         object-fit: cover !important;
     }
