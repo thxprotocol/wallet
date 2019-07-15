@@ -39,7 +39,10 @@ h3 {
     margin-bottom: 0.5rem;
 }
 
-input,
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
 textarea {
     padding: 0.5rem;
     margin-bottom: 0.5rem;
@@ -145,7 +148,6 @@ hr.dotted {
     flex-direction: row;
     flex: 1 1 100%;
     flex-wrap: wrap;
-    overflow: auto;
     z-index: 1;
 }
 
@@ -179,7 +181,7 @@ hr.dotted {
     padding: 1rem;
     width: calc(100% - 4rem);
     overflow: auto;
-    height: calc(100vh - 290px);
+    height: calc(100% - 280px);
 }
 
 .navbar {

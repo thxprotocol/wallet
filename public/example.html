@@ -1,0 +1,63 @@
+<html>
+<head>
+    <script src="./scripts/qrcode.min.js"></script>
+    <script>
+        function createRewardRule() {
+            return fetch('https://thx-client.firebaseio.com/rules.json', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        slug: "complete_profile",
+                        title: "Complete Profile",
+                        description: "This reward is for people that complete filling...",
+                        amount: 200,
+                    }),
+                })
+                .then(r => console.info);
+        }
+
+        function getReward() {
+            return fetch('https://thx-client.firebaseio.com/rewards.json', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        slug: "complete_profile",
+                        key: "-LjGkVg1vkXpZkrrJIWp",
+                        amount: 200,
+                    }),
+                })
+                .then(r => console.info);
+        }
+    </script>
+</head>
+<body>
+    <h1>Software Integration Examples</h1>
+    <h2>Initiate a new reward rule</h2>
+    <p>Call the API at and POST this data to add a first reward rule and store the first reward rule. Users will see it popup and once it passes the voting period the reward rule will be set in the reward pool smart contract.</p>
+    <strong>Example data:</strong>
+    <pre>
+        {
+            slug: "complete_profile",
+            title: "Complete Profile",
+            description: "This reward is for people that complete filling...",
+            amount: 200,
+        }
+    </pre>
+    <p><button onclick="initReward()">Propose new reward rule</button></p>
+    <h2>Claim a reward</h2>
+    <p>Use the THX Wallet to scan and claim your reward.</p>
+    <p><canvas id="canvas"></canvas></p>
+    <strong>Example data:</strong>
+    <pre>
+        {
+            slug: "complete_profile",
+            key: "-LjGkVg1vkXpZkrrJIWp",
+            amount: 200,
+        }
+    </pre>
+    <script>
+      QRCode.toCanvas(document.getElementById('canvas'), JSON.stringify({ slug: "complete_profile", key: "-LjGkVg1vkXpZkrrJIWp", amount: 200 }), function (error) {
+        if (error) console.error(error)
+        console.log('success!');
+      })
+    </script>
+</body>
+</html>

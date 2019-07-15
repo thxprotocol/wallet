@@ -1,18 +1,18 @@
 import Web3 from 'web3'
-// import TokenJSON from '../../build/contracts/THXToken.json'
-// import RewardPoolJSON from '../../build/contracts/RewardPool.json'
+import TokenJSON from '../../build/contracts/THXToken.json'
+import RewardPoolJSON from '../../build/contracts/RewardPool.json'
 
 // Ropsten infura config
-import TokenJSON from '../contracts/THXToken.json';
-import RewardPoolJSON from '../contracts/RewardPool.json';
+// import TokenJSON from '../contracts/THXToken.json';
+// import RewardPoolJSON from '../contracts/RewardPool.json';
 
 import EventService from './EventService.js';
 import StateService from './StateService.js';
 
 export default class NetworkService {
     constructor() {
-        const provider = new Web3.providers.WebsocketProvider('wss://ropsten.infura.io/ws/v3/350a0215b02e46639ff2ac1982de4aed');
-        // const provider = new Web3.providers.WebsocketProvider('ws://localhost:8545');
+        // const provider = new Web3.providers.WebsocketProvider('wss://ropsten.infura.io/ws/v3/350a0215b02e46639ff2ac1982de4aed');
+        const provider = new Web3.providers.WebsocketProvider('ws://localhost:8545');
         this.web3 = new Web3(provider);
         this.ea = new EventService();
         this.state = new StateService();
