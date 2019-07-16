@@ -148,21 +148,17 @@ export default {
         async onCreateAccountFromPrivateKey() {
             THX.ns.privateKeyToAccount(this.privateKey);
             this.init();
-            alert('Your account is created!');
+            alert('Your account is connected.');
         },
         async onTransferEther() {
             const signedTx = await THX.ns.signTransaction(this.transferEtherAddress, this.transferEtherAmount);
             await THX.ns.sendSignedTransaction(signedTx);
-
-            return this.$refs.header.updateBalance();
         },
         async onTransferTokens() {
             const token = THX.ns.instances.token;
             const data = token.methods.transfer(this.transferTokensAddress, this.transferTokensAmount).encodeABI();
             const rawTx = await THX.ns.signContractMethod(token.address, data);
             THX.ns.sendSignedTransaction(rawTx);
-
-            this.$refs.header.updateBalance();
 
             this.$router.replace('/');
         },
@@ -175,8 +171,6 @@ export default {
 
             this.balance.pool = await token.methods.balanceOf(THX.ns.addresses.pool).call();
             this.balance.token = await token.methods.balanceOf(THX.ns.accounts[0]).call();
-
-            return this.$refs.header.updateBalance()
         },
         async onTransferToPool() {
             const pool = THX.ns.instances.pool;
@@ -184,8 +178,6 @@ export default {
             const rawTx = await THX.ns.signContractMethod(pool.address, data);
 
             await THX.ns.sendSignedTransaction(rawTx);
-
-            return this.$refs.header.updateBalance();
         },
         async onAddManager() {
             const pool = THX.ns.instances.pool;

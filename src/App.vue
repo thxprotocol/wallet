@@ -12,7 +12,7 @@
                         <span v-if="route.name == 'notifications' && amountOfRewards > 0" class="badge badge--warning">
                             {{ amountOfRewards }}
                         </span>
-                        <img width="20" height="20" v-bind:src="assets[route.name][(route.path == $router.currentRoute.path) ? 'active' : 'default']" alt="Wallet Icon" />
+                        <img width="20" height="20" v-bind:src="assets[route.name]['default']" alt="Wallet Icon" />
                     </router-link>
                 </li>
             </ul>
@@ -38,20 +38,16 @@ export default {
             amountOfRewards: 0,
             assets: {
                 wallet: {
-                    default: require('./assets/wallet.svg'),
-                    active: require('./assets/wallet_selected.svg'),
+                    default: require('./assets/wallet.svg')
                 },
                 notifications: {
-                    default: require('./assets/notification.svg'),
-                    active: require('./assets/notification_selected.svg'),
+                    default: require('./assets/notification.svg')
                 },
                 account: {
-                    default: require('./assets/account.svg'),
-                    active: require('./assets/account.svg')
+                    default: require('./assets/account.svg')
                 },
                 camera: {
-                    default: require('./assets/qrcode.svg'),
-                    active: require('./assets/qrcode.svg')
+                    default: require('./assets/qrcode.svg')
                 }
             }
         }

@@ -11,9 +11,15 @@ export default class NotificationService {
         this.ea = new EventService();
 
         pool.events.RewardStateChanged({}, (error, event) => this.onRewardStateChanged(event.returnValues));
+        pool.events.RewardStateChanged({filter: { beneficiary: THX.ns.account.address }}, (error, event) => this.onMyRewardStateChanged(event.returnValues));
+
         pool.events.RuleStateChanged({}, (error, event) => this.onRuleStateChanged(event.returnValues));
         pool.events.Deposited({}, (error, event) => this.onDeposited(event.returnValues));
         pool.events.Withdrawn({}, (error, event) => this.onWithdrawn(event.returnValues));
+    }
+
+    onMyRewardStateChanged(reward) {
+        return this.ea.dispatch('event.MyRewardStateChanged', reward);
     }
 
     onRewardStateChanged(reward) {
@@ -31,4 +37,5 @@ export default class NotificationService {
     onWithdrawn(withdrawel) {
         return this.ea.dispatch('event.Withdrawn', withdrawel);
     }
+
 }

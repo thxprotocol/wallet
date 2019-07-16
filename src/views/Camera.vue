@@ -1,16 +1,16 @@
 <template>
     <article class="region region--container">
-        <div class="loader">Loading...</div>
-        <qrcode-stream @init="onInit" @decode="onDecode" :track="repaint"></qrcode-stream>
-        <div v-if="!loading" class="ui-camera">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-        <div v-if="loading" class="ui-file">
+        <div v-if="loading && !hasStream" class="loader">Loading...</div>
+        <div v-if="!hasStream" class="ui-file">
             <h3>Upload QR code image</h3>
             <qrcode-capture @decode="onDecode" />
+        </div>
+        <qrcode-stream @init="onInit" @decode="onDecode" :track="repaint"></qrcode-stream>
+        <div v-if="!loading && hasStream" class="ui-camera">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
         </div>
     </article>
 </template>
@@ -25,7 +25,8 @@ export default {
     name: 'Camera',
     data: function() {
         return {
-            loading: true
+            loading: true,
+            hasStream: false,
         }
     },
     created() {
@@ -39,6 +40,7 @@ export default {
         async onInit (promise) {
             try {
                 await promise
+                this.hasStream = true;
             } catch (error) {
                 if (error.name === 'NotAllowedError') {
                     alert("user denied camera access permisson");
@@ -53,8 +55,8 @@ export default {
                 } else if (error.name === 'StreamApiNotSupportedError') {
                     alert("browser seems to be lacking features");
                 }
+                this.hasStream = false;
             } finally {
-                // hide loading indicator
                 this.loading = false;
             }
         },
@@ -155,6 +157,7 @@ export default {
         left: 0;
         text-align: center;
         width: 100%;
+        z-index: 1;
     }
 
     .ui-file input[type="file"] {

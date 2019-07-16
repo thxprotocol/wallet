@@ -4,15 +4,16 @@
         <img width="50" height="50" v-bind:src="assets.logo" alt="THX Logo" />
     </div>
     <div class="account_balance">
-        <p>Your balance (THX | ETH)</p>
-        <p><span class="font-size-large">{{balance.token}}</span></p>
-        <p><span class="font-size-large">{{balance.eth}}</span></p>
+        <p>Your balances</p>
+        <p><span class="font-size-large">{{balance.token}} THX</span></p>
+        <p><span>{{balance.eth}} ETH</span></p>
     </div>
 </header>
 </template>
 
 <script>
 import Logo from '../assets/thx_logo.svg'
+import EventService from '../services/EventService';
 
 const THX = window.THX;
 
@@ -27,16 +28,17 @@ export default {
             balance: {
                 eth: 0,
                 token: 0
-            }
+            },
+            ea: new EventService(),
         }
     },
     mounted() {
-        THX.ns.connect().then(() => this.init());
+        THX.ns.connect().then(() => this.updateBalance());
+
+        this.ea.listen('event.Deposited', this.updateBalance);
+        this.ea.listen('event.Withdrawn', this.updateBalance);
     },
     methods: {
-        init() {
-            this.updateBalance()
-        },
         async updateBalance() {
             const token = THX.ns.instances.token;
 
