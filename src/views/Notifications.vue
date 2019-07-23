@@ -73,6 +73,9 @@ export default {
 
         this.init(uid, key);
     },
+    mounted() {
+        this.ea.dispatch('event.clearNotifications')
+    },
     methods: {
         async init(uid, key) {
             let token, pool;

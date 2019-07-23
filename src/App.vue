@@ -9,8 +9,8 @@
             <ul class="nav">
                 <li v-bind:key="route.name" v-for="route in routes">
                     <router-link v-bind:to="route.path">
-                        <span v-if="route.name == 'notifications' && amountOfRewards > 0" class="badge badge--warning">
-                            {{ amountOfRewards }}
+                        <span v-if="route.name == 'notifications' && amountOfNewRewards > 0" class="badge badge--warning">
+                            {{ amountOfNewRewards }}
                         </span>
                         <img width="20" height="20" v-bind:src="assets[route.name]['default']" alt="Wallet Icon" />
                     </router-link>
@@ -37,9 +37,10 @@ export default {
     name: 'App',
     data: function() {
         return {
+            ea: new EventService(),
             state: new StateService(),
             alert: null,
-            amountOfRewards: 0,
+            amountOfNewRewards: 0,
             assets: {
                 wallet: {
                     default: require('./assets/wallet.svg')
@@ -77,20 +78,33 @@ export default {
 
             pool = THX.contracts.instances.pool;
 
-            this.amountOfRewards = parseInt(await pool.methods.countRewards().call());
+            const amountOfRewards = parseInt(await pool.methods.countRewards().call());
+            this.state.setItem('lastRewardId', amountOfRewards);
 
             this.notifications = new NotificationService();
             this.ea = new EventService();
 
             this.ea.listen('event.RewardStateChanged', this.onRewardStateChange);
             this.ea.listen('event.RuleStateChanged', this.onRuleStateChange);
+            this.ea.listen('event.clearNotifications', this.clearNotifications);
         },
         removeFooterPaths() {
             return this.$router.history.current["name"] !== "reward";
         },
+        async clearNotifications() {
+            const pool = THX.contracts.instances.pool;
+            const amountOfRewards = parseInt(await pool.methods.countRewards().call());
+
+            this.state.setItem('lastRewardId', amountOfRewards);
+            this.onRewardStateChange();
+        },
         async onRewardStateChange() {
             const pool = THX.contracts.instances.pool;
-            this.amountOfRewards = parseInt(await pool.methods.countRewards().call());
+            const prevAmountOfRewards = parseInt(this.state.getItem('lastRewardId'));
+            const currentAmountOfRewards = parseInt(await pool.methods.countRewards().call());
+
+            this.amountOfNewRewards = currentAmountOfRewards - prevAmountOfRewards;
+
         },
         async onRuleStateChange() {
         }
