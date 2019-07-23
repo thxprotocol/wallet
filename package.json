@@ -4,6 +4,7 @@
     "private": true,
     "scripts": {
         "build": "vue-cli-service build",
+        "deploy:firebase": "NETWORK=extdev yarn build; firebase deploy",
         "deploy:reset": "truffle deploy --reset --network loom_dapp_chain",
         "deploy": "truffle deploy --network loom_dapp_chain",
         "deploy:extdev": "truffle deploy --network extdev_plasma_us1",

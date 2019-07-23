@@ -21,8 +21,8 @@ export default class NetworkService {
     _createClient(key) {
         this.privateKey = CryptoUtils.B64ToUint8Array(key);
         this.publicKey = CryptoUtils.publicKeyFromPrivateKey(this.privateKey);
-        let writeUrl = 'ws://127.0.0.1:46658/websocket'
-        let readUrl = 'ws://127.0.0.1:46658/queryws'
+        let writeUrl = 'wss://127.0.0.1:46658/websocket'
+        let readUrl = 'wss://127.0.0.1:46658/queryws'
         let networkId = 'default'
 
         if (process.env.NETWORK == 'extdev') {
