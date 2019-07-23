@@ -110,7 +110,6 @@ export default {
             this.ea.listen('event.Deposited', this.addDeposit);
             this.ea.listen('event.Withdrawn', this.addWithdrawel);
 
-
             token.getPastEvents('Transfer', {
                 filter: { from: THX.contracts.currentUserAddress },
                 fromBlock: (fromBlock - offset),
@@ -152,7 +151,8 @@ export default {
             for (let key in data) {
                 const hash = data[key].transactionHash;
                 const value = data[key].returnValues;
-                const uid = await firebase.database().ref(`wallets/${value.sender.toLowerCase()}/uid`).once('value');
+                const sender = value.sender.toLowerCase();
+                const uid = await firebase.database().ref(`wallets/${sender}/uid`).once('value');
                 const to = await firebase.database().ref(`users/${uid.val()}/email`).once('value');
                 const date = new Date(value.created*1000);
 
@@ -169,13 +169,17 @@ export default {
             for (let key in data) {
                 const hash = data[key].transactionHash;
                 const value = data[key].returnValues;
-                const uid = await firebase.database().ref('wallets').child(value.beneficiary).child('uid').once('value');
+                const beneficiary = value.beneficiary.toLowerCase();
+                const uid = await firebase.database().ref(`wallets/${beneficiary}/uid`).once('value');
                 const to = await firebase.database().ref('users').child(uid.val()).child('email').once('value');
+                const date = new Date(value.created*1000);
 
                 Vue.set(this.poolTransfers, hash, {
                     hash: hash,
                     to: to.val(),
                     amount: "-" + Number(value.amount),
+                    timestamp: value.created,
+                    created: `${date.toDateString()} ${date.getHours()}:${date.getMinutes()}`,
                 });
             }
         },
@@ -183,8 +187,8 @@ export default {
             for (let key in data) {
                 const hash = data[key].transactionHash;
                 const value = data[key].returnValues;
-                const from = value.from.toLowerCase();
-                const to = value.to.toLowerCase();
+                const from = (value.from) ? value.from.toLowerCase(): '';
+                const to = (value.to) ? value.to.toLowerCase(): '';
                 const amount = value.value;
 
                 this.createTransfer(hash, from, to, amount);
@@ -193,8 +197,8 @@ export default {
         addMyTransfer(data) {
             const value = data.detail;
             const hash  = event.transactionHash;
-            const from = value.from.toLowerCase();
-            const to = value.to.toLowerCase();
+            const from = (value.from) ? value.from.toLowerCase(): '';
+            const to = (value.to) ? value.to.toLowerCase(): '';
             const amount = value.value;
 
             this.createTransfer(hash, from, to, amount);

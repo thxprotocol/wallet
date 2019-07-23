@@ -19,6 +19,8 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
 
+import StateService from '../services/StateService.js';
+
 const THX = window.THX;
 
 export default {
@@ -27,15 +29,21 @@ export default {
         return {
             loading: true,
             hasStream: false,
+            state: new StateService(),
         }
     },
-    created() {
-        // eslint-disable-next-line
-        THX.ns.connect().then(() => this.init()).catch(() => console.error);
+    mounted() {
+        const uid = firebase.auth().currentUser.uid;
+        const key = (typeof this.state.getItem('privateKey') !== "undefined") ? this.state.getItem('privateKey') : null;
+
+        this.init(uid, key);
     },
     methods: {
         repaint () {
             return
+        },
+        async init(uid, key) {
+            await THX.contracts.load(key);
         },
         async onInit (promise) {
             try {
@@ -67,27 +75,25 @@ export default {
                 let data = JSON.parse(decodedString);
 
                 ref.child(id).set(data);
+
                 alert(`Reward ${id} is being processed...`)
+
                 this.addReward(data.key, data.slug, data.amount);
             }
         },
         async addReward(key, slug, amount) {
-            const pool = THX.ns.instances.pool;
-            const data = pool.methods.addReward(key, slug, amount).encodeABI();
-            const rawTx = await THX.ns.signContractMethod(pool.address, data);
+            const pool = THX.contracts.instances.pool;
 
-            return await THX.ns.sendSignedTransaction(rawTx);
+            return await  pool.methods.addReward(key, slug, amount).send({ from: THX.contracts.currentUserAddress });
         },
         async addRule(key, slug, amount) {
-            const pool = THX.ns.instances.pool;
-            const data = pool.methods.addRule(key, slug, amount).encodeABI();
-            const rawTx = await THX.ns.signContractMethod(pool.address, data);
+            const pool = THX.contracts.instances.pool;
 
-            return await THX.ns.sendSignedTransaction(rawTx);
+            return await pool.methods.addRule(key, slug, amount).send({ from: THX.contracts.currentUserAddress });
         },
         async getRewards() {
-            const pool = THX.ns.instances.pool;
-            pool.methods.getRewards();
+            const pool = THX.contracts.instances.pool;
+            return await pool.methods.getRewards();
         }
     }
 }

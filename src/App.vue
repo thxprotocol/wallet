@@ -89,7 +89,7 @@ export default {
             return this.$router.history.current["name"] !== "reward";
         },
         async onRewardStateChange() {
-            const pool = THX.ns.instances.pool;
+            const pool = THX.contracts.instances.pool;
             this.amountOfRewards = parseInt(await pool.methods.countRewards().call());
         },
         async onRuleStateChange() {

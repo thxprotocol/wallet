@@ -46,7 +46,9 @@
 <script>
 import firebase from 'firebase/app';
 import 'firebase/database';
+
 import EventService from '../services/EventService';
+import StateService from '../services/StateService.js';
 
 const THX = window.THX;
 
@@ -55,6 +57,7 @@ export default {
     data: function() {
         return {
             ea: new EventService(),
+            state: new StateService(),
             network: null,
             pool: {
                 name: "",
@@ -65,17 +68,22 @@ export default {
         }
     },
     created() {
-        // eslint-disable-next-line
-        THX.ns.connect().then(() => this.init()).catch(() => console.error);
+        const uid = firebase.auth().currentUser.uid;
+        const key = (typeof this.state.getItem('privateKey') !== "undefined") ? this.state.getItem('privateKey') : null;
+
+        this.init(uid, key);
     },
     methods: {
-        async init() {
-            const pool = THX.ns.instances.pool;
-            const token = THX.ns.instances.token;
+        async init(uid, key) {
+            let token, pool;
 
-            // Get the pool information
+            await THX.contracts.load(key);
+
+            pool = THX.contracts.instances.pool;
+            token = THX.contracts.instances.token;
+
             this.pool.name = await pool.methods.name().call()
-            this.pool.balance = await token.methods.balanceOf(pool.address).call()
+            this.pool.balance = await token.methods.balanceOf(pool._address).call()
 
             this.update()
 
@@ -90,9 +98,9 @@ export default {
             this.notifications = rewards;
         },
         async getPendingRules() {
-            const pool = THX.ns.instances.pool;
+            const pool = THX.contracts.instances.pool;
             const amountOfRules = await pool.methods.countRules().call()
-            const isMember = true; //await pool.methods.isMember(THX.ns.accounts[0]).call();
+            const isMember = true; //await pool.methods.isMember(THX.contracts.currentUserAddress).call();
 
             if (isMember) {
                 let rules = [];
@@ -106,9 +114,9 @@ export default {
             }
         },
         async getPendingRewards() {
-            const pool = THX.ns.instances.pool;
+            const pool = THX.contracts.instances.pool;
             const amountOfRewards = await pool.methods.countRewards().call()
-            const isManager = await pool.methods.isManager(THX.ns.accounts[0]).call()
+            const isManager = await pool.methods.isManager(THX.contracts.currentUserAddress).call()
 
             if (isManager) {
                 let rewards = []
@@ -125,7 +133,8 @@ export default {
         async formatReward(data) {
             const dateTime = new Date(parseInt(data.created));
             const amount = parseInt(data.amount);
-            const wallet = await firebase.database().ref('wallets').child(data.beneficiary).once('value');
+            const beneficiary = data.beneficiary.toLowerCase();
+            const wallet = await firebase.database().ref('wallets').child(beneficiary).once('value');
             const user = await firebase.database().ref('users').child( wallet.val().uid ).once('value');
             const rule = await firebase.database().ref('rules').child( data.key ).once('value');
 
@@ -140,20 +149,15 @@ export default {
             }
         },
         async approveReward(id) {
-            const pool = THX.ns.instances.pool;
-            const data = pool.methods.approveReward(id).encodeABI();
-            const rawTx = await THX.ns.signContractMethod(pool.address, data);
-
-            await THX.ns.sendSignedTransaction(rawTx);
+            const pool = THX.contracts.instances.pool;
+            await pool.methods.approveReward(id).send({ from: THX.contracts.currentUserAddress })
 
             this.update();
         },
         async rejectReward(id) {
-            const pool = THX.ns.instances.pool;
-            const data = pool.methods.rejectReward(id).encodeABI();
-            const rawTx = await THX.ns.signContractMethod(pool.address, data);
+            const pool = THX.contracts.instances.pool;
 
-            await THX.ns.sendSignedTransaction(rawTx);
+            await pool.methods.rejectReward(id).send({ from: THX.contracts.currentUserAddress })
 
             this.update();
         }
