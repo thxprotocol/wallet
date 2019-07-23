@@ -36,6 +36,9 @@ npm install -g ganache-cli
 
 * [Ganache CLI Documentation](https://github.com/trufflesuite/ganache-cli)
 
+### Loom dAppchain
+
+
 ### Truffle Development Toolkit
 This is the development toolkit we use for compiling the .sol (Solidity) and deploying them on the network.
 ```
@@ -57,6 +60,15 @@ npm install
 ```
 
 ## Applications
+### Run Loom dAppChain
+Initialize and create genesis file. Run local sidechain and deploy contracts to it.
+
+```
+./loom init -f;
+./loom run
+truffle migrate --reset --network loom_dapp_chain
+```
+
 
 ### Run Ganache CLI
 Start the Ganache blockchain (with 5 user accounts that hold 500 ETH each) and make sure the network runs on port `8545`. The port that is configured for network `ganache` in the file `./truffle.js`.

@@ -1,118 +1,86 @@
+import {
+    Client,
+    LocalAddress,
+    CryptoUtils,
+    LoomProvider
+} from 'loom-js'
 import Web3 from 'web3'
-import TokenJSON from '../../build/contracts/THXToken.json'
-import RewardPoolJSON from '../../build/contracts/RewardPool.json'
-
-// Ropsten infura config
-// import TokenJSON from '../contracts/THXToken.json';
-// import RewardPoolJSON from '../contracts/RewardPool.json';
-
-import EventService from './EventService.js';
-import StateService from './StateService.js';
+import THXToken from '../contracts/THXToken.json'
+import RewardPool from '../contracts/RewardPool.json'
 
 export default class NetworkService {
-    constructor() {
-        // const provider = new Web3.providers.WebsocketProvider('wss://ropsten.infura.io/ws/v3/350a0215b02e46639ff2ac1982de4aed');
-        const provider = new Web3.providers.WebsocketProvider('ws://localhost:8545');
-        this.web3 = new Web3(provider);
-        this.ea = new EventService();
-        this.state = new StateService();
-        this.account = {}
-        this.accounts = {}
-        this.tx = {}
-        this.addresses = {
-            token: null,
-            rewardPool: null
-        }
-        this.instances = {
-            token: null,
-            rewardPool: null
-        }
+
+    async load(key) {
+        this.onEvent = null
+        this._createClient(key)
+        this._createCurrentUserAddress()
+        this._createWebInstance()
+        await this._createContractInstances()
     }
 
-    privateKeyToAccount(privateKey) {
-        this.state.setItem('privateKey', privateKey);
-        window.location.reload();
+    _createClient(key) {
+        this.privateKey = CryptoUtils.B64ToUint8Array(key);
+        this.publicKey = CryptoUtils.publicKeyFromPrivateKey(this.privateKey);
+        let writeUrl = 'ws://127.0.0.1:46658/websocket'
+        let readUrl = 'ws://127.0.0.1:46658/queryws'
+        let networkId = 'default'
+
+        if (process.env.NETWORK == 'extdev') {
+            writeUrl = 'ws://extdev-plasma-us1.dappchains.com:80/websocket'
+            readUrl = 'ws://extdev-plasma-us1.dappchains.com:80/queryws'
+            networkId = 'extdev-plasma-us1'
+        }
+
+        this.client = new Client(networkId, writeUrl, readUrl)
+
+        this.client.on('error', msg => {
+            // eslint-disable-next-line
+            console.error('Error on connect to client', msg)
+            // eslint-disable-next-line
+            console.warn('Please verify if loom command is running')
+        })
     }
 
-    sendSignedTransaction(rawTX) {
-        let hash;
+    _createCurrentUserAddress() {
+        this.currentUserAddress = LocalAddress.fromPublicKey(this.publicKey).toString().toLowerCase();
+    }
 
-        return this.web3.eth.sendSignedTransaction(rawTX.rawTransaction)
-            .on('transactionHash', (h) => {
-                // eslint-disable-next-line
-                console.info(h)
-            })
-            .on('receipt', (receipt) => {
-                // eslint-disable-next-line
-                console.info(receipt)
-            })
-            .on('confirmation', (c) => {
-                // eslint-disable-next-line
-                if (c > 0) this.ea.dispatch('tx.confirmation', { hash: hash, confirmations: c });
-            })
-            .on('error', (err) => {
-                // eslint-disable-next-line
-                console.error(err)
+    _createWebInstance() {
+        this.web3 = new Web3(new LoomProvider(this.client, this.privateKey))
+    }
+
+    _getCurrentNetwork() {
+        if (process.env.NETWORK == 'extdev') {
+            return '9545242630824'
+        } else {
+            return this.web3.eth.net.getId().then((nid) => {
+                return nid
             });
+        }
     }
 
-    async signContractMethod(to, data) {
-        return await this.web3.eth.accounts.signTransaction({
-            chainId: this.nid,
-            to: to,
-            data: data,
-            gas: 2000000,
-        }, this.state.getItem('privateKey'))
-    }
+    async _createContractInstances() {
+        const networkId = await this._getCurrentNetwork()
 
-    async signTransaction(to, amount) {
-        return await this.web3.eth.accounts.signTransaction({
-            chainId: this.nid,
-            to: to,
-            value: this.web3.utils.toHex(this.web3.utils.toWei(amount, "ether")),
-            gas: 2000000
-        }, this.state.getItem('privateKey'))
-    }
+        if (!THXToken.networks[networkId] || !RewardPool.networks[networkId]) {
+            throw Error('Contract not deployed on DAppChain')
+        }
 
-    getAccount() {
-        const pKey = this.state.getItem('privateKey');
-        const hasKey = (typeof pKey != "undefined" || pKey == "");
-        return (hasKey) ? this.web3.eth.accounts.privateKeyToAccount(pKey) : false;
-    }
+        this.instances = {
+            token: new this.web3.eth.Contract(THXToken.abi, THXToken.networks[networkId].address, { from: this.currentUserAddress }),
+            pool: new this.web3.eth.Contract(RewardPool.abi, RewardPool.networks[networkId].address, { from: this.currentUserAddress })
+        }
 
-    connect() {
-        return new Promise((resolve, reject) => {
-            this.web3.eth.net.getId().then((nid) => {
-                const contractsDeployed = (typeof TokenJSON.networks[nid] != 'undefined' && typeof RewardPoolJSON.networks[nid] != 'undefined');
-
-                this.nid = nid;
-
-                if (contractsDeployed) {
-                    // Get the contract addresses
-                    this.adresses = {
-                        token: TokenJSON.networks[nid].address,
-                        pool: RewardPoolJSON.networks[nid].address
-                    }
-
-                    // Create an instance from the THXToken Contract abi and contract address on the current network
-                    this.instances = {
-                        token: new this.web3.eth.Contract(TokenJSON.abi, this.adresses.token),
-                        pool: new this.web3.eth.Contract(RewardPoolJSON.abi, this.adresses.pool)
-                    }
-
-                    this.account = this.getAccount()
-                    this.accounts = [this.account.address];
-
-                    if ( this.accounts[0] ) {
-                        resolve(true)
-                    }
-                    else {
-                        // eslint-disable-next-line
-                        console.warn('Submit your private key first')
-                        reject(false);
-                    }
+        this.instances.token.events.Transfer({}, (err, event) => {
+            if (err) {
+                // eslint-disable-next-line
+                console.error('Error on event', err)
+            }
+            else {
+                if (this.onEvent) {
+                    this.onEvent(event.returnValues)
                 }
-            })
+            }
         })
     }
 }

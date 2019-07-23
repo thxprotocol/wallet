@@ -32,22 +32,10 @@ export default {
             ea: new EventService(),
         }
     },
-    mounted() {
-        THX.ns.connect().then(() => this.updateBalance());
-
-        this.ea.listen('event.Deposited', this.updateBalance);
-        this.ea.listen('event.Withdrawn', this.updateBalance);
-    },
     methods: {
         async updateBalance() {
-            const token = THX.ns.instances.token;
-
-            this.balance.token = await token.methods.balanceOf(THX.ns.accounts[0]).call()
-
-            const balanceInWei = await THX.ns.web3.eth.getBalance(THX.ns.accounts[0])
-            const balanceInEth = THX.ns.web3.utils.fromWei(balanceInWei,'ether')
-
-            this.balance.eth = Number(balanceInEth).toFixed(2)
+            const token = THX.contracts.instances.token;
+            this.balance.token = await token.methods.balanceOf(THX.contracts.currentUserAddress).call()
         }
     }
 }

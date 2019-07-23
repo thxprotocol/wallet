@@ -22,18 +22,22 @@
 </template>
 
 <script>
-import NetworkService from './services/NetworkService';
+import firebase from 'firebase/app';
+import 'firebase/database';
+
+import StateService from './services/StateService';
+import ContractService from './services/ContractService';
 import EventService from './services/EventService';
 import NotificationService from './services/NotificationService';
 
 /*global THX*/
 window.THX = {};
-THX.ns = new NetworkService();
 
 export default {
     name: 'App',
     data: function() {
         return {
+            state: new StateService(),
             alert: null,
             amountOfRewards: 0,
             assets: {
@@ -58,28 +62,31 @@ export default {
         }
     },
     created() {
-        THX.ns.connect().then(() => this.init());
+        THX.contracts = new ContractService();
+
+        const uid = firebase.auth().currentUser.uid;
+        const key = (typeof this.state.getItem('privateKey') !== "undefined") ? this.state.getItem('privateKey') : null;
+
+        this.init(uid, key);
     },
     methods: {
-        async init() {
-            const pool = THX.ns.instances.pool;
+        async init(uid, key) {
+            let pool;
+
+            await THX.contracts.load(key);
+
+            pool = THX.contracts.instances.pool;
+
             this.amountOfRewards = parseInt(await pool.methods.countRewards().call());
 
-            THX.notify = new NotificationService();
-
+            this.notifications = new NotificationService();
             this.ea = new EventService();
+
             this.ea.listen('event.RewardStateChanged', this.onRewardStateChange);
             this.ea.listen('event.RuleStateChanged', this.onRuleStateChange);
-            this.ea.listen('tx.confirmation', this.onConfirmation);
         },
         removeFooterPaths() {
             return this.$router.history.current["name"] !== "reward";
-        },
-        onConfirmation(data) {
-            this.alert = {
-                hash: data.detail.hash,
-                confirmations: data.detail.confirmations,
-            }
         },
         async onRewardStateChange() {
             const pool = THX.ns.instances.pool;

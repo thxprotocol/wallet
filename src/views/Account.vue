@@ -4,13 +4,14 @@
     <main class="region region--content">
         <a href="/#/logout">Logout user</a>
         <h3>Your details:</h3>
+
         <p><small>{{account.email}}</small><br/>
         <small>{{account.uid}}</small><br/>
         <small>{{account.address}}</small></p>
 
         <h3>Submit private key:</h3>
         <form v-on:submit="onCreateAccountFromPrivateKey()">
-            <input v-model="privateKey" type="text" placeholder="0x023659u23etc">
+            <input v-model="account.privateKey" type="text" placeholder="Your private key">
             <button class="btn btn--default" type="submit">Connect account</button>
         </form>
 
@@ -41,9 +42,9 @@
 
             <div v-if="isMinter">
                 <h3>Mint tokens:</h3>
-                <form v-on:submit="onMintForAccount()">
+                <form>
                     <input v-model="mintForAccountAmount" type="number" min="0" />
-                    <button class="btn btn--default" type="submit">Mint {{ mintForAccountAmount }} THX</button>
+                    <button v-on:click="onMintForAccount()" class="btn btn--default" type="submit">Mint {{ mintForAccountAmount }} THX</button>
                 </form>
             </div>
 
@@ -73,7 +74,7 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import EventService from '../services/EventService.js';
 import StateService from '../services/StateService.js';
-import Header from '../components/Header.vue'
+import Header from '../components/Header.vue';
 
 const THX = window.THX;
 
@@ -114,10 +115,13 @@ export default {
         }
     },
     created() {
+
+    },
+    mounted() {
         const uid = firebase.auth().currentUser.uid;
-        this.privateKey = (typeof this.state.getItem('privateKey') != "undefined") ? this.state.getItem('privateKey') : null;
-        // eslint-disable-next-line
-        THX.ns.connect().then(() => this.init()).catch(() => console.error);
+        const key = (typeof this.state.getItem('privateKey') !== "undefined") ? this.state.getItem('privateKey') : null;
+
+        this.init(uid, key);
 
         firebase.database().ref('users').child(uid).once('value').then((s) => {
             this.account.uid = s.val().uid;
@@ -125,73 +129,89 @@ export default {
         });
     },
     methods: {
-        async init() {
-            const token = THX.ns.instances.token
-            const pool = THX.ns.instances.pool;
-            const uid = firebase.auth().currentUser.uid;
+        async init(uid, key) {
+            let token, pool;
 
-            this.account.address = THX.ns.account.address;
-            this.account.privateKey = THX.ns.account.privateKey;
+            await THX.contracts.load(key);
+
+            token = THX.contracts.instances.token;
+            pool = THX.contracts.instances.pool;
+
+            this.account.address = THX.contracts.currentUserAddress;
+            this.account.privateKey = key;
 
             firebase.database().ref('wallets').child(this.account.address).child('uid').set(uid);
 
-            this.balance.token = await token.methods.balanceOf(THX.ns.accounts[0]).call()
-            this.balance.pool = await token.methods.balanceOf(pool.address).call()
-            this.isManager = await pool.methods.isManager(THX.ns.accounts[0]).call()
-            this.isMinter = await token.methods.isMinter(THX.ns.accounts[0]).call()
+            this.balance.token = await token.methods.balanceOf(this.account.address).call();
+            this.balance.pool = await token.methods.balanceOf(pool._address).call();
+            this.isManager = await pool.methods.isManager(this.account.address).call();
+            this.isMinter = await token.methods.isMinter(this.account.address).call();
+
+            this.$refs.header.updateBalance();
         },
         reset() {
-            this.privateKey = null;
+            this.account.privateKey = null;
             this.state.clear();
+
             window.location.reload();
         },
-        async onCreateAccountFromPrivateKey() {
-            THX.ns.privateKeyToAccount(this.privateKey);
-            this.init();
+        onCreateAccountFromPrivateKey() {
+            const uid = firebase.auth().currentUser.uid;
+
+            this.state.setItem('privateKey', this.account.privateKey);
+            this.init(uid, this.account.privateKey);
+
             alert('Your account is connected.');
         },
-        async onTransferEther() {
-            const signedTx = await THX.ns.signTransaction(this.transferEtherAddress, this.transferEtherAmount);
-            await THX.ns.sendSignedTransaction(signedTx);
+        onTransferTokens() {
+            const token = THX.contracts.instances.token;
+
+            return token.methods.transfer(this.transferTokensAddress, this.transferTokensAmount).send({ from: this.account.address }).then(async () => {
+                const pool = THX.contracts.instances.pool;
+
+                this.balance.pool = await token.methods.balanceOf(pool._address).call();
+                this.balance.token = await token.methods.balanceOf(this.account.address).call();
+
+                this.$refs.header.updateBalance();
+            });
         },
-        async onTransferTokens() {
-            const token = THX.ns.instances.token;
-            const data = token.methods.transfer(this.transferTokensAddress, this.transferTokensAmount).encodeABI();
-            const rawTx = await THX.ns.signContractMethod(token.address, data);
-            THX.ns.sendSignedTransaction(rawTx);
+        onMintForAccount() {
+            const token = THX.contracts.instances.token;
+            const pool = THX.contracts.instances.pool;
 
-            this.$router.replace('/');
+            return token.methods.mint(this.account.address, this.mintForAccountAmount).send({ from: this.account.address }).then(async () => {
+                this.balance.pool = await token.methods.balanceOf(pool._address).call();
+                this.balance.token = await token.methods.balanceOf(this.account.address).call();
+
+                this.$refs.header.updateBalance();
+            });
+
         },
-        async onMintForAccount() {
-            const token = THX.ns.instances.token;
-            const data = token.methods.mint(THX.ns.accounts[0], this.mintForAccountAmount).encodeABI();
-            const rawTx = await THX.ns.signContractMethod(token.address, data);
+        onTransferToPool() {
+            const pool = THX.contracts.instances.pool;
 
-            await THX.ns.sendSignedTransaction(rawTx);
+            return pool.methods.deposit(this.transferToPoolAmount).send({ from: this.account.address }).then(async () => {
+                const token = THX.contracts.instances.token;
 
-            this.balance.pool = await token.methods.balanceOf(THX.ns.addresses.pool).call();
-            this.balance.token = await token.methods.balanceOf(THX.ns.accounts[0]).call();
+                this.balance.pool = await token.methods.balanceOf(pool._address).call();
+                this.balance.token = await token.methods.balanceOf(this.account.address).call();
+
+                this.$refs.header.updateBalance();
+            });
         },
-        async onTransferToPool() {
-            const pool = THX.ns.instances.pool;
-            const data = pool.methods.deposit(this.transferToPoolAmount).encodeABI();
-            const rawTx = await THX.ns.signContractMethod(pool.address, data);
+        onAddManager() {
+            const pool = THX.contracts.instances.pool;
 
-            await THX.ns.sendSignedTransaction(rawTx);
+            return pool.methods.addManager(this.newManagerAddress).send({ from: this.account.address }).then(async () => {
+
+            });
         },
-        async onAddManager() {
-            const pool = THX.ns.instances.pool;
-            const data = pool.methods.addManager(this.newManagerAddress).encodeABI();
-            const rawTx = await THX.ns.signContractMethod(pool.address, data);
+        onAddMinter() {
+            const token = THX.contracts.instances.token;
 
-            return await THX.ns.sendSignedTransaction(rawTx);
-        },
-        async onAddMinter() {
-            const token = THX.ns.instances.token;
-            const data = token.methods.addMinter(this.newMinterAddress).encodeABI();
-            const rawTx = await THX.ns.signContractMethod(token.address, data);
+            return token.methods.addMinter(this.newMinterAddress).send({ from: this.account.address }).then(async () => {
 
-            return await THX.ns.sendSignedTransaction(rawTx);
+            });
         }
     }
 }

@@ -1,7 +1,7 @@
 .DS_Store
 node_modules
 /dist
-/examples
+/openzeppelin
 /build/contracts
 command
 /src/config.js
@@ -25,3 +25,17 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw*
+
+# Loom files and folders
+app.db
+chaindata
+genesis.json
+loom
+loom_private_key
+loom_public_key
+rinkeby_private_key
+rinkeby_public_key
+extdev_private_key
+extdev_public_key
+extdev_private_key_new
+extdev_public_key_new
