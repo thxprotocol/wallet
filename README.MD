@@ -102,6 +102,22 @@ Make sure to compile your Solidity contracts and migrate them on the local Ganac
 truffle migrate --network ganache
 ```
 
+## Loom Transfer Gateway
+```
+yarn deploy:reset:extdev
+yarn deploy:reset:rinkeby
+node ./transfer-gateway.js map-contracts token
+node ./transfer-gateway.js map-accounts
+```
+
+### Testing
+
+```
+node ./transfer-gateway.js token-balance -c eth
+node ./transfer-gateway.js token-balance -c extdev
+node ./transfer-gateway.js token-balance -c eth -a "0x25803u9tqwt09u3q924tutu09j9024t60"
+```
+
 ## VueJS app
 Use these commands to maintain the project, create production builds, run tests and lint code.
 

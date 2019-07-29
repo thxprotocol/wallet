@@ -38,7 +38,7 @@ module.exports = {
                 if (!process.env.INFURA_API_KEY) {
                     throw new Error("INFURA_API_KEY env var not set")
                 }
-                return new HDWalletProvider(process.env.RINKEBY_PRIVATE_KEY, "https://rinkeby.infura.io/v3/" + process.env.INFURA_PROJECT_ID)
+                return new HDWalletProvider(process.env.RINKEBY_PRIVATE_KEY, "https://rinkeby.infura.io/v3/" + process.env.INFURA_API_KEY)
             },
             network_id: 4,
             gasPrice: 15000000001,
@@ -46,13 +46,16 @@ module.exports = {
         },
         ropsten: {
             provider: function() {
-                return new HDWalletProvider(process.env.ROPSTEN_PRIVATE_KEY, "https://ropsten.infura.io/v3/" + process.env.INFURA_PROJECT_ID)
+                return new HDWalletProvider(process.env.ROPSTEN_PRIVATE_KEY, "https://ropsten.infura.io/v3/" + process.env.INFURA_API_KEY)
             },
             network_id: 3,
             gas: 2900000
         }
     },
     solc: {
-        version: '0.4.24'
+        optimizer: {
+            enabled: true,
+            runs: 200
+        }
     }
 };

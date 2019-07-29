@@ -24326,12 +24326,12 @@
         }
       },
       "links": {},
-      "address": "0xd0c198d403Ae087bD99Ccb4F7073aB1100CEfE8D",
-      "transactionHash": "0x6476c81da78d939341ee25fe1f00e264c4312cbec8863d85dacf99e6117fb8f3"
+      "address": "0x30189a4f73445caB4982b8B4cd26dad3E3c6BEef",
+      "transactionHash": "0x777378d812739a422c90de90bf38a535552a47bfbd20392ab36428efb0fd2f2d"
     }
   },
   "schemaVersion": "3.0.11",
-  "updatedAt": "2019-07-23T12:18:49.677Z",
+  "updatedAt": "2019-07-29T09:23:53.416Z",
   "devdoc": {
     "methods": {
       "addReward(string,string,uint256)": {

@@ -26,6 +26,7 @@
     },
     "dependencies": {
         "dotenv": "^6.2.0",
+        "ethereumjs-tx": "^2.1.0",
         "firebase": "^6.2.4",
         "lodash": "^4.17.14",
         "loom-js": "^1.55.0",

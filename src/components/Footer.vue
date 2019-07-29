@@ -47,16 +47,17 @@ export default {
     },
     created() {
         const uid = firebase.auth().currentUser.uid;
-        const key = (typeof this.state.getItem('privateKey') !== "undefined") ? this.state.getItem('privateKey') : null;
+        const loomKey = (typeof this.state.getItem('loomPrivateKey') !== "undefined") ? this.state.getItem('loomPrivateKey') : null;
+        const ethKey = (typeof this.state.getItem('ethPrivateKey') !== "undefined") ? this.state.getItem('ethPrivateKey') : null;
 
-        this.init(uid, key);
+        this.init(uid, loomKey, ethKey);
     },
     methods: {
-        async init(uid, key) {
+        async init(uid, loomKey, ethKey) {
             const THX = window.THX;
             let pool;
 
-            await THX.contracts.load(key);
+            await THX.contracts.load(loomKey, ethKey);
 
             pool = THX.contracts.instances.pool;
 

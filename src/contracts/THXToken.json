@@ -4273,12 +4273,12 @@
         }
       },
       "links": {},
-      "address": "0xb4f6a553695767cEE105E52098a726Ada813c462",
-      "transactionHash": "0x1d599b7f17cf60d4b946919136c05a474fbab6daadc2cbe87ee6c2a31b7233dd"
+      "address": "0xDF205d2520F4379aE4C48b52178Fc8524566ce97",
+      "transactionHash": "0xcd67727864e9bfc861840b2712ca2e7e77b401456160c2825b0175696a300fcd"
     }
   },
   "schemaVersion": "3.0.11",
-  "updatedAt": "2019-07-23T12:18:49.662Z",
+  "updatedAt": "2019-07-29T09:23:53.380Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {

@@ -6,21 +6,25 @@ import {
 } from 'loom-js'
 import Web3 from 'web3'
 import THXToken from '../contracts/THXToken.json'
+import THXTokenRinkeby from '../contracts/THXTokenRinkeby.json'
 import RewardPool from '../contracts/RewardPool.json'
+import config from '../config.js';
 
 export default class NetworkService {
 
-    async load(key) {
+    async load(loomKey, ethKey) {
         this.onEvent = null
-        this._createClient(key)
-        this._createCurrentUserAddress()
-        this._createWebInstance()
+        this._createLoomClient(loomKey)
+        this._createEthClient(ethKey)
+        this._createLoomAddress()
+        this._createEthAddress()
+        this._createWebInstances()
         await this._createContractInstances()
     }
 
-    _createClient(key) {
-        this.privateKey = CryptoUtils.B64ToUint8Array(key);
-        this.publicKey = CryptoUtils.publicKeyFromPrivateKey(this.privateKey);
+    _createLoomClient(key) {
+        this.loomPrivateKey = CryptoUtils.B64ToUint8Array(key);
+        this.loomPublicKey = CryptoUtils.publicKeyFromPrivateKey(this.loomPrivateKey);
         let writeUrl = 'ws://127.0.0.1:46658/websocket'
         let readUrl = 'ws://127.0.0.1:46658/queryws'
         let networkId = 'default'
@@ -41,46 +45,57 @@ export default class NetworkService {
         })
     }
 
-    _createCurrentUserAddress() {
-        this.currentUserAddress = LocalAddress.fromPublicKey(this.publicKey).toString().toLowerCase();
+    _createEthClient(key) {
+        this.ethPrivateKey = `0x${key}`;
     }
 
-    _createWebInstance() {
-        this.web3 = new Web3(new LoomProvider(this.client, this.privateKey))
+    _createLoomAddress() {
+        this.loomAddress = LocalAddress.fromPublicKey(this.loomPublicKey).toString().toLowerCase();
     }
 
-    _getCurrentNetwork() {
+    _createEthAddress() {
+        const web3 = new Web3;
+        const account = web3.eth.accounts.privateKeyToAccount(this.ethPrivateKey);
+        this.ethAddress = account.address;
+    }
+
+    _createWebInstances() {
+        this.loomWeb3 = new Web3(new LoomProvider(this.client, this.loomPrivateKey))
+        this.ethWeb3 = new Web3(`wss://rinkeby.infura.io/ws/v3/${config.infura.apiKey}`)
+    }
+
+    _getCurrentLoomNetwork() {
         if (process.env.NETWORK == 'extdev') {
             return '9545242630824'
         } else {
-            return this.web3.eth.net.getId().then((nid) => {
+            return this.loomWeb3.eth.net.getId().then((nid) => {
                 return nid
             });
         }
     }
 
-    async _createContractInstances() {
-        const networkId = await this._getCurrentNetwork()
+    _getCurrentEthNetwork() {
+        return this.ethWeb3.eth.net.getId().then((nid) => {
+            return nid
+        });
+    }
 
-        if (!THXToken.networks[networkId] || !RewardPool.networks[networkId]) {
-            throw Error('Contract not deployed on DAppChain')
+    async _createContractInstances() {
+        this.loomNetworkId = await this._getCurrentLoomNetwork()
+        this.ethNetworkId = await this._getCurrentEthNetwork()
+
+        if (!THXToken.networks[this.loomNetworkId] || !RewardPool.networks[this.loomNetworkId]) {
+            throw Error('Contracts not deployed on DAppChain')
+        }
+
+        if (!THXTokenRinkeby.networks[this.ethNetworkId]) {
+            throw Error('Contract not deployed on Rinkeby')
         }
 
         this.instances = {
-            token: new this.web3.eth.Contract(THXToken.abi, THXToken.networks[networkId].address, { from: this.currentUserAddress }),
-            pool: new this.web3.eth.Contract(RewardPool.abi, RewardPool.networks[networkId].address, { from: this.currentUserAddress })
+            tokenRinkeby: new this.ethWeb3.eth.Contract(THXTokenRinkeby.abi, THXTokenRinkeby.networks[this.ethNetworkId].address, { from: this.ethAddress }),
+            token: new this.loomWeb3.eth.Contract(THXToken.abi, THXToken.networks[this.loomNetworkId].address, { from: this.loomAddress }),
+            pool: new this.loomWeb3.eth.Contract(RewardPool.abi, RewardPool.networks[this.loomNetworkId].address, { from: this.loomAddress })
         }
-
-        this.instances.token.events.Transfer({}, (err, event) => {
-            if (err) {
-                // eslint-disable-next-line
-                console.error('Error on event', err)
-            }
-            else {
-                if (this.onEvent) {
-                    this.onEvent(event.returnValues)
-                }
-            }
-        })
     }
 }

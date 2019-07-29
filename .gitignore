@@ -34,7 +34,7 @@ loom
 loom_private_key
 loom_public_key
 rinkeby_private_key
-rinkeby_public_key
+rinkeby_account
 extdev_private_key
 extdev_public_key
 extdev_private_key_new

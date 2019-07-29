@@ -6,39 +6,20 @@
 
         <p><small>{{account.email}}</small><br/>
         <small>{{account.uid}}</small><br/>
-        <small>{{account.address}}</small></p>
+        <small>Loom: {{account.loomAddress}}</small><br/>
+        <small>Eth: {{account.ethAddress}}</small></p>
 
         <h3>Submit private key:</h3>
-        <form v-on:submit="onCreateAccountFromPrivateKey()">
-            <input v-model="account.privateKey" type="text" placeholder="Your private key">
-            <button class="btn btn--default" type="submit">Connect account</button>
+        <form v-on:submit="onCreateAccountsFromPrivateKey()">
+            <input v-model="account.loomPrivateKey" type="text" placeholder="Your Loom private key">
+            <input v-model="account.ethPrivateKey" type="text" placeholder="Your Ethereum private key">
+            <button class="btn btn--default" type="submit">Connect accounts</button>
         </form>
 
         <button v-on:click="reset()" class="btn btn--default">Reset</button>
 
-        <template v-if="account.address">
-            <h3>Transfer Tokens:</h3>
-            <form v-on:submit="onTransferTokens()">
-                <input v-model="transferTokensAddress" type="text" placeholder="account_address" />
-                <input v-model="transferTokensAmount" type="number" min="0" v-bind:max="balance.token" />
-                <button class="btn btn--default" type="submit">Transfer {{ transferTokensAmount }} THX</button>
-            </form>
-
-            <h3>Pool deposit:</h3>
-            <small>Reward Pool balance: <strong>{{this.balance.pool}} THX</strong></small>
-            <form v-on:submit="onTransferToPool()">
-                <input v-model="transferToPoolAmount" type="number" min="0" v-bind:max="balance.token" />
-                <button class="btn btn--default" type="submit">Deposit {{ transferToPoolAmount }} THX</button>
-            </form>
-
-            <div v-if="isManager">
-                <h3>Add manager:</h3>
-                <form v-on:submit="onAddManager()">
-                    <input v-model="newManagerAddress" type="text" placeholder="account_address">
-                    <button class="btn btn--default" type="submit">Add manager</button>
-                </form>
-            </div>
-
+        <template v-if="account.loomAddress">
+            <h1>Eth account</h1>
             <div v-if="isMinter">
                 <h3>Mint tokens:</h3>
                 <form>
@@ -61,6 +42,32 @@
                 <input v-model="transferEtherAmount" type="number" min="0" />
                 <button class="btn btn--default" v-on:click="onTransferEther()">Transfer {{ transferEtherAmount }} ETH</button>
             </form>
+        </template>
+
+
+        <h1>Loom Account</h1>
+        <template v-if="account.loomAddress">
+            <h3>Transfer Tokens:</h3>
+            <form v-on:submit="onTransferTokens()">
+                <input v-model="transferTokensAddress" type="text" placeholder="account_address" />
+                <input v-model="transferTokensAmount" type="number" min="0" v-bind:max="balance.token" />
+                <button class="btn btn--default" type="submit">Transfer {{ transferTokensAmount }} THX</button>
+            </form>
+
+            <h3>Pool deposit:</h3>
+            <small>Reward Pool balance: <strong>{{this.balance.pool}} THX</strong></small>
+            <form v-on:submit="onTransferToPool()">
+                <input v-model="transferToPoolAmount" type="number" min="0" v-bind:max="balance.token" />
+                <button class="btn btn--default" type="submit">Deposit {{ transferToPoolAmount }} THX</button>
+            </form>
+
+            <div v-if="isManager">
+                <h3>Add manager:</h3>
+                <form v-on:submit="onAddManager()">
+                    <input v-model="newManagerAddress" type="text" placeholder="account_address">
+                    <button class="btn btn--default" type="submit">Add manager</button>
+                </form>
+            </div>
 
         </template>
 
@@ -97,13 +104,13 @@ export default {
             transferTokensAmount: 0,
             transferEtherAddress: "",
             transferEtherAmount: 0,
-            tx: null,
-            privateKey: null,
             account: {
                 uid: null,
                 email: null,
-                address: null,
-                privateKey: null,
+                loomAddress: null,
+                ethAddress: null,
+                loomPrivateKey: null,
+                ethPrivateKey: null,
             },
             state: new StateService(),
             ea: new EventService(),
@@ -114,9 +121,10 @@ export default {
     },
     mounted() {
         const uid = firebase.auth().currentUser.uid;
-        const key = (typeof this.state.getItem('privateKey') !== "undefined") ? this.state.getItem('privateKey') : null;
+        const loomKey = (typeof this.state.getItem('loomPrivateKey') !== "undefined") ? this.state.getItem('loomPrivateKey') : null;
+        const ethKey = (typeof this.state.getItem('ethPrivateKey') !== "undefined") ? this.state.getItem('ethPrivateKey') : null;
 
-        this.init(uid, key);
+        if (loomKey && ethKey) this.init(uid, loomKey, ethKey);
 
         firebase.database().ref('users').child(uid).once('value').then((s) => {
             this.account.uid = s.val().uid;
@@ -124,37 +132,44 @@ export default {
         });
     },
     methods: {
-        async init(uid, key) {
-            let token, pool;
+        async init(uid, loomKey, ethKey) {
+            let tokenRinkeby, token, pool;
 
-            await THX.contracts.load(key);
+            await THX.contracts.load(loomKey, ethKey);
 
+            tokenRinkeby = THX.contracts.instances.tokenRinkeby;
             token = THX.contracts.instances.token;
             pool = THX.contracts.instances.pool;
 
-            this.account.address = THX.contracts.currentUserAddress;
-            this.account.privateKey = key;
+            this.account.loomAddress = THX.contracts.loomAddress;
+            this.account.ethAddress = THX.contracts.ethAddress;
+            this.account.loomPrivateKey = loomKey;
+            this.account.ethPrivateKey = ethKey;
 
-            firebase.database().ref('wallets').child(this.account.address).child('uid').set(uid);
+            firebase.database().ref('wallets').child(this.account.loomAddress).child('uid').set(uid);
 
-            this.balance.token = await token.methods.balanceOf(this.account.address).call();
+            this.balance.tokenRinkeby = await tokenRinkeby.methods.balanceOf(this.account.ethAddress).call();
+            this.balance.token = await token.methods.balanceOf(this.account.loomAddress).call();
             this.balance.pool = await token.methods.balanceOf(pool._address).call();
-            this.isManager = await pool.methods.isManager(this.account.address).call();
-            this.isMinter = await token.methods.isMinter(this.account.address).call();
+            this.isManager = await pool.methods.isManager(this.account.loomAddress).call();
+
+            this.isMinter = await tokenRinkeby.methods.isMinter(this.account.ethAddress).call();
 
             this.$parent.$refs.header.updateBalance();
         },
         reset() {
-            this.account.privateKey = null;
+            this.account.loomPrivateKey = null;
+            this.account.ethPrivateKey = null;
             this.state.clear();
 
             window.location.reload();
         },
-        onCreateAccountFromPrivateKey() {
+        onCreateAccountsFromPrivateKey() {
             const uid = firebase.auth().currentUser.uid;
 
-            this.state.setItem('privateKey', this.account.privateKey);
-            this.init(uid, this.account.privateKey);
+            this.state.setItem('loomPrivateKey', this.account.loomPrivateKey);
+            this.state.setItem('ethPrivateKey', this.account.ethPrivateKey);
+            this.init(uid, this.account.loomPrivateKey, this.account.ethPrivateKey);
 
             alert('Your account is connected.');
         },
@@ -171,16 +186,7 @@ export default {
             });
         },
         onMintForAccount() {
-            const token = THX.contracts.instances.token;
-            const pool = THX.contracts.instances.pool;
-
-            return token.methods.mint(this.account.address, this.mintForAccountAmount).send({ from: this.account.address }).then(async () => {
-                this.balance.pool = await token.methods.balanceOf(pool._address).call();
-                this.balance.token = await token.methods.balanceOf(this.account.address).call();
-
-                this.$parent.$refs.header.updateBalance();
-            });
-
+            THX.contracts.mint(this.account.ethAddress, this.mintForAccountAmount);
         },
         onTransferToPool() {
             const pool = THX.contracts.instances.pool;
