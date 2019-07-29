@@ -1,6 +1,5 @@
 <template>
 <article class="region region--container">
-    <Header ref="header" />
     <main class="region region--content">
         <a href="/#/logout">Logout user</a>
         <h3>Your details:</h3>
@@ -74,15 +73,11 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import EventService from '../services/EventService.js';
 import StateService from '../services/StateService.js';
-import Header from '../components/Header.vue';
 
 const THX = window.THX;
 
 export default {
     name: 'home',
-    components: {
-        Header
-    },
     data: function() {
         return {
             network: null,
@@ -147,7 +142,7 @@ export default {
             this.isManager = await pool.methods.isManager(this.account.address).call();
             this.isMinter = await token.methods.isMinter(this.account.address).call();
 
-            this.$refs.header.updateBalance();
+            this.$parent.$refs.header.updateBalance();
         },
         reset() {
             this.account.privateKey = null;
@@ -172,7 +167,7 @@ export default {
                 this.balance.pool = await token.methods.balanceOf(pool._address).call();
                 this.balance.token = await token.methods.balanceOf(this.account.address).call();
 
-                this.$refs.header.updateBalance();
+                this.$parent.$refs.header.updateBalance();
             });
         },
         onMintForAccount() {
@@ -183,7 +178,7 @@ export default {
                 this.balance.pool = await token.methods.balanceOf(pool._address).call();
                 this.balance.token = await token.methods.balanceOf(this.account.address).call();
 
-                this.$refs.header.updateBalance();
+                this.$parent.$refs.header.updateBalance();
             });
 
         },
@@ -196,7 +191,7 @@ export default {
                 this.balance.pool = await token.methods.balanceOf(pool._address).call();
                 this.balance.token = await token.methods.balanceOf(this.account.address).call();
 
-                this.$refs.header.updateBalance();
+                this.$parent.$refs.header.updateBalance();
             });
         },
         onAddManager() {

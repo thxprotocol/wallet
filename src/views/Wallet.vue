@@ -1,6 +1,5 @@
 <template>
 <article class="region region--container">
-    <Header ref="header" />
     <main class="region region--content">
         <h3>{{ pool.name }} [{{pool.balance}} THX]</h3>
         <hr class="dotted">
@@ -48,7 +47,6 @@ import firebase from 'firebase';
 import 'firebase/database';
 
 import Vue from 'vue';
-import Header from '../components/Header.vue'
 
 import EventService from '../services/EventService.js';
 import StateService from '../services/StateService.js';
@@ -59,9 +57,6 @@ const _ = require('lodash');
 
 export default {
     name: 'home',
-    components: {
-        Header
-    },
     computed: {
         orderedTokenTransfers: function () {
             let arr = [];
@@ -104,7 +99,7 @@ export default {
             this.pool.name = await pool.methods.name().call();
             this.pool.balance = await token.methods.balanceOf(pool._address).call();
 
-            this.$refs.header.updateBalance();
+            this.$parent.$refs.header.updateBalance();
 
             this.ea.listen('event.Transfer', this.addMyTransfer);
             this.ea.listen('event.Deposited', this.addDeposit);
@@ -203,7 +198,7 @@ export default {
 
             this.createTransfer(hash, from, to, amount);
 
-            this.$refs.header.updateBalance();
+            this.$parent.$refs.header.updateBalance();
         },
         createTransfer(hash, from, to, amount) {
             Vue.set(this.tokenTransfers, hash, {

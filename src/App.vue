@@ -1,113 +1,26 @@
 <template>
 <div id="app" v-bind:class="`section--${$router.currentRoute.name}`">
-    <div v-if="alert" class="alert alert--warning">
-        <strong>[{{ alert.confirmations }}]</strong> {{alert.hash}} <a v-on:click="alert = null"><strong>x</strong></a>
-    </div>
+    <Header v-if="$router.currentRoute.meta.header" ref="header" />
     <router-view />
-    <footer class="region region--navigation">
-        <nav class="navbar">
-            <ul class="nav">
-                <li v-bind:key="route.name" v-for="route in routes">
-                    <router-link v-bind:to="route.path">
-                        <span v-if="route.name == 'notifications' && amountOfNewRewards > 0" class="badge badge--warning">
-                            {{ amountOfNewRewards }}
-                        </span>
-                        <img width="20" height="20" v-bind:src="assets[route.name]['default']" alt="Wallet Icon" />
-                    </router-link>
-                </li>
-            </ul>
-        </nav>
-    </footer>
+    <Footer ref="footer" />
 </div>
 </template>
 
 <script>
-import firebase from 'firebase/app';
-import 'firebase/database';
+import Header from './components/Header.vue';
+import Footer from './components/Footer.vue';
 
-import StateService from './services/StateService';
 import ContractService from './services/ContractService';
-import EventService from './services/EventService';
-import NotificationService from './services/NotificationService';
 
 /*global THX*/
 window.THX = {};
+THX.contracts = new ContractService();
 
 export default {
     name: 'App',
-    data: function() {
-        return {
-            ea: new EventService(),
-            state: new StateService(),
-            alert: null,
-            amountOfNewRewards: 0,
-            assets: {
-                wallet: {
-                    default: require('./assets/wallet.svg')
-                },
-                notifications: {
-                    default: require('./assets/notification.svg')
-                },
-                account: {
-                    default: require('./assets/account.svg')
-                },
-                camera: {
-                    default: require('./assets/qrcode.svg')
-                }
-            }
-        }
-    },
-    computed: {
-        routes() {
-            return this.$router.options.routes.filter(item => item.visible);
-        }
-    },
-    created() {
-        THX.contracts = new ContractService();
-
-        const uid = firebase.auth().currentUser.uid;
-        const key = (typeof this.state.getItem('privateKey') !== "undefined") ? this.state.getItem('privateKey') : null;
-
-        this.init(uid, key);
-    },
-    methods: {
-        async init(uid, key) {
-            let pool;
-
-            await THX.contracts.load(key);
-
-            pool = THX.contracts.instances.pool;
-
-            const amountOfRewards = parseInt(await pool.methods.countRewards().call());
-            this.state.setItem('lastRewardId', amountOfRewards);
-
-            this.notifications = new NotificationService();
-            this.ea = new EventService();
-
-            this.ea.listen('event.RewardStateChanged', this.onRewardStateChange);
-            this.ea.listen('event.RuleStateChanged', this.onRuleStateChange);
-            this.ea.listen('event.clearNotifications', this.clearNotifications);
-        },
-        removeFooterPaths() {
-            return this.$router.history.current["name"] !== "reward";
-        },
-        async clearNotifications() {
-            const pool = THX.contracts.instances.pool;
-            const amountOfRewards = parseInt(await pool.methods.countRewards().call());
-
-            this.state.setItem('lastRewardId', amountOfRewards);
-            this.onRewardStateChange();
-        },
-        async onRewardStateChange() {
-            const pool = THX.contracts.instances.pool;
-            const prevAmountOfRewards = parseInt(this.state.getItem('lastRewardId'));
-            const currentAmountOfRewards = parseInt(await pool.methods.countRewards().call());
-
-            this.amountOfNewRewards = currentAmountOfRewards - prevAmountOfRewards;
-
-        },
-        async onRuleStateChange() {
-        }
+    components: {
+        Header,
+        Footer
     }
 }
 </script>

@@ -1,10 +1,9 @@
 <template>
 <header class="region region--header">
-    <div class="logo">
-        <img width="50" height="50" v-bind:src="assets.logo" alt="THX Logo" />
-    </div>
+    <a href="/#/account" class="link-settings">
+        <img src="../assets/menu.svg" alt="Menu icon" />
+    </a>
     <div class="account_balance">
-        <p>Your balances</p>
         <p><span class="font-size-large">{{balance.token}} THX</span></p>
         <p><span>{{balance.eth}} ETH</span></p>
     </div>
@@ -14,8 +13,6 @@
 <script>
 import Logo from '../assets/thx_logo.svg'
 import EventService from '../services/EventService';
-
-const THX = window.THX;
 
 export default {
     name: 'Header',
@@ -34,6 +31,7 @@ export default {
     },
     methods: {
         async updateBalance() {
+            const THX = window.THX;
             const token = THX.contracts.instances.token;
             this.balance.token = await token.methods.balanceOf(THX.contracts.currentUserAddress).call()
         }

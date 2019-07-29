@@ -9,25 +9,28 @@ import Login from './views/Login.vue';
 import Logout from './views/Logout.vue';
 import Register from './views/Register.vue';
 import Camera from './views/Camera.vue';
+import Pools from './views/Pools.vue';
 
 Vue.use(VueRouter);
 
 const router = new VueRouter({
     routes: [
         {
+            path: '/pools',
+            name: 'pools',
+            component: Pools,
+            visible: true,
+            meta: {
+                header: true,
+                requiresAuth: true
+            }
+        }, {
             path: '/',
             name: 'wallet',
             component: Wallet,
             visible: true,
             meta: {
-                requiresAuth: true
-            }
-        }, {
-            path: '/camera',
-            name: 'camera',
-            component: Camera,
-            visible: true,
-            meta: {
+                header: true,
                 requiresAuth: true
             }
         }, {
@@ -36,14 +39,25 @@ const router = new VueRouter({
             component: Notifications,
             visible: true,
             meta: {
+                header: false,
+                requiresAuth: true
+            }
+        }, {
+            path: '/camera',
+            name: 'camera',
+            component: Camera,
+            visible: true,
+            meta: {
+                header: false,
                 requiresAuth: true
             }
         }, {
             path: '/account',
             name: 'account',
             component: Account,
-            visible: true,
+            visible: false,
             meta: {
+                header: true,
                 requiresAuth: true
             }
         }, {

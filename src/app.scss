@@ -56,7 +56,7 @@ textarea {
 .btn {
     font-family: 'Exo 2';
     border: 0;
-    border-radius: 10px;
+    border-radius: 30px;
     line-height: 1;
     background-color: black;
     color: $yellow;
@@ -141,7 +141,7 @@ hr.dotted {
 .region {
     display: flex;
     flex-wrap: wrap;
-    width: 100%;
+    margin: 0;
 }
 
 .region--container {
@@ -159,15 +159,16 @@ hr.dotted {
 }
 
 .region--header {
-    background: black;
-    color: white;
+    color: black;
     padding: 1rem;
-    background-image: url("./assets/background_header.jpg");
+    padding-bottom: 2rem;
+    background-color: #FBE54D;
+    // background-image: url("./assets/background_header.jpg");
     background-size: cover;
     background-position: center center;
     flex: 0 auto;
 
-    & + .region--content {
+    & + .region--container .region--content {
         margin-top: -1rem;
     }
 }
@@ -181,7 +182,23 @@ hr.dotted {
     padding: 1rem;
     width: calc(100% - 4rem);
     overflow: auto;
-    height: calc(100% - 260px);
+    height: calc(100% - 2rem);
+}
+
+.link-settings {
+    position: absolute;
+    right: 1rem;
+    top: 2rem;
+    text-decoration: none;
+    color: black;
+    padding: 5px;
+    display: block;
+
+    img {
+        display: block;
+        width: 40px;
+        height: 40px;
+    }
 }
 
 .navbar {
