@@ -8,15 +8,13 @@
         <p><strong>Main Network Address:</strong><br> {{account.ethAddress}}</p>
         <p><strong>Loom Address:</strong><br> {{account.loomAddress}}</p>
 
-        <template v-if="account.loomAddress">
-            <h3>Main Network actions</h3>
-            <ul class="list-bullets">
-                <li><button class="btn btn-link" @click="showConnectKeysModal = true">Connect Accounts</button></li>
-                <li><button class="btn btn-link" @click="showDepositToGatewayModal = true">Deposit THX to Gateway</button></li>
-                <li v-if="isMinter"><button class="btn btn-link" @click="showAddMinterModal = true">Add minter role</button></li>
-                <li v-if="isMinter"><button class="btn btn-link" @click="showMintTokensModal = true">Mint tokens</button></li>
-            </ul>
-        </template>
+        <h3>Main Network actions</h3>
+        <ul class="list-bullets">
+            <li><button class="btn btn-link" @click="showConnectKeysModal = true">Connect Accounts</button></li>
+            <li v-if="account.ethAddress"><button class="btn btn-link" @click="showDepositToGatewayModal = true">Deposit THX to Gateway</button></li>
+            <li v-if="account.ethAddress && isMinter"><button class="btn btn-link" @click="showAddMinterModal = true">Add minter role</button></li>
+            <li v-if="account.ethAddress && isMinter"><button class="btn btn-link" @click="showMintTokensModal = true">Mint tokens</button></li>
+        </ul>
 
         <template v-if="account.loomAddress">
             <h3>Loom Network actions</h3>
