@@ -88,9 +88,10 @@ export default {
     },
     methods: {
         async init(uid, loomKey, ethKey) {
+            let token, pool, balanceInWei;
             const fromBlock = await this.getCurrentBlockId();
             const offset = 10000;
-            let token, pool;
+            const web3 = THX.contracts.ethWeb3;
 
             await THX.contracts.load(loomKey, ethKey);
 
@@ -98,7 +99,8 @@ export default {
             pool = THX.contracts.instances.pool;
 
             this.pool.name = await pool.methods.name().call();
-            this.pool.balance = await token.methods.balanceOf(pool._address).call();
+            balanceInWei = await token.methods.balanceOf(pool._address).call();
+            this.pool.balance = web3.utils.fromWei(balanceInWei, 'ether');
 
             this.$parent.$refs.header.updateBalance();
 
@@ -139,7 +141,7 @@ export default {
             });
         },
         getCurrentBlockId() {
-            return THX.contracts.web3.eth.getBlockNumber().then(data => {
+            return THX.contracts.loomWeb3.eth.getBlockNumber().then(data => {
                 return data;
             });
         },
@@ -151,11 +153,12 @@ export default {
                 const uid = await firebase.database().ref(`wallets/${sender}/uid`).once('value');
                 const to = await firebase.database().ref(`users/${uid.val()}/email`).once('value');
                 const date = new Date(value.created*1000);
+                const web3 = THX.contracts.ethWeb3;
 
                 Vue.set(this.poolTransfers, hash, {
                     hash: hash,
                     from: to.val(),
-                    amount: "+" + Number(value.amount),
+                    amount: "+" + web3.utils.fromWei(value.amount, 'ether'),
                     timestamp: value.created,
                     created: `${date.toDateString()} ${date.getHours()}:${date.getMinutes()}`,
                 });
@@ -169,11 +172,12 @@ export default {
                 const uid = await firebase.database().ref(`wallets/${beneficiary}/uid`).once('value');
                 const to = await firebase.database().ref('users').child(uid.val()).child('email').once('value');
                 const date = new Date(value.created*1000);
+                const web3 = THX.contracts.ethWeb3;
 
                 Vue.set(this.poolTransfers, hash, {
                     hash: hash,
                     to: to.val(),
-                    amount: "-" + Number(value.amount),
+                    amount: "-" + web3.utils.fromWei(value.amount, 'ether'),
                     timestamp: value.created,
                     created: `${date.toDateString()} ${date.getHours()}:${date.getMinutes()}`,
                 });

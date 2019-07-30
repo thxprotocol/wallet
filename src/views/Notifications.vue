@@ -23,10 +23,10 @@
                     Time: {{ n.created }}
                 </p>
                 <div class="notification__actions">
-                    <button class="btn btn--default" v-on:click="rejectReward(n.id)">
+                    <button v-bind:class="{ disabled: rejectBusy }" class="btn btn--default" v-on:click="rejectReward(n.id)">
                         Reject
                     </button>
-                    <button class="btn btn--success" v-on:click="approveReward(n.id)">
+                    <button v-bind:class="{ disabled: approveBusy }" class="btn btn--success" v-on:click="approveReward(n.id)">
                         Approve
                     </button>
                 </div>
@@ -36,7 +36,7 @@
 
     <ul class="list list--nav">
         <li v-bind:key="n.id" v-for="n in notifications">
-            <button v-bind:class="`${(n.id == currentNotification) ? 'active' : ''}`">{{ n.id }}</button>
+            <button v-bind:class="{ active: (n.id == currentNotification) }">{{ n.id }}</button>
         </li>
     </ul>
 
@@ -65,6 +65,8 @@ export default {
             },
             notifications: [],
             currentNotification: 0,
+            approveBusy: false,
+            rejectBusy: false,
         }
     },
     created() {
@@ -79,15 +81,18 @@ export default {
     },
     methods: {
         async init(uid, loomKey, ethKey) {
-            let token, pool;
+            let token, pool, balanceInWei, web3;
 
             await THX.contracts.load(loomKey, ethKey);
 
+            web3 = THX.contracts.ethWeb3;
             pool = THX.contracts.instances.pool;
             token = THX.contracts.instances.token;
 
-            this.pool.name = await pool.methods.name().call()
-            this.pool.balance = await token.methods.balanceOf(pool._address).call()
+            this.pool.name = await pool.methods.name().call();
+
+            balanceInWei = await token.methods.balanceOf(pool._address).call()
+            this.pool.balance = web3.utils.fromWei(balanceInWei, "ether");
 
             this.update()
 
@@ -100,39 +105,6 @@ export default {
             const rewards = await this.getPendingRewards();
 
             this.notifications = rewards;
-        },
-        async getPendingRules() {
-            const pool = THX.contracts.instances.pool;
-            const amountOfRules = await pool.methods.countRules().call()
-            const isMember = true; //await pool.methods.isMember(THX.contracts.currentUserAddress).call();
-
-            if (isMember) {
-                let rules = [];
-
-                for (var i = 0; i < parseInt(amountOfRules); i++) {
-                    let rule = await pool.methods.rules(i).call()
-                    rules.push(rule);
-                }
-
-                return rules.filter(r => r.state == 0);
-            }
-        },
-        async getPendingRewards() {
-            const pool = THX.contracts.instances.pool;
-            const amountOfRewards = await pool.methods.countRewards().call()
-            const isManager = await pool.methods.isManager(THX.contracts.currentUserAddress).call()
-
-            if (isManager) {
-                let rewards = []
-
-                for (var i = 0; i < parseInt(amountOfRewards); i++) {
-                    const data = await pool.methods.rewards(i).call()
-                    const reward = await this.formatReward(data);
-                    rewards.push(reward);
-                }
-
-                return rewards.filter((r) => r.state == 0);
-            }
         },
         async formatReward(data) {
             const dateTime = new Date(parseInt(data.created));
@@ -152,18 +124,54 @@ export default {
                 created: dateTime,
             }
         },
-        async approveReward(id) {
+        async getPendingRewards() {
             const pool = THX.contracts.instances.pool;
-            await pool.methods.approveReward(id).send({ from: THX.contracts.currentUserAddress })
+            const amountOfRewards = await pool.methods.countRewards().call()
+            const isManager = await pool.methods.isManager(THX.contracts.loomAddress).call()
 
-            this.update();
+            if (isManager) {
+                let rewards = []
+
+                for (var i = 0; i < parseInt(amountOfRewards); i++) {
+                    const data = await pool.methods.rewards(i).call()
+                    const reward = await this.formatReward(data);
+                    rewards.push(reward);
+                }
+
+                return rewards.filter((r) => r.state == 0);
+            }
         },
-        async rejectReward(id) {
+        approveReward(id) {
             const pool = THX.contracts.instances.pool;
 
-            await pool.methods.rejectReward(id).send({ from: THX.contracts.currentUserAddress })
+            this.approveBusy = true;
 
-            this.update();
+            return pool.methods.approveReward(id).send({ from: THX.contracts.loomAddress })
+                .then(() => {
+                    this.approveBusy = false;
+                    return this.update();
+                })
+                .catch(e => {
+                    this.rejectBusy = false;
+                    // eslint-disable-next-line
+                    return console.error(e);
+                });
+        },
+        rejectReward(id) {
+            const pool = THX.contracts.instances.pool;
+
+            this.rejectBusy = true;
+
+            return pool.methods.rejectReward(id).send({ from: THX.contracts.loomAddress })
+                .then(() => {
+                    this.rejectBusy = false;
+                    return this.update();
+                })
+                .catch(e => {
+                    this.rejectBusy = false;
+                    // eslint-disable-next-line
+                    return console.error(e);
+                });
         }
     }
 }

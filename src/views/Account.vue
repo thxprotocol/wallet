@@ -1,76 +1,116 @@
 <template>
 <article class="region region--container">
     <main class="region region--content">
-        <a href="/#/logout">Logout user</a>
-        <h3>Your details:</h3>
 
-        <p><small>{{account.email}}</small><br/>
-        <small>{{account.uid}}</small><br/>
-        <small>Loom: {{account.loomAddress}}</small><br/>
-        <small>Eth: {{account.ethAddress}}</small></p>
-
-        <h3>Submit private key:</h3>
-        <form v-on:submit="onCreateAccountsFromPrivateKey()">
-            <input v-model="account.loomPrivateKey" type="text" placeholder="Your Loom private key">
-            <input v-model="account.ethPrivateKey" type="text" placeholder="Your Ethereum private key">
-            <button class="btn btn--default" type="submit">Connect accounts</button>
-        </form>
-
-        <button v-on:click="reset()" class="btn btn--default">Reset</button>
+        <h2>Hi {{account.email}}!</h2>
+        <p><strong>E-mail:</strong><br> {{account.email}}</p>
+        <p><strong>UID:</strong><br> {{account.uid}}</p>
+        <p><strong>Main Network Address:</strong><br> {{account.ethAddress}}</p>
+        <p><strong>Loom Address:</strong><br> {{account.loomAddress}}</p>
 
         <template v-if="account.loomAddress">
-            <h1>Eth account</h1>
-            <div v-if="isMinter">
-                <h3>Mint tokens:</h3>
-                <form>
-                    <input v-model="mintForAccountAmount" type="number" min="0" />
-                    <button v-on:click="onMintForAccount()" class="btn btn--default" type="submit">Mint {{ mintForAccountAmount }} THX</button>
-                </form>
-            </div>
-
-            <div v-if="isMinter">
-                <h3>Add minter:</h3>
-                <form v-on:submit="onAddMinter()">
-                    <input v-model="newMinterAddress" type="text" placeholder="account_address">
-                    <button class="btn btn--default" type="submit">Add minter</button>
-                </form>
-            </div>
-
-            <h3>Transfer Ether:</h3>
-            <form>
-                <input v-model="transferEtherAddress" type="text" placeholder="account_address" />
-                <input v-model="transferEtherAmount" type="number" min="0" />
-                <button class="btn btn--default" v-on:click="onTransferEther()">Transfer {{ transferEtherAmount }} ETH</button>
-            </form>
+            <h3>Main Network actions</h3>
+            <ul class="list-bullets">
+                <li><button class="btn btn-link" @click="showConnectKeysModal = true">Connect Accounts</button></li>
+                <li><button class="btn btn-link" @click="showDepositToGatewayModal = true">Deposit THX to Gateway</button></li>
+                <li v-if="isMinter"><button class="btn btn-link" @click="showAddMinterModal = true">Add minter role</button></li>
+                <li v-if="isMinter"><button class="btn btn-link" @click="showMintTokensModal = true">Mint tokens</button></li>
+            </ul>
         </template>
 
-
-        <h1>Loom Account</h1>
         <template v-if="account.loomAddress">
-            <h3>Transfer Tokens:</h3>
-            <form v-on:submit="onTransferTokens()">
-                <input v-model="transferTokensAddress" type="text" placeholder="account_address" />
-                <input v-model="transferTokensAmount" type="number" min="0" v-bind:max="balance.token" />
-                <button class="btn btn--default" type="submit">Transfer {{ transferTokensAmount }} THX</button>
-            </form>
-
-            <h3>Pool deposit:</h3>
-            <small>Reward Pool balance: <strong>{{this.balance.pool}} THX</strong></small>
-            <form v-on:submit="onTransferToPool()">
-                <input v-model="transferToPoolAmount" type="number" min="0" v-bind:max="balance.token" />
-                <button class="btn btn--default" type="submit">Deposit {{ transferToPoolAmount }} THX</button>
-            </form>
-
-            <div v-if="isManager">
-                <h3>Add manager:</h3>
-                <form v-on:submit="onAddManager()">
-                    <input v-model="newManagerAddress" type="text" placeholder="account_address">
-                    <button class="btn btn--default" type="submit">Add manager</button>
-                </form>
-            </div>
-
+            <h3>Loom Network actions</h3>
+            <p>Reward Pool balance: <strong>{{this.balance.pool}} THX</strong></p>
+            <ul class="list-bullets">
+                <li><button class="btn btn-link" @click="showTransferTokensModal = true">Transfer tokens</button></li>
+                <li><button class="btn btn-link" @click="showTransferToPoolModal = true">Pool deposit</button></li>
+                <li v-if="isManager"><button class="btn btn-link" @click="showAddManagerModal = true">Add manager role</button></li>
+            </ul>
         </template>
 
+        <button @click="reset()" class="btn btn--default">Reset</button>
+        <button @click="logout()" class="btn btn--default">Logout user</button>
+
+        <modal v-if="showConnectKeysModal" @close="showConnectKeysModal = false">
+            <h3 slot="header">Add private keys for accounts:</h3>
+            <div slot="body">
+                <input v-model="account.loomPrivateKey" type="text" placeholder="Your Loom private key">
+                <input v-model="account.ethPrivateKey" type="text" placeholder="Your Ethereum private key">
+            </div>
+            <template slot="footer">
+                <button @click="onCreateAccountsFromPrivateKey()" class="btn btn--success" >Connect</button>
+            </template>
+        </modal>
+
+        <modal v-if="showAddMinterModal" @close="showAddMinterModal = false">
+            <h3 slot="header">Add minter role to account:</h3>
+            <div slot="body">
+                <input v-if="!newMinterBusy" v-model="newMinterAddress" type="text" placeholder="0x0000000000000000000000000000000000000000">
+                <span v-if="newMinterBusy" class="">Processing transaction...</span>
+            </div>
+            <template slot="footer">
+                <button @click="onAddMinter()" v-bind:class="{ disabled: newMinterBusy }" class="btn btn--success">Add minter</button>
+            </template>
+        </modal>
+
+        <modal v-if="showMintTokensModal" @close="showMintTokensModal = false">
+            <h3 slot="header">Mint tokens for account:</h3>
+            <div slot="body">
+                <input v-if="!mintForAccountBusy" v-model="mintForAccountAmount" type="number" min="0" />
+                <span v-if="mintForAccountBusy" class="">Processing transaction...</span>
+            </div>
+            <template slot="footer">
+                <button @click="onMintForAccount()" v-bind:class="{ disabled: mintForAccountBusy }" class="btn btn--success" type="submit">Mint {{ mintForAccountAmount }} THX</button>
+            </template>
+        </modal>
+
+        <modal v-if="showDepositToGatewayModal" @close="showDepositToGatewayModal = false">
+            <h3 slot="header">Deposit to main network gateway:</h3>
+            <div slot="body">
+                <input v-if="!depositToGatewayBusy" v-model="depositToGatewayAmount" type="number" min="0" />
+                <span v-if="depositToGatewayBusy" class="">Processing transaction...</span>
+            </div>
+            <template slot="footer">
+                <button @click="onDepositToGateway()" v-bind:class="{ disabled: depositToGatewayBusy }" class="btn btn--success">Deposit {{ depositToGatewayAmount }} THX</button>
+            </template>
+        </modal>
+
+        <modal v-if="showTransferTokensModal" @close="showTransferTokensModal = false">
+            <h3 slot="header">Transfer tokens to account:</h3>
+            <div slot="body">
+                <template v-if="!transferTokensBusy">
+                    <input v-model="transferTokensAddress" type="text" placeholder="0x0000000000000000000000000000000000000000" />
+                    <input v-model="transferTokensAmount" type="number" v-bind:max="balance.token" />
+                </template>
+                <span v-if="transferTokensBusy" class="">Processing transaction...</span>
+            </div>
+            <template slot="footer">
+                <button @click="onTransferTokens()" v-bind:class="{ disabled: transferTokensBusy }" class="btn btn--success">Transfer {{ transferTokensAmount }} THX</button>
+            </template>
+        </modal>
+
+        <modal v-if="showTransferToPoolModal" @close="showTransferToPoolModal = false">
+            <h3 slot="header">Reward pool deposit:</h3>
+            <div slot="body">
+                <p>Reward Pool balance: <strong>{{this.balance.pool}} THX</strong></p>
+                <input v-if="!poolDepositBusy" v-model="transferToPoolAmount" type="number" v-bind:max="balance.token" />
+                <span v-if="poolDepositBusy" class="">Processing transaction...</span>
+            </div>
+            <template slot="footer">
+                <button @click="onTransferToPool()" v-bind:class="{ disabled: poolDepositBusy }" class="btn btn--success">Deposit {{ transferTokensAmount }} THX</button>
+            </template>
+        </modal>
+
+        <modal v-if="showAddManagerModal" @close="showAddManagerModal = false">
+            <h3 slot="header">Add manager role for account:</h3>
+            <div slot="body">
+                <input v-if="!addManagerBusy" v-model="newManagerAddress" type="text" placeholder="0x0000000000000000000000000000000000000000">
+                <span v-if="addManagerBusy" class="">Processing transaction...</span>
+            </div>
+            <template slot="footer">
+                <button @click="onAddManager()" v-bind:class="{ disabled: addManagerBusy }" class="btn btn--success">Add role</button>
+            </template>
+        </modal>
     </main>
 </article>
 </template>
@@ -81,29 +121,44 @@ import 'firebase/database';
 import EventService from '../services/EventService.js';
 import StateService from '../services/StateService.js';
 
+import modal from '../components/Modal';
+
 const THX = window.THX;
+const BN = require('bn.js');
+const tokenMultiplier = new BN(10).pow(new BN(18));
 
 export default {
     name: 'home',
+    components: {
+        modal
+    },
     data: function() {
         return {
-            network: null,
+            ea: new EventService(),
+            state: new StateService(),
             isManager: false,
             isMinter: false,
             balance: {
                 token: 0,
                 pool: 0
             },
+            showMintTokensModal: false,
+            showAddMinterModal: false,
+            showDepositToGatewayModal: false,
+            showConnectKeysModal: false,
+            showTransferTokensModal: false,
+            showTransferToPoolModal: false,
+            showAddManagerModal: false,
             transferToPoolAmount: 0,
             mintForAccountAmount: 0,
-            rewardSlug: "",
-            rewardAmount: 0,
             newManagerAddress: "",
             newMinterAddress: "",
             transferTokensAddress: "",
             transferTokensAmount: 0,
             transferEtherAddress: "",
             transferEtherAmount: 0,
+            depositToGatewayAmount: 0,
+            depositToGatewayBusy: false,
             account: {
                 uid: null,
                 email: null,
@@ -112,8 +167,6 @@ export default {
                 loomPrivateKey: null,
                 ethPrivateKey: null,
             },
-            state: new StateService(),
-            ea: new EventService(),
         }
     },
     created() {
@@ -133,7 +186,7 @@ export default {
     },
     methods: {
         async init(uid, loomKey, ethKey) {
-            let tokenRinkeby, token, pool;
+            let tokenRinkeby, token, pool, balanceInWei;
 
             await THX.contracts.load(loomKey, ethKey);
 
@@ -148,14 +201,22 @@ export default {
 
             firebase.database().ref('wallets').child(this.account.loomAddress).child('uid').set(uid);
 
-            this.balance.tokenRinkeby = await tokenRinkeby.methods.balanceOf(this.account.ethAddress).call();
-            this.balance.token = await token.methods.balanceOf(this.account.loomAddress).call();
-            this.balance.pool = await token.methods.balanceOf(pool._address).call();
-            this.isManager = await pool.methods.isManager(this.account.loomAddress).call();
+            balanceInWei = await token.methods.balanceOf(pool._address).call();
+            this.balance.pool = new BN(balanceInWei).div(tokenMultiplier);
 
+            balanceInWei = await token.methods.balanceOf(this.account.loomAddress).call();
+            this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
+
+            balanceInWei = await tokenRinkeby.methods.balanceOf(this.account.ethAddress).call();
+            this.balance.tokenRinkeby = new BN(balanceInWei).div(tokenMultiplier);
+
+            this.isManager = await pool.methods.isManager(this.account.loomAddress).call();
             this.isMinter = await tokenRinkeby.methods.isMinter(this.account.ethAddress).call();
 
             this.$parent.$refs.header.updateBalance();
+        },
+        logout() {
+            this.$router.push('/logout');
         },
         reset() {
             this.account.loomPrivateKey = null;
@@ -173,16 +234,30 @@ export default {
 
             alert('Your account is connected.');
         },
+        onDepositToGateway() {
+            this.depositToGatewayBusy = true;
+            THX.contracts.depositToRinkebyGateway(this.depositToGatewayAmount).then(() => {
+                this.depositToGatewayAmount = 0;
+                this.depositToGatewayBusy = false;
+            });
+        },
         onTransferTokens() {
             const token = THX.contracts.instances.token;
+            const tokenAmount = new BN(this.transferTokensAmount).mul(tokenMultiplier);
 
-            return token.methods.transfer(this.transferTokensAddress, this.transferTokensAmount).send({ from: this.account.address }).then(async () => {
+            return token.methods.transfer(this.transferTokensAddress, tokenAmount.toString()).send({ from: this.account.loomAddress }).then(async () => {
                 const pool = THX.contracts.instances.pool;
+                let balanceInWei;
 
-                this.balance.pool = await token.methods.balanceOf(pool._address).call();
-                this.balance.token = await token.methods.balanceOf(this.account.address).call();
+                balanceInWei = await token.methods.balanceOf(pool._address).call();
+                this.balance.pool = new BN(balanceInWei).div(tokenMultiplier);
+
+                balanceInWei = await token.methods.balanceOf(this.account.loomAddress).call();
+                this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
 
                 this.$parent.$refs.header.updateBalance();
+
+                this.transferTokensAmount = 0;
             });
         },
         onMintForAccount() {
@@ -190,27 +265,34 @@ export default {
         },
         onTransferToPool() {
             const pool = THX.contracts.instances.pool;
+            const tokenAmount = new BN(this.transferToPoolAmount).mul(tokenMultiplier);
 
-            return pool.methods.deposit(this.transferToPoolAmount).send({ from: this.account.address }).then(async () => {
+            return pool.methods.deposit(tokenAmount.toString()).send({ from: this.account.loomAddress }).then(async () => {
+                let balanceInWei;
                 const token = THX.contracts.instances.token;
 
-                this.balance.pool = await token.methods.balanceOf(pool._address).call();
-                this.balance.token = await token.methods.balanceOf(this.account.address).call();
+                balanceInWei = await token.methods.balanceOf(pool._address).call();
+                this.balance.pool = new BN(balanceInWei).div(tokenMultiplier);
+
+                balanceInWei = await token.methods.balanceOf(this.account.loomAddress).call();
+                this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
 
                 this.$parent.$refs.header.updateBalance();
+
+                this.transferToPoolAmount = 0;
             });
         },
         onAddManager() {
             const pool = THX.contracts.instances.pool;
 
-            return pool.methods.addManager(this.newManagerAddress).send({ from: this.account.address }).then(async () => {
+            return pool.methods.addManager(this.newManagerAddress).send({ from: this.account.loomAddress }).then(async () => {
 
             });
         },
         onAddMinter() {
             const token = THX.contracts.instances.token;
 
-            return token.methods.addMinter(this.newMinterAddress).send({ from: this.account.address }).then(async () => {
+            return token.methods.addMinter(this.newMinterAddress).send({ from: this.account.loomAddress }).then(async () => {
 
             });
         }

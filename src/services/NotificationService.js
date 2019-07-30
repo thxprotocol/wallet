@@ -5,6 +5,7 @@ export default class NotificationService {
         const THX = window.THX;
         const pool = THX.contracts.instances.pool;
         const token = THX.contracts.instances.token;
+        const tokenRinkeby = THX.contracts.instances.tokenRinkeby;
 
         this.ea = new EventService();
 
@@ -17,6 +18,9 @@ export default class NotificationService {
 
         token.events.Transfer({ to: THX.contracts.currentUserAddress }, (error, event) => this.onTransfer(event.returnValues));
         token.events.Transfer({ from: THX.contracts.currentUserAddress }, (error, event) => this.onTransfer(event.returnValues));
+
+        tokenRinkeby.events.Transfer({ to: THX.contracts.currentUserAddress }, (error, event) => this.onTransfer(event.returnValues));
+        tokenRinkeby.events.Transfer({ from: THX.contracts.currentUserAddress }, (error, event) => this.onTransfer(event.returnValues));
     }
 
     onTransfer(transfer) {

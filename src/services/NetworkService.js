@@ -3,11 +3,12 @@ import {
     LocalAddress,
     CryptoUtils,
     LoomProvider
-} from 'loom-js'
-import Web3 from 'web3'
-import THXToken from '../contracts/THXToken.json'
-import THXTokenRinkeby from '../contracts/THXTokenRinkeby.json'
-import RewardPool from '../contracts/RewardPool.json'
+} from 'loom-js';
+import Web3 from 'web3';
+import THXToken from '../contracts/THXToken.json';
+import THXTokenRinkeby from '../contracts/THXTokenRinkeby.json';
+import RinkebyGateway from '../Gateway.json';
+import RewardPool from '../contracts/RewardPool.json';
 import config from '../config.js';
 
 export default class NetworkService {
@@ -93,6 +94,7 @@ export default class NetworkService {
         }
 
         this.instances = {
+            gateway: new this.ethWeb3.eth.Contract(RinkebyGateway.abi, RinkebyGateway.networks[this.ethNetworkId].address, { from: this.ethAddress }),
             tokenRinkeby: new this.ethWeb3.eth.Contract(THXTokenRinkeby.abi, THXTokenRinkeby.networks[this.ethNetworkId].address, { from: this.ethAddress }),
             token: new this.loomWeb3.eth.Contract(THXToken.abi, THXToken.networks[this.loomNetworkId].address, { from: this.loomAddress }),
             pool: new this.loomWeb3.eth.Contract(RewardPool.abi, RewardPool.networks[this.loomNetworkId].address, { from: this.loomAddress })

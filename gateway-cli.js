@@ -70,7 +70,6 @@ async function depositTokenToRinkebyGateway(web3js, amount, ownerAccount, gas) {
     await contract.methods.approve(rinkebyGatewayAddress, amount.toString()).send({from: ownerAccount, gas: gasEstimate})
 
     gasEstimate = await gateway.methods.depositERC20(amount.toString(), contractAddress).estimateGas({from: ownerAccount, gas})
-    console.log(gasEstimate)
 
     if (gasEstimate == gas) {
         throw new Error('Not enough enough gas, send more.')
@@ -350,6 +349,16 @@ async function mapAccounts({client, signer, ownerRinkebyAddress, ownerExtdevAddr
     await mapperContract.addIdentityMappingAsync(ownerExtdevAddr, ownerRinkebyAddr, signer)
     console.log(`Mapped ${ownerExtdevAddr} to ${ownerRinkebyAddr}`)
 }
+
+program.command('tx-nonce <address>').description('get the current transaction cout for the given address.').option("-g, --gas <number>", "Gas for the tx").action(async function(address, options) {
+    const {account, web3js} = loadRinkebyAccount()
+    try {
+        const number = await web3js.eth.getTransactionCount(address);
+        console.log(`Nonce for ${address} is: ${number}`);
+    } catch (err) {
+        console.error(err)
+    }
+});
 
 program.command('deposit-token <amount>').description('deposit the specified amount of ERC20 tokens into the Transfer Gateway').option("-g, --gas <number>", "Gas for the tx").action(async function(amount, options) {
     const {account, web3js} = loadRinkebyAccount()

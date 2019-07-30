@@ -27,16 +27,17 @@ export default {
     name: 'Camera',
     data: function() {
         return {
+            state: new StateService(),
             loading: true,
             hasStream: false,
-            state: new StateService(),
         }
     },
     mounted() {
         const uid = firebase.auth().currentUser.uid;
-        const key = (typeof this.state.getItem('privateKey') !== "undefined") ? this.state.getItem('privateKey') : null;
+        const loomKey = (typeof this.state.getItem('loomPrivateKey') !== "undefined") ? this.state.getItem('loomPrivateKey') : null;
+        const ethKey = (typeof this.state.getItem('ethPrivateKey') !== "undefined") ? this.state.getItem('ethPrivateKey') : null;
 
-        this.init(uid, loomKey, ethKey);
+        if (loomKey && ethKey) this.init(uid, loomKey, ethKey);
     },
     methods: {
         repaint () {
@@ -84,12 +85,12 @@ export default {
         async addReward(key, slug, amount) {
             const pool = THX.contracts.instances.pool;
 
-            return await  pool.methods.addReward(key, slug, amount).send({ from: THX.contracts.currentUserAddress });
+            return await pool.methods.addReward(key, slug, amount).send({ from: THX.contracts.loomAddress });
         },
         async addRule(key, slug, amount) {
             const pool = THX.contracts.instances.pool;
 
-            return await pool.methods.addRule(key, slug, amount).send({ from: THX.contracts.currentUserAddress });
+            return await pool.methods.addRule(key, slug, amount).send({ from: THX.contracts.loomAddress });
         },
         async getRewards() {
             const pool = THX.contracts.instances.pool;
