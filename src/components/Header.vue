@@ -47,7 +47,7 @@ export default {
             this.balance.eth = web3.utils.fromWei(balanceInWei, "ether");
         },
         goToAccount() {
-            this.$router.push('account');
+            this.$router.replace('/account');
         }
     }
 }

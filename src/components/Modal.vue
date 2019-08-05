@@ -10,7 +10,7 @@
                         <slot name="body"></slot>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn--default" @click="$emit('close')">Cancel</button>
+                        <button class="btn btn--default" @click="$emit('close')">Close</button>
                         <slot name="footer"></slot>
                     </div>
                 </div>
@@ -66,6 +66,10 @@
     input {
         width: calc(100% - 1rem - 2px);
         right: 0;
+    }
+
+    textarea {
+        width: calc(100% - 1rem - 2px);
     }
 }
 

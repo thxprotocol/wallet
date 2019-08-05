@@ -106,8 +106,9 @@ truffle migrate --network ganache
 ```
 yarn deploy:reset:extdev
 yarn deploy:reset:rinkeby
-node ./transfer-gateway.js map-contracts token
 node ./transfer-gateway.js map-accounts
+node ./transfer-gateway.js map-local-accounts
+node ./transfer-gateway.js map-contracts token
 ```
 
 ### Testing
@@ -115,7 +116,7 @@ node ./transfer-gateway.js map-accounts
 ```
 node ./transfer-gateway.js token-balance -c eth
 node ./transfer-gateway.js token-balance -c extdev
-node ./transfer-gateway.js token-balance -c eth -a "0x25803u9tqwt09u3q924tutu09j9024t60"
+node ./transfer-gateway.js token-balance -c eth -a "0xs7ZkMkb7Ul5DkfnMSWxUZvYF9NIHkbW5Hb0EMizcWtU="
 ```
 
 ## VueJS app

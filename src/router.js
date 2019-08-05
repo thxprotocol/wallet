@@ -10,6 +10,7 @@ import Logout from './views/Logout.vue';
 import Register from './views/Register.vue';
 import Camera from './views/Camera.vue';
 import Pools from './views/Pools.vue';
+import Pool from './views/Pool.vue';
 
 Vue.use(VueRouter);
 
@@ -20,6 +21,16 @@ const router = new VueRouter({
             name: 'pools',
             component: Pools,
             visible: true,
+            meta: {
+                header: true,
+                requiresAuth: true
+            }
+        }, {
+            path: '/pools/:id',
+            name: 'pool',
+            component: Pool,
+            visible: false,
+            props: true,
             meta: {
                 header: true,
                 requiresAuth: true

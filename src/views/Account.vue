@@ -12,6 +12,7 @@
         <ul class="list-bullets">
             <li><button class="btn btn-link" @click="showConnectKeysModal = true">Connect Accounts</button></li>
             <li v-if="account.ethAddress"><button class="btn btn-link" @click="showDepositToGatewayModal = true">Deposit THX to Gateway</button></li>
+            <li v-if="account.ethAddress"><button class="btn btn-link" @click="showDepositToGatewayModal = true">Withdraw THX from Gateway</button></li>
             <li v-if="account.ethAddress && isMinter"><button class="btn btn-link" @click="showAddMinterModal = true">Add minter role</button></li>
             <li v-if="account.ethAddress && isMinter"><button class="btn btn-link" @click="showMintTokensModal = true">Mint tokens</button></li>
         </ul>
@@ -20,6 +21,7 @@
             <h3>Loom Network actions</h3>
             <p>Reward Pool balance: <strong>{{this.balance.pool}} THX</strong></p>
             <ul class="list-bullets">
+                <li><button class="btn btn-link" @click="showMintLoomTokensModal = true">Mint Loom tokens</button></li>
                 <li><button class="btn btn-link" @click="showTransferTokensModal = true">Transfer tokens</button></li>
                 <li><button class="btn btn-link" @click="showTransferToPoolModal = true">Pool deposit</button></li>
                 <li v-if="isManager"><button class="btn btn-link" @click="showAddManagerModal = true">Add manager role</button></li>
@@ -59,6 +61,17 @@
             </div>
             <template slot="footer">
                 <button @click="onMintForAccount()" v-bind:class="{ disabled: mintForAccountBusy }" class="btn btn--success" type="submit">Mint {{ mintForAccountAmount }} THX</button>
+            </template>
+        </modal>
+
+        <modal v-if="showMintLoomTokensModal" @close="showMintLoomTokensModal = false">
+            <h3 slot="header">Mint tokens for Loom account:</h3>
+            <div slot="body">
+                <input v-if="!mintForLoomAccountBusy" v-model="mintForLoomAccountAmount" type="number" min="0" />
+                <span v-if="mintForLoomAccountBusy" class="">Processing transaction...</span>
+            </div>
+            <template slot="footer">
+                <button @click="onMintForLoomAccount()" v-bind:class="{ disabled: mintForLoomAccountBusy }" class="btn btn--success" type="submit">Mint {{ mintForLoomAccountAmount }} THX</button>
             </template>
         </modal>
 
@@ -146,9 +159,11 @@ export default {
             showConnectKeysModal: false,
             showTransferTokensModal: false,
             showTransferToPoolModal: false,
+            showMintLoomTokensModal: false,
             showAddManagerModal: false,
             transferToPoolAmount: 0,
             mintForAccountAmount: 0,
+            mintForLoomAccountAmount: 0,
             newManagerAddress: "",
             newMinterAddress: "",
             transferTokensAddress: "",
@@ -157,6 +172,11 @@ export default {
             transferEtherAmount: 0,
             depositToGatewayAmount: 0,
             depositToGatewayBusy: false,
+            mintForLoomAccountBusy: false,
+            poolDepositBusy: false,
+            addManagerBusy: false,
+            addMinterBusy: false,
+            transferTokensBusy: false,
             account: {
                 uid: null,
                 email: null,
@@ -261,9 +281,30 @@ export default {
         onMintForAccount() {
             THX.contracts.mint(this.account.ethAddress, this.mintForAccountAmount);
         },
+        onMintForLoomAccount() {
+            const token = THX.contracts.instances.token;
+            const tokenAmount = new BN(this.mintForLoomAccountAmount).mul(tokenMultiplier);
+
+            this.mintForLoomAccountBusy = true;
+
+            return token.methods.mint(this.account.loomAddress, tokenAmount.toString()).send({ from: this.account.loomAddress}).then(async () => {
+                let balanceInWei;
+                const token = THX.contracts.instances.token;
+
+                balanceInWei = await token.methods.balanceOf(this.account.loomAddress).call();
+                this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
+
+                this.$parent.$refs.header.updateBalance();
+
+                this.mintForLoomAccountAmount = 0;
+                this.mintForLoomAccountBusy = false;
+            });
+        },
         onTransferToPool() {
             const pool = THX.contracts.instances.pool;
             const tokenAmount = new BN(this.transferToPoolAmount).mul(tokenMultiplier);
+
+            this.poolDepositBusy = true;
 
             return pool.methods.deposit(tokenAmount.toString()).send({ from: this.account.loomAddress }).then(async () => {
                 let balanceInWei;
@@ -278,20 +319,25 @@ export default {
                 this.$parent.$refs.header.updateBalance();
 
                 this.transferToPoolAmount = 0;
+                this.poolDepositBusy = false;
             });
         },
         onAddManager() {
             const pool = THX.contracts.instances.pool;
 
-            return pool.methods.addManager(this.newManagerAddress).send({ from: this.account.loomAddress }).then(async () => {
+            this.addManagerBusy = true;
 
+            return pool.methods.addManager(this.newManagerAddress).send({ from: this.account.loomAddress }).then(async () => {
+                this.addManagerBusy = false;
             });
         },
         onAddMinter() {
             const token = THX.contracts.instances.token;
 
-            return token.methods.addMinter(this.newMinterAddress).send({ from: this.account.loomAddress }).then(async () => {
+            this.addMinterBusy = true;
 
+            return token.methods.addMinter(this.newMinterAddress).send({ from: this.account.loomAddress }).then(async () => {
+                this.addMinterBusy = false;
             });
         }
     }

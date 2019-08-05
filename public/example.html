@@ -12,7 +12,10 @@
                         amount: 200,
                     }),
                 })
-                .then(r => console.info);
+                .then((r) => {
+                    debugger
+                    console.info
+                });
         }
 
         function getReward() {
@@ -41,7 +44,9 @@
             amount: 200,
         }
     </pre>
-    <p><button onclick="initReward()">Propose new reward rule</button></p>
+    <strong>Response</strong>
+    <pre>-LjGkVg1vkXpZkrrJIWp</pre>
+    <p><button onclick="createRewardRule()">Propose new reward rule</button></p>
     <h2>Claim a reward</h2>
     <p>Use the THX Wallet to scan and claim your reward.</p>
     <p><canvas id="canvas"></canvas></p>
