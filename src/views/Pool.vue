@@ -10,13 +10,13 @@
             <h2>Reward Rules</h2>
             <ul class="list list--dotted">
                 <li v-bind:key="rule.id" v-for="rule in rules">
-                    {{ rule.id }}<br>
-                    {{ rule.slug }}<br>
-                    {{ rule.amount }}<br>
-                    {{ rule.creator }}<br>
-                    {{ rule.created }}<br>
-                    {{ rule.key }}<br>
-                    {{ RuleState[rule.state] }}<br>
+                    <div class="description">
+                        {{ rule.id }} | {{ rule.slug }} | {{ rule.amount }} <strong>{{ RuleState[rule.state] }}</strong>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-primary" @click="onRejectRewardRule(rule.id)">Reject</button>
+                        <button class="btn btn-primary" @click="onApproveRewardRule(rule.id)">Approve</button>
+                    </div>
                 </li>
             </ul>
 
@@ -83,6 +83,8 @@ import EventService from '../services/EventService';
 
 import modal from '../components/Modal';
 
+import Vue from 'vue';
+
 const THX = window.THX;
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
@@ -97,7 +99,6 @@ export default {
             state: new StateService(),
             ea: new EventService(),
             isManager: false,
-            pool: {},
             rules: [],
             RuleState: ['Pending', 'Active', 'Disabled'],
             showCreateRuleModal: false,
@@ -163,8 +164,22 @@ export default {
 
             this.ea.listen('event.RuleStateChanged', this.onRuleStateChanged)
         },
-        onRuleStateChanged(rule) {
+        async onApproveRewardRule(id) {
+            const pool = THX.contracts.instances.pool;
+            return await pool.methods.approveRule(id).send({from: this.account.loomAddress });
+        },
+        async onRejectRewardRule(id) {
+            const pool = THX.contracts.instances.pool;
+            return await pool.methods.rejectRule(id).send({from: this.account.loomAddress });
+        },
+        onRuleStateChanged(data) {
+            const rule = data.detail;
+            const uid = firebase.auth().currentUser.uid;
             const rulesRef = firebase.database().ref(`pools/${uid}/${this.poolAddress}/rules`);
+
+            if (this.rules[rule.id]) {
+                Vue.set(this.rules[rule.id], 'state', rule.state);
+            }
 
             return rulesRef.child(rule.id).update({ state: this.RuleState[rule.state] });
         },
@@ -179,7 +194,7 @@ export default {
             for (let i = 0; i < amountOfRules; i++) {
                 const rule = await pool.methods.rules(i).call();
 
-                this.rules.push(rule);
+                Vue.set(this.rules, rule.id, rule);
             }
         },
         onAddRewardRule() {
@@ -204,6 +219,7 @@ export default {
                     });
                 })
                 .catch(err => {
+                    // eslint-disable-next-line
                     console.error(err);
                 });
         },
