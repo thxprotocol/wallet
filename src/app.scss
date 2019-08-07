@@ -402,18 +402,20 @@ hr.dotted {
 
 .list--swipe {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    flex: 1 auto;
+    overflow: auto;
+    height: 100%;
 }
 
 .notification {
     background-color: white;
     width: calc(100vw - 4rem);
-    margin: 1rem 1rem 4.5rem;
+    margin: 1rem 1rem;
     padding: 1rem;
     border-radius: 10px;
     flex: 1 auto;
     display: block;
-    overflow: auto;
 
     &__actions {
         width: 100%;

@@ -184,22 +184,25 @@ export default {
             }
         },
         addMyTransfers(data) {
+            const web3 = THX.contracts.ethWeb3;
+
             for (let key in data) {
                 const hash = data[key].transactionHash;
                 const value = data[key].returnValues;
                 const from = (value.from) ? value.from.toLowerCase(): '';
                 const to = (value.to) ? value.to.toLowerCase(): '';
-                const amount = value.value;
+                const amount = web3.utils.fromWei(value.value, 'ether');
 
                 this.createTransfer(hash, from, to, amount);
             }
         },
         addMyTransfer(data) {
+            const web3 = THX.contracts.ethWeb3;
             const value = data.detail;
             const hash  = event.transactionHash;
             const from = (value.from) ? value.from.toLowerCase(): '';
             const to = (value.to) ? value.to.toLowerCase(): '';
-            const amount = value.value;
+            const amount = web3.utils.fromWei(value.value, 'ether');
 
             this.createTransfer(hash, from, to, amount);
 

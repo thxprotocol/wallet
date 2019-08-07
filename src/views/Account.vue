@@ -25,6 +25,7 @@
                 <li><button class="btn btn-link" @click="showTransferTokensModal = true">Transfer tokens</button></li>
                 <li><button class="btn btn-link" @click="showTransferToPoolModal = true">Pool deposit</button></li>
                 <li v-if="isManager"><button class="btn btn-link" @click="showAddManagerModal = true">Add manager role</button></li>
+                <li v-if="isMember"><button class="btn btn-link" @click="showAddMemberModal = true">Add member role</button></li>
             </ul>
         </template>
 
@@ -112,6 +113,17 @@
             </template>
         </modal>
 
+        <modal v-if="showAddMemberModal" @close="showAddMemberModal = false">
+            <h3 slot="header">Add member role for account:</h3>
+            <div slot="body">
+                <input v-if="!addMemberBusy" v-model="newMemberAddress" type="text" placeholder="0x0000000000000000000000000000000000000000">
+                <span v-if="addMemberBusy" class="">Processing transaction...</span>
+            </div>
+            <template slot="footer">
+                <button @click="onAddMember()" v-bind:class="{ disabled: addMemberBusy }" class="btn btn--success">Add member</button>
+            </template>
+        </modal>
+
         <modal v-if="showAddManagerModal" @close="showAddManagerModal = false">
             <h3 slot="header">Add manager role for account:</h3>
             <div slot="body">
@@ -119,7 +131,7 @@
                 <span v-if="addManagerBusy" class="">Processing transaction...</span>
             </div>
             <template slot="footer">
-                <button @click="onAddManager()" v-bind:class="{ disabled: addManagerBusy }" class="btn btn--success">Add role</button>
+                <button @click="onAddManager()" v-bind:class="{ disabled: addManagerBusy }" class="btn btn--success">Add manager</button>
             </template>
         </modal>
     </main>
@@ -147,6 +159,7 @@ export default {
         return {
             ea: new EventService(),
             state: new StateService(),
+            isMember: false,
             isManager: false,
             isMinter: false,
             balance: {
@@ -154,6 +167,7 @@ export default {
                 pool: 0
             },
             showMintTokensModal: false,
+            showAddMemberModal: false,
             showAddMinterModal: false,
             showDepositToGatewayModal: false,
             showConnectKeysModal: false,
@@ -164,6 +178,7 @@ export default {
             transferToPoolAmount: 0,
             mintForAccountAmount: 0,
             mintForLoomAccountAmount: 0,
+            newMemberAddress: "",
             newManagerAddress: "",
             newMinterAddress: "",
             transferTokensAddress: "",
@@ -174,6 +189,7 @@ export default {
             depositToGatewayBusy: false,
             mintForLoomAccountBusy: false,
             poolDepositBusy: false,
+            addMemberBusy: false,
             addManagerBusy: false,
             addMinterBusy: false,
             transferTokensBusy: false,
@@ -228,6 +244,7 @@ export default {
             balanceInWei = await tokenRinkeby.methods.balanceOf(this.account.ethAddress).call();
             this.balance.tokenRinkeby = new BN(balanceInWei).div(tokenMultiplier);
 
+            this.isMember = await pool.methods.isMember(this.account.loomAddress).call();
             this.isManager = await pool.methods.isManager(this.account.loomAddress).call();
             this.isMinter = await tokenRinkeby.methods.isMinter(this.account.ethAddress).call();
 
@@ -320,6 +337,15 @@ export default {
 
                 this.transferToPoolAmount = 0;
                 this.poolDepositBusy = false;
+            });
+        },
+        onAddMember() {
+            const pool = THX.contracts.instances.pool;
+
+            this.addMemberBusy = true;
+
+            return pool.methods.addMember(this.newMemberAddress).send({ from: this.account.loomAddress }).then(async () => {
+                this.addMemberBusy = false;
             });
         },
         onAddManager() {

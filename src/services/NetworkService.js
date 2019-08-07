@@ -10,6 +10,7 @@ import THXTokenRinkeby from '../contracts/THXTokenRinkeby.json';
 import RinkebyGateway from '../Gateway.json';
 import RewardPool from '../contracts/RewardPool.json';
 import config from '../config.js';
+import ContractEventService from '../services/ContractEventService';
 
 export default class NetworkService {
 
@@ -99,5 +100,7 @@ export default class NetworkService {
             token: new this.loomWeb3.eth.Contract(THXToken.abi, THXToken.networks[this.loomNetworkId].address, { from: this.loomAddress }),
             pool: new this.loomWeb3.eth.Contract(RewardPool.abi, RewardPool.networks[this.loomNetworkId].address, { from: this.loomAddress })
         }
+
+        this.events = new ContractEventService(this.instances, this.currentUserAddress);
     }
 }

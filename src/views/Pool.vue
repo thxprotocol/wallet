@@ -205,7 +205,7 @@ export default {
             return pool.methods.addRule(this.newRule.slug, this.newRule.size)
                 .send({ from: this.account.loomAddress })
                 .then(async tx => {
-                    const id = tx.events.RuleStateChanged.returnValues;
+                    const id = tx.events.RuleStateChanged.returnValues.id;
                     const rule = await pool.methods.rules(id).call();
 
                     return rulesRef.child(id).set({

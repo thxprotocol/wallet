@@ -22,7 +22,6 @@ import 'firebase/database';
 
 import StateService from '../services/StateService';
 import EventService from '../services/EventService';
-import NotificationService from '../services/NotificationService';
 
 export default {
     name: 'App',
@@ -64,7 +63,6 @@ export default {
             const amountOfRewards = parseInt(await pool.methods.countRewards().call());
             this.state.setItem('lastRewardId', amountOfRewards);
 
-            this.notifications = new NotificationService();
             this.ea = new EventService();
 
             this.ea.listen('event.RewardStateChanged', this.onRewardStateChange);

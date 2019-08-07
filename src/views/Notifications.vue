@@ -1,5 +1,10 @@
 <template>
 <article class="region region--container">
+    <!-- <main class="region region--content">
+        <template v-for="n in notifications">
+            {{n}}
+        </template>
+    </main> -->
 
     <div class="list list--swipe">
         <div v-bind:key="n.id" v-for="n in notifications" class="notification">
@@ -8,6 +13,9 @@
                     {{ n.title }}
                     <span class="badge badge--default">{{ n.state }}</span>
                 </h2>
+                <p>
+                    Approved: <strong>{{ n.yesCounter }}</strong> | Rejected: <strong>{{ n.noCounter }}</strong>
+                </p>
                 <p>{{ n.description }}</p>
                 <p>{{ pool.name }} <strong>{{ pool.balance }} THX</strong></p>
                 <hr />
@@ -23,22 +31,21 @@
                     Time: {{ n.created }}
                 </p>
                 <div class="notification__actions">
-                    <button v-bind:class="{ disabled: rejectBusy }" class="btn btn--default" v-on:click="rejectReward(n.id)">
+                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn--default" v-on:click="vote(n.id, false)">
                         Reject
                     </button>
-                    <button v-bind:class="{ disabled: approveBusy }" class="btn btn--success" v-on:click="approveReward(n.id)">
+                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn--success" v-on:click="vote(n.id, true)">
                         Approve
+                    </button>
+                </div>
+                <div class="notification__actions" v-if="n.voted">
+                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn--link" v-on:click="revokeVote(n.id)">
+                        Revoke Vote
                     </button>
                 </div>
             </template>
         </div>
     </div>
-
-    <ul class="list list--nav">
-        <li v-bind:key="n.id" v-for="n in notifications">
-            <button v-bind:class="{ active: (n.id == currentNotification) }">{{ n.id }}</button>
-        </li>
-    </ul>
 
 </article>
 </template>
@@ -50,7 +57,10 @@ import 'firebase/database';
 import EventService from '../services/EventService';
 import StateService from '../services/StateService.js';
 
+import RewardJSON from '../contracts/Reward.json';
+
 const THX = window.THX;
+const RewardState = ['Pending', 'Active', 'Disabled'];
 
 export default {
     name: 'home',
@@ -65,8 +75,7 @@ export default {
             },
             notifications: [],
             currentNotification: 0,
-            approveBusy: false,
-            rejectBusy: false,
+            voteBusy: false,
         }
     },
     created() {
@@ -97,6 +106,10 @@ export default {
             this.update()
 
             this.ea.listen('event.RewardStateChanged', this.handleRewardStateChange);
+
+            const isMember = await pool.methods.isMember(THX.contracts.loomAddress).call()
+
+            console.log(isMember)
         },
         handleRewardStateChange() {
             return this.update();
@@ -106,72 +119,92 @@ export default {
 
             this.notifications = rewards;
         },
-        async formatReward(data) {
-            const dateTime = new Date(parseInt(data.created));
-            const amount = parseInt(data.amount);
-            const beneficiary = data.beneficiary.toLowerCase();
+        async formatReward(contract) {
+            const id = parseInt(await contract.methods.id().call());
+            const dateTime = new Date(parseInt(await contract.methods.created().call()));
+            const amount = await contract.methods.amount().call();
+            const state = RewardState[await contract.methods.state().call()];
+            const beneficiary = (await contract.methods.beneficiary().call()).toLowerCase();
             const wallet = await firebase.database().ref('wallets').child(beneficiary).once('value');
             const user = await firebase.database().ref('users').child( wallet.val().uid ).once('value');
-            const rule = await firebase.database().ref('rules').child( data.key ).once('value');
+            const rule = await firebase.database().ref('rules').child( id ).once('value');
+            const yesCounter = await contract.methods.yesCounter().call();
+            const noCounter = await contract.methods.noCounter().call();
+            const web3 = THX.contracts.loomWeb3;
 
             return {
-                id: parseInt(data.id),
-                title: rule.val().title,
-                description: rule.val().description,
+                id: id,
+                title: 'title',// rule.val().title,
+                description: 'description', //rule.val().description,
                 beneficiary: user.val().email,
                 amount: amount,
-                state: data.state,
+                state: state,
                 created: dateTime,
+                yesCounter: web3.utils.fromWei(yesCounter, 'ether'),
+                noCounter: web3.utils.fromWei(noCounter, 'ether'),
             }
         },
         async getPendingRewards() {
             const pool = THX.contracts.instances.pool;
             const amountOfRewards = await pool.methods.countRewards().call()
             const isManager = await pool.methods.isManager(THX.contracts.loomAddress).call()
+            const web3 = THX.contracts.loomWeb3;
 
             if (isManager) {
                 let rewards = []
 
-                for (var i = 0; i < parseInt(amountOfRewards); i++) {
-                    const data = await pool.methods.rewards(i).call()
-                    const reward = await this.formatReward(data);
+                for (var i = 0; i < amountOfRewards; i++) {
+                    const rewardAddress = await pool.methods.rewards(i).call();
+                    const rewardContract = new web3.eth.Contract(RewardJSON.abi, rewardAddress, { from: THX.contracts.loomAddress });
+                    const reward = await this.formatReward(rewardContract);
+
                     rewards.push(reward);
                 }
 
-                return rewards.filter((r) => r.state == 0);
+                return rewards;
             }
         },
-        approveReward(id) {
+        async revokeVote(id) {
             const pool = THX.contracts.instances.pool;
+            if (isManager) {
+                return pool.methods.revokeVoteForReward(id).send({ from: THX.contracts.loomAddress })
+                    .then(() => {
+                        this.voteBusy = false;
+                        return this.update();
+                    })
+                    .catch(e => {
+                        this.voteBusy = false;
+                        // eslint-disable-next-line
+                        return console.error(e);
+                    });
+            }
+            else {
+                this.voteBusy = false;
+            }
 
-            this.approveBusy = true;
-
-            return pool.methods.approveReward(id).send({ from: THX.contracts.loomAddress })
-                .then(() => {
-                    this.approveBusy = false;
-                    return this.update();
-                })
-                .catch(e => {
-                    this.rejectBusy = false;
-                    // eslint-disable-next-line
-                    return console.error(e);
-                });
         },
-        rejectReward(id) {
+        async vote(id, agree) {
             const pool = THX.contracts.instances.pool;
+            const isManager = await pool.methods.isManager(THX.contracts.loomAddress).call()
 
-            this.rejectBusy = true;
+            this.voteBusy = true;
 
-            return pool.methods.rejectReward(id).send({ from: THX.contracts.loomAddress })
-                .then(() => {
-                    this.rejectBusy = false;
-                    return this.update();
-                })
-                .catch(e => {
-                    this.rejectBusy = false;
-                    // eslint-disable-next-line
-                    return console.error(e);
-                });
+            if (isManager) {
+                return pool.methods.voteForReward(id, agree).send({ from: THX.contracts.loomAddress })
+                    .then(() => {
+                        this.voteBusy = false;
+                        return this.update();
+                    })
+                    .catch(e => {
+                        this.voteBusy = false;
+                        // eslint-disable-next-line
+                        return console.error(e);
+                    });
+            }
+            else {
+                this.voteBusy = false;
+            }
+
         }
     }
 }

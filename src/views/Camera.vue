@@ -71,30 +71,20 @@ export default {
         },
         onDecode (decodedString) {
             if (decodedString.length > 0) {
+                const pool = THX.contracts.instances.pool;
                 const ref = firebase.database().ref('rewards');
                 const id = ref.push().key;
+
                 let data = JSON.parse(decodedString);
 
                 ref.child(id).set(data);
 
-                alert(`Reward ${id} is being processed...`)
+                alert(`Reward will be processed...`)
 
-                this.addReward(data.key, data.slug, data.amount);
+                pool.methods.createReward(data.slug, data.amount).send({ from: THX.contracts.loomAddress }).then((tx) => {
+                    // Only MemberAdded is fired here. Probably due to dependency in RewardPoll.
+                });
             }
-        },
-        async addReward(key, slug, amount) {
-            const pool = THX.contracts.instances.pool;
-
-            return await pool.methods.addReward(key, slug, amount).send({ from: THX.contracts.loomAddress });
-        },
-        async addRule(key, slug, amount) {
-            const pool = THX.contracts.instances.pool;
-
-            return await pool.methods.addRule(key, slug, amount).send({ from: THX.contracts.loomAddress });
-        },
-        async getRewards() {
-            const pool = THX.contracts.instances.pool;
-            return await pool.methods.getRewards();
         }
     }
 }
