@@ -1,7 +1,7 @@
 <template>
     <article class="region region--container">
         <div v-if="loading && !hasStream" class="loader">Loading...</div>
-        <div v-if="!hasStream" class="ui-file">
+        <div v-if="hasStream" class="ui-file">
             <h3>Upload QR code image</h3>
             <qrcode-capture @decode="onDecode" />
         </div>
@@ -20,6 +20,8 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 
 import StateService from '../services/StateService.js';
+
+import RewardPoolJSON from '../contracts/RewardPool.json';
 
 const THX = window.THX;
 
@@ -71,18 +73,17 @@ export default {
         },
         onDecode (decodedString) {
             if (decodedString.length > 0) {
-                const pool = THX.contracts.instances.pool;
-                const ref = firebase.database().ref('rewards');
-                const id = ref.push().key;
+                const poolsRef = firebase.database().ref('pools');
+                const data = JSON.parse(decodedString);
+                const web3 = THX.contracts.loomWeb3;
+                const pool = new web3.eth.Contract(RewardPoolJSON.abi, data.pool, { from: THX.contracts.loomAddress });
 
-                let data = JSON.parse(decodedString);
+                poolsRef.child(data.pool).child('rewards').push().set(data);
 
-                ref.child(id).set(data);
+                alert(`Reward will be processed...`);
 
-                alert(`Reward will be processed...`)
-
-                pool.methods.createReward(data.slug, data.amount).send({ from: THX.contracts.loomAddress }).then((tx) => {
-                    // Only MemberAdded is fired here. Probably due to dependency in RewardPoll.
+                pool.methods.createReward(data.rule).send({ from: THX.contracts.loomAddress }).then((tx) => {
+                    console.log(tx);
                 });
             }
         }

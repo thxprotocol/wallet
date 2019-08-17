@@ -126,16 +126,16 @@ export default {
             const state = RewardState[await contract.methods.state().call()];
             const beneficiary = (await contract.methods.beneficiary().call()).toLowerCase();
             const wallet = await firebase.database().ref('wallets').child(beneficiary).once('value');
-            const user = await firebase.database().ref('users').child( wallet.val().uid ).once('value');
-            const rule = await firebase.database().ref('rules').child( id ).once('value');
+            const user = await firebase.database().ref(`users/${wallet.val().uid}`).once('value');
+            const rule = await firebase.database().ref(`pools/${THX.contracts.instances.pool._address}/rules/${id}`).once('value');
             const yesCounter = await contract.methods.yesCounter().call();
             const noCounter = await contract.methods.noCounter().call();
             const web3 = THX.contracts.loomWeb3;
 
             return {
                 id: id,
-                title: 'title',// rule.val().title,
-                description: 'description', //rule.val().description,
+                title: rule.val().title,
+                description: rule.val().description,
                 beneficiary: user.val().email,
                 amount: amount,
                 state: state,

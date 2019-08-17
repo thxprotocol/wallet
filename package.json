@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
+        "truffle": "truffle",
         "build": "vue-cli-service build",
         "deploy:firebase": "NETWORK=extdev yarn build; firebase deploy",
         "deploy:reset": "truffle deploy --reset --network loom_dapp_chain",
@@ -11,7 +12,7 @@
         "deploy:reset:extdev": "truffle deploy --reset --network extdev_plasma_us1",
         "deploy:rinkeby": "truffle deploy --network rinkeby",
         "deploy:reset:rinkeby": "truffle deploy --reset --network rinkeby",
-        "test": "truffle test --network loom_dapp_chain",
+        "test": "truffle test --network ganache",
         "test:extdev": "truffle test --network extdev_plasma_us1",
         "serve:raw": "webpack-dev-server --hot --content-base ./dist",
         "serve": "vue-cli-service serve",
@@ -22,17 +23,19 @@
         "gen:extdev-newkey": "npm run get:loom && ./loom/loom genkey -k extdev_private_key_new -a extdev_public_key_new",
         "gen:loom-key": "npm run get:loom && ./loom/loom genkey -k loom_private_key -a loom_public_key",
         "loom:init": "cd loom && chmod +x loom && ./loom init -f && cd ..",
-        "loom:run": "cd loom && ./loom run && cd .."
+        "loom:run": "cd loom && ./loom run && cd ..",
+        "ganache:run": "ganache-cli --accounts=10 --defaultBalanceEther=10 --gasPrice=10225000000 --gasLimit=8500000"
     },
     "dependencies": {
         "dotenv": "^6.2.0",
         "ethereumjs-tx": "^2.1.0",
         "firebase": "^6.2.4",
+        "ganache-time-traveler": "^1.0.3",
         "lodash": "^4.17.14",
         "loom-js": "^1.55.0",
         "loom-truffle-provider": "^0.13.0",
         "path": "^0.12.7",
-        "truffle-contract": "^4.0.1",
+        "truffle": "^5.0.32",
         "truffle-hdwallet-provider": "^1.0.2",
         "vue": "^2.5.21",
         "vue-qrcode-reader": "^2.0.2",
@@ -48,7 +51,7 @@
         "node-sass": "^4.9.0",
         "sass-loader": "^7.0.1",
         "vue-template-compiler": "^2.5.21",
-        "web3": "1.0.0-beta.37"
+        "web3": "1.0.0-beta.33"
     },
     "eslintConfig": {
         "root": true,

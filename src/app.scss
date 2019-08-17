@@ -198,7 +198,7 @@ hr.dotted {
     // background-image: url("./assets/background_header.jpg");
     background-size: cover;
     background-position: center center;
-    flex: 0 auto;
+    flex: 1 auto;
 
     & + .region--container .region--content {
         margin-top: -1rem;

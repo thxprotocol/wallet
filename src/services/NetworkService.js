@@ -1,9 +1,4 @@
-import {
-    Client,
-    LocalAddress,
-    CryptoUtils,
-    LoomProvider
-} from 'loom-js';
+import { Client, LocalAddress, CryptoUtils, LoomProvider } from 'loom-js';
 import Web3 from 'web3';
 import THXToken from '../contracts/THXToken.json';
 import THXTokenRinkeby from '../contracts/THXTokenRinkeby.json';
@@ -100,6 +95,8 @@ export default class NetworkService {
             token: new this.loomWeb3.eth.Contract(THXToken.abi, THXToken.networks[this.loomNetworkId].address, { from: this.loomAddress }),
             pool: new this.loomWeb3.eth.Contract(RewardPool.abi, RewardPool.networks[this.loomNetworkId].address, { from: this.loomAddress })
         }
+
+        console.log('Pool Address', this.instances.pool._address)
 
         this.events = new ContractEventService(this.instances, this.currentUserAddress);
     }

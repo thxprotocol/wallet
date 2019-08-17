@@ -1,8 +1,9 @@
-const path = require('path')
-const {join} = require('path')
-const {readFileSync} = require('fs')
-const LoomTruffleProvider = require('loom-truffle-provider')
+const path = require('path');
+const {join} = require('path');
+const {readFileSync} = require('fs');
+const LoomTruffleProvider = require('loom-truffle-provider');
 const HDWalletProvider = require("truffle-hdwallet-provider");
+
 require('dotenv').config();
 
 module.exports = {

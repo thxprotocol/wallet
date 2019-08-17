@@ -14,7 +14,7 @@ export default class ContractEventService {
         pool.methods.countRewards().call().then(async (amount) => {
             const web3 = THX.contracts.loomWeb3;
 
-            console.info(`Subscribing for StateChange Events on ${amount} contracts.`);
+            console.info(`Subscribing for Events on ${amount} Reward Contracts.`);
 
             // Get all rewards for the pool that need listening
             for (var i = 0; i < amount; i++) {
@@ -25,7 +25,7 @@ export default class ContractEventService {
                 reward.events.RewardStateChanged({filter: { beneficiary: currentUserAddress }}, (error, event) => this.onMyRewardStateChanged(event.returnValues));
             }
         });
-
+        pool.events.RewardPollCreated({}, (error, event) => this.onRewardPollCreated(event.returnValues));
         pool.events.RuleStateChanged({}, (error, event) => this.onRuleStateChanged(event.returnValues));
         pool.events.Deposited({}, (error, event) => this.onDeposited(event.returnValues));
         pool.events.Withdrawn({}, (error, event) => this.onWithdrawn(event.returnValues));
@@ -43,6 +43,10 @@ export default class ContractEventService {
 
     onMyRewardStateChanged(reward) {
         return this.ea.dispatch('event.MyRewardStateChanged', reward);
+    }
+
+    onRewardPollCreated(reward) {
+        return this.ea.dispatch('event.RewardPollCreated', reward);
     }
 
     onRewardStateChanged(reward) {

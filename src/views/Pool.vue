@@ -14,15 +14,29 @@
                         {{ rule.id }} | {{ rule.slug }} | {{ rule.amount }} <strong>{{ RuleState[rule.state] }}</strong>
                     </div>
                     <div class="actions">
-                        <button class="btn btn-primary" @click="onRejectRewardRule(rule.id)">Reject</button>
-                        <button class="btn btn-primary" @click="onApproveRewardRule(rule.id)">Approve</button>
+
                     </div>
                 </li>
             </ul>
 
+            <h2>Rule Poll</h2>
+
+            <h3>{{poll.rule.title}}</h3>
+            <p>{{poll.rule.description}}</p>
+            <p>Proposed amount: <strong>{{poll.proposedAmount}}</strong></p>
+            <p>
+                Amount of votes: {{poll.totalVoted}}<br>
+                Yes: <strong>{{poll.yesCounter}}</strong> | No: <strong>{{poll.noCounter}}</strong>
+            </p>
+
+            <button class="btn btn-primary" v-if="hasVoted" @click="onRevokeVoteForRule()">Revoke</button>
+            <button class="btn btn-primary" v-if="!hasVoted" @click="onRejectRewardRule()">Reject</button>
+            <button class="btn btn-primary" v-if="!hasVoted"@click="onApproveRewardRule()">Approve</button>
+
+
             <h2>Pool Actions</h2>
             <ul class="list-bullets">
-                <li><button class="btn btn-link" v-if="isManager" @click="showCreateRuleModal = true">Add new rule</button></li>
+                <li v-if="isManager"><button class="btn btn-link" @click="showCreateRuleModal = true">Add new rule</button></li>
                 <li><button class="btn btn-link" @click="showChangeRuleModal = true">Change Rule</button></li>
                 <li><button class="btn btn-link" @click="showTransferToPoolModal = true">Pool Deposit</button></li>
             </ul>
@@ -85,6 +99,8 @@ import modal from '../components/Modal';
 
 import Vue from 'vue';
 
+import RulePollJSON from '../contracts/RulePoll.json';
+
 const THX = window.THX;
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
@@ -106,6 +122,7 @@ export default {
             showTransferToPoolModal: false,
             poolDepositBusy: false,
             transferToPoolAmount: 0,
+            hasVoted: false,
             account: {
                 loomAddress: null
             },
@@ -114,6 +131,19 @@ export default {
                 title: '',
                 description: '',
                 size: 0,
+            },
+            poll: {
+                id: null,
+                proposedAmount: null,
+                yesCounter: 0,
+                noCounter: 0,
+                totalVoted: 0,
+                rule: {
+                    title: '',
+                    description: '',
+                    state: null,
+                    amount: 0,
+                },
             },
             pool: {
                 name: '',
@@ -131,7 +161,7 @@ export default {
 
         this.poolAddress = this.$route.params.id;
 
-        firebase.database().ref(`pools/${uid}/${this.poolAddress}`).once('value').then((s) => {
+        firebase.database().ref(`pools/${this.poolAddress}`).once('value').then((s) => {
             this.pool = s.val();
         });
 
@@ -157,25 +187,31 @@ export default {
             this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
 
             this.isManager = await pool.methods.isManager(this.account.loomAddress).call();
+            this.isMember = await pool.methods.isMember(this.account.loomAddress).call();
 
             this.$parent.$refs.header.updateBalance();
 
             this.getRewardRules();
+            this.getRulePoll();
 
             this.ea.listen('event.RuleStateChanged', this.onRuleStateChanged)
         },
-        async onApproveRewardRule(id) {
+        async onApproveRewardRule() {
             const pool = THX.contracts.instances.pool;
-            return await pool.methods.approveRule(id).send({from: this.account.loomAddress });
+            return await pool.methods.voteForRule(true).send({from: this.account.loomAddress });
         },
-        async onRejectRewardRule(id) {
+        async onRejectRewardRule() {
             const pool = THX.contracts.instances.pool;
-            return await pool.methods.rejectRule(id).send({from: this.account.loomAddress });
+            return await pool.methods.voteForRule(false).send({from: this.account.loomAddress });
+        },
+        async onRevokeVoteForRule() {
+            const pool = THX.contracts.instances.pool;
+
+            return await pool.methods.revokeVoteForRule().send({from: this.account.loomAddress });
         },
         onRuleStateChanged(data) {
             const rule = data.detail;
-            const uid = firebase.auth().currentUser.uid;
-            const rulesRef = firebase.database().ref(`pools/${uid}/${this.poolAddress}/rules`);
+            const rulesRef = firebase.database().ref(`pools/${this.poolAddress}/rules`);
 
             if (this.rules[rule.id]) {
                 Vue.set(this.rules[rule.id], 'state', rule.state);
@@ -197,12 +233,45 @@ export default {
                 Vue.set(this.rules, rule.id, rule);
             }
         },
+        async getRulePoll() {
+            const uid = firebase.auth().currentUser.uid;
+            const pool = THX.contracts.instances.pool;
+            const pollAddress = await pool.methods.rulePoll().call();
+            const web3 = THX.contracts.loomWeb3;
+            const pollContract = new web3.eth.Contract(RulePollJSON.abi, pollAddress, { from: THX.contracts.loomAddress });
+            const id = parseInt(await pollContract.methods.id().call());
+            const proposedAmount = parseInt(await pollContract.methods.proposedAmount().call());
+            const rulesRef = firebase.database().ref(`pools/${this.poolAddress}/rules`);
+            const vote = await pollContract.methods.votesByAddress(this.account.loomAddress).call();
+
+            this.hasVoted = parseInt(vote.time) > 0;
+
+            rulesRef.child(id).once('value').then(async data => {
+                const yesCounter = await pollContract.methods.yesCounter().call();
+                const noCounter = await pollContract.methods.noCounter().call();
+                const totalVoted = await pollContract.methods.totalVoted().call();
+
+                this.poll = {
+                    id: id,
+                    proposedAmount: proposedAmount,
+                    yesCounter: web3.utils.fromWei(yesCounter, 'ether'),
+                    noCounter: web3.utils.fromWei(noCounter, 'ether'),
+                    totalVoted: totalVoted,
+                    rule: {
+                        title: data.val().title,
+                        description: data.val().description,
+                        state: this.RuleState[data.val().state],
+                        amount: data.val().amount,
+                    }
+                }
+            });
+        },
         onAddRewardRule() {
             const pool = THX.contracts.instances.pool;
             const uid = firebase.auth().currentUser.uid;
-            const rulesRef = firebase.database().ref(`pools/${uid}/${this.poolAddress}/rules`);
+            const rulesRef = firebase.database().ref(`pools/${this.poolAddress}/rules`);
 
-            return pool.methods.addRule(this.newRule.slug, this.newRule.size)
+            return pool.methods.createRule(this.newRule.slug, this.newRule.size)
                 .send({ from: this.account.loomAddress })
                 .then(async tx => {
                     const id = tx.events.RuleStateChanged.returnValues.id;
