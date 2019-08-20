@@ -24,8 +24,6 @@
 </template>
 
 <script>
-import StarsSrc from '../assets/flash_page_stars.svg';
-
 const THX = window.THX;
 
 export default {
@@ -34,7 +32,7 @@ export default {
         return {
             network: null,
             assets: {
-                stars: StarsSrc
+                stars: require('../assets/flash_page_stars.svg')
             },
             pool: {
                 name: "",

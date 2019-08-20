@@ -5,7 +5,7 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
 const rinkebyGatewayAddress = '0xb73C9506cb7f4139A4D6Ac81DF1e5b6756Fab7A2';
 const gas = 350000;
 
-export default class ContractService extends NetworkService {
+export default class TransferGateway extends NetworkService {
 
     async depositToRinkebyGateway(amount) {
         let data, tx;

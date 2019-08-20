@@ -21,8 +21,6 @@ import 'firebase/database';
 
 import StateService from '../services/StateService.js';
 
-import RewardPoolJSON from '../contracts/RewardPool.json';
-
 const THX = window.THX;
 
 export default {
@@ -46,7 +44,7 @@ export default {
             return
         },
         async init(uid, loomKey, ethKey) {
-            await THX.contracts.load(loomKey, ethKey);
+            await THX.networks(loomKey, ethKey);
         },
         async onInit (promise) {
             try {
@@ -75,14 +73,14 @@ export default {
             if (decodedString.length > 0) {
                 const poolsRef = firebase.database().ref('pools');
                 const data = JSON.parse(decodedString);
-                const web3 = THX.contracts.loomWeb3;
-                const pool = new web3.eth.Contract(RewardPoolJSON.abi, data.pool, { from: THX.contracts.loomAddress });
+                const pool = THX.networks.poolInstance(data.pool);
 
                 poolsRef.child(data.pool).child('rewards').push().set(data);
 
                 alert(`Reward will be processed...`);
 
-                pool.methods.createReward(data.rule).send({ from: THX.contracts.loomAddress }).then((tx) => {
+                pool.methods.createReward(data.rule).send({ from: THX.networks.loomAddress }).then((tx) => {
+                    // eslint-disable-next-line
                     console.log(tx);
                 });
             }

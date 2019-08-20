@@ -7,6 +7,26 @@
                 <p>Curabitur sollicitudin nulla vitae sem ultricies cursus. In lectus lorem, sagittis quis fermentum ut, varius et dui. In posuere lacus vitae mollis lacinia.</p>
             </div>
 
+            <h2>Pool transfers</h2>
+            <hr class="dotted">
+            <div v-if="!orderedPoolTransfers.length">Loading pool transfers...</div>
+            <ul class="list list--dotted" v-if="orderedPoolTransfers">
+                <li v-bind:key="transfer.hash" v-for="transfer in orderedPoolTransfers">
+                    <div class="description">
+                        <div v-if="transfer.from">
+                            <small>From: </small><span class="badge badge--default">{{transfer.from}}</span>
+                        </div>
+                        <div v-if="transfer.to">
+                            <small>To: </small><span class="badge badge--default">{{transfer.to}}</span>
+                        </div>
+                        <small>{{ transfer.created }}</small>
+                    </div>
+                    <div class="actions">
+                        <strong>{{transfer.amount}} THX</strong>
+                    </div>
+                </li>
+            </ul>
+
             <h2>Reward Rules</h2>
             <ul class="list list--dotted">
                 <li v-bind:key="rule.id" v-for="rule in rules">
@@ -20,24 +40,27 @@
             </ul>
 
             <h2>Rule Poll</h2>
-
-            <h3>{{poll.rule.title}}</h3>
-            <p>{{poll.rule.description}}</p>
-            <p>Proposed amount: <strong>{{poll.proposedAmount}}</strong></p>
-            <p>
-                Amount of votes: {{poll.totalVoted}}<br>
-                Yes: <strong>{{poll.yesCounter}}</strong> | No: <strong>{{poll.noCounter}}</strong>
-            </p>
-
-            <button class="btn btn-primary" v-if="hasVoted" @click="onRevokeVoteForRule()">Revoke</button>
-            <button class="btn btn-primary" v-if="!hasVoted" @click="onRejectRewardRule()">Reject</button>
-            <button class="btn btn-primary" v-if="!hasVoted"@click="onApproveRewardRule()">Approve</button>
-
+            <template v-if="poll">
+                <h3>{{poll.rule.title}}</h3>
+                <p>{{poll.rule.description}}</p>
+                <p>Proposed amount: <strong>{{poll.proposedAmount}}</strong></p>
+                <p>
+                    Amount of votes: {{poll.totalVoted}}<br>
+                    Yes: <strong>{{poll.yesCounter}}</strong> | No: <strong>{{poll.noCounter}}</strong>
+                </p>
+                <template v-if="isMember">
+                    <button class="btn btn-primary" v-if="hasVoted" @click="onRevokeVoteForRule()">Revoke</button>
+                    <button class="btn btn-primary" v-if="!hasVoted" @click="onRejectRewardRule()">Reject</button>
+                    <button class="btn btn-primary" v-if="!hasVoted" @click="onApproveRewardRule()">Approve</button>
+                </template>
+                <p v-if="!isMember"><strong>You are not a member of this pool and can not join the poll.</strong></p>
+            </template>
 
             <h2>Pool Actions</h2>
             <ul class="list-bullets">
                 <li v-if="isManager"><button class="btn btn-link" @click="showCreateRuleModal = true">Add new rule</button></li>
-                <li><button class="btn btn-link" @click="showChangeRuleModal = true">Change Rule</button></li>
+                <li v-if="isMember"><button class="btn btn-link" @click="showChangeRuleModal = true">Change Rule</button></li>
+                <li v-if="isMember"><button class="btn btn-link" @click="showAddMemberModal = true">Invite Member</button></li>
                 <li><button class="btn btn-link" @click="showTransferToPoolModal = true">Pool Deposit</button></li>
             </ul>
 
@@ -58,7 +81,18 @@
                     <span v-if="createRuleBusy" class="">Processing transaction...</span>
                 </div>
                 <template slot="footer">
-                    <button @click="onAddRewardRule()" v-bind:class="{ disabled: createRuleBusy }" class="btn btn--success">Add new rule</button>
+                    <button @click="onCreateRewardRule()" v-bind:class="{ disabled: createRuleBusy }" class="btn btn--success">Add new rule</button>
+                </template>
+            </modal>
+
+            <modal v-if="showAddMemberModal" @close="showAddMemberModal = false">
+                <h3 slot="header">Invite new member to the pool:</h3>
+                <div slot="body">
+                    <input v-if="!addMemberBusy" v-model="newMemberAddress" type="text" placeholder="0x0000000000000000000000000000000000000000">
+                    <span v-if="addMemberBusy" class="">Processing transaction...</span>
+                </div>
+                <template slot="footer">
+                    <button @click="onAddMember()" v-bind:class="{ disabled: addMemberBusy }" class="btn btn--success">Add member</button>
                 </template>
             </modal>
 
@@ -92,16 +126,14 @@
 <script>
 import firebase from 'firebase/app';
 import 'firebase/database';
-import StateService from '../services/StateService';
-import EventService from '../services/EventService';
-
+import EventAggregator from '../services/EventAggregator';
+import RewardPool from '../contracts/RewardPool.json';
+import RulePoll from '../contracts/RulePoll.json';
 import modal from '../components/Modal';
 
 import Vue from 'vue';
+const _ = require('lodash');
 
-import RulePollJSON from '../contracts/RulePoll.json';
-
-const THX = window.THX;
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
 
@@ -110,11 +142,17 @@ export default {
     components: {
         modal
     },
+    computed: {
+        orderedPoolTransfers: function () {
+            return _.orderBy(this.poolTransfers, 'timestamp').reverse()
+        }
+    },
     data: function() {
         return {
-            state: new StateService(),
-            ea: new EventService(),
+            ea: new EventAggregator(),
+            poolTransfers: null,
             isManager: false,
+            isMember: false,
             rules: [],
             RuleState: ['Pending', 'Active', 'Disabled'],
             showCreateRuleModal: false,
@@ -122,9 +160,14 @@ export default {
             showTransferToPoolModal: false,
             poolDepositBusy: false,
             transferToPoolAmount: 0,
+            showAddMemberModal: false,
+            addMemberBusy: false,
+            newMemberAddress: '',
             hasVoted: false,
             account: {
-                loomAddress: null
+                loom: {
+                    address: null
+                }
             },
             newRule: {
                 slug: '',
@@ -132,19 +175,8 @@ export default {
                 description: '',
                 size: 0,
             },
-            poll: {
-                id: null,
-                proposedAmount: null,
-                yesCounter: 0,
-                noCounter: 0,
-                totalVoted: 0,
-                rule: {
-                    title: '',
-                    description: '',
-                    state: null,
-                    amount: 0,
-                },
-            },
+            poll: null,
+            constract: null,
             pool: {
                 name: '',
             },
@@ -154,40 +186,31 @@ export default {
             }
         }
     },
-    mounted() {
-        const uid = firebase.auth().currentUser.uid;
-        const loomKey = (typeof this.state.getItem('loomPrivateKey') !== "undefined") ? this.state.getItem('loomPrivateKey') : null;
-        const ethKey = (typeof this.state.getItem('ethPrivateKey') !== "undefined") ? this.state.getItem('ethPrivateKey') : null;
-
+    created() {
         this.poolAddress = this.$route.params.id;
-
-        firebase.database().ref(`pools/${this.poolAddress}`).once('value').then((s) => {
-            this.pool = s.val();
-        });
-
-        if (loomKey && ethKey) this.init(uid, loomKey, ethKey);
+        this.init();
     },
     methods: {
-        async init(uid, loomKey, ethKey) {
-            let token, pool, balanceInWei;
+        async init() {
+            const THX = window.THX;
+            const token = THX.network.instances.token;
+            let balanceInWei;
 
-            await THX.contracts.load(loomKey, ethKey);
+            this.contract = await THX.network.contract(RewardPool, this.poolAddress);
 
-            token = THX.contracts.instances.token;
-            pool = THX.contracts.instances.pool;
+            this.account.loom = THX.network.account;
+            this.account.rinkeby = THX.network.rinkeby.account;
 
-            this.account.loomAddress = THX.contracts.loomAddress;
+            this.pool.name = await this.contract.methods.name().call();
 
-            this.getPoolMetadata();
-
-            balanceInWei = await token.methods.balanceOf(pool._address).call();
+            balanceInWei = await token.methods.balanceOf(this.poolAddress).call();
             this.balance.pool = new BN(balanceInWei).div(tokenMultiplier);
 
-            balanceInWei = await token.methods.balanceOf(this.account.loomAddress).call();
+            balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
             this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
 
-            this.isManager = await pool.methods.isManager(this.account.loomAddress).call();
-            this.isMember = await pool.methods.isMember(this.account.loomAddress).call();
+            this.isManager = await this.contract.methods.isManager(this.account.loom.address).call();
+            this.isMember = await this.contract.methods.isMember(this.account.loom.address).call();
 
             this.$parent.$refs.header.updateBalance();
 
@@ -196,18 +219,35 @@ export default {
 
             this.ea.listen('event.RuleStateChanged', this.onRuleStateChanged)
         },
+        onAddManager() {
+            this.addManagerBusy = true;
+
+            return this.contract.methods.addManager(this.newManagerAddress)
+                .send({ from: this.account.loom.address })
+                .then(async () => {
+                    this.addManagerBusy = false;
+                });
+        },
+        onAddMember() {
+            this.addMemberBusy = true;
+
+            return this.contract.methods.addMember(this.newMemberAddress).send({ from: this.account.loom.address })
+                .then(async () => {
+                    this.addMemberBusy = false;
+                })
+                .catch(async (err) => {
+                    // eslint-disable-next-line
+                    console.error(err);
+                });
+        },
         async onApproveRewardRule() {
-            const pool = THX.contracts.instances.pool;
-            return await pool.methods.voteForRule(true).send({from: this.account.loomAddress });
+            return await this.contract.methods.voteForRule(true).send({from: this.account.loom.address });
         },
         async onRejectRewardRule() {
-            const pool = THX.contracts.instances.pool;
-            return await pool.methods.voteForRule(false).send({from: this.account.loomAddress });
+            return await this.contract.methods.voteForRule(false).send({from: this.account.loom.address });
         },
         async onRevokeVoteForRule() {
-            const pool = THX.contracts.instances.pool;
-
-            return await pool.methods.revokeVoteForRule().send({from: this.account.loomAddress });
+            return await this.contract.methods.revokeVoteForRule().send({from: this.account.loom.address });
         },
         onRuleStateChanged(data) {
             const rule = data.detail;
@@ -219,63 +259,62 @@ export default {
 
             return rulesRef.child(rule.id).update({ state: this.RuleState[rule.state] });
         },
-        async getPoolMetadata() {
-            const pool = THX.contracts.instances.pool;
-            this.pool.name = await pool.methods.name().call();
-        },
         async getRewardRules() {
-            const pool = THX.contracts.instances.pool;
-            const amountOfRules = parseInt( await pool.methods.countRules().call() );
+            const amountOfRules = parseInt( await this.contract.methods.countRules().call() );
 
             for (let i = 0; i < amountOfRules; i++) {
-                const rule = await pool.methods.rules(i).call();
+                const rule = await this.contract.methods.rules(i).call();
 
                 Vue.set(this.rules, rule.id, rule);
             }
         },
         async getRulePoll() {
-            const uid = firebase.auth().currentUser.uid;
-            const pool = THX.contracts.instances.pool;
-            const pollAddress = await pool.methods.rulePoll().call();
-            const web3 = THX.contracts.loomWeb3;
-            const pollContract = new web3.eth.Contract(RulePollJSON.abi, pollAddress, { from: THX.contracts.loomAddress });
-            const id = parseInt(await pollContract.methods.id().call());
-            const proposedAmount = parseInt(await pollContract.methods.proposedAmount().call());
-            const rulesRef = firebase.database().ref(`pools/${this.poolAddress}/rules`);
-            const vote = await pollContract.methods.votesByAddress(this.account.loomAddress).call();
+            const pollAddress = await this.contract.methods.rulePoll().call();
 
-            this.hasVoted = parseInt(vote.time) > 0;
+            if (pollAddress !== "0x0000000000000000000000000000000000000000") {
+                const THX = window.THX;
+                const rulePoll = THX.network.contract(RulePoll, pollAddress);
 
-            rulesRef.child(id).once('value').then(async data => {
-                const yesCounter = await pollContract.methods.yesCounter().call();
-                const noCounter = await pollContract.methods.noCounter().call();
-                const totalVoted = await pollContract.methods.totalVoted().call();
+                const id = parseInt(await rulePoll.methods.id().call());
+                const proposedAmount = parseInt(await rulePoll.methods.proposedAmount().call());
 
-                this.poll = {
-                    id: id,
-                    proposedAmount: proposedAmount,
-                    yesCounter: web3.utils.fromWei(yesCounter, 'ether'),
-                    noCounter: web3.utils.fromWei(noCounter, 'ether'),
-                    totalVoted: totalVoted,
-                    rule: {
-                        title: data.val().title,
-                        description: data.val().description,
-                        state: this.RuleState[data.val().state],
-                        amount: data.val().amount,
-                    }
-                }
-            });
+                const rulesRef = firebase.database().ref(`pools/${this.poolAddress}/rules`);
+                const vote = await rulePoll.methods.votesByAddress(this.account.loom.address).call();
+
+                this.hasVoted = parseInt(vote.time) > 0;
+
+                rulesRef.child(id).once('value')
+                    .then(async data => {
+                        const yesCounter = await rulePoll.methods.yesCounter().call();
+                        const noCounter = await rulePoll.methods.noCounter().call();
+                        const totalVoted = await rulePoll.methods.totalVoted().call();
+
+                        this.poll = {
+                            id: id,
+                            proposedAmount: proposedAmount,
+                            yesCounter: new BN(yesCounter).div(tokenMultiplier),
+                            noCounter: new BN(noCounter).div(tokenMultiplier),
+                            totalVoted: totalVoted,
+                            rule: {
+                                title: data.val().title,
+                                description: data.val().description,
+                                state: this.RuleState[data.val().state],
+                                amount: data.val().amount,
+                            }
+                        }
+                    });
+            }
+
         },
-        onAddRewardRule() {
-            const pool = THX.contracts.instances.pool;
-            const uid = firebase.auth().currentUser.uid;
+        onCreateRewardRule() {
             const rulesRef = firebase.database().ref(`pools/${this.poolAddress}/rules`);
 
-            return pool.methods.createRule(this.newRule.slug, this.newRule.size)
-                .send({ from: this.account.loomAddress })
+            return this.contract.methods.createRule(this.newRule.slug, this.newRule.size)
+                .send({ from: this.account.loom.address })
                 .then(async tx => {
+                    debugger
                     const id = tx.events.RuleStateChanged.returnValues.id;
-                    const rule = await pool.methods.rules(id).call();
+                    const rule = await this.contract.methods.rules(id).call();
 
                     return rulesRef.child(id).set({
                         id: rule.id,
@@ -283,7 +322,7 @@ export default {
                         title: this.newRule.title,
                         description: this.newRule.description,
                         state: this.RuleState[rule.state],
-                    }).then(async () => {
+                    }).then(() => {
                         return this.showCreateRuleModal = false;
                     });
                 })
@@ -293,35 +332,29 @@ export default {
                 });
         },
         onTransferToPool() {
-            const pool = THX.contracts.instances.pool;
             const tokenAmount = new BN(this.transferToPoolAmount).mul(tokenMultiplier);
 
             this.poolDepositBusy = true;
 
-            return pool.methods.deposit(tokenAmount.toString()).send({ from: this.account.loomAddress }).then(async () => {
-                let balanceInWei;
-                const token = THX.contracts.instances.token;
+            return this.contract.methods.deposit(tokenAmount.toString())
+                .send({ from: this.account.loom.address })
+                .then(async () => {
+                    const THX = window.THX;
+                    const token = THX.network.instances.token;
+                    let balanceInWei;
 
-                balanceInWei = await token.methods.balanceOf(pool._address).call();
-                this.balance.pool = new BN(balanceInWei).div(tokenMultiplier);
+                    balanceInWei = await token.methods.balanceOf(this.poolAddress).call();
+                    this.balance.pool = new BN(balanceInWei).div(tokenMultiplier);
 
-                balanceInWei = await token.methods.balanceOf(this.account.loomAddress).call();
-                this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
+                    balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
+                    this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
 
-                this.$parent.$refs.header.updateBalance();
+                    this.$parent.$refs.header.updateBalance();
 
-                this.transferToPoolAmount = 0;
-                this.poolDepositBusy = false;
-            });
-        },
-        onAddRewardPool() {
-            const uid = firebase.auth().currentUser.uid;
-
-            firebase.database().ref('pools').child(uid).once('value').then((s) => {
-                this.account.uid = s.val().uid;
-                this.account.email = s.val().email;
-            });
-        },
+                    this.transferToPoolAmount = 0;
+                    this.poolDepositBusy = false;
+                });
+        }
     }
 }
 </script>

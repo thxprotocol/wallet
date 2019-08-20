@@ -27,9 +27,6 @@ yarn-error.log*
 *.sw*
 
 # Loom files and folders
-app.db
-chaindata
-genesis.json
 loom
 loom_private_key
 loom_public_key

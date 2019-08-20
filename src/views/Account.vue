@@ -5,27 +5,29 @@
         <h2>Hi {{account.email}}!</h2>
         <p><strong>E-mail:</strong><br> {{account.email}}</p>
         <p><strong>UID:</strong><br> {{account.uid}}</p>
-        <p><strong>Main Network Address:</strong><br> {{account.ethAddress}}</p>
-        <p><strong>Loom Address:</strong><br> {{account.loomAddress}}</p>
+        <p>
+            <strong>Main Network Address:</strong><br>
+            <span v-if="account.rinkeby.address">{{account.rinkeby.address}}</span>
+        </p>
+        <p>
+            <strong>Loom Address:</strong><br>
+            <span v-if="account.loom.address">{{account.loom.address}}</span>
+        </p>
 
         <h3>Main Network actions</h3>
         <ul class="list-bullets">
             <li><button class="btn btn-link" @click="showConnectKeysModal = true">Connect Accounts</button></li>
-            <li v-if="account.ethAddress"><button class="btn btn-link" @click="showDepositToGatewayModal = true">Deposit THX to Gateway</button></li>
-            <li v-if="account.ethAddress"><button class="btn btn-link" @click="showDepositToGatewayModal = true">Withdraw THX from Gateway</button></li>
-            <li v-if="account.ethAddress && isMinter"><button class="btn btn-link" @click="showAddMinterModal = true">Add minter role</button></li>
-            <li v-if="account.ethAddress && isMinter"><button class="btn btn-link" @click="showMintTokensModal = true">Mint tokens</button></li>
+            <li v-if="account.rinkeby.address"><button class="btn btn-link" @click="showDepositToGatewayModal = true">Deposit THX to Gateway</button></li>
+            <li v-if="account.rinkeby.address"><button class="btn btn-link" @click="showDepositToGatewayModal = true">Withdraw THX from Gateway</button></li>
+            <li v-if="account.rinkeby.address && isRinkebyMinter"><button class="btn btn-link" @click="showAddMinterModal = true">Add minter role</button></li>
+            <li v-if="account.rinkeby.address && isRinkebyMinter"><button class="btn btn-link" @click="showMintTokensModal = true">Mint tokens</button></li>
         </ul>
 
-        <template v-if="account.loomAddress">
+        <template v-if="account.loom.address">
             <h3>Loom Network actions</h3>
-            <p>Reward Pool balance: <strong>{{this.balance.pool}} THX</strong></p>
             <ul class="list-bullets">
-                <li><button class="btn btn-link" @click="showMintLoomTokensModal = true">Mint Loom tokens</button></li>
+                <li v-if="isLoomMinter"><button class="btn btn-link" @click="showMintLoomTokensModal = true">Mint Loom tokens</button></li>
                 <li><button class="btn btn-link" @click="showTransferTokensModal = true">Transfer tokens</button></li>
-                <li><button class="btn btn-link" @click="showTransferToPoolModal = true">Pool deposit</button></li>
-                <li v-if="isManager"><button class="btn btn-link" @click="showAddManagerModal = true">Add manager role</button></li>
-                <li v-if="isMember"><button class="btn btn-link" @click="showAddMemberModal = true">Add member role</button></li>
             </ul>
         </template>
 
@@ -35,8 +37,8 @@
         <modal v-if="showConnectKeysModal" @close="showConnectKeysModal = false">
             <h3 slot="header">Add private keys for accounts:</h3>
             <div slot="body">
-                <input v-model="account.loomPrivateKey" type="text" placeholder="Your Loom private key">
-                <input v-model="account.ethPrivateKey" type="text" placeholder="Your Ethereum private key">
+                <input v-model="account.loom.privateKey" type="text" placeholder="Your Loom private key">
+                <input v-model="account.rinkeby.privateKey" type="text" placeholder="Your Rinkeby private key">
             </div>
             <template slot="footer">
                 <button @click="onCreateAccountsFromPrivateKey()" class="btn btn--success" >Connect</button>
@@ -101,39 +103,6 @@
             </template>
         </modal>
 
-        <modal v-if="showTransferToPoolModal" @close="showTransferToPoolModal = false">
-            <h3 slot="header">Reward pool deposit:</h3>
-            <div slot="body">
-                <p>Reward Pool balance: <strong>{{this.balance.pool}} THX</strong></p>
-                <input v-if="!poolDepositBusy" v-model="transferToPoolAmount" type="number" v-bind:max="balance.token" />
-                <span v-if="poolDepositBusy" class="">Processing transaction...</span>
-            </div>
-            <template slot="footer">
-                <button @click="onTransferToPool()" v-bind:class="{ disabled: poolDepositBusy }" class="btn btn--success">Deposit {{ transferTokensAmount }} THX</button>
-            </template>
-        </modal>
-
-        <modal v-if="showAddMemberModal" @close="showAddMemberModal = false">
-            <h3 slot="header">Add member role for account:</h3>
-            <div slot="body">
-                <input v-if="!addMemberBusy" v-model="newMemberAddress" type="text" placeholder="0x0000000000000000000000000000000000000000">
-                <span v-if="addMemberBusy" class="">Processing transaction...</span>
-            </div>
-            <template slot="footer">
-                <button @click="onAddMember()" v-bind:class="{ disabled: addMemberBusy }" class="btn btn--success">Add member</button>
-            </template>
-        </modal>
-
-        <modal v-if="showAddManagerModal" @close="showAddManagerModal = false">
-            <h3 slot="header">Add manager role for account:</h3>
-            <div slot="body">
-                <input v-if="!addManagerBusy" v-model="newManagerAddress" type="text" placeholder="0x0000000000000000000000000000000000000000">
-                <span v-if="addManagerBusy" class="">Processing transaction...</span>
-            </div>
-            <template slot="footer">
-                <button @click="onAddManager()" v-bind:class="{ disabled: addManagerBusy }" class="btn btn--success">Add manager</button>
-            </template>
-        </modal>
     </main>
 </article>
 </template>
@@ -141,12 +110,10 @@
 <script>
 import firebase from 'firebase/app';
 import 'firebase/database';
-import EventService from '../services/EventService.js';
-import StateService from '../services/StateService.js';
+import TransferGateway from '../services/TransferGateway.js';
 
 import modal from '../components/Modal';
 
-const THX = window.THX;
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
 
@@ -157,96 +124,77 @@ export default {
     },
     data: function() {
         return {
-            ea: new EventService(),
-            state: new StateService(),
-            isMember: false,
-            isManager: false,
-            isMinter: false,
+            isLoomMinter: false,
+            isRinkebyMinter: false,
+            showMintTokensModal: false,
+            showDepositToGatewayModal: false,
+            showConnectKeysModal: false,
+            showTransferTokensModal: false,
+            showMintLoomTokensModal: false,
+            showAddMinterModal: false,
+            mintForAccountAmount: 0,
+            mintForLoomAccountAmount: 0,
+            newMinterAddress: "",
+            transferTokensAddress: "",
+            transferTokensAmount: 0,
+            transferTokensBusy: false,
+            depositToGatewayAmount: 0,
+            depositToGatewayBusy: false,
+            mintForLoomAccountBusy: false,
+            addMinterBusy: false,
+            mintForAccountBusy: false,
+            newMinterBusy: false,
             balance: {
                 token: 0,
                 pool: 0
             },
-            showMintTokensModal: false,
-            showAddMemberModal: false,
-            showAddMinterModal: false,
-            showDepositToGatewayModal: false,
-            showConnectKeysModal: false,
-            showTransferTokensModal: false,
-            showTransferToPoolModal: false,
-            showMintLoomTokensModal: false,
-            showAddManagerModal: false,
-            transferToPoolAmount: 0,
-            mintForAccountAmount: 0,
-            mintForLoomAccountAmount: 0,
-            newMemberAddress: "",
-            newManagerAddress: "",
-            newMinterAddress: "",
-            transferTokensAddress: "",
-            transferTokensAmount: 0,
-            transferEtherAddress: "",
-            transferEtherAmount: 0,
-            depositToGatewayAmount: 0,
-            depositToGatewayBusy: false,
-            mintForLoomAccountBusy: false,
-            poolDepositBusy: false,
-            addMemberBusy: false,
-            addManagerBusy: false,
-            addMinterBusy: false,
-            transferTokensBusy: false,
             account: {
                 uid: null,
                 email: null,
-                loomAddress: null,
-                ethAddress: null,
-                loomPrivateKey: null,
-                ethPrivateKey: null,
+                loom: {
+                    address: null,
+                    privateKey: null,
+                },
+                rinkeby: {
+                    address: null,
+                    privateKey: null,
+                },
             },
         }
     },
     created() {
-
-    },
-    mounted() {
         const uid = firebase.auth().currentUser.uid;
-        const loomKey = (typeof this.state.getItem('loomPrivateKey') !== "undefined") ? this.state.getItem('loomPrivateKey') : null;
-        const ethKey = (typeof this.state.getItem('ethPrivateKey') !== "undefined") ? this.state.getItem('ethPrivateKey') : null;
 
-        if (loomKey && ethKey) this.init(uid, loomKey, ethKey);
-
-        firebase.database().ref('users').child(uid).once('value').then((s) => {
+        firebase.database().ref(`users/${uid}`).once('value').then((s) => {
             this.account.uid = s.val().uid;
             this.account.email = s.val().email;
+
+            this.init(uid);
         });
     },
+    mounted() {
+
+    },
     methods: {
-        async init(uid, loomKey, ethKey) {
-            let tokenRinkeby, token, pool, balanceInWei;
+        async init(uid) {
+            const THX = window.THX;
+            const token = THX.network.instances.token;
+            const tokenRinkeby = THX.network.instances.tokenRinkeby;
+            let balanceInWei
 
-            await THX.contracts.load(loomKey, ethKey);
+            this.account.loom = THX.network.account;
+            this.account.rinkeby = THX.network.rinkeby.account;
 
-            tokenRinkeby = THX.contracts.instances.tokenRinkeby;
-            token = THX.contracts.instances.token;
-            pool = THX.contracts.instances.pool;
+            firebase.database().ref(`wallets/${this.account.loom.address}`).child('uid').set(uid);
 
-            this.account.loomAddress = THX.contracts.loomAddress;
-            this.account.ethAddress = THX.contracts.ethAddress;
-            this.account.loomPrivateKey = loomKey;
-            this.account.ethPrivateKey = ethKey;
-
-            firebase.database().ref('wallets').child(this.account.loomAddress).child('uid').set(uid);
-
-            balanceInWei = await token.methods.balanceOf(pool._address).call();
-            this.balance.pool = new BN(balanceInWei).div(tokenMultiplier);
-
-            balanceInWei = await token.methods.balanceOf(this.account.loomAddress).call();
+            balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
             this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
+            this.isLoomMinter = await token.methods.isMinter(this.account.loom.address).call();
 
-            balanceInWei = await tokenRinkeby.methods.balanceOf(this.account.ethAddress).call();
+
+            balanceInWei = await tokenRinkeby.methods.balanceOf(this.account.rinkeby.address).call();
             this.balance.tokenRinkeby = new BN(balanceInWei).div(tokenMultiplier);
-
-            this.isMember = await pool.methods.isMember(this.account.loomAddress).call();
-            this.isManager = await pool.methods.isManager(this.account.loomAddress).call();
-            this.isMinter = await tokenRinkeby.methods.isMinter(this.account.ethAddress).call();
+            this.isRinkebyMinter = await tokenRinkeby.methods.isMinter(this.account.rinkeby.address).call();
 
             this.$parent.$refs.header.updateBalance();
         },
@@ -254,40 +202,38 @@ export default {
             this.$router.push('/logout');
         },
         reset() {
-            this.account.loomPrivateKey = null;
-            this.account.ethPrivateKey = null;
-            this.state.clear();
+            const THX = window.THX;
 
-            window.location.reload();
+            THX.state.clear();
+
+            return window.location.reload();
         },
         onCreateAccountsFromPrivateKey() {
-            const uid = firebase.auth().currentUser.uid;
+            const THX = window.THX;
 
-            this.state.setItem('loomPrivateKey', this.account.loomPrivateKey);
-            this.state.setItem('ethPrivateKey', this.account.ethPrivateKey);
-            this.init(uid, this.account.loomPrivateKey, this.account.ethPrivateKey);
+            THX.state.loomPrivateKey = this.account.loom.privateKey;
+            THX.state.rinkebyPrivateKey = this.account.rinkeby.privateKey;
+            THX.state.save();
 
-            alert('Your account is connected.');
+            alert('Your account is connected. The app will restart.');
+
+            return window.location.reload();
         },
         onDepositToGateway() {
             this.depositToGatewayBusy = true;
-            THX.contracts.depositToRinkebyGateway(this.depositToGatewayAmount).then(() => {
+
+            TransferGateway.depositToRinkebyGateway(this.depositToGatewayAmount).then(() => {
                 this.depositToGatewayAmount = 0;
                 this.depositToGatewayBusy = false;
             });
         },
         onTransferTokens() {
-            const token = THX.contracts.instances.token;
-            const tokenAmount = new BN(this.transferTokensAmount).mul(tokenMultiplier);
+            const THX = window.THX;
+            const token = THX.network.instances.token;
+            const amount = new BN(this.transferTokensAmount).mul(tokenMultiplier);
 
-            return token.methods.transfer(this.transferTokensAddress, tokenAmount.toString()).send({ from: this.account.loomAddress }).then(async () => {
-                const pool = THX.contracts.instances.pool;
-                let balanceInWei;
-
-                balanceInWei = await token.methods.balanceOf(pool._address).call();
-                this.balance.pool = new BN(balanceInWei).div(tokenMultiplier);
-
-                balanceInWei = await token.methods.balanceOf(this.account.loomAddress).call();
+            return token.methods.transfer(this.transferTokensAddress, amount.toString()).send({ from: this.account.loom.address }).then(async () => {
+                let balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
                 this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
 
                 this.$parent.$refs.header.updateBalance();
@@ -296,19 +242,20 @@ export default {
             });
         },
         onMintForAccount() {
-            THX.contracts.mint(this.account.ethAddress, this.mintForAccountAmount);
+            const THX = window.THX;
+            const tokenRinkeby = THX.network.instances.tokenRinkeby;
+
+            return tokenRinkeby.mint(this.account.rinkeby.address, this.mintForAccountAmount);
         },
         onMintForLoomAccount() {
-            const token = THX.contracts.instances.token;
-            const tokenAmount = new BN(this.mintForLoomAccountAmount).mul(tokenMultiplier);
+            const THX = window.THX;
+            const token = THX.network.instances.token;
+            const amount = new BN(this.mintForLoomAccountAmount).mul(tokenMultiplier);
 
             this.mintForLoomAccountBusy = true;
 
-            return token.methods.mint(this.account.loomAddress, tokenAmount.toString()).send({ from: this.account.loomAddress}).then(async () => {
-                let balanceInWei;
-                const token = THX.contracts.instances.token;
-
-                balanceInWei = await token.methods.balanceOf(this.account.loomAddress).call();
+            return token.methods.mint(this.account.loom.address, amount.toString()).send({ from: this.account.loom.address}).then(async () => {
+                const balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
                 this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
 
                 this.$parent.$refs.header.updateBalance();
@@ -317,52 +264,13 @@ export default {
                 this.mintForLoomAccountBusy = false;
             });
         },
-        onTransferToPool() {
-            const pool = THX.contracts.instances.pool;
-            const tokenAmount = new BN(this.transferToPoolAmount).mul(tokenMultiplier);
-
-            this.poolDepositBusy = true;
-
-            return pool.methods.deposit(tokenAmount.toString()).send({ from: this.account.loomAddress }).then(async () => {
-                let balanceInWei;
-                const token = THX.contracts.instances.token;
-
-                balanceInWei = await token.methods.balanceOf(pool._address).call();
-                this.balance.pool = new BN(balanceInWei).div(tokenMultiplier);
-
-                balanceInWei = await token.methods.balanceOf(this.account.loomAddress).call();
-                this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
-
-                this.$parent.$refs.header.updateBalance();
-
-                this.transferToPoolAmount = 0;
-                this.poolDepositBusy = false;
-            });
-        },
-        onAddMember() {
-            const pool = THX.contracts.instances.pool;
-
-            this.addMemberBusy = true;
-
-            return pool.methods.addMember(this.newMemberAddress).send({ from: this.account.loomAddress }).then(async () => {
-                this.addMemberBusy = false;
-            });
-        },
-        onAddManager() {
-            const pool = THX.contracts.instances.pool;
-
-            this.addManagerBusy = true;
-
-            return pool.methods.addManager(this.newManagerAddress).send({ from: this.account.loomAddress }).then(async () => {
-                this.addManagerBusy = false;
-            });
-        },
         onAddMinter() {
-            const token = THX.contracts.instances.token;
+            const THX = window.THX;
+            const token = THX.network.instances.token;
 
             this.addMinterBusy = true;
 
-            return token.methods.addMinter(this.newMinterAddress).send({ from: this.account.loomAddress }).then(async () => {
+            return token.methods.addMinter(this.newMinterAddress).send({ from: this.account.loom.address }).then(async () => {
                 this.addMinterBusy = false;
             });
         }

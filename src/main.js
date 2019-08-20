@@ -6,14 +6,37 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import config from './config.js';
 
-Vue.use(VueQrcodeReader);
+import StateService from './services/StateService';
+import NetworkService from './services/NetworkService';
 
-Vue.config.productionTip = false
+/*global THX*/
+window.THX = {};
+THX.state = new StateService();
+
+const loomPrivateKey = THX.state.loomPrivateKey;
+const rinkebyPrivateKey = THX.state.rinkebyPrivateKey;
+
+THX.network = new NetworkService(
+    loomPrivateKey ? loomPrivateKey : config.ganache.private,
+    rinkebyPrivateKey ? rinkebyPrivateKey : config.rinkeby.private,
+);
+
+THX.network.init()
+    .then(instances => {
+        // eslint-disable-next-line
+        console.info(`Initialized instances `, instances)
+    })
+    .catch((err) => {
+        // eslint-disable-next-line
+        console.error(err);
+    });
 
 let app;
 
-firebase.initializeApp(config.firebase);
+Vue.use(VueQrcodeReader);
+Vue.config.productionTip = false
 
+firebase.initializeApp(config.firebase);
 firebase.auth().onAuthStateChanged(function() {
     if (!app) {
         app = new Vue({

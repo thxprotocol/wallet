@@ -13,8 +13,7 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x445df0ac"
+      "type": "function"
     },
     {
       "constant": true,
@@ -28,15 +27,13 @@
       ],
       "payable": false,
       "stateMutability": "view",
-      "type": "function",
-      "signature": "0x8da5cb5b"
+      "type": "function"
     },
     {
       "inputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "constructor",
-      "signature": "constructor"
+      "type": "constructor"
     },
     {
       "constant": false,
@@ -50,8 +47,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0xfdacd576"
+      "type": "function"
     },
     {
       "constant": false,
@@ -65,8 +61,7 @@
       "outputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "function",
-      "signature": "0x0900f010"
+      "type": "function"
     }
   ],
   "bytecode": "0x608060405234801561001057600080fd5b5060008054600160a060020a0319163317905561025d806100326000396000f3fe6080604052600436106100615763ffffffff7c01000000000000000000000000000000000000000000000000000000006000350416630900f0108114610066578063445df0ac146100a85780638da5cb5b146100cf578063fdacd5761461010d575b600080fd5b34801561007257600080fd5b506100a66004803603602081101561008957600080fd5b503573ffffffffffffffffffffffffffffffffffffffff16610137565b005b3480156100b457600080fd5b506100bd6101ea565b60408051918252519081900360200190f35b3480156100db57600080fd5b506100e46101f0565b6040805173ffffffffffffffffffffffffffffffffffffffff9092168252519081900360200190f35b34801561011957600080fd5b506100a66004803603602081101561013057600080fd5b503561020c565b60005473ffffffffffffffffffffffffffffffffffffffff163314156101e75760008190508073ffffffffffffffffffffffffffffffffffffffff1663fdacd5766001546040518263ffffffff167c010000000000000000000000000000000000000000000000000000000002815260040180828152602001915050600060405180830381600087803b1580156101cd57600080fd5b505af11580156101e1573d6000803e3d6000fd5b50505050505b50565b60015481565b60005473ffffffffffffffffffffffffffffffffffffffff1681565b60005473ffffffffffffffffffffffffffffffffffffffff163314156101e75760015556fea165627a7a72305820749a1b59833eac42d428520d8eb457f4f73c46193d3380cd28135aca67446ad50029",
@@ -1371,9 +1366,46 @@
     "name": "solc",
     "version": "0.5.0+commit.1d4f565a.Emscripten.clang"
   },
-  "networks": {},
-  "schemaVersion": "3.0.1",
-  "updatedAt": "2019-08-14T12:54:54.615Z",
+  "networks": {
+    "4": {
+      "events": {},
+      "links": {},
+      "address": "0x7fBF4CA69DCb268294B9Eb7d5223b43c604fEA29",
+      "transactionHash": "0x2afe1eaec9e9f6396cc1c9af9235bb70d6ec996bb971aab8d3c9eb57496fa6d1"
+    },
+    "13654820909954": {
+      "events": {},
+      "links": {},
+      "address": "0xF85535dD0D76b604AE1b35837D9c91F3384B8F67",
+      "transactionHash": "0x01be548f0db5d6be5239fd3c4a812062180bd0a2fa59f46aa273a8be799d46d8"
+    },
+    "1566217587806": {
+      "events": {},
+      "links": {},
+      "address": "0x41f29d4cB3a7e9114BeC95DF663B677ADa7CF80f",
+      "transactionHash": "0x58b7fa4966fef8147bb557e4fd4fc4a2db789a24309482b86fc59eb35d3b5def"
+    },
+    "9545242630824": {
+      "events": {},
+      "links": {},
+      "address": "0x3e1755f8D2501c496BAA9f5a9f1bD2f20bC2c512",
+      "transactionHash": "0xa5f05254a7230db46e67ce4e7a8a5d068930041dc031248aae1c362945029c80"
+    },
+    "1566242350381": {
+      "events": {},
+      "links": {},
+      "address": "0x80f2d60e4058dD2414eC7c437DEA829Fa476D252",
+      "transactionHash": "0xbc80f4ce6b3808624af8701f9f78d72520715803f743016dc8548238c62c370f"
+    },
+    "1566284298134": {
+      "events": {},
+      "links": {},
+      "address": "0xD53b96BD99823051a6210a8d61D5600fb4759500",
+      "transactionHash": "0x25c84a9c8d1d24d4ac5ca6406322993739c0a646a2728740101b05d686cd4d92"
+    }
+  },
+  "schemaVersion": "3.0.12",
+  "updatedAt": "2019-08-20T06:58:34.955Z",
   "devdoc": {
     "methods": {}
   },

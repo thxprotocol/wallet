@@ -54,7 +54,7 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
 
-import EventService from '../services/EventService';
+import EventAggregator from '../services/EventAggregator';
 import StateService from '../services/StateService.js';
 
 import RewardJSON from '../contracts/Reward.json';
@@ -66,7 +66,7 @@ export default {
     name: 'home',
     data: function() {
         return {
-            ea: new EventService(),
+            ea: new EventAggregator(),
             state: new StateService(),
             network: null,
             pool: {
@@ -92,11 +92,10 @@ export default {
         async init(uid, loomKey, ethKey) {
             let token, pool, balanceInWei, web3;
 
-            await THX.contracts.load(loomKey, ethKey);
+            await THX.networks(loomKey, ethKey);
 
-            web3 = THX.contracts.ethWeb3;
-            pool = THX.contracts.instances.pool;
-            token = THX.contracts.instances.token;
+            pool = THX.networks.instances.pool;
+            token = THX.networks.instances.token;
 
             this.pool.name = await pool.methods.name().call();
 
@@ -107,9 +106,7 @@ export default {
 
             this.ea.listen('event.RewardStateChanged', this.handleRewardStateChange);
 
-            const isMember = await pool.methods.isMember(THX.contracts.loomAddress).call()
-
-            console.log(isMember)
+            // const isMember = await pool.methods.isMember(THX.networks.loomAddress).call()
         },
         handleRewardStateChange() {
             return this.update();
@@ -127,10 +124,10 @@ export default {
             const beneficiary = (await contract.methods.beneficiary().call()).toLowerCase();
             const wallet = await firebase.database().ref('wallets').child(beneficiary).once('value');
             const user = await firebase.database().ref(`users/${wallet.val().uid}`).once('value');
-            const rule = await firebase.database().ref(`pools/${THX.contracts.instances.pool._address}/rules/${id}`).once('value');
+            const rule = await firebase.database().ref(`pools/${THX.networks.instances.pool._address}/rules/${id}`).once('value');
             const yesCounter = await contract.methods.yesCounter().call();
             const noCounter = await contract.methods.noCounter().call();
-            const web3 = THX.contracts.loomWeb3;
+            const web3 = THX.networks.loomWeb3;
 
             return {
                 id: id,
@@ -145,17 +142,17 @@ export default {
             }
         },
         async getPendingRewards() {
-            const pool = THX.contracts.instances.pool;
+            const pool = THX.networks.instances.pool;
             const amountOfRewards = await pool.methods.countRewards().call()
-            const isManager = await pool.methods.isManager(THX.contracts.loomAddress).call()
-            const web3 = THX.contracts.loomWeb3;
+            const isManager = await pool.methods.isManager(THX.networks.loomAddress).call()
+            const web3 = THX.networks.loomWeb3;
 
             if (isManager) {
                 let rewards = []
 
                 for (var i = 0; i < amountOfRewards; i++) {
                     const rewardAddress = await pool.methods.rewards(i).call();
-                    const rewardContract = new web3.eth.Contract(RewardJSON.abi, rewardAddress, { from: THX.contracts.loomAddress });
+                    const rewardContract = new web3.eth.Contract(RewardJSON.abi, rewardAddress, { from: THX.networks.loomAddress });
                     const reward = await this.formatReward(rewardContract);
 
                     rewards.push(reward);
@@ -165,9 +162,11 @@ export default {
             }
         },
         async revokeVote(id) {
-            const pool = THX.contracts.instances.pool;
+            const pool = THX.networks.instances.pool;
+            const isManager = await pool.methods.isManager(THX.networks.loomAddress).call()
+
             if (isManager) {
-                return pool.methods.revokeVoteForReward(id).send({ from: THX.contracts.loomAddress })
+                return pool.methods.revokeVoteForReward(id).send({ from: THX.networks.loomAddress })
                     .then(() => {
                         this.voteBusy = false;
                         return this.update();
@@ -184,13 +183,13 @@ export default {
 
         },
         async vote(id, agree) {
-            const pool = THX.contracts.instances.pool;
-            const isManager = await pool.methods.isManager(THX.contracts.loomAddress).call()
+            const pool = THX.networks.instances.pool;
+            const isManager = await pool.methods.isManager(THX.networks.loomAddress).call()
 
             this.voteBusy = true;
 
             if (isManager) {
-                return pool.methods.voteForReward(id, agree).send({ from: THX.contracts.loomAddress })
+                return pool.methods.voteForReward(id, agree).send({ from: THX.networks.loomAddress })
                     .then(() => {
                         this.voteBusy = false;
                         return this.update();

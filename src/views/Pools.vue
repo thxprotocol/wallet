@@ -4,7 +4,8 @@
             <ul class="list list--dotted">
                 <li v-bind:key="p.address" v-for="p in pools">
                     <div class="description">
-                        {{ p.address }}
+                        <strong>{{ p.name }}</strong>
+                        <span>{{ p.address }}</span>
                     </div>
                     <div class="action">
                         <button class="btn btn-link" @click="onLeavePool(p.address)">Leave pool</button>
@@ -19,11 +20,10 @@
             <modal v-if="showJoinPoolModal" @close="showJoinPoolModal = false">
                 <h3 slot="header">Join Reward Pool:</h3>
                 <div slot="body">
-                    <input v-model="poolName" type="text" placeholder="Volunteers United" />
                     <input v-model="poolAddress" type="text" placeholder="0x0000000000000000000000000000" />
                 </div>
                 <template slot="footer">
-                    <button @click="onJoinPool()" class="btn btn--success">Join Reward Pool</button>
+                    <button @click="onJoinPool()" class="btn btn--success">Join Pool</button>
                 </template>
             </modal>
         </main>
@@ -34,6 +34,8 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
 import modal from '../components/Modal';
+import Vue from 'vue';
+import RewardPool from '../contracts/RewardPool.json';
 
 export default {
     name: 'pools',
@@ -43,31 +45,45 @@ export default {
     data: function() {
         return {
             pools: {},
-            poolName: '',
+            contracts: {},
             poolAddress: '',
             showJoinPoolModal: false,
         }
     },
-    mounted() {
+    created() {
         this.init();
     },
     methods: {
         init() {
-            firebase.database().ref('pools').once('value').then((s) => {
-                this.pools = s.val();
+            const uid = firebase.auth().currentUser.uid;
 
-                this.$parent.$refs.header.updateBalance();
+            firebase.database().ref(`users/${uid}/pools`).on('child_added', async (s) => {
+                const THX = window.THX;
+                let data = s.val();
+
+                this.contracts[data.address] = await THX.network.contract(RewardPool, data.address);
+                data.name = await this.contracts[data.address].methods.name().call();
+
+                Vue.set(this.pools, data.address, data);
             });
+
+            firebase.database().ref(`users/${uid}/pools`).on('child_removed', (s) => {
+                Vue.delete(this.pools, s.key);
+            })
         },
         onJoinPool() {
-            firebase.database().ref('pools').child(this.poolAddress).set({
+            const uid = firebase.auth().currentUser.uid;
+
+            firebase.database().ref(`users/${uid}/pools`).child(this.poolAddress).set({
                 address: this.poolAddress
             });
 
             return this.showJoinPoolModal = false;
         },
         onLeavePool(poolAddress) {
-            return firebase.database().ref('pools').child(poolAddress).remove();
+            const uid = firebase.auth().currentUser.uid;
+
+            return firebase.database().ref(`users/${uid}/pools`).child(poolAddress).remove();
         },
         openPool(poolAddress) {
             return this.$router.replace(`/pools/${poolAddress}`);

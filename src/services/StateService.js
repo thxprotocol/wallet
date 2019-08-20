@@ -1,41 +1,33 @@
 const KEY = 'THX:StateService';
 
 export default class StateService {
-    state = {};
+    loomPrivateKey = null;
+    rinkebyPrivateKey = null;
 
-    constructor(
-    ) {
-        this.load();
-    }
-
-    load() {
+    constructor() {
         const state = localStorage.getItem(KEY);
 
         if (state !== null) {
             const rows = JSON.parse(state);
 
-            for (let i in rows) {
-                this.state[i] = rows[i];
+            for (let row in rows) {
+                this[row] = rows[row];
             }
         }
     }
 
-    setItem(key, value) {
-        this.state[key] = value;
-        this.save();
-    }
+    clear() {
+        this.loomPrivateKey = null;
+        this.rinkebyPrivateKey = null;
 
-    getItem(key) {
-        return this.state[key];
+        return this.save();
     }
 
     save() {
-        const val = JSON.stringify(this.state);
+        const val = JSON.stringify({
+            loomPrivateKey: this.loomPrivateKey,
+            rinkebyPrivateKey: this.rinkebyPrivateKey,
+        });
         localStorage.setItem(KEY, val)
-    }
-
-    clear() {
-        this.state = null;
-        this.save();
     }
 }

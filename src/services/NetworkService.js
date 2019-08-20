@@ -3,101 +3,105 @@ import Web3 from 'web3';
 import THXToken from '../contracts/THXToken.json';
 import THXTokenRinkeby from '../contracts/THXTokenRinkeby.json';
 import RinkebyGateway from '../Gateway.json';
-import RewardPool from '../contracts/RewardPool.json';
-import config from '../config.js';
-import ContractEventService from '../services/ContractEventService';
+import Config from '../config.js';
 
 export default class NetworkService {
-
-    async load(loomKey, ethKey) {
-        this.onEvent = null
-        this._createLoomClient(loomKey)
-        this._createEthClient(ethKey)
-        this._createLoomAddress()
-        this._createEthAddress()
-        this._createWebInstances()
-        await this._createContractInstances()
+    constructor(loomPrivateKey, rinkebyPrivateKey) {
+        this.loomPrivateKey = loomPrivateKey;
+        this.rinkebyPrivateKey = rinkebyPrivateKey;
     }
 
-    _createLoomClient(key) {
-        this.loomPrivateKey = CryptoUtils.B64ToUint8Array(key);
-        this.loomPublicKey = CryptoUtils.publicKeyFromPrivateKey(this.loomPrivateKey);
-        let writeUrl = 'ws://127.0.0.1:46658/websocket'
-        let readUrl = 'ws://127.0.0.1:46658/queryws'
-        let networkId = 'default'
+    async init() {
+        let networkConfig;
 
-        if (process.env.NETWORK == 'extdev') {
-            writeUrl = 'wss://extdev-plasma-us1.dappchains.com/websocket'
-            readUrl = 'wss://extdev-plasma-us1.dappchains.com/queryws'
-            networkId = 'extdev-plasma-us1'
+        if (this.rinkebyPrivateKey) {
+            this.rinkeby = new Web3(`wss://rinkeby.infura.io/ws/v3/${Config.infura.key}`);
+            this.rinkeby.account = this.rinkeby.eth.accounts.privateKeyToAccount(`0x${this.rinkebyPrivateKey}`);
         }
 
-        this.client = new Client(networkId, writeUrl, readUrl)
+        if (process.env.NETWORK === 'ganache') {
+            this.loom = new Web3('ws://localhost:8545');
+            this.account = this.loom.eth.accounts.privateKeyToAccount(`0x${Config.ganache.private}`);
+        }
 
-        this.client.on('error', msg => {
+        if ((process.env.NETWORK !== 'ganache') && this.loomPrivateKey) {
+            networkConfig = this._networkConfig(this.loomPrivateKey);
+
+            this.loom = await new Web3( this._networkProvider(networkConfig.privateArray) );
+            this.account = networkConfig;
+        }
+
+        return new Promise(async (resolve) => {
+            this.instances = {
+                token: await this.contract(THXToken, null),
+                tokenRinkeby: this.rinkebyContract(THXTokenRinkeby, this.rinkeby.account.address),
+                gateway: this.rinkebyContract(RinkebyGateway, this.rinkeby.account.address),
+            };
+
+            resolve(this.instances);
+        });
+    }
+
+    // Returns the default network Contract class
+    // @param address If set to null the default network will apply
+    async contract(json, address) {
+        const Contract = this.loom.eth.Contract;
+        let nid;
+
+        if (!address) {
+            nid = await this.loom.eth.net.getId();
+            address = json.networks[nid].address;
+        }
+
+        return new Contract(json.abi, address, { from: this.account.address });
+    }
+
+    // Returns a Rinkeby Contract class
+    rinkebyContract(json, account) {
+        const Contract = this.rinkeby.eth.Contract;
+
+        return new Contract(json.abi, json.networks[4].address, { from: account })
+    }
+
+    // Create loom account for private key
+    _networkConfig(privateKey) {
+        const privateKeyArray = CryptoUtils.B64ToUint8Array(privateKey);
+        const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKeyArray);
+        const address = LocalAddress.fromPublicKey(publicKey).toString().toLowerCase();
+
+        return {
+            address: address,
+            privateKey: privateKey,
+            privateArray: privateKeyArray,
+            public: publicKey,
+        }
+    }
+
+    // Get the loom provider configuration
+    _networkProvider(privateKey) {
+        let writeUrl, readUrl, networkId, client;
+
+        if (process.env.NETWORK === 'loom_dapp_chain') {
+            writeUrl = 'ws://127.0.0.1:46658/websocket';
+            readUrl = 'ws://127.0.0.1:46658/queryws';
+            networkId = 'default';
+        }
+
+        if (process.env.NETWORK === 'extdev') {
+            writeUrl = 'wss://extdev-plasma-us1.dappchains.com/websocket';
+            readUrl = 'wss://extdev-plasma-us1.dappchains.com/queryws';
+            networkId = 'extdev-plasma-us1';
+        }
+
+        client = new Client(networkId, writeUrl, readUrl);
+
+        client.on('error', msg => {
             // eslint-disable-next-line
             console.error('Error on connect to client', msg)
             // eslint-disable-next-line
             console.warn('Please verify if loom command is running')
-        })
-    }
-
-    _createEthClient(key) {
-        this.ethPrivateKey = `0x${key}`;
-    }
-
-    _createLoomAddress() {
-        this.loomAddress = LocalAddress.fromPublicKey(this.loomPublicKey).toString().toLowerCase();
-    }
-
-    _createEthAddress() {
-        const web3 = new Web3;
-        const account = web3.eth.accounts.privateKeyToAccount(this.ethPrivateKey);
-        this.ethAddress = account.address;
-    }
-
-    _createWebInstances() {
-        this.loomWeb3 = new Web3(new LoomProvider(this.client, this.loomPrivateKey))
-        this.ethWeb3 = new Web3(`wss://rinkeby.infura.io/ws/v3/${config.infura.apiKey}`)
-    }
-
-    _getCurrentLoomNetwork() {
-        if (process.env.NETWORK == 'extdev') {
-            return '9545242630824'
-        } else {
-            return this.loomWeb3.eth.net.getId().then((nid) => {
-                return nid
-            });
-        }
-    }
-
-    _getCurrentEthNetwork() {
-        return this.ethWeb3.eth.net.getId().then((nid) => {
-            return nid
         });
-    }
 
-    async _createContractInstances() {
-        this.loomNetworkId = await this._getCurrentLoomNetwork()
-        this.ethNetworkId = await this._getCurrentEthNetwork()
-
-        if (!THXToken.networks[this.loomNetworkId] || !RewardPool.networks[this.loomNetworkId]) {
-            throw Error('Contracts not deployed on DAppChain')
-        }
-
-        if (!THXTokenRinkeby.networks[this.ethNetworkId]) {
-            throw Error('Contract not deployed on Rinkeby')
-        }
-
-        this.instances = {
-            gateway: new this.ethWeb3.eth.Contract(RinkebyGateway.abi, RinkebyGateway.networks[this.ethNetworkId].address, { from: this.ethAddress }),
-            tokenRinkeby: new this.ethWeb3.eth.Contract(THXTokenRinkeby.abi, THXTokenRinkeby.networks[this.ethNetworkId].address, { from: this.ethAddress }),
-            token: new this.loomWeb3.eth.Contract(THXToken.abi, THXToken.networks[this.loomNetworkId].address, { from: this.loomAddress }),
-            pool: new this.loomWeb3.eth.Contract(RewardPool.abi, RewardPool.networks[this.loomNetworkId].address, { from: this.loomAddress })
-        }
-
-        console.log('Pool Address', this.instances.pool._address)
-
-        this.events = new ContractEventService(this.instances, this.currentUserAddress);
+        return new LoomProvider(client, privateKey);
     }
 }

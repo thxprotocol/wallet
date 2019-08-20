@@ -4118,9 +4118,34 @@
     "name": "solc",
     "version": "0.5.8+commit.23d335f2.Emscripten.clang"
   },
-  "networks": {},
+  "networks": {
+    "1566217587806": {
+      "events": {},
+      "links": {},
+      "address": "0xd8C9787823413d986bB10E3c0B0BE00e8350135a",
+      "transactionHash": "0x471ef52cf4d699fd707dce743c90820a9a09a8dba2a47476cb5e5694675890d3"
+    },
+    "9545242630824": {
+      "events": {},
+      "links": {},
+      "address": "0x35d450A9EEdC3445239205D9B053d597505d9e76",
+      "transactionHash": "0xe33cdd6d051b376b25b55a5d6300cad770870e1bebb2f0acce5828988b28ad18"
+    },
+    "1566242350381": {
+      "events": {},
+      "links": {},
+      "address": "0x9B5613A952E2b8f23921eB1560C652C528Ec21a9",
+      "transactionHash": "0x034a2df475af57739f697096142a5acd43dcf13816318e72422bc8ff864fe186"
+    },
+    "1566284298134": {
+      "events": {},
+      "links": {},
+      "address": "0x0785d84443828087C82a2B807D77308dd490afE9",
+      "transactionHash": "0x744eb5fbd6c6bf448096c142a732246add8184dbfca522ff9f2bf45697217c19"
+    }
+  },
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-08-19T11:26:06.373Z",
+  "updatedAt": "2019-08-20T06:58:34.630Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {

@@ -10,12 +10,6 @@
 import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
 
-import ContractService from './services/ContractService';
-
-/*global THX*/
-window.THX = {};
-THX.contracts = new ContractService();
-
 export default {
     name: 'App',
     components: {

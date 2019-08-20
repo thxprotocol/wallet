@@ -4,25 +4,27 @@
         <img src="../assets/menu.svg" alt="Menu icon" />
     </button>
     <div class="account_balance">
-        <p><span class="font-size-large">{{balance.loomTokens}} THX</span></p>
-        <p><span>{{balance.ethTokens}} THX</span> | <span>{{balance.eth}} ETH</span></p>
+        <p><span class="font-size-large">{{balance.token}} THX</span></p>
+        <p><span>{{balance.tokenRinkeby}} THX</span> | <span>{{balance.eth}} ETH</span></p>
     </div>
 </header>
 </template>
 
 <script>
-import EventService from '../services/EventService';
+import EventAggregator from '../services/EventAggregator';
+
+const BN = require('bn.js');
+const tokenMultiplier = new BN(10).pow(new BN(18));
 
 export default {
     name: 'Header',
     data: function() {
         return {
-            ea: new EventService(),
-            network: null,
+            ea: new EventAggregator(),
             balance: {
                 eth: 0,
-                ethTokens: 0,
-                loomTokens: 0,
+                token: 0,
+                tokenRinkeby: 0,
             },
         }
     },
@@ -32,19 +34,20 @@ export default {
     methods: {
         async updateBalance() {
             const THX = window.THX;
-            const token = THX.contracts.instances.token;
-            const tokenRinkeby = THX.contracts.instances.tokenRinkeby;
-            const web3 = THX.contracts.ethWeb3;
+            const token = THX.network.instances.token;
+            const tokenRinkeby = THX.network.instances.tokenRinkeby;
+            const address = THX.network.account.address;
+            const addressRinkeby = THX.network.rinkeby.account.address;
             let balanceInWei;
 
-            balanceInWei = await token.methods.balanceOf(THX.contracts.loomAddress).call();
-            this.balance.loomTokens = web3.utils.fromWei(balanceInWei, "ether");
+            balanceInWei = await THX.network.rinkeby.eth.getBalance(addressRinkeby);
+            this.balance.eth = THX.network.rinkeby.utils.fromWei(balanceInWei, 'ether');
 
-            balanceInWei = await tokenRinkeby.methods.balanceOf(THX.contracts.ethAddress).call();
-            this.balance.ethTokens = web3.utils.fromWei(balanceInWei, "ether");
+            balanceInWei = await token.methods.balanceOf(address).call();
+            this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
 
-            balanceInWei = await web3.eth.getBalance(THX.contracts.ethAddress);
-            this.balance.eth = web3.utils.fromWei(balanceInWei, "ether");
+            balanceInWei = await tokenRinkeby.methods.balanceOf(addressRinkeby).call();
+            this.balance.tokenRinkeby = new BN(balanceInWei).div(tokenMultiplier);
         },
         goToAccount() {
             this.$router.replace('/account');

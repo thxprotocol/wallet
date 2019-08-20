@@ -107,7 +107,6 @@ truffle migrate --network ganache
 yarn deploy:reset:extdev
 yarn deploy:reset:rinkeby
 node ./transfer-gateway.js map-accounts
-node ./transfer-gateway.js map-local-accounts
 node ./transfer-gateway.js map-contracts token
 ```
 

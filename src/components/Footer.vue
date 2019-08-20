@@ -17,11 +17,7 @@
 </template>
 
 <script>
-import firebase from 'firebase/app';
-import 'firebase/database';
-
-import StateService from '../services/StateService';
-import EventService from '../services/EventService';
+import EventAggregator from '../services/EventAggregator';
 
 export default {
     name: 'App',
@@ -32,8 +28,7 @@ export default {
     },
     data: function() {
         return {
-            ea: new EventService(),
-            state: new StateService(),
+            ea: new EventAggregator(),
             amountOfNewRewards: 0,
             assets: {
                 wallet: require('../assets/wallet.svg'),
@@ -45,46 +40,44 @@ export default {
         }
     },
     created() {
-        const uid = firebase.auth().currentUser.uid;
-        const loomKey = (typeof this.state.getItem('loomPrivateKey') !== "undefined") ? this.state.getItem('loomPrivateKey') : null;
-        const ethKey = (typeof this.state.getItem('ethPrivateKey') !== "undefined") ? this.state.getItem('ethPrivateKey') : null;
+        // const THX = window.THX;
 
-        this.init(uid, loomKey, ethKey);
+        // if (firebase.auth().currentUser) {
+        //     const uid = firebase.auth().currentUser.uid;
+        //     const loomKey = (typeof THX.state.loomPrivateKey !== "undefined") ? THX.state.loomPrivateKey : null;
+        //     const ethKey = (typeof THX.state.ethPrivateKey !== "undefined") ? THX.state.ethPrivateKey : null;
+        //
+        //     this.init(uid, loomKey, ethKey);
+        // }
     },
     methods: {
-        async init(uid, loomKey, ethKey) {
-            const THX = window.THX;
-            let pool;
-
-            await THX.contracts.load(loomKey, ethKey);
-
-            pool = THX.contracts.instances.pool;
-
-            const amountOfRewards = parseInt(await pool.methods.countRewards().call());
-            this.state.setItem('lastRewardId', amountOfRewards);
-
-            this.ea = new EventService();
+        async init() {
+            // firebase.database().ref(`users/${uid}/pools`).once('value').then(async s => {
+            //     const pools = s.val();
+            //
+            //     for (let address in pools) {
+            //         const pool = await THX.network.poolInstance(p);
+            //         debugger
+            //         // Start counting the pending reward polls here
+            //     }
+            // })
 
             this.ea.listen('event.RewardStateChanged', this.onRewardStateChange);
             this.ea.listen('event.RuleStateChanged', this.onRuleStateChange);
             this.ea.listen('event.clearNotifications', this.clearNotifications);
         },
         async clearNotifications() {
-            const THX = window.THX;
-            const pool = THX.contracts.instances.pool;
-            const amountOfRewards = parseInt(await pool.methods.countRewards().call());
-
-            this.state.setItem('lastRewardId', amountOfRewards);
-            this.onRewardStateChange();
+            // const pool = THX.network.instances.pool;
+            // const amountOfRewards = parseInt(await pool.methods.countRewards().call());
+            //
+            // THX.state.setItem('lastRewardId', amountOfRewards);
         },
         async onRewardStateChange() {
-            const THX = window.THX;
-            const pool = THX.contracts.instances.pool;
-            const prevAmountOfRewards = parseInt(this.state.getItem('lastRewardId'));
-            const currentAmountOfRewards = parseInt(await pool.methods.countRewards().call());
-
-            this.amountOfNewRewards = currentAmountOfRewards - prevAmountOfRewards;
-
+            // const pool = THX.network.poolInstance();
+            // const prevAmountOfRewards = parseInt(this.state.lastRewardId);
+            // const currentAmountOfRewards = parseInt(await pool.methods.countRewards().call());
+            //
+            // this.amountOfNewRewards = currentAmountOfRewards - prevAmountOfRewards;
         },
         async onRuleStateChange() {
         }
