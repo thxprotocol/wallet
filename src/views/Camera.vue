@@ -18,33 +18,19 @@
 <script>
 import firebase from 'firebase/app';
 import 'firebase/database';
-
-import StateService from '../services/StateService.js';
-
-const THX = window.THX;
+import RewardPool from '../contracts/RewardPool.json';
 
 export default {
     name: 'Camera',
     data: function() {
         return {
-            state: new StateService(),
             loading: true,
             hasStream: false,
         }
     },
-    mounted() {
-        const uid = firebase.auth().currentUser.uid;
-        const loomKey = (typeof this.state.getItem('loomPrivateKey') !== "undefined") ? this.state.getItem('loomPrivateKey') : null;
-        const ethKey = (typeof this.state.getItem('ethPrivateKey') !== "undefined") ? this.state.getItem('ethPrivateKey') : null;
-
-        if (loomKey && ethKey) this.init(uid, loomKey, ethKey);
-    },
     methods: {
         repaint () {
             return
-        },
-        async init(uid, loomKey, ethKey) {
-            await THX.networks(loomKey, ethKey);
         },
         async onInit (promise) {
             try {
@@ -69,19 +55,22 @@ export default {
                 this.loading = false;
             }
         },
-        onDecode (decodedString) {
+        async onDecode (decodedString) {
+            const THX = window.THX;
+
             if (decodedString.length > 0) {
-                const poolsRef = firebase.database().ref('pools');
+                const poolsRef = firebase.database().ref(`pools`);
                 const data = JSON.parse(decodedString);
-                const pool = THX.networks.poolInstance(data.pool);
+                const pool = await THX.network.contract(RewardPool, data.pool);
 
-                poolsRef.child(data.pool).child('rewards').push().set(data);
+                poolsRef.child(data.pool).child(`rewards`).push().set(data);
 
-                alert(`Reward will be processed...`);
+                alert(`Claiming your reward...`);
 
-                pool.methods.createReward(data.rule).send({ from: THX.networks.loomAddress }).then((tx) => {
+                pool.methods.createReward(data.rule).send({ from: THX.network.account.address }).then((tx) => {
                     // eslint-disable-next-line
                     console.log(tx);
+                    alert(`Your claim is up for review!`);
                 });
             }
         }

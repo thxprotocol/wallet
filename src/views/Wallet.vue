@@ -24,14 +24,8 @@
 </template>
 
 <script>
-import firebase from 'firebase';
-import 'firebase/database';
-
 import Vue from 'vue';
-
 import EventService from '../services/EventService';
-
-const _ = require('lodash');
 
 export default {
     name: 'home',
@@ -45,27 +39,14 @@ export default {
     data: function() {
         return {
             events: new EventService(),
-            poolTransfers: {},
             tokenTransfers: {},
-            pool: {
-                name: "",
-                balance: 0
-            },
         }
     },
     created() {
-        const uid = firebase.auth().currentUser.uid;
-
-        firebase.database().ref(`users/${uid}/pools`).once('value').then(s => {
-            const pools = s.val();
-
-            this.events.init(pools);
-
-            this.init(uid);
-        });
+        this.init();
     },
     methods: {
-        async init(uid) {
+        async init() {
             const THX = window.THX;
             const token = await THX.network.instances.token;
             const fromBlock = await this.getCurrentBlockId();
@@ -95,11 +76,13 @@ export default {
             });
         },
         getCurrentBlockId() {
+            const THX = window.THX;
             return THX.network.loom.eth.getBlockNumber().then(data => {
                 return data;
             });
         },
         addMyTransfers(data) {
+            const THX = window.THX;
             const utils = THX.network.loom.utils;
 
             for (let key in data) {
@@ -113,6 +96,7 @@ export default {
             }
         },
         addMyTransfer(data) {
+            const THX = window.THX;
             const utils = THX.network.loom.utils;
             const value = data.detail;
             const hash  = event.transactionHash;

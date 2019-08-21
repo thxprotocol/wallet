@@ -126,8 +126,9 @@
 <script>
 import firebase from 'firebase/app';
 import 'firebase/database';
-import EventAggregator from '../services/EventAggregator';
+import EventService from '../services/EventService';
 import RewardPool from '../contracts/RewardPool.json';
+import Reward from '../contracts/Reward.json';
 import RulePoll from '../contracts/RulePoll.json';
 import modal from '../components/Modal';
 
@@ -149,7 +150,7 @@ export default {
     },
     data: function() {
         return {
-            ea: new EventAggregator(),
+            events: new EventService(),
             poolTransfers: null,
             isManager: false,
             isMember: false,
@@ -214,10 +215,26 @@ export default {
 
             this.$parent.$refs.header.updateBalance();
 
+            this.subscribe();
             this.getRewardRules();
             this.getRulePoll();
 
-            this.ea.listen('event.RuleStateChanged', this.onRuleStateChanged)
+            this.events.listen('event.RuleStateChanged', this.onRuleStateChanged)
+        },
+        async subscribe() {
+            const THX = window.THX;
+            const amount = await this.contract.methods.countRewards().call();
+
+            this.events.rewardPoolSubscription(this.contract.events);
+
+            for (let i = 0; i < parseInt(amount); i++) {
+                const rewardAddress = await this.contract.methods.rewards(i).call();
+                const reward = THX.network.contract(Reward, rewardAddress);
+
+                if (reward.state !== 2) {
+                    this.events.rewardSubscription(reward.events);
+                }
+            }
         },
         onAddManager() {
             this.addManagerBusy = true;
@@ -265,7 +282,14 @@ export default {
             for (let i = 0; i < amountOfRules; i++) {
                 const rule = await this.contract.methods.rules(i).call();
 
-                Vue.set(this.rules, rule.id, rule);
+                Vue.set(this.rules, rule.id, {
+                    amount: rule.amount,
+                    created: rule.created,
+                    creator: rule.creator,
+                    id: rule.id,
+                    slug: rule.slug,
+                    state: rule.state,
+                });
             }
         },
         async getRulePoll() {
@@ -312,7 +336,6 @@ export default {
             return this.contract.methods.createRule(this.newRule.slug, this.newRule.size)
                 .send({ from: this.account.loom.address })
                 .then(async tx => {
-                    debugger
                     const id = tx.events.RuleStateChanged.returnValues.id;
                     const rule = await this.contract.methods.rules(id).call();
 

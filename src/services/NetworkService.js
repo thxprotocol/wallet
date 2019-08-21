@@ -81,7 +81,7 @@ export default class NetworkService {
     _networkProvider(privateKey) {
         let writeUrl, readUrl, networkId, client;
 
-        if (process.env.NETWORK === 'loom_dapp_chain') {
+        if (!process.env.NETWORK) {
             writeUrl = 'ws://127.0.0.1:46658/websocket';
             readUrl = 'ws://127.0.0.1:46658/queryws';
             networkId = 'default';

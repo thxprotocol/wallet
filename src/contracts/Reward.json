@@ -5690,7 +5690,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-08-19T11:31:12.937Z",
+  "updatedAt": "2019-08-20T13:01:32.274Z",
   "devdoc": {
     "methods": {
       "revokeVote(address)": {
