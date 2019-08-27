@@ -1,26 +1,27 @@
 <template>
 <footer class="region region--navigation">
-    <nav class="navbar">
-        <ul class="nav">
-            <li v-bind:key="route.name" v-for="route in routes">
-                <router-link v-bind:to="route.path">
-                    <span v-if="route.name == 'notifications' && amountOfNewRewards > 0" class="badge badge--warning">
-                        {{ amountOfNewRewards }}
-                    </span>
-                    <img width="20" height="20" v-bind:src="assets[route.name]" alt="Icon" />
-                    <!-- {{route.name}} -->
-                </router-link>
-            </li>
-        </ul>
-    </nav>
+    <b-nav fill>
+        <b-nav-item v-bind:key="route.name" v-for="route in routes" v-bind:to="route.path">
+            <span v-if="route.name == 'notifications' && amountOfNewRewards > 0" class="badge badge--warning">
+                {{ amountOfNewRewards }}
+            </span>
+            <img width="20" height="20" v-bind:src="assets[route.name]" alt="Icon" />
+            <!-- {{route.name}} -->
+        </b-nav-item>
+    </b-nav>
 </footer>
 </template>
 
 <script>
 import EventAggregator from '../services/EventAggregator';
+import { BNav, BNavItem } from 'bootstrap-vue';
 
 export default {
     name: 'App',
+    components: {
+        'b-nav': BNav,
+        'b-nav-item': BNavItem,
+    },
     computed: {
         routes() {
             return this.$router.options.routes.filter(item => item.visible);

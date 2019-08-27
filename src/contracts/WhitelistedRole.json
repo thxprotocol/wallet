@@ -2691,7 +2691,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-08-20T13:01:32.206Z",
+  "updatedAt": "2019-08-27T12:04:13.048Z",
   "devdoc": {
     "details": "Whitelisted accounts have been approved by a Whitelister to perform certain actions (e.g. participate in a crowdsale). This role is special in that the only accounts that can add it are Whitelisters (who can also remove it), and not Whitelisteds themselves.",
     "methods": {},

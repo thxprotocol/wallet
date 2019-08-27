@@ -16,7 +16,7 @@ export default class EventAggregator {
         const event = new CustomEvent(e, { detail: data });
         return window.dispatchEvent(event);
     }
-    
+
     remove(id) {
         window.removeEventListener(this.listeners[id].e, this.listeners[id].cb);
         return delete this.listeners[id]

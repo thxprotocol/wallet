@@ -21,7 +21,7 @@ export default class NetworkService {
 
         if (process.env.NETWORK === 'ganache') {
             this.loom = new Web3('ws://localhost:8545');
-            this.account = this.loom.eth.accounts.privateKeyToAccount(`0x${Config.ganache.private}`);
+            this.account = this.loom.eth.accounts.privateKeyToAccount(`0x${this.loomPrivateKey}`);
         }
 
         if ((process.env.NETWORK !== 'ganache') && this.loomPrivateKey) {

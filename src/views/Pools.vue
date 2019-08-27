@@ -1,29 +1,39 @@
 <template>
     <article class="region region--container">
         <main class="region region--content">
-            <ul class="list list--dotted">
-                <li v-bind:key="p.address" v-for="p in pools">
-                    <div class="description">
-                        <strong>{{ p.name }}</strong>
-                        <span>{{ p.address }}</span>
-                    </div>
-                    <div class="action">
-                        <button class="btn btn-link" @click="onLeavePool(p.address)">Leave pool</button>
-                        <button class="btn btn-primary" @click="openPool(p.address)">Open pool</button>
-                    </div>
-                </li>
-            </ul>
-            <button class="btn btn-success btn-block" @click="showJoinPoolModal = true">
+            <b-card
+                v-bind:key="p.address"
+                v-for="p in pools"
+                v-if="p.name"
+                v-bind:title="p.name"
+                v-bind:sub-title="p.address"
+                footer-tag="footer"
+                tag="article"
+                class="mb-2">
+
+                <b-card-text>
+                </b-card-text>
+
+                <template slot="footer" class="text-right">
+                    <b-link href="#" class="card-link" @click="onLeavePool(p.address)">Leave pool</b-link>
+                    <b-link href="#" class="card-link" @click="openPool(p.address)">Open pool</b-link>
+                </template>
+
+            </b-card>
+
+            <button class="btn btn-primary btn-block" @click="showJoinPoolModal = true">
                 Add Reward Pool
             </button>
 
             <modal v-if="showJoinPoolModal" @close="showJoinPoolModal = false">
                 <h3 slot="header">Join Reward Pool:</h3>
                 <div slot="body">
-                    <input v-model="poolAddress" type="text" placeholder="0x0000000000000000000000000000" />
+                    <input v-model="poolAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000" />
+                    <label for="poolImage">Upload Pool image:</label>
+                    <input id="poolImage" type="file">
                 </div>
                 <template slot="footer">
-                    <button @click="onJoinPool()" class="btn btn--success">Join Pool</button>
+                    <button @click="onJoinPool()" class="btn btn-primary">Join Pool</button>
                 </template>
             </modal>
         </main>
@@ -36,11 +46,15 @@ import 'firebase/database';
 import modal from '../components/Modal';
 import Vue from 'vue';
 import RewardPool from '../contracts/RewardPool.json';
+import { BCard, BCardText, BLink } from 'bootstrap-vue';
 
 export default {
     name: 'pools',
     components: {
-        modal
+        modal,
+        'b-card': BCard,
+        'b-card-text': BCardText,
+        'b-link': BLink,
     },
     data: function() {
         return {

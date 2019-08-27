@@ -29,6 +29,7 @@ export default {
         }
     },
     created() {
+        this.updateBalance();
         this.ea.listen('event.Transfer', this.updateBalance);
     },
     methods: {

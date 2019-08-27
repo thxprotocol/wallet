@@ -22,12 +22,14 @@
         "gen:extdev-key": "npm run get:loom && ./loom/loom genkey -k extdev_private_key -a extdev_public_key",
         "gen:extdev-newkey": "npm run get:loom && ./loom/loom genkey -k extdev_private_key_new -a extdev_public_key_new",
         "gen:loom-key": "npm run get:loom && ./loom/loom genkey -k loom_private_key -a loom_public_key",
-        "loom:install": "curl https://raw.githubusercontent.com/loomnetwork/loom-sdk-documentation/master/scripts/get_loom.sh | sh",
-        "loom:init": "./loom init -f;",
-        "loom:run": "./loom run;",
+        "loom:install": "mkdir ./loom; cd ./loom; curl https://raw.githubusercontent.com/loomnetwork/loom-sdk-documentation/master/scripts/get_loom.sh | sh; cd ../;",
+        "loom:init": "cd ./loom; ./loom init -f; cd ../;",
+        "loom:run": "cd ./loom; ./loom run;",
         "ganache:run": "ganache-cli --accounts=10 --defaultBalanceEther=10 --gasPrice=10225000000 --gasLimit=8500000"
     },
     "dependencies": {
+        "bootstrap": "^4.3.1",
+        "bootstrap-vue": "^2.0.0-rc.28",
         "dotenv": "^6.2.0",
         "firebase": "^6.2.4",
         "ganache-time-traveler": "^1.0.3",
@@ -37,7 +39,8 @@
         "path": "^0.12.7",
         "truffle": "^5.0.32",
         "truffle-hdwallet-provider": "^1.0.2",
-        "vue": "^2.5.21",
+        "vue": "^2.6.10",
+        "vue-moment": "^4.0.0",
         "vue-qrcode-reader": "^2.0.2",
         "vue-router": "^3.0.6"
     },

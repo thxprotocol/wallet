@@ -1,51 +1,66 @@
 <template>
-<article class="region region--container">
-    <!-- <main class="region region--content">
-        <template v-for="n in notifications">
-            {{n}}
-        </template>
-    </main> -->
+<article class="region region--container overflow">
 
-    <div class="list list--swipe">
-        <div v-bind:key="n.id" v-for="n in notifications" class="notification">
-            <template v-if="n.beneficiary">
-                <h2 class="font-size-large">
-                    {{ n.title }}
-                    <span class="badge badge--default">{{ n.state }}</span>
-                </h2>
-                <p>
-                    Approved: <strong>{{ n.yesCounter }}</strong> | Rejected: <strong>{{ n.noCounter }}</strong>
-                </p>
-                <p>{{ n.description }}</p>
-                <p>{{ pool.name }} <strong>{{ pool.balance }} THX</strong></p>
-                <hr />
-                <p>
-                    Amount:<br>
-                    <strong>{{ n.amount }}</strong> THX
-                </p>
-                <hr class="dotted" />
-                <p>
-                    To: <span class="badge badge--default">{{ n.beneficiary }}</span>
-                </p>
-                <p>
-                    Time: {{ n.created }}
-                </p>
-                <div class="notification__actions">
-                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn--default" v-on:click="vote(n.id, false)">
+    <b-card
+        v-bind:key="n.id"
+        v-for="n in notifications"
+        v-bind:title="n.beneficiary"
+        v-bind:sub-title="n.created | moment('MMMM Do YYYY HH:mm')"
+        footer-tag="footer"
+        tag="article"
+        class="mb-2"
+        style="margin: 1rem; width: 100%">
+
+        <b-card-text>
+            <strong>{{ n.title }}</strong><br>
+            <strong>{{ n.amount }} THX</strong>
+            <div class="row">
+                <div class="col-12">
+                    Amount of tokens: {{n.yesCounter + n.noCounter}}
+                    <b-progress show-progress :max="(n.yesCounter + n.noCounter)">
+                        <b-progress-bar variant="success" :value="n.yesCounter"></b-progress-bar>
+                        <b-progress-bar variant="danger" :value="n.noCounter"></b-progress-bar>
+                    </b-progress>
+                </div>
+                <div class="col-6">
+                    <strong>{{n.yesCounter}}</strong>
+                </div>
+                <div class="col-6 text-right">
+                    <strong>{{n.noCounter}}</strong>
+                </div>
+            </div>
+
+            <p>{{ n.description }}</p>
+
+            <hr class="dotted" />
+            <p>
+                {{ n.pool.name }} <strong>[{{ n.pool.balance }} THX]</strong><br>
+            </p>
+        </b-card-text>
+
+        <template slot="footer">
+            <div class="row" v-if="!n.voted">
+                <div class="col-6">
+                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn--default btn-block" v-on:click="vote(n.id, false, n.pool.address)">
                         Reject
                     </button>
-                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn--success" v-on:click="vote(n.id, true)">
+                </div>
+                <div class="col-6">
+                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn-primary btn-block" v-on:click="vote(n.id, true, n.pool.address)">
                         Approve
                     </button>
                 </div>
-                <div class="notification__actions" v-if="n.voted">
-                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn--link" v-on:click="revokeVote(n.id)">
+            </div>
+            <div class="row" v-if="n.voted">
+                <div class="col-12">
+                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn--link" v-on:click="revokeVote(n.id, n.pool.address)">
                         Revoke Vote
                     </button>
                 </div>
-            </template>
-        </div>
-    </div>
+            </div>
+        </template>
+
+    </b-card>
 
 </article>
 </template>
@@ -54,9 +69,9 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
 import EventService from '../services/EventService';
-
 import RewardPool from '../contracts/RewardPool.json';
 import Reward from '../contracts/Reward.json';
+import {BCard, BCardText, BProgress, BProgressBar} from 'bootstrap-vue';
 
 const THX = window.THX;
 
@@ -64,6 +79,12 @@ const RewardState = ['Pending', 'Active', 'Disabled'];
 
 export default {
     name: 'home',
+    components: {
+        'b-card': BCard,
+        'b-card-text': BCardText,
+        'b-progress': BProgress,
+        'b-progress-bar': BProgressBar,
+    },
     data: function() {
         return {
             events: new EventService(),
@@ -110,15 +131,18 @@ export default {
             const utils = THX.network.loom.utils;
 
             const id = parseInt(await contract.methods.id().call());
-            const dateTime = new Date(parseInt(await contract.methods.created().call()));
+            const slug = await contract.methods.slug().call();
+            const dateTime = parseInt(await contract.methods.created().call());
             const amount = await contract.methods.amount().call();
             const state = RewardState[await contract.methods.state().call()];
             const beneficiary = (await contract.methods.beneficiary().call()).toLowerCase();
             const wallet = await firebase.database().ref('wallets').child(beneficiary).once('value');
             const user = await firebase.database().ref(`users/${wallet.val().uid}`).once('value');
-            const rule = await firebase.database().ref(`pools/${poolAddress}/rules/${id}`).once('value');
+            const rule = await firebase.database().ref(`pools/${poolAddress}/rules/${slug}`).once('value');
             const yesCounter = await contract.methods.yesCounter().call();
             const noCounter = await contract.methods.noCounter().call();
+            const pool = await THX.network.contract(RewardPool, poolAddress);
+            const poolName = await pool.methods.name().call();
 
             return {
                 id: id,
@@ -128,19 +152,24 @@ export default {
                 amount: amount,
                 state: state,
                 created: dateTime,
-                pool: poolAddress,
-                yesCounter: utils.fromWei(yesCounter, 'ether'),
-                noCounter: utils.fromWei(noCounter, 'ether'),
+                pool: {
+                    address: poolAddress,
+                    name: poolName,
+                    balance: 0
+                },
+                yesCounter: parseInt(utils.fromWei(yesCounter, 'ether')),
+                noCounter: parseInt(utils.fromWei(noCounter, 'ether')),
             }
         },
-        async vote(id, agree) {
-            const pool = THX.networks.instances.pool;
-            const isManager = await pool.methods.isManager(THX.networks.loomAddress).call()
+        async vote(id, agree, poolAddress) {
+            const THX = window.THX;
+            const pool = await THX.network.contract(RewardPool, poolAddress);
+            const isManager = await pool.methods.isManager(THX.network.account.address).call()
 
             this.voteBusy = true;
 
             if (isManager) {
-                return pool.methods.voteForReward(id, agree).send({ from: THX.networks.loomAddress })
+                return pool.methods.voteForReward(id, agree).send({ from: THX.network.account.address })
                     .then(() => {
                         this.voteBusy = false;
                         return this.update();
@@ -156,12 +185,13 @@ export default {
             }
 
         },
-        async revokeVote(id) {
-            const pool = THX.networks.instances.pool;
-            const isManager = await pool.methods.isManager(THX.networks.loomAddress).call()
+        async revokeVote(id, poolAddress) {
+            const THX = window.THX;
+            const pool = await THX.network.contract(RewardPool, poolAddress);
+            const isManager = await pool.methods.isManager(THX.network.account.address).call()
 
             if (isManager) {
-                return pool.methods.revokeVoteForReward(id).send({ from: THX.networks.loomAddress })
+                return pool.methods.revokeVoteForReward(id).send({ from: THX.network.account.address })
                     .then(() => {
                         this.voteBusy = false;
                         return this.update();

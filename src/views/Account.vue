@@ -2,7 +2,7 @@
 <article class="region region--container">
     <main class="region region--content">
 
-        <h2>Hi {{account.email}}!</h2>
+        <h2>Hi!</h2>
         <p><strong>E-mail:</strong><br> {{account.email}}</p>
         <p><strong>UID:</strong><br> {{account.uid}}</p>
         <p>
@@ -37,55 +37,55 @@
         <modal v-if="showConnectKeysModal" @close="showConnectKeysModal = false">
             <h3 slot="header">Add private keys for accounts:</h3>
             <div slot="body">
-                <input v-model="account.loom.privateKey" type="text" placeholder="Your Loom private key">
-                <input v-model="account.rinkeby.privateKey" type="text" placeholder="Your Rinkeby private key">
+                <input v-model="account.loom.privateKey" type="text" class="form-control" placeholder="Your Loom private key">
+                <input v-model="account.rinkeby.privateKey" type="text" class="form-control" placeholder="Your Rinkeby private key">
             </div>
             <template slot="footer">
-                <button @click="onCreateAccountsFromPrivateKey()" class="btn btn--success" >Connect</button>
+                <button @click="onCreateAccountsFromPrivateKey()" class="btn btn-primary" >Connect</button>
             </template>
         </modal>
 
         <modal v-if="showAddMinterModal" @close="showAddMinterModal = false">
             <h3 slot="header">Add minter role to account:</h3>
             <div slot="body">
-                <input v-if="!newMinterBusy" v-model="newMinterAddress" type="text" placeholder="0x0000000000000000000000000000000000000000">
+                <input v-if="!newMinterBusy" v-model="newMinterAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
                 <span v-if="newMinterBusy" class="">Processing transaction...</span>
             </div>
             <template slot="footer">
-                <button @click="onAddMinter()" v-bind:class="{ disabled: newMinterBusy }" class="btn btn--success">Add minter</button>
+                <button @click="onAddMinter()" v-bind:class="{ disabled: newMinterBusy }" class="btn btn-primary">Add minter</button>
             </template>
         </modal>
 
         <modal v-if="showMintTokensModal" @close="showMintTokensModal = false">
             <h3 slot="header">Mint tokens for account:</h3>
             <div slot="body">
-                <input v-if="!mintForAccountBusy" v-model="mintForAccountAmount" type="number" min="0" />
+                <input v-if="!mintForAccountBusy" v-model="mintForAccountAmount" type="number" class="form-control"  min="0" />
                 <span v-if="mintForAccountBusy" class="">Processing transaction...</span>
             </div>
             <template slot="footer">
-                <button @click="onMintForAccount()" v-bind:class="{ disabled: mintForAccountBusy }" class="btn btn--success" type="submit">Mint {{ mintForAccountAmount }} THX</button>
+                <button @click="onMintForAccount()" v-bind:class="{ disabled: mintForAccountBusy }" class="btn btn-primary" type="submit">Mint {{ mintForAccountAmount }} THX</button>
             </template>
         </modal>
 
         <modal v-if="showMintLoomTokensModal" @close="showMintLoomTokensModal = false">
             <h3 slot="header">Mint tokens for Loom account:</h3>
             <div slot="body">
-                <input v-if="!mintForLoomAccountBusy" v-model="mintForLoomAccountAmount" type="number" min="0" />
+                <input v-if="!mintForLoomAccountBusy" v-model="mintForLoomAccountAmount" type="number" class="form-control"  min="0" />
                 <span v-if="mintForLoomAccountBusy" class="">Processing transaction...</span>
             </div>
             <template slot="footer">
-                <button @click="onMintForLoomAccount()" v-bind:class="{ disabled: mintForLoomAccountBusy }" class="btn btn--success" type="submit">Mint {{ mintForLoomAccountAmount }} THX</button>
+                <button @click="onMintForLoomAccount()" v-bind:class="{ disabled: mintForLoomAccountBusy }" class="btn btn-primary" type="submit">Mint {{ mintForLoomAccountAmount }} THX</button>
             </template>
         </modal>
 
         <modal v-if="showDepositToGatewayModal" @close="showDepositToGatewayModal = false">
             <h3 slot="header">Deposit to main network gateway:</h3>
             <div slot="body">
-                <input v-if="!depositToGatewayBusy" v-model="depositToGatewayAmount" type="number" min="0" />
+                <input v-if="!depositToGatewayBusy" v-model="depositToGatewayAmount" type="number" class="form-control"  min="0" />
                 <span v-if="depositToGatewayBusy" class="">Processing transaction...</span>
             </div>
             <template slot="footer">
-                <button @click="onDepositToGateway()" v-bind:class="{ disabled: depositToGatewayBusy }" class="btn btn--success">Deposit {{ depositToGatewayAmount }} THX</button>
+                <button @click="onDepositToGateway()" v-bind:class="{ disabled: depositToGatewayBusy }" class="btn btn-primary">Deposit {{ depositToGatewayAmount }} THX</button>
             </template>
         </modal>
 
@@ -93,13 +93,13 @@
             <h3 slot="header">Transfer tokens to account:</h3>
             <div slot="body">
                 <template v-if="!transferTokensBusy">
-                    <input v-model="transferTokensAddress" type="text" placeholder="0x0000000000000000000000000000000000000000" />
-                    <input v-model="transferTokensAmount" type="number" v-bind:max="balance.token" />
+                    <input v-model="transferTokensAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000" />
+                    <input v-model="transferTokensAmount" type="number" class="form-control"  v-bind:max="balance.token" />
                 </template>
                 <span v-if="transferTokensBusy" class="">Processing transaction...</span>
             </div>
             <template slot="footer">
-                <button @click="onTransferTokens()" v-bind:class="{ disabled: transferTokensBusy }" class="btn btn--success">Transfer {{ transferTokensAmount }} THX</button>
+                <button @click="onTransferTokens()" v-bind:class="{ disabled: transferTokensBusy }" class="btn btn-primary">Transfer {{ transferTokensAmount }} THX</button>
             </template>
         </modal>
 

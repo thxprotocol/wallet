@@ -2560,7 +2560,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-08-20T13:01:32.196Z",
+  "updatedAt": "2019-08-27T12:04:13.042Z",
   "devdoc": {
     "details": "Library for managing addresses assigned to a Role.",
     "methods": {},

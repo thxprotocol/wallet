@@ -11,13 +11,13 @@
             <form class="form" v-on:submit.prevent="register" v-if="!loading">
                 <h2>Authentication</h2>
                 <div class="form-item">
-                    <input required type="text" v-model="email" class="input-text" placeholder="E-mail">
+                    <input required type="text" class="form-control" v-model="email" placeholder="E-mail">
                 </div>
                 <div class="form-item">
-                    <input required type="password" v-model="password" class="input-text" placeholder="******">
+                    <input required type="password" v-model="password" class="form-control" placeholder="******">
                 </div>
                 <div class="form-item">
-                    <input required type="password" v-model="passwordVerify" class="input-text" placeholder="******">
+                    <input required type="password" v-model="passwordVerify" class="form-control" placeholder="******">
                 </div>
 
                 <button class="btn btn-primary" type="submit">Create account</button>

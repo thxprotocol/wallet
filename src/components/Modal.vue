@@ -5,12 +5,12 @@
                 <div class="modal-container">
                     <div class="modal-header">
                         <slot name="header"></slot>
+                        <button type="button" style="font-family: Arial;" aria-label="Close" class="close" @click="$emit('close')">&#215;</button>
                     </div>
                     <div class="modal-body">
                         <slot name="body"></slot>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn--default" @click="$emit('close')">Close</button>
                         <slot name="footer"></slot>
                     </div>
                 </div>
@@ -49,20 +49,23 @@
     @media (max-width: 360px) {
         margin: 1rem;
     }
+
+    @media (min-width: 768px) {
+        max-width: 768px;
+    }
 }
 
 .modal-header {
-    padding: 1rem 2rem 0;
+    position: relative;
 }
 
 .modal-header h3 {
+    font-weight: bold;
     margin: 0;
     color: black;
 }
 
 .modal-body {
-    padding: 1rem 2rem;
-
     input {
         width: calc(100% - 1rem - 2px);
         right: 0;
@@ -76,8 +79,7 @@
 .modal-footer {
     display: block;
     background-color: #EFEFEF;
-    padding: 1rem 2rem .5rem;
-    text-align: center;
+    text-align: right;
 
     .btn {
         margin: 0;

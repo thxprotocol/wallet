@@ -2,97 +2,195 @@
     <article class="region region--container">
         <main class="region region--content">
             <div class="region region--jumbotron">
-                Pool size: <strong class="font-size-xl">{{this.balance.pool}} THX</strong>
-                <h1>{{ pool.name }}</h1>
-                <p>Curabitur sollicitudin nulla vitae sem ultricies cursus. In lectus lorem, sagittis quis fermentum ut, varius et dui. In posuere lacus vitae mollis lacinia.</p>
+                <strong class="font-size-xl">{{this.balance.pool}} THX</strong>
+                <p>{{ pool.name }}</p>
             </div>
 
-            <h2>Pool transfers</h2>
-            <hr class="dotted">
-            <div v-if="!orderedPoolTransfers.length">Loading pool transfers...</div>
-            <ul class="list list--dotted" v-if="orderedPoolTransfers">
-                <li v-bind:key="transfer.hash" v-for="transfer in orderedPoolTransfers">
-                    <div class="description">
-                        <div v-if="transfer.from">
-                            <small>From: </small><span class="badge badge--default">{{transfer.from}}</span>
+            <div class="row">
+                <div class="col-12">
+                    <b-tabs content-class="mt-4" justified>
+
+                        <b-tab title="Events" active>
+
+                            <div class="text-center" v-if="!orderedPoolTransfers.length">
+                                <b-spinner label="Loading..."></b-spinner>
+                            </div>
+
+                            <b-list-group v-if="orderedPoolTransfers">
+                                <b-list-group-item href="#" v-bind:key="transfer.timestamp" v-for="transfer in orderedPoolTransfers" variant="transfer.variant">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <strong>{{transfer.amount}} THX</strong>
+                                        <small>{{ transfer.timestamp | moment("MMMM Do YYYY HH:mm") }}</small>
+                                    </div>
+                                    <small class="mb-1">Sender: {{transfer.sender}}</small>
+                                </b-list-group-item>
+                            </b-list-group>
+
+                        </b-tab>
+
+                        <b-tab title="Rules">
+
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <th>#</th>
+                                        <th>slug</th>
+                                        <th>amount</th>
+                                        <th>poll</th>
+                                        <th>state</th>
+                                    </thead>
+                                    <tr v-bind:key="rule.id" v-for="rule in rules">
+                                        <td>
+                                            {{ rule.id }}
+                                        </td>
+                                        <td>
+                                            {{ rule.slug }}
+                                        </td>
+                                        <td>
+                                            {{ rule.amount }}
+                                        </td>
+                                        <td v-if="hasPoll(rule.poll)">
+                                            <a href="#" @click="getRulePoll(rule.poll)">View Poll</a>
+                                        </td>
+                                        <td v-if="!hasPoll(rule.poll)">
+                                            <a href="#" @click="onStartPoll(rule.id)">Start Poll</a>
+                                        </td>
+                                        <td>
+                                            <strong>{{ RuleState[rule.state] }}</strong>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <button v-if="isManager" class="btn btn-primary" @click="showCreateRuleModal = true">Add new rule</button>
+
+                        </b-tab>
+
+                        <b-tab title="Rewards">
+
+                        </b-tab>
+
+                        <b-tab title="Actions">
+
+                            <ul class="list-bullets">
+                                <li v-if="isManager"><button class="btn btn-link" @click="showAddManagerModal = true">Add Manager</button></li>
+                                <li v-if="isMember"><button class="btn btn-link" @click="showAddMemberModal = true">Invite Member</button></li>
+                                <li><button class="btn btn-link" @click="showTransferToPoolModal = true">Pool Deposit</button></li>
+                            </ul>
+
+                        </b-tab>
+                    </b-tabs>
+                </div>
+            </div>
+
+            <modal v-if="showRuleProposalModal" @close="showRuleProposalModal = false">
+                <h3 slot="header">Running Rule Proposal:</h3>
+                <div slot="body">
+                    <div v-if="poll">
+                        <h3><strong>{{poll.rule.title}}</strong></h3>
+                        <p><i>{{poll.rule.description}}</i></p>
+                        <p>
+                            Proposal: <del><strong>{{poll.amount}} THX</strong></del> > <strong>{{poll.proposedAmount}} THX</strong>
+                        </p>
+                        <hr class="dotted">
+                        <h3><strong>Poll period:</strong></h3>
+                        <div class="row">
+                            <div class="col-12">
+                                <b-progress
+                                    variant="info"
+                                    :value="((poll.now - poll.startTime) / (poll.endTime - poll.startTime)) * 100"
+                                    :max="100"
+                                ></b-progress>
+                            </div>
+                            <div class="col-6">
+                                {{poll.startTime | moment("MMMM Do YYYY HH:mm") }}
+                            </div>
+                            <div class="col-6 text-right">
+                                {{poll.endTime | moment("MMMM Do YYYY HH:mm") }}
+                            </div>
                         </div>
-                        <div v-if="transfer.to">
-                            <small>To: </small><span class="badge badge--default">{{transfer.to}}</span>
+                        <hr class="dotted">
+
+                        <h3><strong>Votes ({{poll.totalVoted}})</strong></h3>
+                        <div class="row">
+                            <div class="col-12">
+                                <b-progress show-progress :max="(poll.yesCounter + poll.noCounter)">
+                                    <b-progress-bar variant="success" :value="poll.yesCounter"></b-progress-bar>
+                                    <b-progress-bar variant="danger" :value="poll.noCounter"></b-progress-bar>
+                                </b-progress>
+                            </div>
+                            <div class="col-6">
+                                {{poll.yesCounter}}
+                            </div>
+                            <div class="col-6 text-right">
+                                {{poll.noCounter}}
+                            </div>
                         </div>
-                        <small>{{ transfer.created }}</small>
                     </div>
-                    <div class="actions">
-                        <strong>{{transfer.amount}} THX</strong>
+                </div>
+                <template slot="footer">
+                    <div class="alert alert-warning" v-if="!isMember">
+                        <strong>You are not a member of this pool and can not join the poll.</strong>
                     </div>
-                </li>
-            </ul>
-
-            <h2>Reward Rules</h2>
-            <ul class="list list--dotted">
-                <li v-bind:key="rule.id" v-for="rule in rules">
-                    <div class="description">
-                        {{ rule.id }} | {{ rule.slug }} | {{ rule.amount }} <strong>{{ RuleState[rule.state] }}</strong>
+                    <div v-if="isMember">
+                        <div class="row" v-if="!poll.hasVoted">
+                            <div class="col-6">
+                                <button class="btn btn-primary btn-block" @click="onVoteForRule(poll.id, true)">Approve</button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-primary btn-block" @click="onVoteForRule(poll.id, false)">Reject</button>
+                            </div>
+                        </div>
+                        <div class="row" v-if="poll.hasVoted">
+                            <div class="col-12">
+                                <button class="btn btn-primary btn-block" @click="onRevokeVoteForRule()">Revoke</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="actions">
-
-                    </div>
-                </li>
-            </ul>
-
-            <h2>Rule Poll</h2>
-            <template v-if="poll">
-                <h3>{{poll.rule.title}}</h3>
-                <p>{{poll.rule.description}}</p>
-                <p>Proposed amount: <strong>{{poll.proposedAmount}}</strong></p>
-                <p>
-                    Amount of votes: {{poll.totalVoted}}<br>
-                    Yes: <strong>{{poll.yesCounter}}</strong> | No: <strong>{{poll.noCounter}}</strong>
-                </p>
-                <template v-if="isMember">
-                    <button class="btn btn-primary" v-if="hasVoted" @click="onRevokeVoteForRule()">Revoke</button>
-                    <button class="btn btn-primary" v-if="!hasVoted" @click="onRejectRewardRule()">Reject</button>
-                    <button class="btn btn-primary" v-if="!hasVoted" @click="onApproveRewardRule()">Approve</button>
                 </template>
-                <p v-if="!isMember"><strong>You are not a member of this pool and can not join the poll.</strong></p>
-            </template>
-
-            <h2>Pool Actions</h2>
-            <ul class="list-bullets">
-                <li v-if="isManager"><button class="btn btn-link" @click="showCreateRuleModal = true">Add new rule</button></li>
-                <li v-if="isMember"><button class="btn btn-link" @click="showChangeRuleModal = true">Change Rule</button></li>
-                <li v-if="isMember"><button class="btn btn-link" @click="showAddMemberModal = true">Invite Member</button></li>
-                <li><button class="btn btn-link" @click="showTransferToPoolModal = true">Pool Deposit</button></li>
-            </ul>
+            </modal>
 
             <modal v-if="showCreateRuleModal" @close="showCreateRuleModal = false">
                 <h3 slot="header">Create reward rule:</h3>
                 <div slot="body">
                     <template v-if="!createRuleBusy">
                         <label for="slug">Slug:</label>
-                        <input id="slug" v-model="newRule.slug" type="text" placeholder="complete_profile"/>
+                        <input id="slug" v-model="newRule.slug" type="text" class="form-control" placeholder="complete_profile"/>
                         <label for="title">Title:</label>
-                        <input id="title" v-model="newRule.title" type="text" placeholder="Complete your profile!"/>
+                        <input id="title" v-model="newRule.title" type="text" class="form-control" placeholder="Complete your profile!"/>
                         <label for="description">Description:</label>
-                        <textarea width="100%" rows="3" id="description" v-model="newRule.description" placeholder="When filling all fields of your public profile you will receive the reward."> </textarea>
+                        <textarea class="form-control"  width="100%" rows="3" id="description" v-model="newRule.description" placeholder="When filling all fields of your public profile you will receive the reward."> </textarea>
                         <label for="rewardSize">Reward size:</label>
-                        <input id="rewardSize" v-model="newRule.size" type="number" />
+                        <input id="rewardSize" v-model="newRule.size" type="number" class="form-control"  />
                     </template>
 
                     <span v-if="createRuleBusy" class="">Processing transaction...</span>
                 </div>
                 <template slot="footer">
-                    <button @click="onCreateRewardRule()" v-bind:class="{ disabled: createRuleBusy }" class="btn btn--success">Add new rule</button>
+                    <button @click="onCreateRewardRule()" v-bind:class="{ disabled: createRuleBusy }" class="btn btn-primary">Add new rule</button>
                 </template>
             </modal>
 
             <modal v-if="showAddMemberModal" @close="showAddMemberModal = false">
                 <h3 slot="header">Invite new member to the pool:</h3>
                 <div slot="body">
-                    <input v-if="!addMemberBusy" v-model="newMemberAddress" type="text" placeholder="0x0000000000000000000000000000000000000000">
+                    <input v-if="!addMemberBusy" v-model="newMemberAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
                     <span v-if="addMemberBusy" class="">Processing transaction...</span>
                 </div>
                 <template slot="footer">
-                    <button @click="onAddMember()" v-bind:class="{ disabled: addMemberBusy }" class="btn btn--success">Add member</button>
+                    <button @click="onAddMember()" v-bind:class="{ disabled: addMemberBusy }" class="btn btn-primary">Add member</button>
+                </template>
+            </modal>
+
+
+            <modal v-if="showAddManagerModal" @close="showAddManagerModal = false">
+                <h3 slot="header">Add a manager for this pool:</h3>
+                <div slot="body">
+                    <input v-if="!addManagerBusy" v-model="newMemberAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
+                    <span v-if="addManagerBusy" class="">Processing transaction...</span>
+                </div>
+                <template slot="footer">
+                    <button @click="onAddManager()" v-bind:class="{ disabled: addManagerBusy }" class="btn btn-primary">Add manager</button>
                 </template>
             </modal>
 
@@ -100,23 +198,22 @@
                 <h3 slot="header">Reward pool deposit:</h3>
                 <div slot="body">
                     <p>Reward Pool balance: <strong>{{this.balance.pool}} THX</strong></p>
-                    <input v-if="!poolDepositBusy" v-model="transferToPoolAmount" type="number" v-bind:max="balance.token" />
+                    <input v-if="!poolDepositBusy" v-model="transferToPoolAmount" type="number" class="form-control"  v-bind:max="balance.token" />
                     <span v-if="poolDepositBusy" class="">Processing transaction...</span>
                 </div>
                 <template slot="footer">
-                    <button @click="onTransferToPool()" v-bind:class="{ disabled: poolDepositBusy }" class="btn btn--success">Deposit {{ transferToPoolAmount }} THX</button>
+                    <button @click="onTransferToPool()" v-bind:class="{ disabled: poolDepositBusy }" class="btn btn-primary">Deposit {{ transferToPoolAmount }} THX</button>
                 </template>
             </modal>
 
-            <modal v-if="showTransferToPoolModal" @close="showTransferToPoolModal = false">
-                <h3 slot="header">Reward pool deposit:</h3>
+            <modal v-if="showChangeRuleModal" @close="showChangeRuleModal = false">
+                <h3 slot="header">Propose rule change:</h3>
                 <div slot="body">
-                    <p>Reward Pool balance: <strong>{{this.balance.pool}} THX</strong></p>
-                    <input v-if="!poolDepositBusy" v-model="transferToPoolAmount" type="number" v-bind:max="balance.token" />
-                    <span v-if="poolDepositBusy" class="">Processing transaction...</span>
+                    <input v-if="!ruleRewardSizeBusy" v-model="changeRuleAmount" type="number" class="form-control" />
+                    <span v-if="ruleRewardSizeBusy" class="">Processing transaction...</span>
                 </div>
                 <template slot="footer">
-                    <button @click="onTransferToPool()" v-bind:class="{ disabled: poolDepositBusy }" class="btn btn--success">Deposit {{ transferToPoolAmount }} THX</button>
+                    <button @click="changeRule()" v-bind:class="{ disabled: ruleRewardSizeBusy }" class="btn btn-primary">Start proposal</button>
                 </template>
             </modal>
         </main>
@@ -131,6 +228,7 @@ import RewardPool from '../contracts/RewardPool.json';
 import Reward from '../contracts/Reward.json';
 import RulePoll from '../contracts/RulePoll.json';
 import modal from '../components/Modal';
+import { BToast, BSpinner, BProgress, BProgressBar, BTab, BTabs, BListGroup, BListGroupItem } from 'bootstrap-vue';
 
 import Vue from 'vue';
 const _ = require('lodash');
@@ -141,7 +239,14 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
 export default {
     name: 'pool',
     components: {
-        modal
+        modal,
+        'b-spinner': BSpinner,
+        'b-tabs':BTabs,
+        'b-tab':BTab,
+        'b-progress': BProgress,
+        'b-progress-bar': BProgressBar,
+        'b-list-group': BListGroup,
+        'b-list-group-item': BListGroupItem,
     },
     computed: {
         orderedPoolTransfers: function () {
@@ -151,20 +256,26 @@ export default {
     data: function() {
         return {
             events: new EventService(),
-            poolTransfers: null,
+            poolTransfers: [],
             isManager: false,
             isMember: false,
             rules: [],
             RuleState: ['Pending', 'Active', 'Disabled'],
             showCreateRuleModal: false,
             createRuleBusy: false,
-            showTransferToPoolModal: false,
             poolDepositBusy: false,
             transferToPoolAmount: 0,
             showAddMemberModal: false,
-            addMemberBusy: false,
+            showAddManagerModal: false,
+            showTransferToPoolModal: false,
             newMemberAddress: '',
-            hasVoted: false,
+            addMemberBusy: false,
+            addManagerBusy: false,
+            newManagerAddress: '',
+            showChangeRuleModal: false,
+            showRuleProposalModal: false,
+            ruleRewardSizeBusy: false,
+            changeRuleAmount: 0,
             account: {
                 loom: {
                     address: null
@@ -199,6 +310,22 @@ export default {
 
             this.contract = await THX.network.contract(RewardPool, this.poolAddress);
 
+            for (let e of this.events.poolEvents) {
+                this.contract.getPastEvents(e, { fromBlock: 0, toBlock: 'latest'})
+                    .then(events => {
+                        if (events.length > 0) {
+                            console.log(events);
+                            for (let event of events) {
+                                this[`on${event.event}`](event.returnValues);
+                            }
+                        }
+
+                    })
+                    .catch(err => {
+                        console.error(err);
+                    });
+            }
+
             this.account.loom = THX.network.account;
             this.account.rinkeby = THX.network.rinkeby.account;
 
@@ -217,7 +344,6 @@ export default {
 
             this.subscribe();
             this.getRewardRules();
-            this.getRulePoll();
 
             this.events.listen('event.RuleStateChanged', this.onRuleStateChanged)
         },
@@ -225,16 +351,39 @@ export default {
             const THX = window.THX;
             const amount = await this.contract.methods.countRewards().call();
 
-            this.events.rewardPoolSubscription(this.contract.events);
+            this.events.subscribePoolEvents(this.contract.events);
 
             for (let i = 0; i < parseInt(amount); i++) {
                 const rewardAddress = await this.contract.methods.rewards(i).call();
-                const reward = THX.network.contract(Reward, rewardAddress);
+                const reward = await THX.network.contract(Reward, rewardAddress);
+                const state = await reward.methods.state().call();
 
-                if (reward.state !== 2) {
+                if (state !== 2) {
                     this.events.rewardSubscription(reward.events);
                 }
             }
+        },
+        onDeposited(data) {
+            this.poolTransfers.push({
+                amount: `+${new BN(data.amount).div(tokenMultiplier)}`,
+                timestamp: parseInt(data.created),
+                sender: data.sender,
+                variant: 'success'
+            });
+        },
+        onWithdrawn(data) {
+            this.poolTransfers.push({
+                amount: `-${new BN(data.amount).div(tokenMultiplier)}`,
+                timestamp: parseInt(data.created),
+                sender: data.sender,
+                variant: 'danger'
+            });
+        },
+        onManagerAdded(data) {
+            console.log(data);
+        },
+        onMemberAdded(data) {
+            console.log(data);
         },
         onAddManager() {
             this.addManagerBusy = true;
@@ -257,14 +406,27 @@ export default {
                     console.error(err);
                 });
         },
-        async onApproveRewardRule() {
-            return await this.contract.methods.voteForRule(true).send({from: this.account.loom.address });
-        },
-        async onRejectRewardRule() {
-            return await this.contract.methods.voteForRule(false).send({from: this.account.loom.address });
+        async onVoteForRule(id, agree) {
+            return await this.contract.methods.voteForRule(id, agree).send({from: this.account.loom.address })
+                .then(async () => {
+                    this.poll.hasVoted = true;
+                    this.getRulePoll();
+                })
+                .catch(async (err) => {
+                    // eslint-disable-next-line
+                    console.error(err);
+                });
         },
         async onRevokeVoteForRule() {
-            return await this.contract.methods.revokeVoteForRule().send({from: this.account.loom.address });
+            return await this.contract.methods.revokeVoteForRule().send({from: this.account.loom.address })
+                .then(async () => {
+                    this.poll.hasVoted = false;
+                    this.getRulePoll();
+                })
+                .catch(async (err) => {
+                    // eslint-disable-next-line
+                    console.error(err);
+                });
         },
         onRuleStateChanged(data) {
             const rule = data.detail;
@@ -275,6 +437,22 @@ export default {
             }
 
             return rulesRef.child(rule.id).update({ state: this.RuleState[rule.state] });
+        },
+        async getRewards() {
+            const amountOfRewards = parseInt( await this.contract.methods.countRewards().call() );
+
+            for (let i = 0; i < amountOfRewards; i++) {
+                const reward = await this.contract.methods.rewards(i).call();
+
+                Vue.set(this.rewards, reward.id, {
+                    id: reward.id,
+                    slug: reward.slug,
+                    beneficiary: reward.beneficiary,
+                    amount: reward.amount,
+                    state: reward.state,
+                    created: reward.created,
+                });
+            }
         },
         async getRewardRules() {
             const amountOfRules = parseInt( await this.contract.methods.countRules().call() );
@@ -289,46 +467,75 @@ export default {
                     id: rule.id,
                     slug: rule.slug,
                     state: rule.state,
+                    poll: rule.poll,
                 });
             }
         },
-        async getRulePoll() {
-            const pollAddress = await this.contract.methods.rulePoll().call();
-
+        hasPoll(pollAddress) {
+            return (pollAddress !== "0x0000000000000000000000000000000000000000");
+        },
+        async getRulePoll(pollAddress) {
             if (pollAddress !== "0x0000000000000000000000000000000000000000") {
                 const THX = window.THX;
-                const rulePoll = THX.network.contract(RulePoll, pollAddress);
-
+                const rulePoll = await THX.network.contract(RulePoll, pollAddress);
                 const id = parseInt(await rulePoll.methods.id().call());
+                const rule = await this.contract.methods.rules(id).call();
                 const proposedAmount = parseInt(await rulePoll.methods.proposedAmount().call());
-
                 const rulesRef = firebase.database().ref(`pools/${this.poolAddress}/rules`);
                 const vote = await rulePoll.methods.votesByAddress(this.account.loom.address).call();
 
-                this.hasVoted = parseInt(vote.time) > 0;
-
-                rulesRef.child(id).once('value')
+                rulesRef.child(rule.slug).once('value')
                     .then(async data => {
                         const yesCounter = await rulePoll.methods.yesCounter().call();
                         const noCounter = await rulePoll.methods.noCounter().call();
                         const totalVoted = await rulePoll.methods.totalVoted().call();
 
+                        const now = (await THX.network.loom.eth.getBlock('latest')).timestamp;
+                        const startTime = await rulePoll.methods.startTime().call();
+                        const endTime = await rulePoll.methods.endTime().call();
+                        const diff = (endTime - now);
+
                         this.poll = {
                             id: id,
+                            amount: rule.amount,
                             proposedAmount: proposedAmount,
-                            yesCounter: new BN(yesCounter).div(tokenMultiplier),
-                            noCounter: new BN(noCounter).div(tokenMultiplier),
+                            yesCounter: parseInt(new BN(yesCounter).div(tokenMultiplier)),
+                            noCounter: parseInt(new BN(noCounter).div(tokenMultiplier)),
                             totalVoted: totalVoted,
+                            hasVoted: parseInt(vote.time) > 0,
+                            now: now,
+                            startTime: parseInt(startTime),
+                            endTime: parseInt(endTime),
+                            diff: diff,
                             rule: {
                                 title: data.val().title,
                                 description: data.val().description,
                                 state: this.RuleState[data.val().state],
                                 amount: data.val().amount,
+                                poll: rule.poll,
                             }
                         }
+                        this.showRuleProposalModal = true;
                     });
             }
 
+        },
+        onStartPoll(id) {
+            this.showChangeRuleModal = true;
+            return this.changeRuleId = id;
+        },
+        async changeRule() {
+            const rule = await this.contract.methods.rules(this.changeRuleId).call();
+
+            return await this.contract.methods.startRulePoll(this.changeRuleId, this.changeRuleAmount)
+                .send({ from: this.account.loom.address })
+                .then(tx => {
+                    console.log(tx);
+                })
+                .catch(err => {
+                    // eslint-disable-next-line
+                    console.error(err);
+                })
         },
         onCreateRewardRule() {
             const rulesRef = firebase.database().ref(`pools/${this.poolAddress}/rules`);
@@ -339,14 +546,15 @@ export default {
                     const id = tx.events.RuleStateChanged.returnValues.id;
                     const rule = await this.contract.methods.rules(id).call();
 
-                    return rulesRef.child(id).set({
+                    return rulesRef.child(rule.slug).set({
                         id: rule.id,
                         slug: rule.slug,
                         title: this.newRule.title,
                         description: this.newRule.description,
                         state: this.RuleState[rule.state],
                     }).then(() => {
-                        return this.showCreateRuleModal = false;
+                        this.showCreateRuleModal = false;
+                        return this.getRewardRules();
                     });
                 })
                 .catch(err => {

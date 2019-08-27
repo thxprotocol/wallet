@@ -11,10 +11,10 @@
             <form class="form" v-on:submit.prevent="login" v-if="!loading">
                 <h1>Enter your details</h1>
                 <div class="form-item">
-                    <input required type="text" v-model="email" class="input-text" placeholder="E-mail">
+                    <input required type="text" class="form-control" v-model="email" placeholder="E-mail">
                 </div>
                 <div class="form-item">
-                    <input required type="password" v-model="password" class="input-text" placeholder="******">
+                    <input required type="password" v-model="password" placeholder="******">
                 </div>
                 <button class="btn btn-primary" type="submit">Login</button>
                 <p>You don't have an account? You can <router-link to="/register">register one!</router-link>
