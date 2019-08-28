@@ -1,78 +1,107 @@
-/*global web3*/
-import Web3 from 'web3'
-
-// import TokenJSON from '../../build/contracts/THXToken.json'
-// import RewardPoolJSON from '../../build/contracts/RewardPool.json'
-
-import config from '../config.js'
+import { Client, LocalAddress, CryptoUtils, LoomProvider } from 'loom-js';
+import Web3 from 'web3';
+import THXToken from '../contracts/THXToken.json';
+import THXTokenRinkeby from '../contracts/THXTokenRinkeby.json';
+import RinkebyGateway from '../Gateway.json';
+import Config from '../config.js';
 
 export default class NetworkService {
-  constructor() {
-    this.web3 = web3
-
-    if (typeof web3 !== 'undefined') {
-      this.web3 = new Web3(this.web3.currentProvider);
-    } else {
-      this.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
+    constructor(loomPrivateKey, rinkebyPrivateKey) {
+        this.loomPrivateKey = loomPrivateKey;
+        this.rinkebyPrivateKey = rinkebyPrivateKey;
     }
-    this.accounts = []
-    this.addresses = {
-      token: null,
-      rewardPool: null
+
+    async init() {
+        let networkConfig;
+
+        if (this.rinkebyPrivateKey) {
+            this.rinkeby = new Web3(`wss://rinkeby.infura.io/ws/v3/${Config.infura.key}`);
+            this.rinkeby.account = this.rinkeby.eth.accounts.privateKeyToAccount(`0x${this.rinkebyPrivateKey}`);
+        }
+
+        if (process.env.NETWORK === 'ganache') {
+            this.loom = new Web3('ws://localhost:8545');
+            this.account = this.loom.eth.accounts.privateKeyToAccount(`0x${this.loomPrivateKey}`);
+        }
+
+        if ((process.env.NETWORK !== 'ganache') && this.loomPrivateKey) {
+            networkConfig = this._networkConfig(this.loomPrivateKey);
+
+            this.loom = await new Web3( this._networkProvider(networkConfig.privateArray) );
+            this.account = networkConfig;
+        }
+
+        return new Promise(async (resolve) => {
+            this.instances = {
+                token: await this.contract(THXToken, null),
+                tokenRinkeby: this.rinkebyContract(THXTokenRinkeby, this.rinkeby.account.address),
+                gateway: this.rinkebyContract(RinkebyGateway, this.rinkeby.account.address),
+            };
+
+            resolve(this.instances);
+        });
     }
-    this.instances = {
-      token: null,
-      rewardPool: null
+
+    // Returns the default network Contract class
+    // @param address If set to null the default network will apply
+    async contract(json, address) {
+        const Contract = this.loom.eth.Contract;
+        let nid;
+
+        if (!address) {
+            nid = await this.loom.eth.net.getId();
+            address = json.networks[nid].address;
+        }
+
+        return new Contract(json.abi, address, { from: this.account.address });
     }
-  }
 
-  connect() {
-    return new Promise((resolve, reject) => {
-      this.web3.eth.net.getId().then( (nid) => {
+    // Returns a Rinkeby Contract class
+    rinkebyContract(json, account) {
+        const Contract = this.rinkeby.eth.Contract;
 
-        this.web3.eth.getAccounts((error, accounts) => {
-          let instances = {
-            token: new this.web3.eth.Contract(config.abi.token, config.address.token),
-            pool: new this.web3.eth.Contract(config.abi.pool, config.address.pool)
-          }
+        return new Contract(json.abi, json.networks[4].address, { from: account })
+    }
 
-          resolve({
-            addresses: config.address,
-            instances: instances,
-            accounts: accounts
-          })
-        })
+    // Create loom account for private key
+    _networkConfig(privateKey) {
+        const privateKeyArray = CryptoUtils.B64ToUint8Array(privateKey);
+        const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKeyArray);
+        const address = LocalAddress.fromPublicKey(publicKey).toString().toLowerCase();
 
-        // if (typeof TokenJSON.networks[nid] != 'undefined' && typeof RewardPoolJSON.networks[nid] != 'undefined') {
-        //   let addresses = {}
-        //   let instances = {}
-        //
-        //   // Get the contract addresses
-        //   this.adresses = addresses = {
-        //     token: TokenJSON.networks[nid].address,
-        //     pool: RewardPoolJSON.networks[nid].address
-        //   }
-        //
-        //   // Create an instance from the THXToken Contract abi and contract address on the current network
-        //   this.instances = instances = {
-        //     token: new this.web3.eth.Contract(TokenJSON.abi, addresses.token),
-        //     pool: new this.web3.eth.Contract(RewardPoolJSON.abi, addresses.pool)
-        //   }
-        //
-        //   this.web3.eth.getAccounts((error, accounts) => {
-        //     this.accounts = accounts
-        //
-        //     resolve({
-        //       addresses: addresses,
-        //       instances: instances,
-        //       accounts: accounts
-        //     })
-        //   })
-        // }
-        // else {
-        //   reject()
-        // }
-      })
-    })
-  }
+        return {
+            address: address,
+            privateKey: privateKey,
+            privateArray: privateKeyArray,
+            public: publicKey,
+        }
+    }
+
+    // Get the loom provider configuration
+    _networkProvider(privateKey) {
+        let writeUrl, readUrl, networkId, client;
+
+        if (!process.env.NETWORK) {
+            writeUrl = 'ws://127.0.0.1:46658/websocket';
+            readUrl = 'ws://127.0.0.1:46658/queryws';
+            networkId = 'default';
+        }
+
+        if (process.env.NETWORK === 'extdev') {
+            writeUrl = 'wss://extdev-plasma-us1.dappchains.com/websocket';
+            readUrl = 'wss://extdev-plasma-us1.dappchains.com/queryws';
+            networkId = 'extdev-plasma-us1';
+        }
+
+        client = new Client(networkId, writeUrl, readUrl);
+
+        client.on('error', msg => {
+            // eslint-disable-next-line
+            console.error('Error on connect to client', msg)
+            // eslint-disable-next-line
+            console.warn('Please verify if loom command is running')
+        });
+
+        return new LoomProvider(client, privateKey);
+    }
 }

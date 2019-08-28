@@ -1,47 +1,58 @@
 <template>
-  <header class="region region--header">
-    <div class="logo">
-      <img width="50" height="50" v-bind:src="assets.logo" alt="THX Logo" />
-    </div>
+<header class="region region--header">
+    <button v-on:click="goToAccount()" class="link-settings">
+        <img src="../assets/menu.svg" alt="Menu icon" />
+    </button>
     <div class="account_balance">
-      <p>Your balance (THX)</p>
-      <p><span class="font-size-large" v-html="balance.token"></span></p>
+        <p><span class="font-size-large">{{balance.token}} THX</span></p>
+        <p><span>{{balance.tokenRinkeby}} THX</span> | <span>{{balance.eth}} ETH</span></p>
     </div>
-  </header>
+</header>
 </template>
 
 <script>
-import NetworkService from '../services/NetworkService.js'
-import Logo from '../assets/thx_logo.svg'
+import EventAggregator from '../services/EventAggregator';
+
+const BN = require('bn.js');
+const tokenMultiplier = new BN(10).pow(new BN(18));
 
 export default {
-  name: 'Header',
-  data: function () {
-    return {
-      network: null,
-      assets: {
-        logo: Logo
-      },
-      balance: {
-        eth: 0,
-        token: 0
-      }
-    }
-  },
-  mounted() {
-    new NetworkService(web3).connect().then((network) => {
-      this.network = network
-      this.init()
-    })
-  },
-  methods: {
-    init() {
-      this.updateBalance()
+    name: 'Header',
+    data: function() {
+        return {
+            ea: new EventAggregator(),
+            balance: {
+                eth: 0,
+                token: 0,
+                tokenRinkeby: 0,
+            },
+        }
     },
-    async updateBalance() {
-      const token = this.network.instances.token;
-      this.balance.token = await token.methods.balanceOf(this.network.accounts[0]).call()
+    created() {
+        this.updateBalance();
+        this.ea.listen('event.Transfer', this.updateBalance);
+    },
+    methods: {
+        async updateBalance() {
+            const THX = window.THX;
+            const token = THX.network.instances.token;
+            const tokenRinkeby = THX.network.instances.tokenRinkeby;
+            const address = THX.network.account.address;
+            const addressRinkeby = THX.network.rinkeby.account.address;
+            let balanceInWei;
+
+            balanceInWei = await THX.network.rinkeby.eth.getBalance(addressRinkeby);
+            this.balance.eth = THX.network.rinkeby.utils.fromWei(balanceInWei, 'ether');
+
+            balanceInWei = await token.methods.balanceOf(address).call();
+            this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
+
+            balanceInWei = await tokenRinkeby.methods.balanceOf(addressRinkeby).call();
+            this.balance.tokenRinkeby = new BN(balanceInWei).div(tokenMultiplier);
+        },
+        goToAccount() {
+            this.$router.replace('/account');
+        }
     }
-  }
 }
 </script>

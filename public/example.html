@@ -1,0 +1,45 @@
+<html>
+<head>
+    <script src="./scripts/qrcode.min.js"></script>
+    <script>
+        function getReward() {
+            return fetch('https://thx-client.firebaseio.com/rewards.json', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        slug: "complete_profile",
+                        id: 0,
+                        amount: 200,
+                    }),
+                })
+                .then(r => console.info);
+        }
+    </script>
+</head>
+<body>
+    <h1>Software Integration Examples</h1>
+
+    <h2>Claim a reward</h2>
+    <p>Use the THX Wallet to scan and claim your reward.</p>
+    <p><canvas id="canvas"></canvas></p>
+    <strong>Example data:</strong>
+    <pre>
+        {
+            rule: 0,
+            pool: "0x00F8BaCd604FADf7046849B1E87Ef1653aD31314"
+        }
+    </pre>
+    <script>
+      QRCode.toCanvas(
+          document.getElementById('canvas'),
+          JSON.stringify({
+              rule: 0,
+              pool: "0x00F8BaCd604FADf7046849B1E87Ef1653aD31314"
+          }), function (error) {
+            if (error) {
+                console.error(error)
+            }
+            console.log('success!');
+        });
+    </script>
+</body>
+</html>

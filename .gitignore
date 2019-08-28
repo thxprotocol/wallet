@@ -1,8 +1,11 @@
 .DS_Store
 node_modules
 /dist
-/examples
+/openzeppelin
 /build/contracts
+command
+/src/config.js
+.firebase
 
 # local env files
 .env
@@ -22,3 +25,19 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw*
+
+# Loom files and folders
+receipts_db
+evm.db
+chaindata
+app.db
+genesis.json
+loom
+loom_private_key
+loom_public_key
+rinkeby_private_key
+rinkeby_account
+extdev_private_key
+extdev_public_key
+extdev_private_key_new
+extdev_public_key_new

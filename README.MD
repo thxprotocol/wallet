@@ -36,6 +36,9 @@ npm install -g ganache-cli
 
 * [Ganache CLI Documentation](https://github.com/trufflesuite/ganache-cli)
 
+### Loom dAppchain
+
+
 ### Truffle Development Toolkit
 This is the development toolkit we use for compiling the .sol (Solidity) and deploying them on the network.
 ```
@@ -57,6 +60,15 @@ npm install
 ```
 
 ## Applications
+### Run Loom dAppChain
+Initialize and create genesis file. Run local sidechain and deploy contracts to it.
+
+```
+./loom init -f;
+./loom run
+truffle migrate --reset --network loom_dapp_chain
+```
+
 
 ### Run Ganache CLI
 Start the Ganache blockchain (with 5 user accounts that hold 500 ETH each) and make sure the network runs on port `8545`. The port that is configured for network `ganache` in the file `./truffle.js`.
@@ -90,6 +102,22 @@ Make sure to compile your Solidity contracts and migrate them on the local Ganac
 truffle migrate --network ganache
 ```
 
+## Loom Transfer Gateway
+```
+yarn deploy:reset:extdev
+yarn deploy:reset:rinkeby
+node ./transfer-gateway.js map-accounts
+node ./transfer-gateway.js map-contracts token
+```
+
+### Testing
+
+```
+node ./transfer-gateway.js token-balance -c eth
+node ./transfer-gateway.js token-balance -c extdev
+node ./transfer-gateway.js token-balance -c eth -a "0xs7ZkMkb7Ul5DkfnMSWxUZvYF9NIHkbW5Hb0EMizcWtU="
+```
+
 ## VueJS app
 Use these commands to maintain the project, create production builds, run tests and lint code.
 
@@ -111,11 +139,11 @@ npm run lint
 
 * ~~The THX Wallet UI needs to be implemented.~~
 * ~~The list of Reward Structs in the RewardPool contract needs to be able to support multiple rewards of various types per beneficiary address.~~
-* A splash screen should be shown when you have received a reward. See how to use contract events for this and probably store the state client side.
+* ~~A splash screen should be shown when you have received a reward. See how to use contract events for this and probably store the state client side.~~
 * Improve Solidity typing for properties and refactor standard contracts.
-* Investigate the impact of long lists of rewards in terms of tx cost calculation.
-* Investigate Trust Wallet SDK and see if it can work with VueJS for this POC.
-* Deploy the contract layer on Ropsten or Rinkeby test network.
+* ~~Investigate the impact of long lists of rewards in terms of tx cost calculation.~~
+* ~~Investigate Trust Wallet SDK and see if it can work with VueJS for this POC.~~
+* ~~Deploy the contract layer on Ropsten or Rinkeby test network.~~
 * ~~Account without ManageRole should not see Suggested Rewards in notification list~~
 
 ## Known issues
@@ -134,5 +162,5 @@ VueJS compiler tells us there is a memory leak when adding listeners to the netw
 
 * [Solidity](https://solidity.readthedocs.io/en/v0.5.0/)
 * [web3.js](https://web3js.readthedocs.io/en/1.0/)
-* [OpenZeppeling Smart Contracts](https://github.com/OpenZeppelin/openzeppelin-solidity.git)
+* [OpenZeppelin Smart Contracts](https://github.com/OpenZeppelin/openzeppelin-solidity.git)
 * [Trust Wallet SDK](https://github.com/TrustWallet/react-native-trust-sdk)

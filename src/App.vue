@@ -1,120 +1,60 @@
 <template>
-  <div id="app" v-bind:class="`section--${$router.currentRoute.name}`">
-    <router-view/>
-    <footer v-if="removeFooterPaths()" class="region region--navigation">
-      <nav class="navbar">
-        <ul class="nav">
-          <li v-bind:key="route.name" v-for="route in $router.options.routes" v-if="route.visible">
-            <router-link v-bind:to="route.path">
-              <span v-if="route.name == 'notifications' && rewards.length > 0" class="badge badge--warning">
-                {{ rewards.length }}
-              </span>
-              <img width="20" height="20" v-bind:src="assets[route.name][(route.path == $router.currentRoute.path) ? 'active' : 'default']" alt="Wallet Icon" />
-            </router-link>
-          </li>
-        </ul>
-      </nav>
-    </footer>
-  </div>
+<div id="app" v-bind:class="`section--${$router.currentRoute.name}`">
+    <Header v-if="$router.currentRoute.meta.header" ref="header" />
+    <router-view />
+    <Footer v-if="currentUser" ref="footer" />
+</div>
 </template>
 
 <script>
-import NetworkService from './services/NetworkService.js'
-import WalletSrc from './assets/wallet.svg'
-import WalletActiveSrc from './assets/wallet_selected.svg'
-import NotificationsSrc from './assets/notification.svg'
-import NotificationsActiveSrc from './assets/notification_selected.svg'
-import AccountSrc from './assets/account.svg'
+import firebase from 'firebase/app';
+
+import Header from './components/Header';
+import Footer from './components/Footer';
+import EventService from './services/EventService';
+
+const BN = require('bn.js');
+const tokenMultiplier = new BN(10).pow(new BN(18));
 
 export default {
-  name: 'App',
-  data: function () {
-    return {
-      network: null,
-      rewards: [],
-      assets: {
-        wallet: {
-          default: WalletSrc,
-          active: WalletActiveSrc
-        },
-        notifications: {
-          default: NotificationsSrc,
-          active: NotificationsActiveSrc
-        },
-        account: {
-          default: AccountSrc,
-          active: AccountSrc
+    name: 'App',
+    components: {
+        Header,
+        Footer
+    },
+    data: function() {
+        return {
+            events: new EventService(),
+            currentUser: firebase.auth().currentUser,
         }
-      },
-      approvals: [],
-      lastId: -1
-    }
-  },
-  created() {
-    new NetworkService().connect().then(async (network) => {
-      this.network = network
-      this.init()
-    })
-  },
-  mounted() {
-    if (localStorage.lastId) {
-      this.lastId = localStorage.lastId;
-    }
-  },
-  methods: {
-    async init() {
-      this.checkForRewards()
-      this.update()
     },
-    removeFooterPaths() {
-      return this.$router.history.current["name"] !== "reward";
+    created() {
+        this.events.listen('event.Deposited', this.onPoolDeposit);
+        this.events.listen('event.Withdrawn', this.onPoolWithdrawel);
     },
-    async update() {
-      const pool = this.network.instances.pool;
+    methods: {
+        toast(title, body, variant) {
+            return this.$bvToast.toast(body, {
+                title: title,
+                toaster: 'b-toaster-bottom-full',
+                autoHideDelay: 3000,
+                appendToast: true
+            })
+        },
+        onPoolDeposit(data) {
+            const timestamp = parseInt(data.detail.created);
+            const time = this.$moment(timestamp).format("MMMM Do YYYY, HH:mm");
+            const amount = parseInt(new BN(data.detail.amount).div(tokenMultiplier))
 
-      const amountOfRewards = await pool.methods.countRewardsOf(this.network.accounts[0]).call()
+            return this.toast('New pool deposit!', `${amount} THX deposited by ${data.detail.created} at ${time}.`, 'info');
+        },
+        onPoolWithdrawel(data) {
+            const timestamp = parseInt(data.detail.created);
+            const time = this.$moment(timestamp).format("MMMM Do YYYY, HH:mm");
+            const amount = parseInt(new BN(data.detail.amount).div(tokenMultiplier))
 
-      let rewards = []
-
-      for (var i = 0; i < parseInt(amountOfRewards); i++) {
-        let reward = await pool.methods.rewards(i).call()
-
-        rewards.push(reward)
-      }
-
-      this.rewards = rewards.filter((r) => {
-        return r.state == 0
-      })
-    },
-    async checkForRewards() {
-      let newRewards = await this.getNewestApprovedWithdrawals(this.lastId);
-
-      if (newRewards !== false && typeof newRewards !== "undefined") {
-        this.$router.push({name: 'reward', params: { id: newRewards}});
-      }
-
-      return null;
-    },
-    async getNewestApprovedWithdrawals(lastId) {
-      const pool = this.network.instances.pool;
-      let amountOfRewards = parseInt( await pool.methods.countRewardsOf(this.network.accounts[0]).call() )
-
-      // Grab all the ID's of rewards for this beneficiaries.
-      for (var i = 0; i < amountOfRewards; i++) {
-        let rewardId = await pool.methods.beneficiaries(this.network.accounts[0], i).call()
-        // If the reward ID of this address is new (aka the ID is higher than the last one generated) we
-        // add it to the array of items the user should see.
-        if (parseInt(rewardId) > parseInt(lastId)) {
-          return rewardId;
+            return this.toast('New pool withdrawel!', `${amount} THX withdrawn by ${data.detail.created} at ${time}.`, 'info');
         }
-      }
-
-      return false;
     }
-  }
 }
 </script>
-
-<style lang="scss">
-@import './app.scss';
-</style>

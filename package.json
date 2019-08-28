@@ -1,54 +1,83 @@
 {
-  "name": "thx_client",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
-  },
-  "dependencies": {
-    "dotenv": "^6.2.0",
-    "ethers": "^4.0.20",
-    "truffle-contract": "^4.0.1",
-    "truffle-hdwallet-provider": "^1.0.2",
-    "vue": "^2.5.21",
-    "vue-router": "^3.0.2",
-    "web3": "^1.0.0-beta.37"
-  },
-  "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.3.0",
-    "@vue/cli-plugin-eslint": "^3.3.0",
-    "@vue/cli-service": "^3.3.0",
-    "babel-eslint": "^10.0.1",
-    "eslint": "^5.8.0",
-    "eslint-plugin-vue": "^5.0.0",
-    "node-sass": "^4.9.0",
-    "sass-loader": "^7.0.1",
-    "vue-template-compiler": "^2.5.21"
-  },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
+    "name": "thx_client",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "truffle": "truffle",
+        "build": "vue-cli-service build",
+        "deploy:firebase": "NETWORK=extdev yarn build; firebase deploy",
+        "deploy": "truffle deploy --network loom_dapp_chain",
+        "deploy:reset": "truffle deploy --reset --network loom_dapp_chain",
+        "deploy:ganache": "truffle deploy --network ganache",
+        "deploy:reset:ganache": "truffle deploy --reset --network ganache",
+        "deploy:extdev": "truffle deploy --network extdev_plasma_us1",
+        "deploy:reset:extdev": "truffle deploy --reset --network extdev_plasma_us1",
+        "deploy:rinkeby": "truffle deploy --network rinkeby",
+        "deploy:reset:rinkeby": "truffle deploy --reset --network rinkeby",
+        "test:ganache": "truffle test --network ganache",
+        "serve": "vue-cli-service serve",
+        "serve:ganache": "NETWORK=ganache yarn run serve",
+        "serve:extdev": "NETWORK=extdev yarn run serve",
+        "gen:rinkeby-key": "node ./scripts/gen-eth-key.js rinkeby",
+        "gen:extdev-key": "npm run get:loom && ./loom/loom genkey -k extdev_private_key -a extdev_public_key",
+        "gen:extdev-newkey": "npm run get:loom && ./loom/loom genkey -k extdev_private_key_new -a extdev_public_key_new",
+        "gen:loom-key": "npm run get:loom && ./loom/loom genkey -k loom_private_key -a loom_public_key",
+        "loom:install": "mkdir ./loom; cd ./loom; curl https://raw.githubusercontent.com/loomnetwork/loom-sdk-documentation/master/scripts/get_loom.sh | sh; cd ../;",
+        "loom:init": "cd ./loom; ./loom init -f; cd ../;",
+        "loom:run": "cd ./loom; ./loom run;",
+        "ganache:run": "ganache-cli --accounts=10 --defaultBalanceEther=10 --gasPrice=10225000000 --gasLimit=8500000"
     },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ]
+    "dependencies": {
+        "bootstrap": "^4.3.1",
+        "bootstrap-vue": "^2.0.0-rc.28",
+        "dotenv": "^6.2.0",
+        "firebase": "^6.2.4",
+        "ganache-time-traveler": "^1.0.3",
+        "lodash": "^4.17.14",
+        "loom-js": "^1.55.0",
+        "loom-truffle-provider": "^0.13.0",
+        "path": "^0.12.7",
+        "truffle": "^5.0.32",
+        "truffle-hdwallet-provider": "^1.0.2",
+        "vue": "^2.6.10",
+        "vue-moment": "^4.0.0",
+        "vue-qrcode-reader": "^2.0.2",
+        "vue-router": "^3.0.6"
+    },
+    "devDependencies": {
+        "@vue/cli-plugin-babel": "^3.3.0",
+        "@vue/cli-plugin-eslint": "^3.3.0",
+        "@vue/cli-service": "^3.3.0",
+        "babel-eslint": "^10.0.1",
+        "eslint": "^5.8.0",
+        "eslint-plugin-vue": "^5.0.0",
+        "node-sass": "^4.9.0",
+        "sass-loader": "^7.0.1",
+        "vue-template-compiler": "^2.5.21",
+        "web3": "1.0.0-beta.33"
+    },
+    "eslintConfig": {
+        "root": true,
+        "env": {
+            "node": true
+        },
+        "extends": [
+            "plugin:vue/essential",
+            "eslint:recommended"
+        ],
+        "rules": {},
+        "parserOptions": {
+            "parser": "babel-eslint"
+        }
+    },
+    "postcss": {
+        "plugins": {
+            "autoprefixer": {}
+        }
+    },
+    "browserslist": [
+        "> 1%",
+        "last 2 versions",
+        "not ie <= 8"
+    ]
 }
