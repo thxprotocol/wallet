@@ -5,6 +5,15 @@
         <h2>Hi!</h2>
         <p><strong>E-mail:</strong><br> {{account.email}}</p>
         <p><strong>UID:</strong><br> {{account.uid}}</p>
+        <ul class="list list-bullets">
+            <li>
+                <button @click="reset()" class="btn btn-link">Reset</button>
+            </li>
+            <li>
+                <button @click="logout()" class="btn btn-link">Logout user</button>
+            </li>
+        </ul>
+
         <p>
             <strong>Main Network Address:</strong><br>
             <span v-if="account.rinkeby.address">{{account.rinkeby.address}}</span>
@@ -30,9 +39,6 @@
                 <li><button class="btn btn-link" @click="showTransferTokensModal = true">Transfer tokens</button></li>
             </ul>
         </template>
-
-        <button @click="reset()" class="btn btn--default">Reset</button>
-        <button @click="logout()" class="btn btn--default">Logout user</button>
 
         <modal v-if="showConnectKeysModal" @close="showConnectKeysModal = false">
             <h3 slot="header">Add private keys for accounts:</h3>

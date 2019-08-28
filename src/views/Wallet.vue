@@ -1,24 +1,22 @@
 <template>
 <article class="region region--container">
     <main class="region region--content">
-        <h3>Token Transfers</h3>
-        <hr class="dotted">
-        <div v-if="!orderedTokenTransfers.length">Loading token transfers...</div>
-        <ul class="list list--dotted" v-if="orderedTokenTransfers">
-            <li v-bind:key="transfer.hash" v-for="transfer in orderedTokenTransfers">
-                <div class="description">
-                    <div>
-                        <small>From: </small><span class="badge badge--default">{{transfer.from}}</span>
-                    </div>
-                    <div>
-                        <small>To: </small><span class="badge badge--default">{{transfer.to}}</span>
-                    </div>
-                </div>
-                <div class="actions">
+
+        <div class="text-center" v-if="!orderedTokenTransfers.length">
+            <b-spinner label="Loading..."></b-spinner>
+        </div>
+
+        <b-list-group v-if="orderedTokenTransfers">
+            <b-list-group-item v-bind:key="transfer.hash" v-for="transfer in orderedTokenTransfers" variant="transfer.variant">
+                <div class="d-flex w-100 justify-content-between">
                     <strong>{{transfer.amount}} THX</strong>
+                    <small>{{ transfer.timestamp | moment("MMMM Do YYYY HH:mm") }}</small>
                 </div>
-            </li>
-        </ul>
+                <small class="mb-1">From: {{transfer.from}}</small><br>
+                <small class="mb-1">To: {{transfer.to}}</small>
+            </b-list-group-item>
+        </b-list-group>
+
     </main>
 </article>
 </template>
@@ -26,9 +24,15 @@
 <script>
 import Vue from 'vue';
 import EventService from '../services/EventService';
+import { BSpinner, BListGroup, BListGroupItem } from 'bootstrap-vue';
 
 export default {
     name: 'home',
+    components: {
+        'b-spinner': BSpinner,
+        'b-list-group': BListGroup,
+        'b-list-group-item': BListGroupItem,
+    },
     computed: {
         orderedTokenTransfers: function () {
             let arr = [];
@@ -91,8 +95,9 @@ export default {
                 const from = (value.from) ? value.from.toLowerCase(): '';
                 const to = (value.to) ? value.to.toLowerCase(): '';
                 const amount = utils.fromWei(value.value, 'ether');
+                const timestamp = data[key].blockTime;
 
-                this._createTransfer(hash, from, to, amount);
+                this._createTransfer(hash, from, to, amount, timestamp);
             }
         },
         addMyTransfer(data) {
@@ -103,17 +108,19 @@ export default {
             const from = (value.from) ? value.from.toLowerCase(): '';
             const to = (value.to) ? value.to.toLowerCase(): '';
             const amount = utils.fromWei(value.value, 'ether');
+            const timestamp = event.blockTime;
 
-            this._createTransfer(hash, from, to, amount);
+            this._createTransfer(hash, from, to, amount, timestamp);
 
             this.$parent.$refs.header.updateBalance();
         },
-        _createTransfer(hash, from, to, amount) {
+        _createTransfer(hash, from, to, amount, timestamp) {
             Vue.set(this.tokenTransfers, hash, {
                 hash: hash,
                 from: from,
                 to: to,
                 amount: Number(amount),
+                timestamp: timestamp,
             });
         }
     }

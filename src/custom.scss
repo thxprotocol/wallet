@@ -62,7 +62,8 @@ hr {
     // background-image: url("./assets/background_header.jpg");
     background-size: cover;
     background-position: center center;
-    flex: 0;
+    flex: 0 auto;
+    width: 100%;
 
     p {
         line-height: 1;

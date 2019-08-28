@@ -1,22 +1,26 @@
 <template>
     <article class="region region--container">
-        <header class="region region--header">
-            <div class="logo">
+        <header class="region region--header" style="background: black;">
+            <p class="logo">
                 <img width="50" height="50" v-bind:src="assets.logo" alt="THX Logo" />
-            </div>
-            <p>A token of appreciation</p>
+            </p>
+            <p style="color: white;">A token of appreciation</p>
         </header>
         <main class="region region--content">
-            <div class="loader" v-if="loading">Loading...</div>
+            <div class="text-center" v-if="loading">
+                <b-spinner label="Loading..."></b-spinner>
+            </div>
             <form class="form" v-on:submit.prevent="login" v-if="!loading">
-                <h1>Enter your details</h1>
-                <div class="form-item">
+                <h2>Enter your details</h2>
+                <div class="form-group">
                     <input required type="text" class="form-control" v-model="email" placeholder="E-mail">
                 </div>
-                <div class="form-item">
-                    <input required type="password" v-model="password" placeholder="******">
+                <div class="form-group">
+                    <input required type="password" v-model="password" class="form-control" placeholder="******">
                 </div>
-                <button class="btn btn-primary" type="submit">Login</button>
+                <div class="form-group">
+                    <button class="btn btn-primary" type="submit">Login</button>
+                </div>
                 <p>You don't have an account? You can <router-link to="/register">register one!</router-link>
                 </p>
             </form>
@@ -28,9 +32,13 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import Logo from '../assets/thx_logo.svg'
+import { BSpinner } from 'bootstrap-vue';
 
 export default {
     name: 'login',
+    components: {
+        'b-spinner': BSpinner
+    },
     data: function() {
         return {
             assets: {

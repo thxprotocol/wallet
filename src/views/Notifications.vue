@@ -39,21 +39,21 @@
         </b-card-text>
 
         <template slot="footer">
-            <div class="row" v-if="!n.voted">
-                <div class="col-6">
-                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn--default btn-block" v-on:click="vote(n.id, false, n.pool.address)">
-                        Reject
-                    </button>
-                </div>
+            <div class="row" v-if="!n.hasVoted">
                 <div class="col-6">
                     <button v-bind:class="{ disabled: voteBusy }" class="btn btn-primary btn-block" v-on:click="vote(n.id, true, n.pool.address)">
                         Approve
                     </button>
                 </div>
+                <div class="col-6">
+                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn-primary btn-block" v-on:click="vote(n.id, false, n.pool.address)">
+                        Reject
+                    </button>
+                </div>
             </div>
-            <div class="row" v-if="n.voted">
+            <div class="row" v-if="n.hasVoted">
                 <div class="col-12">
-                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn--link" v-on:click="revokeVote(n.id, n.pool.address)">
+                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn-primary btn-block" v-on:click="revokeVote(n.id, n.pool.address)">
                         Revoke Vote
                     </button>
                 </div>
@@ -73,7 +73,7 @@ import RewardPool from '../contracts/RewardPool.json';
 import Reward from '../contracts/Reward.json';
 import {BCard, BCardText, BProgress, BProgressBar} from 'bootstrap-vue';
 
-const THX = window.THX;
+import Vue from 'vue';
 
 const RewardState = ['Pending', 'Active', 'Disabled'];
 
@@ -93,7 +93,7 @@ export default {
                 name: "",
                 balance: 0
             },
-            notifications: [],
+            notifications: {},
             currentNotification: 0,
             voteBusy: false,
         }
@@ -120,7 +120,7 @@ export default {
                             const contract = await THX.network.contract(Reward, rewardAddress);
                             const reward = await this.formatReward(contract, poolAddress);
 
-                            this.notifications.push(reward);
+                            Vue.set(this.notifications, reward.id, reward);
                         }
                     }
                 }
@@ -129,6 +129,7 @@ export default {
         async formatReward(contract, poolAddress) {
             const THX = window.THX;
             const utils = THX.network.loom.utils;
+            const address = THX.network.account.address;
 
             const id = parseInt(await contract.methods.id().call());
             const slug = await contract.methods.slug().call();
@@ -141,6 +142,7 @@ export default {
             const rule = await firebase.database().ref(`pools/${poolAddress}/rules/${slug}`).once('value');
             const yesCounter = await contract.methods.yesCounter().call();
             const noCounter = await contract.methods.noCounter().call();
+            const vote = await contract.methods.votesByAddress(address).call();
             const pool = await THX.network.contract(RewardPool, poolAddress);
             const poolName = await pool.methods.name().call();
 
@@ -157,6 +159,7 @@ export default {
                     name: poolName,
                     balance: 0
                 },
+                hasVoted: (parseInt(vote.time) > 0),
                 yesCounter: parseInt(utils.fromWei(yesCounter, 'ether')),
                 noCounter: parseInt(utils.fromWei(noCounter, 'ether')),
             }
@@ -171,8 +174,8 @@ export default {
             if (isManager) {
                 return pool.methods.voteForReward(id, agree).send({ from: THX.network.account.address })
                     .then(() => {
+                        this.notifications[id].hasVoted = true;
                         this.voteBusy = false;
-                        return this.update();
                     })
                     .catch(e => {
                         this.voteBusy = false;
@@ -193,8 +196,8 @@ export default {
             if (isManager) {
                 return pool.methods.revokeVoteForReward(id).send({ from: THX.network.account.address })
                     .then(() => {
+                        this.notifications[id].hasVoted = false;
                         this.voteBusy = false;
-                        return this.update();
                     })
                     .catch(e => {
                         this.voteBusy = false;

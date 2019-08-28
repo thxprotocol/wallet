@@ -1,7 +1,7 @@
 <template>
     <article class="region region--container">
         <div v-if="loading && !hasStream" class="loader">Loading...</div>
-        <div v-if="hasStream" class="ui-file">
+        <div class="ui-file">
             <h3>Upload QR code image</h3>
             <qrcode-capture @decode="onDecode" />
         </div>

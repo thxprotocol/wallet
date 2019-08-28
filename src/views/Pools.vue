@@ -15,8 +15,8 @@
                 </b-card-text>
 
                 <template slot="footer" class="text-right">
-                    <b-link href="#" class="card-link" @click="onLeavePool(p.address)">Leave pool</b-link>
-                    <b-link href="#" class="card-link" @click="openPool(p.address)">Open pool</b-link>
+                    <b-link class="card-link" @click="onLeavePool(p.address)">Leave pool</b-link>
+                    <b-link class="card-link" @click="openPool(p.address)">Open pool</b-link>
                 </template>
 
             </b-card>

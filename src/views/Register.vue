@@ -1,26 +1,31 @@
 <template>
     <article class="region region--container">
-        <header class="region region--header">
-            <div class="logo">
+        <header class="region region--header" style="background: black;">
+            <p class="logo">
                 <img width="50" height="50" v-bind:src="assets.logo" alt="THX Logo" />
-            </div>
-            <p>A token of appreciation</p>
+            </p>
+            <p style="color: white;">A token of appreciation</p>
         </header>
         <main class="region region--content">
-            <div class="loader" v-if="loading">Loading...</div>
+
+            <div class="text-center" v-if="loading">
+                <b-spinner label="Loading..."></b-spinner>
+            </div>
+
             <form class="form" v-on:submit.prevent="register" v-if="!loading">
                 <h2>Authentication</h2>
-                <div class="form-item">
+                <div class="form-group">
                     <input required type="text" class="form-control" v-model="email" placeholder="E-mail">
                 </div>
-                <div class="form-item">
+                <div class="form-group">
                     <input required type="password" v-model="password" class="form-control" placeholder="******">
                 </div>
-                <div class="form-item">
+                <div class="form-group">
                     <input required type="password" v-model="passwordVerify" class="form-control" placeholder="******">
                 </div>
-
-                <button class="btn btn-primary" type="submit">Create account</button>
+                <div class="form-group">
+                    <button class="btn btn-primary" type="submit">Create account</button>
+                </div>
                 <p>Or go back to <router-link to="/login">Login</router-link></p>
             </form>
         </main>
@@ -32,9 +37,13 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
 import Logo from '../assets/thx_logo.svg'
+import { BSpinner } from 'bootstrap-vue';
 
 export default {
     name: 'register',
+    components: {
+        'b-spinner': BSpinner
+    },
     data: function() {
         return {
             assets: {

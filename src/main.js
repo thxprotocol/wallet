@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueQrcodeReader from 'vue-qrcode-reader';
 import VueMoment from 'vue-moment';
 
-import { BootstrapVue, BVToastPlugin } from 'bootstrap-vue';
+import { BVToastPlugin } from 'bootstrap-vue';
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import './custom.scss';

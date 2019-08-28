@@ -10,25 +10,7 @@
                 <div class="col-12">
                     <b-tabs content-class="mt-4" justified>
 
-                        <b-tab title="Events" active>
-
-                            <div class="text-center" v-if="!orderedPoolTransfers.length">
-                                <b-spinner label="Loading..."></b-spinner>
-                            </div>
-
-                            <b-list-group v-if="orderedPoolTransfers">
-                                <b-list-group-item href="#" v-bind:key="transfer.timestamp" v-for="transfer in orderedPoolTransfers" variant="transfer.variant">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <strong>{{transfer.amount}} THX</strong>
-                                        <small>{{ transfer.timestamp | moment("MMMM Do YYYY HH:mm") }}</small>
-                                    </div>
-                                    <small class="mb-1">Sender: {{transfer.sender}}</small>
-                                </b-list-group-item>
-                            </b-list-group>
-
-                        </b-tab>
-
-                        <b-tab title="Rules">
+                        <b-tab title="Rules" active>
 
                             <div class="table-responsive">
                                 <table class="table table-striped">
@@ -37,6 +19,7 @@
                                         <th>slug</th>
                                         <th>amount</th>
                                         <th>poll</th>
+                                        <th>actions</th>
                                         <th>state</th>
                                     </thead>
                                     <tr v-bind:key="rule.id" v-for="rule in rules">
@@ -49,14 +32,15 @@
                                         <td>
                                             {{ rule.amount }}
                                         </td>
-                                        <td v-if="hasPoll(rule.poll)">
-                                            <a href="#" @click="getRulePoll(rule.poll)">View Poll</a>
-                                        </td>
-                                        <td v-if="!hasPoll(rule.poll)">
-                                            <a href="#" @click="onStartPoll(rule.id)">Start Poll</a>
+                                        <td>
+                                            <template v-if="rule.poll">
+                                                <button v-if="!rule.poll.finalized" class="btn btn-link" @click="showPollModal(rule.poll)">View Poll</button>
+                                                <button v-if="rule.poll.finalized" class="btn btn-link" @click="onStartPoll(rule.id)">Start Poll</button>
+                                                <button class="btn btn-link" @click="onFinalize(rule.id)">Finalize Poll</button>
+                                            </template>
                                         </td>
                                         <td>
-                                            <strong>{{ RuleState[rule.state] }}</strong>
+                                            <strong>{{ rule.state }}</strong>
                                         </td>
                                     </tr>
                                 </table>
@@ -67,6 +51,24 @@
                         </b-tab>
 
                         <b-tab title="Rewards">
+
+                        </b-tab>
+
+                        <b-tab title="Events">
+
+                            <div class="text-center" v-if="!orderedPoolTransfers.length">
+                                <b-spinner label="Loading..."></b-spinner>
+                            </div>
+
+                            <b-list-group v-if="orderedPoolTransfers">
+                                <b-list-group-item v-bind:key="transfer.timestamp" v-for="transfer in orderedPoolTransfers" variant="transfer.variant">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <strong>{{transfer.amount}} THX</strong>
+                                        <small>{{ transfer.timestamp | moment("MMMM Do YYYY HH:mm") }}</small>
+                                    </div>
+                                    <small class="mb-1">Sender: {{transfer.sender}}</small>
+                                </b-list-group-item>
+                            </b-list-group>
 
                         </b-tab>
 
@@ -128,22 +130,22 @@
                         </div>
                     </div>
                 </div>
-                <template slot="footer">
+                <template slot="footer" v-if="poll">
                     <div class="alert alert-warning" v-if="!isMember">
                         <strong>You are not a member of this pool and can not join the poll.</strong>
                     </div>
                     <div v-if="isMember">
                         <div class="row" v-if="!poll.hasVoted">
                             <div class="col-6">
-                                <button class="btn btn-primary btn-block" @click="onVoteForRule(poll.id, true)">Approve</button>
+                                <button class="btn btn-primary btn-block" @click="onVoteForRule(poll, true)">Approve</button>
                             </div>
                             <div class="col-6">
-                                <button class="btn btn-primary btn-block" @click="onVoteForRule(poll.id, false)">Reject</button>
+                                <button class="btn btn-primary btn-block" @click="onVoteForRule(poll, false)">Reject</button>
                             </div>
                         </div>
                         <div class="row" v-if="poll.hasVoted">
                             <div class="col-12">
-                                <button class="btn btn-primary btn-block" @click="onRevokeVoteForRule()">Revoke</button>
+                                <button class="btn btn-primary btn-block" @click="onRevokeVoteForRule(poll)">Revoke</button>
                             </div>
                         </div>
                     </div>
@@ -228,13 +230,14 @@ import RewardPool from '../contracts/RewardPool.json';
 import Reward from '../contracts/Reward.json';
 import RulePoll from '../contracts/RulePoll.json';
 import modal from '../components/Modal';
-import { BToast, BSpinner, BProgress, BProgressBar, BTab, BTabs, BListGroup, BListGroupItem } from 'bootstrap-vue';
+import { BSpinner, BProgress, BProgressBar, BTab, BTabs, BListGroup, BListGroupItem } from 'bootstrap-vue';
 
 import Vue from 'vue';
 const _ = require('lodash');
 
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
+const RuleState = ['Pending', 'Active', 'Disabled'];
 
 export default {
     name: 'pool',
@@ -260,7 +263,6 @@ export default {
             isManager: false,
             isMember: false,
             rules: [],
-            RuleState: ['Pending', 'Active', 'Disabled'],
             showCreateRuleModal: false,
             createRuleBusy: false,
             poolDepositBusy: false,
@@ -274,6 +276,7 @@ export default {
             newManagerAddress: '',
             showChangeRuleModal: false,
             showRuleProposalModal: false,
+            ruleProposalBusy: false,
             ruleRewardSizeBusy: false,
             changeRuleAmount: 0,
             account: {
@@ -310,22 +313,6 @@ export default {
 
             this.contract = await THX.network.contract(RewardPool, this.poolAddress);
 
-            for (let e of this.events.poolEvents) {
-                this.contract.getPastEvents(e, { fromBlock: 0, toBlock: 'latest'})
-                    .then(events => {
-                        if (events.length > 0) {
-                            console.log(events);
-                            for (let event of events) {
-                                this[`on${event.event}`](event.returnValues);
-                            }
-                        }
-
-                    })
-                    .catch(err => {
-                        console.error(err);
-                    });
-            }
-
             this.account.loom = THX.network.account;
             this.account.rinkeby = THX.network.rinkeby.account;
 
@@ -345,7 +332,23 @@ export default {
             this.subscribe();
             this.getRewardRules();
 
-            this.events.listen('event.RuleStateChanged', this.onRuleStateChanged)
+            this.events.listen('event.RuleStateChanged', this.onRuleStateChanged);
+
+            // for (let e of this.events.poolEvents) {
+                // this.contract.getPastEvents(e, { fromBlock: 0, toBlock: 'latest'})
+                //     .then(events => {
+                //         if (events.length > 0) {
+                //             console.log(events);
+                //             for (let event of events) {
+                //                 this[`on${event.event}`](event.returnValues);
+                //             }
+                //         }
+                //
+                //     })
+                //     .catch(err => {
+                //         console.error(err);
+                //     });
+            // }
         },
         async subscribe() {
             const THX = window.THX;
@@ -380,9 +383,11 @@ export default {
             });
         },
         onManagerAdded(data) {
+            // eslint-disable-next-line
             console.log(data);
         },
         onMemberAdded(data) {
+            // eslint-disable-next-line
             console.log(data);
         },
         onAddManager() {
@@ -406,22 +411,26 @@ export default {
                     console.error(err);
                 });
         },
-        async onVoteForRule(id, agree) {
-            return await this.contract.methods.voteForRule(id, agree).send({from: this.account.loom.address })
+        showPollModal(poll) {
+            this.poll = poll;
+            this.showRuleProposalModal = true;
+        },
+        async onVoteForRule(poll, agree) {
+            return await this.contract.methods.voteForRule(poll.id, agree).send({from: this.account.loom.address })
                 .then(async () => {
                     this.poll.hasVoted = true;
-                    this.getRulePoll();
                 })
                 .catch(async (err) => {
                     // eslint-disable-next-line
                     console.error(err);
                 });
         },
-        async onRevokeVoteForRule() {
-            return await this.contract.methods.revokeVoteForRule().send({from: this.account.loom.address })
+        async onRevokeVoteForRule(poll) {
+            return await this.contract.methods.revokeVoteForRule(poll.id).send({from: this.account.loom.address })
                 .then(async () => {
                     this.poll.hasVoted = false;
-                    this.getRulePoll();
+
+                    Vue.set(this.rules[rule.id], 'state', RuleState[rule.state]);
                 })
                 .catch(async (err) => {
                     // eslint-disable-next-line
@@ -433,10 +442,10 @@ export default {
             const rulesRef = firebase.database().ref(`pools/${this.poolAddress}/rules`);
 
             if (this.rules[rule.id]) {
-                Vue.set(this.rules[rule.id], 'state', rule.state);
+                Vue.set(this.rules[rule.id], 'state', RuleState[rule.state]);
             }
 
-            return rulesRef.child(rule.id).update({ state: this.RuleState[rule.state] });
+            return rulesRef.child(rule.id).update({ state: RuleState[rule.state] });
         },
         async getRewards() {
             const amountOfRewards = parseInt( await this.contract.methods.countRewards().call() );
@@ -466,13 +475,10 @@ export default {
                     creator: rule.creator,
                     id: rule.id,
                     slug: rule.slug,
-                    state: rule.state,
-                    poll: rule.poll,
+                    state: RuleState[rule.state],
+                    poll: await this.getRulePoll(rule.poll),
                 });
             }
-        },
-        hasPoll(pollAddress) {
-            return (pollAddress !== "0x0000000000000000000000000000000000000000");
         },
         async getRulePoll(pollAddress) {
             if (pollAddress !== "0x0000000000000000000000000000000000000000") {
@@ -480,22 +486,23 @@ export default {
                 const rulePoll = await THX.network.contract(RulePoll, pollAddress);
                 const id = parseInt(await rulePoll.methods.id().call());
                 const rule = await this.contract.methods.rules(id).call();
+
                 const proposedAmount = parseInt(await rulePoll.methods.proposedAmount().call());
                 const rulesRef = firebase.database().ref(`pools/${this.poolAddress}/rules`);
                 const vote = await rulePoll.methods.votesByAddress(this.account.loom.address).call();
 
-                rulesRef.child(rule.slug).once('value')
+                return rulesRef.child(rule.slug).once('value')
                     .then(async data => {
                         const yesCounter = await rulePoll.methods.yesCounter().call();
                         const noCounter = await rulePoll.methods.noCounter().call();
                         const totalVoted = await rulePoll.methods.totalVoted().call();
-
                         const now = (await THX.network.loom.eth.getBlock('latest')).timestamp;
                         const startTime = await rulePoll.methods.startTime().call();
                         const endTime = await rulePoll.methods.endTime().call();
                         const diff = (endTime - now);
+                        const finalized = await rulePoll.methods.finalized().call();
 
-                        this.poll = {
+                        return this.poll = {
                             id: id,
                             amount: rule.amount,
                             proposedAmount: proposedAmount,
@@ -507,15 +514,15 @@ export default {
                             startTime: parseInt(startTime),
                             endTime: parseInt(endTime),
                             diff: diff,
+                            address: rule.poll,
+                            finalized: finalized,
                             rule: {
                                 title: data.val().title,
                                 description: data.val().description,
-                                state: this.RuleState[data.val().state],
+                                state: RuleState[data.val().state],
                                 amount: data.val().amount,
-                                poll: rule.poll,
                             }
                         }
-                        this.showRuleProposalModal = true;
                     });
             }
 
@@ -524,10 +531,26 @@ export default {
             this.showChangeRuleModal = true;
             return this.changeRuleId = id;
         },
+        async onFinalize(id) {
+            const THX = window.THX;
+            const rule = await this.contract.methods.rules(id).call();
+            const rulePoll = await THX.network.contract(RulePoll, rule.poll);
+
+            return await rulePoll.methods.tryToFinalize()
+                .send({ from: this.account.loom.address })
+                .then(tx => {
+                    // eslint-disable-next-line
+                    console.log(tx);
+                })
+                .catch(err => {
+                    // eslint-disable-next-line
+                    console.error(err);
+                })
+        },
         async changeRule() {
             const rule = await this.contract.methods.rules(this.changeRuleId).call();
 
-            return await this.contract.methods.startRulePoll(this.changeRuleId, this.changeRuleAmount)
+            return await this.contract.methods.startRulePoll(rule.id, this.changeRuleAmount)
                 .send({ from: this.account.loom.address })
                 .then(tx => {
                     console.log(tx);
@@ -540,27 +563,34 @@ export default {
         onCreateRewardRule() {
             const rulesRef = firebase.database().ref(`pools/${this.poolAddress}/rules`);
 
-            return this.contract.methods.createRule(this.newRule.slug, this.newRule.size)
-                .send({ from: this.account.loom.address })
-                .then(async tx => {
-                    const id = tx.events.RuleStateChanged.returnValues.id;
-                    const rule = await this.contract.methods.rules(id).call();
+            return rulesRef.child(this.newRule.slug).set({
+                slug: this.newRule.slug,
+                title: this.newRule.title,
+                size: this.newRule.size,
+                description: this.newRule.description,
+                state: 'undefined',
+            }).then(() => {
 
-                    return rulesRef.child(rule.slug).set({
-                        id: rule.id,
-                        slug: rule.slug,
-                        title: this.newRule.title,
-                        description: this.newRule.description,
-                        state: this.RuleState[rule.state],
-                    }).then(() => {
+                return this.contract.methods.createRule(this.newRule.slug, this.newRule.size)
+                    .send({ from: this.account.loom.address })
+                    .then(async tx => {
+                        const id = tx.events.RuleStateChanged.returnValues.id;
+                        const rule = await this.contract.methods.rules(id).call();
+
+                        rulesRef.child(rule.slug).update({
+                            id: id,
+                            state: RuleState[rule.state]
+                        });
+
                         this.showCreateRuleModal = false;
+
                         return this.getRewardRules();
+                    })
+                    .catch(err => {
+                        // eslint-disable-next-line
+                        console.error(err);
                     });
-                })
-                .catch(err => {
-                    // eslint-disable-next-line
-                    console.error(err);
-                });
+            });
         },
         onTransferToPool() {
             const tokenAmount = new BN(this.transferToPoolAmount).mul(tokenMultiplier);

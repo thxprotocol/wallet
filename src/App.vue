@@ -2,11 +2,13 @@
 <div id="app" v-bind:class="`section--${$router.currentRoute.name}`">
     <Header v-if="$router.currentRoute.meta.header" ref="header" />
     <router-view />
-    <Footer ref="footer" />
+    <Footer v-if="currentUser" ref="footer" />
 </div>
 </template>
 
 <script>
+import firebase from 'firebase/app';
+
 import Header from './components/Header';
 import Footer from './components/Footer';
 import EventService from './services/EventService';
@@ -23,6 +25,7 @@ export default {
     data: function() {
         return {
             events: new EventService(),
+            currentUser: firebase.auth().currentUser,
         }
     },
     created() {
