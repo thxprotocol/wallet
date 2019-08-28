@@ -37,7 +37,7 @@ export default {
         orderedTokenTransfers: function () {
             let arr = [];
             for (let hash in this.tokenTransfers) arr.unshift(this.tokenTransfers[hash]);
-            return arr
+            return arr.reverse()
         }
     },
     data: function() {

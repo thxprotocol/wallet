@@ -33,11 +33,9 @@
                                             {{ rule.amount }}
                                         </td>
                                         <td>
-                                            <template v-if="rule.poll">
-                                                <button v-if="!rule.poll.finalized" class="btn btn-link" @click="showPollModal(rule.poll)">View Poll</button>
-                                                <button v-if="rule.poll.finalized" class="btn btn-link" @click="onStartPoll(rule.id)">Start Poll</button>
-                                                <button class="btn btn-link" @click="onFinalize(rule.id)">Finalize Poll</button>
-                                            </template>
+                                            <button v-if="rule.poll && !rule.poll.finalized" class="btn btn-link" @click="showPollModal(rule.poll)">View Poll</button>
+                                            <button v-if="!rule.poll || rule.poll.finalized" class="btn btn-link" @click="onStartPoll(rule.id)">Start Poll</button>
+                                            <button class="btn btn-link" @click="onFinalize(rule.id)">Finalize Poll</button>
                                         </td>
                                         <td>
                                             <strong>{{ rule.state }}</strong>
@@ -46,6 +44,7 @@
                                 </table>
                             </div>
 
+                            <button class="btn btn-link" @click="getRewardRules()">Refresh</button>
                             <button v-if="isManager" class="btn btn-primary" @click="showCreateRuleModal = true">Add new rule</button>
 
                         </b-tab>
@@ -416,23 +415,26 @@ export default {
             this.showRuleProposalModal = true;
         },
         async onVoteForRule(poll, agree) {
+            this.poll.hasVoted = true;
+
             return await this.contract.methods.voteForRule(poll.id, agree).send({from: this.account.loom.address })
                 .then(async () => {
-                    this.poll.hasVoted = true;
+
                 })
                 .catch(async (err) => {
+                    this.poll.hasVoted = false;
                     // eslint-disable-next-line
                     console.error(err);
                 });
         },
         async onRevokeVoteForRule(poll) {
+            this.poll.hasVoted = false;
             return await this.contract.methods.revokeVoteForRule(poll.id).send({from: this.account.loom.address })
                 .then(async () => {
-                    this.poll.hasVoted = false;
 
-                    Vue.set(this.rules[rule.id], 'state', RuleState[rule.state]);
                 })
                 .catch(async (err) => {
+                    this.poll.hasVoted = false;
                     // eslint-disable-next-line
                     console.error(err);
                 });
@@ -445,7 +447,9 @@ export default {
                 Vue.set(this.rules[rule.id], 'state', RuleState[rule.state]);
             }
 
-            return rulesRef.child(rule.id).update({ state: RuleState[rule.state] });
+            rulesRef.child(rule.id).update({ state: RuleState[rule.state] })
+            
+            return this.getRewardRules();
         },
         async getRewards() {
             const amountOfRewards = parseInt( await this.contract.methods.countRewards().call() );
@@ -468,6 +472,8 @@ export default {
 
             for (let i = 0; i < amountOfRules; i++) {
                 const rule = await this.contract.methods.rules(i).call();
+                console.log(rule.poll)
+                const poll = await this.getRulePoll(rule.poll);
 
                 Vue.set(this.rules, rule.id, {
                     amount: rule.amount,
@@ -476,7 +482,7 @@ export default {
                     id: rule.id,
                     slug: rule.slug,
                     state: RuleState[rule.state],
-                    poll: await this.getRulePoll(rule.poll),
+                    poll: poll,
                 });
             }
         },
@@ -486,7 +492,6 @@ export default {
                 const rulePoll = await THX.network.contract(RulePoll, pollAddress);
                 const id = parseInt(await rulePoll.methods.id().call());
                 const rule = await this.contract.methods.rules(id).call();
-
                 const proposedAmount = parseInt(await rulePoll.methods.proposedAmount().call());
                 const rulesRef = firebase.database().ref(`pools/${this.poolAddress}/rules`);
                 const vote = await rulePoll.methods.votesByAddress(this.account.loom.address).call();
@@ -549,7 +554,7 @@ export default {
         },
         async changeRule() {
             const rule = await this.contract.methods.rules(this.changeRuleId).call();
-
+            this.showChangeRuleModal = false;
             return await this.contract.methods.startRulePoll(rule.id, this.changeRuleAmount)
                 .send({ from: this.account.loom.address })
                 .then(tx => {

@@ -71,7 +71,7 @@ import 'firebase/database';
 import EventService from '../services/EventService';
 import RewardPool from '../contracts/RewardPool.json';
 import Reward from '../contracts/Reward.json';
-import {BCard, BCardText, BProgress, BProgressBar} from 'bootstrap-vue';
+import { BCard, BCardText, BProgress, BProgressBar } from 'bootstrap-vue';
 
 import Vue from 'vue';
 
