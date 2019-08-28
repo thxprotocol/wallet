@@ -4,7 +4,6 @@ import firebase from 'firebase/app';
 import Wallet from './views/Wallet.vue';
 import Notifications from './views/Notifications.vue';
 import Account from './views/Account.vue';
-import Reward from './views/Reward.vue';
 import Login from './views/Login.vue';
 import Logout from './views/Logout.vue';
 import Register from './views/Register.vue';
@@ -15,85 +14,74 @@ import Pool from './views/Pool.vue';
 Vue.use(VueRouter);
 
 const router = new VueRouter({
-    routes: [
-        {
-            path: '/pools',
-            name: 'pools',
-            component: Pools,
-            visible: true,
-            meta: {
-                header: true,
-                requiresAuth: true
-            }
-        }, {
-            path: '/pools/:id',
-            name: 'pool',
-            component: Pool,
-            visible: false,
-            props: true,
-            meta: {
-                header: true,
-                requiresAuth: true
-            }
-        }, {
-            path: '/',
-            name: 'wallet',
-            component: Wallet,
-            visible: true,
-            meta: {
-                header: true,
-                requiresAuth: true
-            }
-        }, {
-            path: '/notifications',
-            name: 'notifications',
-            component: Notifications,
-            visible: true,
-            meta: {
-                header: false,
-                requiresAuth: true
-            }
-        }, {
-            path: '/camera',
-            name: 'camera',
-            component: Camera,
-            visible: true,
-            meta: {
-                header: false,
-                requiresAuth: true
-            }
-        }, {
-            path: '/account',
-            name: 'account',
-            component: Account,
-            visible: false,
-            meta: {
-                header: true,
-                requiresAuth: true
-            }
-        }, {
-            path: '/reward/:id',
-            name: 'reward',
-            component: Reward,
-            visible: false,
-            props: true,
-            meta: {
-                requiresAuth: true
-            }
-        }, {
-            name: 'login',
-            path: '/login',
-            component: Login
-        },  {
-            name: 'logout',
-            path: '/logout',
-            component: Logout
-        }, {
-            name: 'register',
-            path: '/register',
-            component: Register
+    routes: [{
+        path: '/pools',
+        name: 'pools',
+        component: Pools,
+        visible: true,
+        meta: {
+            header: true,
+            requiresAuth: true
         }
-    ]
+    }, {
+        path: '/pools/:id',
+        name: 'pool',
+        component: Pool,
+        visible: false,
+        props: true,
+        meta: {
+            header: true,
+            requiresAuth: true
+        }
+    }, {
+        path: '/',
+        name: 'wallet',
+        component: Wallet,
+        visible: true,
+        meta: {
+            header: true,
+            requiresAuth: true
+        }
+    }, {
+        path: '/notifications',
+        name: 'notifications',
+        component: Notifications,
+        visible: true,
+        meta: {
+            header: false,
+            requiresAuth: true
+        }
+    }, {
+        path: '/camera',
+        name: 'camera',
+        component: Camera,
+        visible: true,
+        meta: {
+            header: false,
+            requiresAuth: true
+        }
+    }, {
+        path: '/account',
+        name: 'account',
+        component: Account,
+        visible: false,
+        meta: {
+            header: true,
+            requiresAuth: true
+        }
+    }, {
+        name: 'login',
+        path: '/login',
+        component: Login
+    }, {
+        name: 'logout',
+        path: '/logout',
+        component: Logout
+    }, {
+        name: 'register',
+        path: '/register',
+        component: Register
+    }]
 })
 
 router.beforeEach((to, from, next) => {
