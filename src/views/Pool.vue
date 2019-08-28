@@ -448,7 +448,7 @@ export default {
             }
 
             rulesRef.child(rule.id).update({ state: RuleState[rule.state] })
-            
+
             return this.getRewardRules();
         },
         async getRewards() {
@@ -472,7 +472,6 @@ export default {
 
             for (let i = 0; i < amountOfRules; i++) {
                 const rule = await this.contract.methods.rules(i).call();
-                console.log(rule.poll)
                 const poll = await this.getRulePoll(rule.poll);
 
                 Vue.set(this.rules, rule.id, {
@@ -558,6 +557,7 @@ export default {
             return await this.contract.methods.startRulePoll(rule.id, this.changeRuleAmount)
                 .send({ from: this.account.loom.address })
                 .then(tx => {
+                    // eslint-disable-next-line
                     console.log(tx);
                 })
                 .catch(err => {
