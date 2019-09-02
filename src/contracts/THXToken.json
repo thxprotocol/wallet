@@ -479,7 +479,7 @@
         "id": 343,
         "nodeType": "ImportDirective",
         "scope": 482,
-        "sourceUnit": 3018,
+        "sourceUnit": 3056,
         "src": "25:41:3",
         "symbolAliases": [],
         "unitAlias": ""
@@ -493,10 +493,10 @@
               "id": 344,
               "name": "ERC20Mintable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3017,
+              "referencedDeclaration": 3055,
               "src": "89:13:3",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20Mintable_$3017",
+                "typeIdentifier": "t_contract$_ERC20Mintable_$3055",
                 "typeString": "contract ERC20Mintable"
               }
             },
@@ -507,9 +507,9 @@
         ],
         "contractDependencies": [
           912,
-          2989,
-          3017,
-          3086
+          3027,
+          3055,
+          3124
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -517,10 +517,10 @@
         "id": 481,
         "linearizedBaseContracts": [
           481,
-          3017,
+          3055,
           912,
-          2989,
-          3086
+          3027,
+          3124
         ],
         "name": "THXToken",
         "nodeType": "ContractDefinition",
@@ -1064,10 +1064,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3104,
-                        3105
+                        3142,
+                        3143
                       ],
-                      "referencedDeclaration": 3104,
+                      "referencedDeclaration": 3142,
                       "src": "591:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1255,7 +1255,7 @@
                       "name": "Approval",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3085,
+                      "referencedDeclaration": 3123,
                       "src": "676:8:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
@@ -1714,7 +1714,7 @@
                       "name": "_transfer",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2862,
+                      "referencedDeclaration": 2900,
                       "src": "909:9:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
@@ -1856,7 +1856,7 @@
                       "name": "Approval",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3085,
+                      "referencedDeclaration": 3123,
                       "src": "950:8:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
@@ -2069,7 +2069,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3101,
+                            "referencedDeclaration": 3139,
                             "src": "1197:3:3",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -2123,10 +2123,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3104,
-                        3105
+                        3142,
+                        3143
                       ],
-                      "referencedDeclaration": 3104,
+                      "referencedDeclaration": 3142,
                       "src": "1189:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2197,7 +2197,7 @@
                       "name": "_mint",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2904,
+                      "referencedDeclaration": 2942,
                       "src": "1229:5:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -2310,7 +2310,7 @@
         "id": 343,
         "nodeType": "ImportDirective",
         "scope": 482,
-        "sourceUnit": 3018,
+        "sourceUnit": 3056,
         "src": "25:41:3",
         "symbolAliases": [],
         "unitAlias": ""
@@ -2324,10 +2324,10 @@
               "id": 344,
               "name": "ERC20Mintable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3017,
+              "referencedDeclaration": 3055,
               "src": "89:13:3",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20Mintable_$3017",
+                "typeIdentifier": "t_contract$_ERC20Mintable_$3055",
                 "typeString": "contract ERC20Mintable"
               }
             },
@@ -2338,9 +2338,9 @@
         ],
         "contractDependencies": [
           912,
-          2989,
-          3017,
-          3086
+          3027,
+          3055,
+          3124
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -2348,10 +2348,10 @@
         "id": 481,
         "linearizedBaseContracts": [
           481,
-          3017,
+          3055,
           912,
-          2989,
-          3086
+          3027,
+          3124
         ],
         "name": "THXToken",
         "nodeType": "ContractDefinition",
@@ -2895,10 +2895,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3104,
-                        3105
+                        3142,
+                        3143
                       ],
-                      "referencedDeclaration": 3104,
+                      "referencedDeclaration": 3142,
                       "src": "591:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -3086,7 +3086,7 @@
                       "name": "Approval",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3085,
+                      "referencedDeclaration": 3123,
                       "src": "676:8:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
@@ -3545,7 +3545,7 @@
                       "name": "_transfer",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2862,
+                      "referencedDeclaration": 2900,
                       "src": "909:9:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
@@ -3687,7 +3687,7 @@
                       "name": "Approval",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3085,
+                      "referencedDeclaration": 3123,
                       "src": "950:8:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_event_nonpayable$_t_address_$_t_address_$_t_uint256_$returns$__$",
@@ -3900,7 +3900,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3101,
+                            "referencedDeclaration": 3139,
                             "src": "1197:3:3",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -3954,10 +3954,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3104,
-                        3105
+                        3142,
+                        3143
                       ],
-                      "referencedDeclaration": 3104,
+                      "referencedDeclaration": 3142,
                       "src": "1189:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -4028,7 +4028,7 @@
                       "name": "_mint",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 2904,
+                      "referencedDeclaration": 2942,
                       "src": "1229:5:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_internal_nonpayable$_t_address_$_t_uint256_$returns$__$",
@@ -4274,12 +4274,12 @@
         }
       },
       "links": {},
-      "address": "0x7fdFE4AdB58ee33533A15223B259b43C625EA2B1",
-      "transactionHash": "0xbb70028e375acf954809c5a52885484e405a909df474c97e178d17f78b378f4d"
+      "address": "0x2DB0E00fc5c378e7dc4adFd96A0cb774B2C58674",
+      "transactionHash": "0xf47b748c86ffda440124bdac6f88001953e4dc5b65740f18e40f2d1d7642b3be"
     }
   },
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-08-27T14:50:56.642Z",
+  "updatedAt": "2019-09-02T11:46:05.819Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {

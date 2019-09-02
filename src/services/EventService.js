@@ -5,6 +5,7 @@ export default class EventService extends EventAggregator {
         super();
 
         const THX = window.THX;
+
         this.token = THX.network.instances.token;
 
         const tokenRinkeby = THX.network.instances.tokenRinkeby;
@@ -16,8 +17,8 @@ export default class EventService extends EventAggregator {
         this.token.events.Transfer({ from: address }, (error, event) => this.dispatch('event.Transfer', event.returnValues));
 
         // All my rinkeby token transfers
-        tokenRinkeby.events.Transfer({ to: addressRinkeby }, (error, event) => this.onTransfer(event.returnValues));
-        tokenRinkeby.events.Transfer({ from: addressRinkeby }, (error, event) => this.onTransfer(event.returnValues));
+        tokenRinkeby.events.Transfer({ to: addressRinkeby }, (error, event) => this.dispatch('event.RinkebyTransfer', event.returnValues));
+        tokenRinkeby.events.Transfer({ from: addressRinkeby }, (error, event) => this.dispatch('event.RinkebyTransfer', event.returnValues));
 
         this.poolEvents = [
             'Deposited',
@@ -40,7 +41,7 @@ export default class EventService extends EventAggregator {
         }
     }
 
-    rewardSubscription(events) {
+    subscribeRewardEvents(events) {
         events.RewardStateChanged({}, (error, event) => this.dispatch(`event.RewardStateChanged`, event.returnValues));
     }
 }

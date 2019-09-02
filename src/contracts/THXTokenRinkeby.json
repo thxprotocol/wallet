@@ -392,7 +392,7 @@
         "id": 484,
         "nodeType": "ImportDirective",
         "scope": 510,
-        "sourceUnit": 3018,
+        "sourceUnit": 3056,
         "src": "25:41:4",
         "symbolAliases": [],
         "unitAlias": ""
@@ -406,10 +406,10 @@
               "id": 485,
               "name": "ERC20Mintable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3017,
+              "referencedDeclaration": 3055,
               "src": "96:13:4",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20Mintable_$3017",
+                "typeIdentifier": "t_contract$_ERC20Mintable_$3055",
                 "typeString": "contract ERC20Mintable"
               }
             },
@@ -420,9 +420,9 @@
         ],
         "contractDependencies": [
           912,
-          2989,
-          3017,
-          3086
+          3027,
+          3055,
+          3124
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -430,10 +430,10 @@
         "id": 509,
         "linearizedBaseContracts": [
           509,
-          3017,
+          3055,
           912,
-          2989,
-          3086
+          3027,
+          3124
         ],
         "name": "THXTokenRinkeby",
         "nodeType": "ContractDefinition",
@@ -736,7 +736,7 @@
         "id": 484,
         "nodeType": "ImportDirective",
         "scope": 510,
-        "sourceUnit": 3018,
+        "sourceUnit": 3056,
         "src": "25:41:4",
         "symbolAliases": [],
         "unitAlias": ""
@@ -750,10 +750,10 @@
               "id": 485,
               "name": "ERC20Mintable",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3017,
+              "referencedDeclaration": 3055,
               "src": "96:13:4",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_ERC20Mintable_$3017",
+                "typeIdentifier": "t_contract$_ERC20Mintable_$3055",
                 "typeString": "contract ERC20Mintable"
               }
             },
@@ -764,9 +764,9 @@
         ],
         "contractDependencies": [
           912,
-          2989,
-          3017,
-          3086
+          3027,
+          3055,
+          3124
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -774,10 +774,10 @@
         "id": 509,
         "linearizedBaseContracts": [
           509,
-          3017,
+          3055,
           912,
-          2989,
-          3086
+          3027,
+          3124
         ],
         "name": "THXTokenRinkeby",
         "nodeType": "ContractDefinition",
@@ -1066,7 +1066,7 @@
     }
   },
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-08-27T14:51:02.286Z",
+  "updatedAt": "2019-09-02T11:46:11.090Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {

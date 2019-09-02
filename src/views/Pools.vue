@@ -12,6 +12,8 @@
                 class="mb-2">
 
                 <b-card-text>
+                    <span v-if="p.outOfSync" class="badge badge-danger">Out of sync</span>
+                    <span v-if="!p.outOfSync" class="badge badge-success">Up to date</span>
                 </b-card-text>
 
                 <template slot="footer" class="text-right">
@@ -29,8 +31,6 @@
                 <h3 slot="header">Join Reward Pool:</h3>
                 <div slot="body">
                     <input v-model="poolAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000" />
-                    <label for="poolImage">Upload Pool image:</label>
-                    <input id="poolImage" type="file">
                 </div>
                 <template slot="footer">
                     <button @click="onJoinPool()" class="btn btn-primary">Join Pool</button>
@@ -73,10 +73,14 @@ export default {
 
             firebase.database().ref(`users/${uid}/pools`).on('child_added', async (s) => {
                 const THX = window.THX;
+                const hash = RewardPool.networks[9545242630824].transactionHash;
+                const receipt = await THX.network.loom.eth.getTransactionReceipt(hash);
                 let data = s.val();
 
                 this.contracts[data.address] = await THX.network.contract(RewardPool, data.address);
+
                 data.name = await this.contracts[data.address].methods.name().call();
+                data.outOfSync = (data.address !== receipt.contractAddress);
 
                 Vue.set(this.pools, data.address, data);
             });

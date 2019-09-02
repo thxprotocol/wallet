@@ -40,7 +40,7 @@
             </ul>
         </template>
 
-        <modal v-if="showConnectKeysModal" @close="showConnectKeysModal = false">
+        <Modal v-if="showConnectKeysModal" @close="showConnectKeysModal = false">
             <h3 slot="header">Add private keys for accounts:</h3>
             <div slot="body">
                 <input v-model="account.loom.privateKey" type="text" class="form-control" placeholder="Your Loom private key">
@@ -49,65 +49,83 @@
             <template slot="footer">
                 <button @click="onCreateAccountsFromPrivateKey()" class="btn btn-primary" >Connect</button>
             </template>
-        </modal>
+        </Modal>
 
-        <modal v-if="showAddMinterModal" @close="showAddMinterModal = false">
+        <Modal v-if="showAddMinterModal" @close="showAddMinterModal = false">
             <h3 slot="header">Add minter role to account:</h3>
-            <div slot="body">
-                <input v-if="!newMinterBusy" v-model="newMinterAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
-                <span v-if="newMinterBusy" class="">Processing transaction...</span>
+            <div slot="body" v-if="!loading">
+                <input v-model="newMinterAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">>
+            </div>
+            <div slot="body" v-if="loading">
+                <div class="text-center">
+                    <BSpinner label="Loading..."></BSpinner>
+                </div>
             </div>
             <template slot="footer">
-                <button @click="onAddMinter()" v-bind:class="{ disabled: newMinterBusy }" class="btn btn-primary">Add minter</button>
+                <button @click="onAddMinter()" v-bind:class="{ disabled: loading }" class="btn btn-primary">Add minter</button>
             </template>
-        </modal>
+        </Modal>
 
-        <modal v-if="showMintTokensModal" @close="showMintTokensModal = false">
+        <Modal v-if="showMintTokensModal" @close="showMintTokensModal = false">
             <h3 slot="header">Mint tokens for account:</h3>
-            <div slot="body">
-                <input v-if="!mintForAccountBusy" v-model="mintForAccountAmount" type="number" class="form-control"  min="0" />
-                <span v-if="mintForAccountBusy" class="">Processing transaction...</span>
+            <div slot="body" v-if="!loading" >
+                <input v-model="mintForAccountAmount" type="number" class="form-control"  min="0" />
+            </div>
+            <div slot="body" v-if="loading">
+                <div class="text-center">
+                    <BSpinner label="Loading..."></BSpinner>
+                </div>
             </div>
             <template slot="footer">
-                <button @click="onMintForAccount()" v-bind:class="{ disabled: mintForAccountBusy }" class="btn btn-primary" type="submit">Mint {{ mintForAccountAmount }} THX</button>
+                <button @click="onMintForAccount()" v-bind:class="{ disabled: loading }" class="btn btn-primary" type="submit">Mint {{ mintForAccountAmount }} THX</button>
             </template>
-        </modal>
+        </Modal>
 
-        <modal v-if="showMintLoomTokensModal" @close="showMintLoomTokensModal = false">
+        <Modal v-if="showMintLoomTokensModal" @close="showMintLoomTokensModal = false">
             <h3 slot="header">Mint tokens for Loom account:</h3>
-            <div slot="body">
-                <input v-if="!mintForLoomAccountBusy" v-model="mintForLoomAccountAmount" type="number" class="form-control"  min="0" />
-                <span v-if="mintForLoomAccountBusy" class="">Processing transaction...</span>
+            <div slot="body" v-if="!loading" >
+                <input v-if="!loading" v-model="mintForLoomAccountAmount" type="number" class="form-control"  min="0" />
+            </div>
+            <div slot="body" v-if="loading">
+                <div class="text-center">
+                    <BSpinner label="Loading..."></BSpinner>
+                </div>
             </div>
             <template slot="footer">
-                <button @click="onMintForLoomAccount()" v-bind:class="{ disabled: mintForLoomAccountBusy }" class="btn btn-primary" type="submit">Mint {{ mintForLoomAccountAmount }} THX</button>
+                <button @click="onMintForLoomAccount()" v-bind:class="{ disabled: loading }" class="btn btn-primary" type="submit">Mint {{ mintForLoomAccountAmount }} THX</button>
             </template>
-        </modal>
+        </Modal>
 
-        <modal v-if="showDepositToGatewayModal" @close="showDepositToGatewayModal = false">
+        <Modal v-if="showDepositToGatewayModal" @close="showDepositToGatewayModal = false">
             <h3 slot="header">Deposit to main network gateway:</h3>
-            <div slot="body">
-                <input v-if="!depositToGatewayBusy" v-model="depositToGatewayAmount" type="number" class="form-control"  min="0" />
-                <span v-if="depositToGatewayBusy" class="">Processing transaction...</span>
+            <div slot="body" v-if="!loading">
+                <input v-if="!loading" v-model="depositToGatewayAmount" type="number" class="form-control"  min="0" />
+            </div>
+            <div slot="body" v-if="loading">
+                <div class="text-center">
+                    <BSpinner label="Loading..."></BSpinner>
+                </div>
             </div>
             <template slot="footer">
-                <button @click="onDepositToGateway()" v-bind:class="{ disabled: depositToGatewayBusy }" class="btn btn-primary">Deposit {{ depositToGatewayAmount }} THX</button>
+                <button @click="onDepositToGateway()" v-bind:class="{ disabled: loading }" class="btn btn-primary">Deposit {{ depositToGatewayAmount }} THX</button>
             </template>
-        </modal>
+        </Modal>
 
-        <modal v-if="showTransferTokensModal" @close="showTransferTokensModal = false">
+        <Modal v-if="showTransferTokensModal" @close="showTransferTokensModal = false">
             <h3 slot="header">Transfer tokens to account:</h3>
-            <div slot="body">
-                <template v-if="!transferTokensBusy">
-                    <input v-model="transferTokensAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000" />
-                    <input v-model="transferTokensAmount" type="number" class="form-control"  v-bind:max="balance.token" />
-                </template>
-                <span v-if="transferTokensBusy" class="">Processing transaction...</span>
+            <div slot="body" v-if="!loading">
+                <input v-model="transferTokensAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000" />
+                <input v-model="transferTokensAmount" type="number" class="form-control"  v-bind:max="balance.token" />
+            </div>
+            <div slot="body" v-if="loading">
+                <div class="text-center">
+                    <BSpinner label="Loading..."></BSpinner>
+                </div>
             </div>
             <template slot="footer">
-                <button @click="onTransferTokens()" v-bind:class="{ disabled: transferTokensBusy }" class="btn btn-primary">Transfer {{ transferTokensAmount }} THX</button>
+                <button @click="onTransferTokens()" v-bind:class="{ disabled: loading }" class="btn btn-primary">Transfer {{ transferTokensAmount }} THX</button>
             </template>
-        </modal>
+        </Modal>
 
     </main>
 </article>
@@ -116,9 +134,8 @@
 <script>
 import firebase from 'firebase/app';
 import 'firebase/database';
-import TransferGateway from '../services/TransferGateway.js';
-
-import modal from '../components/Modal';
+import { BSpinner } from 'bootstrap-vue';
+import Modal from '../components/Modal';
 
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
@@ -126,7 +143,8 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
 export default {
     name: 'home',
     components: {
-        modal
+        Modal,
+        BSpinner
     },
     data: function() {
         return {
@@ -143,13 +161,8 @@ export default {
             newMinterAddress: "",
             transferTokensAddress: "",
             transferTokensAmount: 0,
-            transferTokensBusy: false,
             depositToGatewayAmount: 0,
-            depositToGatewayBusy: false,
-            mintForLoomAccountBusy: false,
-            addMinterBusy: false,
-            mintForAccountBusy: false,
-            newMinterBusy: false,
+            loading: false,
             balance: {
                 token: 0,
                 pool: 0
@@ -226,12 +239,15 @@ export default {
             return window.location.reload();
         },
         onDepositToGateway() {
-            this.depositToGatewayBusy = true;
+            const THX = window.THX;
 
-            TransferGateway.depositToRinkebyGateway(this.depositToGatewayAmount).then(() => {
-                this.depositToGatewayAmount = 0;
-                this.depositToGatewayBusy = false;
-            });
+            this.loading = true;
+
+            return THX.network.depositToRinkebyGateway(this.depositToGatewayAmount)
+                .then(() => {
+                    this.depositToGatewayAmount = 0;
+                    this.loading = false;
+                });
         },
         onTransferTokens() {
             const THX = window.THX;
@@ -251,14 +267,18 @@ export default {
             const THX = window.THX;
             const tokenRinkeby = THX.network.instances.tokenRinkeby;
 
-            return tokenRinkeby.mint(this.account.rinkeby.address, this.mintForAccountAmount);
+            return THX.network.mint(this.account.rinkeby.address, this.mintForAccountAmount)
+                .then(() => {
+                    this.depositToGatewayAmount = 0;
+                    this.loading = false;
+                });
         },
         onMintForLoomAccount() {
             const THX = window.THX;
             const token = THX.network.instances.token;
             const amount = new BN(this.mintForLoomAccountAmount).mul(tokenMultiplier);
 
-            this.mintForLoomAccountBusy = true;
+            this.loading = true;
 
             return token.methods.mint(this.account.loom.address, amount.toString()).send({ from: this.account.loom.address}).then(async () => {
                 const balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
@@ -267,17 +287,17 @@ export default {
                 this.$parent.$refs.header.updateBalance();
 
                 this.mintForLoomAccountAmount = 0;
-                this.mintForLoomAccountBusy = false;
+                this.loading = false;
             });
         },
         onAddMinter() {
             const THX = window.THX;
             const token = THX.network.instances.token;
 
-            this.addMinterBusy = true;
+            this.loading = true;
 
             return token.methods.addMinter(this.newMinterAddress).send({ from: this.account.loom.address }).then(async () => {
-                this.addMinterBusy = false;
+                this.loading = false;
             });
         }
     }
