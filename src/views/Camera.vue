@@ -1,17 +1,23 @@
 <template>
     <article class="region region--container">
-        <div v-if="loading && !hasStream" class="loader">Loading...</div>
+        <div v-if="loading" class="d-flex w-100 h-100 align-items-center justify-content-center">
+            <BSpinner></BSpinner>
+        </div>
+
         <div class="ui-file">
             <h3>Upload QR code image</h3>
             <qrcode-capture @decode="onDecode" />
         </div>
+
         <qrcode-stream @init="onInit" @decode="onDecode" :track="repaint"></qrcode-stream>
+
         <div v-if="!loading && hasStream" class="ui-camera">
             <span></span>
             <span></span>
             <span></span>
             <span></span>
         </div>
+
     </article>
 </template>
 
@@ -19,9 +25,13 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
 import RewardPool from '../contracts/RewardPool.json';
+import { BSpinner } from 'bootstrap-vue';
 
 export default {
     name: 'Camera',
+    components: {
+        BSpinner
+    },
     data: function() {
         return {
             loading: true,

@@ -1,6 +1,7 @@
 <template>
 <article class="region region--container">
     <main class="region region--content">
+        <h2>Wallet</h2>
 
         <div class="text-center" v-if="!orderedTokenTransfers.length">
             <b-spinner label="Loading..."></b-spinner>
@@ -9,7 +10,7 @@
         <b-list-group v-if="orderedTokenTransfers">
             <b-list-group-item v-bind:key="transfer.hash" v-for="transfer in orderedTokenTransfers" variant="transfer.variant">
                 <div class="d-flex w-100 justify-content-between">
-                    <strong>{{transfer.amount}} THX</strong>
+                    <strong>Transfer {{transfer.amount}} THX</strong>
                     <small>{{ transfer.timestamp | moment("MMMM Do YYYY HH:mm") }}</small>
                 </div>
                 <small class="mb-1">From: {{transfer.from}}</small><br>

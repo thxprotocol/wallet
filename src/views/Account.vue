@@ -2,18 +2,26 @@
 <article class="region region--container">
     <main class="region region--content">
 
-        <h2>Hi!</h2>
-        <p><strong>E-mail:</strong><br> {{account.email}}</p>
-        <p><strong>UID:</strong><br> {{account.uid}}</p>
-        <ul class="list list-bullets">
-            <li>
-                <button @click="reset()" class="btn btn-link">Reset</button>
-            </li>
-            <li>
-                <button @click="logout()" class="btn btn-link">Logout user</button>
-            </li>
-        </ul>
+        <h2>Account</h2>
+        <label class="upload-group">
+            <div v-if="!account.picture">
+                <label>
+                    <ProfilePicture size="lg" :uid="uid"></ProfilePicture>
+                    <input type="file" @change="onFileChange" class="invisible">
+                </label>
+            </div>
+            <div v-else>
+                <ProfilePicture size="lg" :uid="uid"></ProfilePicture>
+                <button class="btn btn-link"@click="removeImage">Delete</button>
+            </div>
+        </label>
 
+        <p>
+            <strong>E-mail:</strong><br> {{account.email}}
+        </p>
+        <p>
+            <strong>UID:</strong><br> {{account.uid}}
+        </p>
         <p>
             <strong>Main Network Address:</strong><br>
             <span v-if="account.rinkeby.address">{{account.rinkeby.address}}</span>
@@ -39,6 +47,16 @@
                 <li><button class="btn btn-link" @click="showTransferTokensModal = true">Transfer tokens</button></li>
             </ul>
         </template>
+
+        <h3>Auth actions</h3>
+        <ul class="list list-bullets">
+            <li>
+                <button @click="reset()" class="btn btn-link">Reset</button>
+            </li>
+            <li>
+                <button @click="logout()" class="btn btn-link">Logout user</button>
+            </li>
+        </ul>
 
         <Modal v-if="showConnectKeysModal" @close="showConnectKeysModal = false">
             <h3 slot="header">Add private keys for accounts:</h3>
@@ -134,8 +152,10 @@
 <script>
 import firebase from 'firebase/app';
 import 'firebase/database';
+import 'firebase/storage';
 import { BSpinner } from 'bootstrap-vue';
 import Modal from '../components/Modal';
+import ProfilePicture from '../components/ProfilePicture';
 
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
@@ -144,10 +164,12 @@ export default {
     name: 'home',
     components: {
         Modal,
-        BSpinner
+        BSpinner,
+        ProfilePicture,
     },
     data: function() {
         return {
+            uid: firebase.auth().currentUser.uid,
             isLoomMinter: false,
             isRinkebyMinter: false,
             showMintTokensModal: false,
@@ -170,6 +192,9 @@ export default {
             account: {
                 uid: null,
                 email: null,
+                picture: null,
+                firstName: '',
+                lastName: '',
                 loom: {
                     address: null,
                     privateKey: null,
@@ -177,16 +202,26 @@ export default {
                 rinkeby: {
                     address: null,
                     privateKey: null,
-                },
-            },
+                }
+            }
         }
     },
     created() {
         const uid = firebase.auth().currentUser.uid;
 
-        firebase.database().ref(`users/${uid}`).once('value').then((s) => {
-            this.account.uid = s.val().uid;
-            this.account.email = s.val().email;
+        firebase.database().ref(`users/${uid}`).once('value').then(async s => {
+            const avatarRef = firebase.storage().ref('avatars');
+            const u = s.val();
+            const picture = u.picture;
+
+            if (picture) {
+                this.account.picture = picture.url;
+            }
+
+            this.account.firstName = u.firstName;
+            this.account.lastName = u.lastName;
+            this.account.uid = u.uid;
+            this.account.email = u.email;
 
             this.init(uid);
         });
@@ -204,18 +239,43 @@ export default {
             this.account.loom = THX.network.account;
             this.account.rinkeby = THX.network.rinkeby.account;
 
-            firebase.database().ref(`wallets/${this.account.loom.address}`).child('uid').set(uid);
+            firebase.database().ref(`wallets/${this.account.loom.address.toLowerCase()}`).child('uid').set(uid);
 
             balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
             this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
             this.isLoomMinter = await token.methods.isMinter(this.account.loom.address).call();
-
 
             balanceInWei = await tokenRinkeby.methods.balanceOf(this.account.rinkeby.address).call();
             this.balance.tokenRinkeby = new BN(balanceInWei).div(tokenMultiplier);
             this.isRinkebyMinter = await tokenRinkeby.methods.isMinter(this.account.rinkeby.address).call();
 
             this.$parent.$refs.header.updateBalance();
+        },
+        onFileChange(e) {
+            const uid = firebase.auth().currentUser.uid;
+            const avatarRef = firebase.storage().ref('avatars');
+            const files = e.target.files || e.dataTransfer.files;
+            const fileName = `${uid}.jpg`;
+
+            avatarRef.child(fileName).put(files[0]).then(async s => {
+                const url = await s.ref.getDownloadURL();
+
+                this.account.picture = url;
+
+                firebase.database().ref('users').child(uid).update({ picture: { name: fileName, url: url }});
+            });
+        },
+        async removeImage() {
+            const uid = firebase.auth().currentUser.uid;
+            const avatarRef = firebase.storage().ref('avatars');
+            const pictureRef = firebase.database().ref(`users/${uid}/picture`);
+            const fileName = (await pictureRef.child('name').once('value')).val();
+
+            avatarRef.child(fileName).delete().then(s => {
+                pictureRef.remove().then(s => {
+                    this.account.picture = null
+                });
+            });
         },
         logout() {
             this.$router.push('/logout');

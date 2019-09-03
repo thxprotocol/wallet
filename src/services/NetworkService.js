@@ -131,7 +131,6 @@ export default class NetworkService {
     async mint(address, amount) {
         let tx;
         const tokenAmount = new BN(amount).mul(tokenMultiplier);
-        debugger
         const contractAddress = this.instances.tokenRinkeby._address;
         const data = this.instances.tokenRinkeby.methods.mint(address, tokenAmount.toString()).encodeABI();
 
@@ -141,7 +140,6 @@ export default class NetworkService {
     }
 
     async _signContractMethod(to, data) {
-        console.log(this.rinkebyPrivateKey)
         return await this.rinkeby.eth.accounts.signTransaction({
             chainId: 4,
             to: to,

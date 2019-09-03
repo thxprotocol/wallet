@@ -1,7 +1,7 @@
 <template>
 <header class="region region--header">
     <button v-on:click="goToAccount()" class="link-settings">
-        <img src="../assets/menu.svg" alt="Menu icon" />
+        <ProfilePicture size="sm" :uid="uid"></ProfilePicture>
     </button>
     <div class="account_balance">
         <p><span class="font-size-large">{{balance.token}} THX</span></p>
@@ -11,15 +11,22 @@
 </template>
 
 <script>
+import firebase from 'firebase';
+import 'firebase/auth';
 import EventAggregator from '../services/EventAggregator';
+import ProfilePicture from '../components/ProfilePicture';
 
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
 
 export default {
     name: 'Header',
+    components: {
+        ProfilePicture,
+    },
     data: function() {
         return {
+            uid: firebase.auth().currentUser.uid,
             ea: new EventAggregator(),
             balance: {
                 eth: 0,

@@ -1,27 +1,31 @@
 <template>
     <article class="region region--container">
         <main class="region region--content">
-            <b-card
+            <h2>Pools</h2>
+            <BCard
                 v-bind:key="p.address"
                 v-for="p in pools"
-                v-if="p.name"
-                v-bind:title="p.name"
-                v-bind:sub-title="p.address"
                 footer-tag="footer"
+                header-tag="header"
                 tag="article"
                 class="mb-2">
 
-                <b-card-text>
-                    <span v-if="p.outOfSync" class="badge badge-danger">Out of sync</span>
-                    <span v-if="!p.outOfSync" class="badge badge-success">Up to date</span>
-                </b-card-text>
-
-                <template slot="footer" class="text-right">
-                    <b-link class="card-link" @click="onLeavePool(p.address)">Leave pool</b-link>
-                    <b-link class="card-link" @click="openPool(p.address)">Open pool</b-link>
+                <template slot="header" class="">
+                    <span v-if="p.outOfSync" class="badge badge-danger float-right">Out of sync</span>
+                    <span v-if="!p.outOfSync" class="badge badge-success float-right">Up to date</span>
+                    <strong>{{p.name}}</strong><br>
+                    <small>{{p.address}}</small>
                 </template>
 
-            </b-card>
+                <BCardText>
+                    <p><strong>Pool size: {{p.balance}} THX</strong></p>
+                    <div class="text-right">
+                        <button class="btn btn-link card-link" @click="onLeavePool(p.address)">Leave pool</button>
+                        <button class="btn btn-link card-link" @click="openPool(p.address)">Open pool</button>
+                    </div>
+                </BCardText>
+
+            </BCard>
 
             <button class="btn btn-primary btn-block" @click="showJoinPoolModal = true">
                 Add Reward Pool
@@ -52,9 +56,8 @@ export default {
     name: 'pools',
     components: {
         modal,
-        'b-card': BCard,
-        'b-card-text': BCardText,
-        'b-link': BLink,
+        BCard,
+        BCardText,
     },
     data: function() {
         return {
@@ -73,6 +76,8 @@ export default {
 
             firebase.database().ref(`users/${uid}/pools`).on('child_added', async (s) => {
                 const THX = window.THX;
+                const token = THX.network.instances.token;
+                const utils = THX.network.loom.utils;
                 const hash = RewardPool.networks[9545242630824].transactionHash;
                 const receipt = await THX.network.loom.eth.getTransactionReceipt(hash);
                 let data = s.val();
@@ -81,6 +86,7 @@ export default {
 
                 data.name = await this.contracts[data.address].methods.name().call();
                 data.outOfSync = (data.address !== receipt.contractAddress);
+                data.balance = utils.fromWei(await token.methods.balanceOf(data.address).call(), 'ether');
 
                 Vue.set(this.pools, data.address, data);
             });

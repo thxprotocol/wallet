@@ -7,8 +7,9 @@
             <p style="color: white;">A token of appreciation</p>
         </header>
         <main class="region region--content">
+            <h2>Login</h2>
             <div class="text-center" v-if="loading">
-                <b-spinner label="Loading..."></b-spinner>
+                <BSpinner label="Loading..."></BSpinner>
             </div>
             <form class="form" v-on:submit.prevent="login" v-if="!loading">
                 <h2>Enter your details</h2>
@@ -37,7 +38,7 @@ import { BSpinner } from 'bootstrap-vue';
 export default {
     name: 'login',
     components: {
-        'b-spinner': BSpinner
+        BSpinner
     },
     data: function() {
         return {

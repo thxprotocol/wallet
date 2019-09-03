@@ -8,11 +8,21 @@ html {
     font-family: 'Exo 2';
     background-color: #EFEFEF;
     height: 100%;
+    font-size: 14px;
+
+    @media(min-width: 768px) {
+        font-size: 1rem;
+    }
+}
+
+h2 {
+    margin-bottom: 1.5rem;
 }
 
 h3 {
     font-size: 1rem;
     margin-bottom: 0.5rem;
+    font-weight: bold;
 }
 
 $yellow: #FDE542;
@@ -21,6 +31,10 @@ hr {
     border: 0;
     height: 0;
     border-top: 1px dotted black;
+}
+
+.table td {
+    vertical-align: middle;
 }
 
 #app {
@@ -54,11 +68,15 @@ hr {
     box-shadow: 0 0 5px rgba(0,0,0,0.5);
 }
 
-.region--header {
-    color: black;
-    padding: 1rem;
-    padding-bottom: 2rem;
+.bg-yellow {
     background-color: #FBE54D;
+}
+
+.region--header {
+    color: $yellow;
+    padding: 2rem 1rem;
+    padding-bottom: 3rem;
+    background-color: #333; //#FBE54D;
     // background-image: url("./assets/background_header.jpg");
     background-size: cover;
     background-position: center center;
@@ -81,7 +99,7 @@ hr {
     border-radius: 5px;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    background: #666;
+    background-color: #039be5;
     margin: -1rem -1rem 0 -1rem;
     padding: 1rem 1rem calc(42px + 1rem) 1rem;
     color: white;
@@ -158,16 +176,10 @@ hr {
     right: 1rem;
     top: 2rem;
     text-decoration: none;
-    color: black;
     display: block;
+    color: black;
     background: none;
     border: 0;
-
-    img {
-        display: block;
-        width: 40px;
-        height: 40px;
-    }
 }
 
 .logo {
@@ -198,7 +210,8 @@ hr {
     align-items: center;
     justify-content: center;
     display: flex;
-    padding: 0.5rem .5rem;
+    padding: 1rem .5rem;
+
 }
 
 .router-link-exact-active {
@@ -206,19 +219,30 @@ hr {
 }
 
 .nav-tabs {
-    margin-top: -42px;
+    margin-top: -50px;
     margin-left: -1rem;
     margin-right: -1rem;
     padding: 0 1rem;
     background: transparent;
 
+    @media (min-width: 768px) {
+        margin-top: -58px;
+    }
+
     a {
         color: white;
+        font-weight: bold;
+        text-transform: uppercase;
 
         &:hover,
         &:active,
         &:focus {
             border: 0;
+        }
+
+        &.nav-link.active {
+            background: transparent;
+            border-color: transparent;
         }
     }
 }

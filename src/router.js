@@ -43,18 +43,18 @@ const router = new VueRouter({
             requiresAuth: true
         }
     }, {
-        path: '/notifications',
-        name: 'notifications',
-        component: Notifications,
+        path: '/camera',
+        name: 'camera',
+        component: Camera,
         visible: true,
         meta: {
             header: false,
             requiresAuth: true
         }
     }, {
-        path: '/camera',
-        name: 'camera',
-        component: Camera,
+        path: '/notifications',
+        name: 'notifications',
+        component: Notifications,
         visible: true,
         meta: {
             header: false,

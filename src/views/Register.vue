@@ -9,19 +9,25 @@
         <main class="region region--content">
 
             <div class="text-center" v-if="loading">
-                <b-spinner label="Loading..."></b-spinner>
+                <BSpinner label="Loading..."></BSpinner>
             </div>
 
             <form class="form" v-on:submit.prevent="register" v-if="!loading">
                 <h2>Authentication</h2>
                 <div class="form-group">
-                    <input required type="text" class="form-control" v-model="email" placeholder="E-mail">
+                    <input required type="text" class="form-control" v-model="firstName" placeholder="e.g. Ada">
                 </div>
                 <div class="form-group">
-                    <input required type="password" v-model="password" class="form-control" placeholder="******">
+                    <input required type="text" class="form-control" v-model="lastName" placeholder="e.g. Lovelace">
                 </div>
                 <div class="form-group">
-                    <input required type="password" v-model="passwordVerify" class="form-control" placeholder="******">
+                    <input required type="email" class="form-control" v-model="email" placeholder="e.g. alovelace@abc.xyz">
+                </div>
+                <div class="form-group">
+                    <input required type="password" v-model="password" class="form-control" placeholder="********">
+                </div>
+                <div class="form-group">
+                    <input required type="password" v-model="passwordVerify" class="form-control" placeholder="********">
                 </div>
                 <div class="form-group">
                     <button class="btn btn-primary" type="submit">Create account</button>
@@ -42,13 +48,15 @@ import { BSpinner } from 'bootstrap-vue';
 export default {
     name: 'register',
     components: {
-        'b-spinner': BSpinner
+        BSpinner,
     },
     data: function() {
         return {
             assets: {
                 logo: Logo
             },
+            firstName: '',
+            lastName: '',
             email: '',
             password: '',
             passwordVerify: '',
@@ -72,6 +80,9 @@ export default {
                     const user = {
                         uid: r.user.uid,
                         email: r.user.email,
+                        firstName: r.user.firstName,
+                        lastName: r.user.lastName,
+                        userName: r.user.userName,
                     }
 
                     firebase.database().ref('users').child(user.uid).set(user);

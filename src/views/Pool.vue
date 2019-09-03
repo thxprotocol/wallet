@@ -8,39 +8,39 @@
 
             <div class="row">
                 <div class="col-12">
-                    <b-tabs content-class="mt-4" justified>
+                    <BTabs content-class="mt-4" justified>
 
-                        <b-tab title="Rules" active>
-
-                            <Rules v-if="contract && account" v-bind:contract="contract" v-bind:account="account"></Rules>
-
-                        </b-tab>
-
-                        <b-tab title="Rewards">
-
-                            <Rewards v-if="contract && account" v-bind:contract="contract" v-bind:account="account"></Rewards>
-
-                        </b-tab>
-
-                        <b-tab title="Events">
+                        <BTab title="Stream">
 
                             <div class="text-center" v-if="!orderedStream.length">
-                                <b-spinner label="Loading..."></b-spinner>
+                                <BSpinner label="Loading..."></BSpinner>
                             </div>
 
-                            <b-list-group v-if="orderedStream">
-                                <b-list-group-item v-for="transfer in orderedStream" variant="transfer.variant">
+                            <BListGroup v-if="orderedStream">
+                                <BListGroupItem v-for="transfer in orderedStream" variant="transfer.variant">
                                     <div class="d-flex w-100 justify-content-between">
                                         <strong v-bind:class="`text-${transfer.variant}`">{{transfer.title}}</strong>
                                         <small>{{ transfer.timestamp | moment("MMMM Do YYYY HH:mm") }}</small>
                                     </div>
                                     <small class="mb-1">{{transfer.body}}</small>
-                                </b-list-group-item>
-                            </b-list-group>
+                                </BListGroupItem>
+                            </BListGroup>
 
-                        </b-tab>
+                        </BTab>
 
-                        <b-tab title="Actions">
+                        <BTab title="Rules">
+
+                            <Rules v-if="contract && account" v-bind:contract="contract" v-bind:account="account"></Rules>
+
+                        </BTab>
+
+                        <BTab title="Rewards" active>
+
+                            <Rewards v-if="contract && account" v-bind:contract="contract" v-bind:account="account"></Rewards>
+
+                        </BTab>
+
+                        <BTab title="Actions">
 
                             <ul class="list-bullets">
                                 <li v-if="account.isManager"><button class="btn btn-link" @click="modal.addManager = true">Add Manager</button></li>
@@ -48,8 +48,8 @@
                                 <li><button class="btn btn-link" @click="modal.poolDeposit = true">Pool Deposit</button></li>
                             </ul>
 
-                        </b-tab>
-                    </b-tabs>
+                        </BTab>
+                    </BTabs>
                 </div>
             </div>
 
@@ -63,7 +63,6 @@
                     <button @click="onAddMember()" v-bind:class="{ disabled: loading }" class="btn btn-primary">Add member</button>
                 </template>
             </Modal>
-
 
             <Modal v-if="modal.addManager" @close="modal.addManager = false">
                 <h3 slot="header">Add a manager for this pool:</h3>
@@ -93,18 +92,14 @@
 </template>
 
 <script>
-import firebase from 'firebase/app';
-import 'firebase/database';
 import EventService from '../services/EventService';
 import RewardPool from '../contracts/RewardPool.json';
 import Rules from '../components/Rules';
 import Rewards from '../components/Rewards';
 import Modal from '../components/Modal';
-import { BSpinner, BProgress, BProgressBar, BTab, BTabs, BListGroup, BListGroupItem } from 'bootstrap-vue';
+import { BSpinner, BTab, BTabs, BListGroup, BListGroupItem } from 'bootstrap-vue';
 
-import Vue from 'vue';
 const _ = require('lodash');
-
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
 
@@ -114,11 +109,11 @@ export default {
         Modal,
         Rules,
         Rewards,
-        'b-spinner': BSpinner,
-        'b-tabs': BTabs,
-        'b-tab': BTab,
-        'b-list-group': BListGroup,
-        'b-list-group-item': BListGroupItem,
+        BSpinner,
+        BTabs,
+        BTab,
+        BListGroup,
+        BListGroupItem,
     },
     computed: {
         orderedStream: function () {
@@ -185,7 +180,6 @@ export default {
                 this.contract.getPastEvents(e, { fromBlock: receipt.blockNumber, toBlock: 'latest'})
                     .then(events => {
                         if (events.length > 0) {
-                            console.log(events);
                             for (let event of events) {
                                 this[`on${event.event}`](event.returnValues, event.blockTime);
                             }
@@ -193,6 +187,7 @@ export default {
 
                     })
                     .catch(err => {
+                        // eslint-disable-next-line
                         console.error(err);
                     });
             }
@@ -221,9 +216,9 @@ export default {
                 variant: 'info'
             });
         },
-        onDeposited(data) {
+        onDeposited(data, timestamp) {
             this.stream.push({
-                timestamp: parseInt(data.created),
+                timestamp: parseInt(timestamp),
                 title: `+${new BN(data.amount).div(tokenMultiplier)} THX`,
                 body: data.sender,
                 variant: 'success'
@@ -231,19 +226,41 @@ export default {
         },
         onWithdrawn(data, timestamp) {
             this.stream.push({
-                timestamp: parseInt(data.created),
+                timestamp: parseInt(timestamp),
                 title: `-${new BN(data.amount).div(tokenMultiplier)} THX`,
                 body: data.sender,
                 variant: 'danger'
             });
         },
         onManagerAdded(data, timestamp) {
-            // eslint-disable-next-line
-            console.log(data);
+            this.stream.push({
+                timestamp: parseInt(timestamp),
+                title: `New manager added`,
+                body: `${data.account} is added as manager.`,
+                variant: 'info'
+            });
         },
-        onMemberAdded(data) {
-            // eslint-disable-next-line
-            console.log(data);
+        onMemberAdded(data, timestamp) {
+            this.stream.push({
+                timestamp: parseInt(timestamp),
+                title: `New member invited`,
+                body: `Welcome ${data.account} to the pool!`,
+                variant: 'success'
+            });
+        },
+        onRewardPollCreated(data, timestamp) {
+            this.stream.push({
+                timestamp: parseInt(timestamp),
+                title: `Reward poll started`,
+                variant: 'info'
+            });
+        },
+        onRewardPollFinished(data, timestamp) {
+            this.stream.push({
+                timestamp: parseInt(timestamp),
+                title: `Reward poll has finished`,
+                variant: 'info'
+            });
         },
         onAddManager() {
             this.loading = true;
@@ -276,15 +293,12 @@ export default {
                 .then(async () => {
                     const THX = window.THX;
                     const token = THX.network.instances.token;
-                    let balanceInWei;
 
-                    balanceInWei = await token.methods.balanceOf(this.pool.address).call();
-                    this.pool.balance = new BN(balanceInWei).div(tokenMultiplier);
-
-                    this.$parent.$refs.header.updateBalance();
-
+                    this.pool.balance = new BN(await token.methods.balanceOf(this.pool.address).call()).div(tokenMultiplier);
                     this.input.poolDeposit = 0;
                     this.loading = false;
+
+                    this.$parent.$refs.header.updateBalance();
                 });
         }
     }

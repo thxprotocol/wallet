@@ -1,7 +1,7 @@
 <template>
     <article>
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table table-striped" style="min-width: 438px;">
                 <thead>
                     <th>#</th>
                     <th>slug</th>
@@ -20,8 +20,9 @@
             </table>
         </div>
 
-        <button class="btn btn-link" @click="getRewardRules()">Refresh</button>
-        <button v-if="account.isManager" class="btn btn-primary" @click="modal.createRule = true">Add new rule</button>
+        <div class="d-flex w-100 justify-content-end">
+            <button v-if="account.isManager" class="btn btn-primary" @click="modal.createRule = true">Add new rule</button>
+        </div>
 
         <Modal v-if="modal.createRule" @close="modal.createRule = false">
             <h3 slot="header">Create reward rule:</h3>
@@ -133,7 +134,6 @@ export default {
             return rulesRef.child(this.newRule.slug).set({
                 slug: this.newRule.slug,
                 title: this.newRule.title,
-                size: this.newRule.size,
                 description: this.newRule.description,
                 state: 'undefined',
             }).then(() => {

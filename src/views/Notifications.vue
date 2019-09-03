@@ -12,8 +12,28 @@
         style="margin: 1rem; width: 100%">
 
         <b-card-text>
-            <strong>{{ n.title }}</strong><br>
-            <strong>{{ n.amount }} THX</strong>
+            <strong class="font-size-lg">{{ n.amount }} THX</strong>
+
+            <div v-if="n.poll">
+                <h3><strong>Poll period:</strong></h3>
+                <div class="row">
+                    <div class="col-12">
+                        <BProgress
+                            variant="info"
+                            :value="((n.poll.now - n.poll.startTime) / (n.poll.endTime - n.poll.startTime)) * 100"
+                            :max="100"
+                        ></BProgress>
+                    </div>
+                    <div class="col-6">
+                        {{n.poll.startTime | moment("MMMM Do YYYY HH:mm") }}
+                    </div>
+                    <div class="col-6 text-right">
+                        {{n.poll.endTime | moment("MMMM Do YYYY HH:mm") }}
+                    </div>
+                </div>
+                <hr class="dotted">
+            </div>
+
             <div class="row">
                 <div class="col-12">
                     Amount of tokens: {{n.yesCounter + n.noCounter}}
@@ -30,30 +50,36 @@
                 </div>
             </div>
 
+            <strong>{{ n.title }}</strong><br>
             <p>{{ n.description }}</p>
 
             <hr class="dotted" />
             <p>
                 {{ n.pool.name }} <strong>[{{ n.pool.balance }} THX]</strong><br>
             </p>
+            <p>
+                <button v-bind:class="{ disabled: loading }" class="btn btn-link" v-on:click="finalizePoll(n.id, n.pool.address)">
+                    Finalize poll
+                </button>
+            </p>
         </b-card-text>
 
         <template slot="footer">
             <div class="row" v-if="!n.hasVoted">
                 <div class="col-6">
-                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn-primary btn-block" v-on:click="vote(n.id, true, n.pool.address)">
+                    <button v-bind:class="{ disabled: loading }" class="btn btn-primary btn-block" v-on:click="vote(n.id, true, n.pool.address)">
                         Approve
                     </button>
                 </div>
                 <div class="col-6">
-                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn-primary btn-block" v-on:click="vote(n.id, false, n.pool.address)">
+                    <button v-bind:class="{ disabled: loading }" class="btn btn-primary btn-block" v-on:click="vote(n.id, false, n.pool.address)">
                         Reject
                     </button>
                 </div>
             </div>
             <div class="row" v-if="n.hasVoted">
                 <div class="col-12">
-                    <button v-bind:class="{ disabled: voteBusy }" class="btn btn-primary btn-block" v-on:click="revokeVote(n.id, n.pool.address)">
+                    <button v-bind:class="{ disabled: loading }" class="btn btn-primary btn-block" v-on:click="revokeVote(n.id, n.pool.address)">
                         Revoke Vote
                     </button>
                 </div>
@@ -75,7 +101,7 @@ import { BCard, BCardText, BProgress, BProgressBar } from 'bootstrap-vue';
 
 import Vue from 'vue';
 
-const RewardState = ['Pending', 'Active', 'Disabled'];
+const RewardState = ['Pending', 'Approved', 'Rejected'];
 
 export default {
     name: 'home',
@@ -95,7 +121,7 @@ export default {
             },
             notifications: {},
             currentNotification: 0,
-            voteBusy: false,
+            loading: false,
         }
     },
     created() {
@@ -162,29 +188,51 @@ export default {
                 hasVoted: (parseInt(vote.time) > 0),
                 yesCounter: parseInt(utils.fromWei(yesCounter, 'ether')),
                 noCounter: parseInt(utils.fromWei(noCounter, 'ether')),
+                poll: null,
             }
+        },
+        async finalizePoll(id, poolAddress) {
+            const THX = window.THX;
+            const pool = await THX.network.contract(RewardPool, poolAddress);
+            const rewardAddress = await pool.methods.rewards(id).call();
+            const reward = await THX.network.contract(Reward, rewardAddress);
+
+            this.loading = true;
+
+            return await reward.methods.tryToFinalize()
+                .send({ from: THX.network.account.address })
+                .then(async tx => {
+                    this.loading = false;
+                    // eslint-disable-next-line
+                    console.log(tx);
+                })
+                .catch(err => {
+                    this.loading = false;
+                    // eslint-disable-next-line
+                    console.error(err);
+                })
         },
         async vote(id, agree, poolAddress) {
             const THX = window.THX;
             const pool = await THX.network.contract(RewardPool, poolAddress);
             const isManager = await pool.methods.isManager(THX.network.account.address).call()
 
-            this.voteBusy = true;
+            this.loading = true;
 
             if (isManager) {
                 return pool.methods.voteForReward(id, agree).send({ from: THX.network.account.address })
                     .then(() => {
                         this.notifications[id].hasVoted = true;
-                        this.voteBusy = false;
+                        this.loading = false;
                     })
                     .catch(e => {
-                        this.voteBusy = false;
+                        this.loading = false;
                         // eslint-disable-next-line
                         return console.error(e);
                     });
             }
             else {
-                this.voteBusy = false;
+                this.loading = false;
             }
 
         },
@@ -197,16 +245,16 @@ export default {
                 return pool.methods.revokeVoteForReward(id).send({ from: THX.network.account.address })
                     .then(() => {
                         this.notifications[id].hasVoted = false;
-                        this.voteBusy = false;
+                        this.loading = false;
                     })
                     .catch(e => {
-                        this.voteBusy = false;
+                        this.loading = false;
                         // eslint-disable-next-line
                         return console.error(e);
                     });
             }
             else {
-                this.voteBusy = false;
+                this.loading = false;
             }
 
         }

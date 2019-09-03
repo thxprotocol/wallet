@@ -6,11 +6,12 @@
         </td>
 
         <td>
-            {{ rule.slug }}
+            <button class="btn btn-link" @click="showRuleInformation()">{{ rule.slug }}</button><br>
+            <!-- <canvas ref="canvas"></canvas> -->
         </td>
 
         <td>
-            {{ rule.amount }}
+            {{ rule.amount }} THX
         </td>
 
         <td>
@@ -135,6 +136,15 @@
                 <button @click="finalizePoll()" v-bind:class="{ disabled: loading }" class="btn btn-primary">Finalize Poll</button>
             </template>
         </Modal>
+
+        <Modal v-if="modal.ruleInfo" @close="modal.ruleInfo = false">
+            <h3 slot="header">{{ meta.title }}</h3>
+            <div slot="body">
+                <p><strong class="font-size-xl align-center">{{ rule.amount }} THX</strong></p>
+                <p><i>{{ meta.description }}</i></p>
+            </div>
+        </Modal>
+
     </tr>
 
 </template>
@@ -166,9 +176,14 @@ export default {
                 rulePoll: false,
                 startPoll: false,
                 finalizePoll: false,
+                ruleInfo: false,
             },
             alert: {
                 noVote: false,
+            },
+            meta: {
+                title: '',
+                description: '',
             },
             poll: null,
             input: {
@@ -192,7 +207,28 @@ export default {
     },
     methods: {
         async init() {
+            // const canvas = this.$refs.canvas;
+            // const data = JSON.stringify({
+            //     rule: this.rule.id,
+            //     pool: `${this.contract._address}`
+            // });
+            //
+            // QRCode.toCanvas(canvas, data, (error) => {
+            //     if (error) {
+            //       console.error(error)
+            //     }
+            // });
+        },
+        async showRuleInformation() {
+            this.modal.ruleInfo = true;
+            this.meta = (await this.getRuleMeta()).val();
+            console.log(this.meta)
+            debugger
+        },
+        async getRuleMeta() {
+            const rulesRef = firebase.database().ref(`pools/${this.contract._address}/rules`);
 
+            return await rulesRef.child(this.rule.slug).once('value');
         },
         async showRulePoll() {
             this.loading = true;
@@ -205,7 +241,6 @@ export default {
                 const rulePoll = await THX.network.contract(RulePoll, this.rule.poll);
                 const id = parseInt(await rulePoll.methods.id().call());
                 const proposedAmount = parseInt(await rulePoll.methods.proposedAmount().call());
-                const rulesRef = firebase.database().ref(`pools/${this.contract._address}/rules`);
                 const vote = await rulePoll.methods.votesByAddress(this.account.loom.address).call();
                 const minVotedTokensPerc = await this.contract.methods.minVotedTokensPerc().call();
                 const votedTokensPerc = await rulePoll.methods.getVotedTokensPerc().call();
@@ -217,7 +252,7 @@ export default {
                 const endTime = await rulePoll.methods.endTime().call();
                 const now = (await THX.network.loom.eth.getBlock('latest')).timestamp;
                 const diff = (endTime - now);
-                const meta = await rulesRef.child(this.rule.slug).once('value');
+                const meta = (await this.getRuleMeta()).val();
 
                 this.loading = false;
 
