@@ -12,7 +12,7 @@
             </div>
             <div v-else>
                 <ProfilePicture size="lg" :uid="uid"></ProfilePicture>
-                <button class="btn btn-link"@click="removeImage">Delete</button>
+                <button class="btn btn-link" @click="removeImage">Delete</button>
             </div>
         </label>
 
@@ -220,7 +220,6 @@ export default {
         const uid = firebase.auth().currentUser.uid;
 
         firebase.database().ref(`users/${uid}`).once('value').then(async s => {
-            const avatarRef = firebase.storage().ref('avatars');
             const u = s.val();
             const picture = u.picture;
 
@@ -284,8 +283,8 @@ export default {
             const pictureRef = firebase.database().ref(`users/${uid}/picture`);
             const fileName = (await pictureRef.child('name').once('value')).val();
 
-            avatarRef.child(fileName).delete().then(s => {
-                pictureRef.remove().then(s => {
+            avatarRef.child(fileName).delete().then(() => {
+                pictureRef.remove().then(() => {
                     this.account.picture = null
                 });
             });
@@ -338,7 +337,6 @@ export default {
         },
         onMintForAccount() {
             const THX = window.THX;
-            const tokenRinkeby = THX.network.instances.tokenRinkeby;
 
             return THX.network.mint(this.account.rinkeby.address, this.mintForAccountAmount)
                 .then(() => {

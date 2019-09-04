@@ -40,7 +40,8 @@ export default {
                 title: title,
                 toaster: 'b-toaster-bottom-full',
                 autoHideDelay: 3000,
-                appendToast: true
+                appendToast: true,
+                variant: variant,
             })
         },
         onPoolDeposit(data) {

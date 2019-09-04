@@ -158,7 +158,6 @@
 <script>
 import firebase from 'firebase/app';
 import 'firebase/database';
-import Vue from 'vue';
 import Modal from '../components/Modal';
 import RulePoll from '../contracts/RulePoll.json';
 import { BSpinner, BProgress, BProgressBar } from 'bootstrap-vue';
@@ -325,7 +324,6 @@ export default {
         },
         async finalizePoll() {
             const THX = window.THX;
-            const rule = await this.contract.methods.rules(this.rule.id).call();
             const rulePoll = await THX.network.contract(RulePoll, this.rule.poll);
 
             this.loading = true;
@@ -347,8 +345,6 @@ export default {
                 })
         },
         async startPoll() {
-            const rule = await this.contract.methods.rules(this.rule.id).call();
-
             this.modal.startPoll = false;
             this.loading = true;
 

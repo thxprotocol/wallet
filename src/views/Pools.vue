@@ -4,7 +4,6 @@
             <h2>Pools</h2>
             <BCard
                 v-bind:key="p.address"
-                v-if="p.name"
                 v-for="p in pools"
                 footer-tag="footer"
                 header-tag="header"
@@ -89,7 +88,7 @@ export default {
                 const utils = THX.network.loom.utils;
                 const hash = RewardPool.networks[9545242630824].transactionHash;
                 const receipt = await THX.network.loom.eth.getTransactionReceipt(hash);
-                
+
                 let data = s.val();
 
                 this.contracts[data.address] = await THX.network.contract(RewardPool, data.address);

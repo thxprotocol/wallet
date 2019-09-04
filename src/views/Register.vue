@@ -54,9 +54,6 @@ export default {
     },
     data: function() {
         return {
-            assets: {
-                logo: Logo
-            },
             firstName: '',
             lastName: '',
             email: '',

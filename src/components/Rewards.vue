@@ -69,12 +69,15 @@ export default {
     },
     methods: {
         onRewardStateChanged(data) {
+            // eslint-disable-next-line
             console.log(data)
         },
         onRewardPollCreated(data) {
+            // eslint-disable-next-line
             console.log(data)
         },
         onRewardPollFinished(data) {
+            // eslint-disable-next-line
             console.log(data)
         },
         async subscribeRewardEvents() {
@@ -92,6 +95,7 @@ export default {
             }
         },
         async getRewards() {
+            const THX = window.THX;
             const amountOfRewards = parseInt( await this.contract.methods.countRewards().call() );
 
             for (let i = 0; i < amountOfRewards; i++) {

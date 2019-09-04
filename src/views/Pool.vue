@@ -17,7 +17,7 @@
                             </div>
 
                             <BListGroup v-if="orderedStream">
-                                <BListGroupItem v-for="transfer in orderedStream" variant="transfer.variant">
+                                <BListGroupItem v-bind:key="transfer.key" v-for="transfer in orderedStream" variant="transfer.variant">
                                     <div class="d-flex w-100 justify-content-between">
                                         <strong v-bind:class="`text-${transfer.variant}`">{{transfer.title}}</strong>
                                         <small>{{ transfer.timestamp | moment("MMMM Do YYYY HH:mm") }}</small>

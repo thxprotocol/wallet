@@ -33,7 +33,7 @@ export default {
     },
     props: {
         uid: null,
-        size: '',
+        size: null,
     },
     created() {
         const userRef = firebase.database().ref(`users/${this.uid}`);

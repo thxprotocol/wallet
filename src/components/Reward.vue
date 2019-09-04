@@ -32,17 +32,13 @@
 </template>
 
 <script>
-import Modal from '../components/Modal';
 import ProfilePicture from '../components/ProfilePicture';
-import { BSpinner, BProgress, BProgressBar, BListGroup, BListGroupItem } from 'bootstrap-vue';
+import { BProgress, BListGroupItem } from 'bootstrap-vue';
 
 export default {
     name: 'Reward',
     components: {
-        Modal,
-        BSpinner,
         BProgress,
-        BProgressBar,
         BListGroupItem,
         ProfilePicture,
     },

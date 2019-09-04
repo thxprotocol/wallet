@@ -158,7 +158,7 @@ export default {
             });
         },
         async getRules() {
-            const rulesRef = firebase.database().ref(`pools/${this.contract._address}/rules`);
+            // const rulesRef = firebase.database().ref(`pools/${this.contract._address}/rules`);
             // Check the firebase for objects that are not in contracts and vice versa.
             // TODO index the id and not the slug
 
