@@ -33,8 +33,6 @@
                 <input id="title" v-model="newRule.title" type="text" class="form-control" placeholder="Complete your profile!"/>
                 <label for="description">Description:</label>
                 <textarea class="form-control"  width="100%" rows="3" id="description" v-model="newRule.description" placeholder="When filling all fields of your public profile you will receive the reward."> </textarea>
-                <label for="rewardSize">Reward size:</label>
-                <input id="rewardSize" v-model="newRule.size" type="number" class="form-control"  />
             </div>
             <div slot="body" v-if="loading">
                 <div class="text-center">
@@ -58,7 +56,7 @@ import Rule from './Rule';
 import Modal from './Modal';
 import { BSpinner } from 'bootstrap-vue';
 
-const RuleState = ['Pending', 'Active', 'Disabled'];
+const RuleState = ['Active', 'Disabled'];
 
 export default {
     name: 'Rules',
@@ -80,7 +78,6 @@ export default {
                 slug: '',
                 title: '',
                 description: '',
-                size: 0,
             },
         }
     },
@@ -137,7 +134,7 @@ export default {
                 description: this.newRule.description,
                 state: 'undefined',
             }).then(() => {
-                return this.contract.methods.createRule(this.newRule.slug, this.newRule.size)
+                return this.contract.methods.createRule(this.newRule.slug)
                     .send({ from: this.account.loom.address })
                     .then(async tx => {
                         const id = tx.events.RuleStateChanged.returnValues.id;

@@ -4,6 +4,7 @@
             <h2>Pools</h2>
             <BCard
                 v-bind:key="p.address"
+                v-if="p.name"
                 v-for="p in pools"
                 footer-tag="footer"
                 header-tag="header"
@@ -26,6 +27,10 @@
                 </BCardText>
 
             </BCard>
+
+            <p v-if="loading" class="d-flex w-100 justify-content-center">
+                <BSpinner></BSpinner>
+            </p>
 
             <button class="btn btn-primary btn-block" @click="showJoinPoolModal = true">
                 Add Reward Pool
@@ -50,7 +55,7 @@ import 'firebase/database';
 import modal from '../components/Modal';
 import Vue from 'vue';
 import RewardPool from '../contracts/RewardPool.json';
-import { BCard, BCardText, BLink } from 'bootstrap-vue';
+import { BCard, BCardText, BSpinner } from 'bootstrap-vue';
 
 export default {
     name: 'pools',
@@ -58,9 +63,11 @@ export default {
         modal,
         BCard,
         BCardText,
+        BSpinner,
     },
     data: function() {
         return {
+            loading: false,
             pools: {},
             contracts: {},
             poolAddress: '',
@@ -74,19 +81,27 @@ export default {
         init() {
             const uid = firebase.auth().currentUser.uid;
 
+            this.loading = true;
+
             firebase.database().ref(`users/${uid}/pools`).on('child_added', async (s) => {
                 const THX = window.THX;
                 const token = THX.network.instances.token;
                 const utils = THX.network.loom.utils;
                 const hash = RewardPool.networks[9545242630824].transactionHash;
                 const receipt = await THX.network.loom.eth.getTransactionReceipt(hash);
+                
                 let data = s.val();
 
                 this.contracts[data.address] = await THX.network.contract(RewardPool, data.address);
 
                 data.name = await this.contracts[data.address].methods.name().call();
-                data.outOfSync = (data.address !== receipt.contractAddress);
-                data.balance = utils.fromWei(await token.methods.balanceOf(data.address).call(), 'ether');
+
+                if (data.name && receipt) {
+                    data.outOfSync = (data.address !== receipt.contractAddress);
+                    data.balance = utils.fromWei(await token.methods.balanceOf(data.address).call(), 'ether');
+                }
+
+                this.loading = false;
 
                 Vue.set(this.pools, data.address, data);
             });

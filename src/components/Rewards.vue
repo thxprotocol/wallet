@@ -14,10 +14,10 @@
 
         </div>
 
-        <div v-if="loading" class="d-flex w-100 h-100 align-items-center justify-content-center">
+        <div v-if="rewards.length <= 0" class="d-flex w-100 h-100 align-items-center justify-content-center">
             <BSpinner></BSpinner>
         </div>
-        
+
     </article>
 </template>
 

@@ -1,38 +1,33 @@
 <template>
-    <article class="region region--container">
-        <header class="region region--header" style="background: black;">
-            <p class="logo">
-                <img width="50" height="50" v-bind:src="assets.logo" alt="THX Logo" />
-            </p>
-            <p style="color: white;">A token of appreciation</p>
-        </header>
-        <main class="region region--content">
-            <h2>Login</h2>
-            <div class="text-center" v-if="loading">
-                <BSpinner label="Loading..."></BSpinner>
+    <main class="d-flex h-100 w-100 text-white align-items-center justify-content-center" style="background: black;">
+
+        <BSpinner v-if="loading" label="Loading..."></BSpinner>
+
+        <form v-if="!loading" class="form" v-on:submit.prevent="login">
+            <div class="form-group d-flex justify-content-center">
+                <img width="75" height="75" src="../assets/thx_logo.svg" alt="THX Logo" /><br>
             </div>
-            <form class="form" v-on:submit.prevent="login" v-if="!loading">
-                <h2>Enter your details</h2>
-                <div class="form-group">
-                    <input required type="text" class="form-control" v-model="email" placeholder="E-mail">
-                </div>
-                <div class="form-group">
-                    <input required type="password" v-model="password" class="form-control" placeholder="******">
-                </div>
-                <div class="form-group">
-                    <button class="btn btn-primary" type="submit">Login</button>
-                </div>
-                <p>You don't have an account? You can <router-link to="/register">register one!</router-link>
-                </p>
-            </form>
-        </main>
-    </article>
+            <div class="form-group text-center">
+                <h2>Enter your credentials</h2>
+            </div>
+            <div class="form-group">
+                <input required type="text" class="form-control" v-model="email" placeholder="E-mail">
+            </div>
+            <div class="form-group">
+                <input required type="password" v-model="password" class="form-control" placeholder="******">
+            </div>
+            <div class="form-group">
+                <button class="btn btn-primary btn-block btn-inverse" type="submit">Login</button>
+            </div>
+            <p>You don't have an account? You can <router-link to="/register">register one!</router-link>
+            </p>
+        </form>
+    </main>
 </template>
 
 <script>
 import firebase from 'firebase/app';
 import 'firebase/auth';
-import Logo from '../assets/thx_logo.svg'
 import { BSpinner } from 'bootstrap-vue';
 
 export default {
@@ -42,9 +37,6 @@ export default {
     },
     data: function() {
         return {
-            assets: {
-                logo: Logo
-            },
             email: '',
             password: '',
             loading: false
@@ -69,9 +61,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-    .region--content {
-        background-color: transparent;
-    }
-</style>

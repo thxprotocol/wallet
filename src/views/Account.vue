@@ -61,8 +61,14 @@
         <Modal v-if="showConnectKeysModal" @close="showConnectKeysModal = false">
             <h3 slot="header">Add private keys for accounts:</h3>
             <div slot="body">
-                <input v-model="account.loom.privateKey" type="text" class="form-control" placeholder="Your Loom private key">
-                <input v-model="account.rinkeby.privateKey" type="text" class="form-control" placeholder="Your Rinkeby private key">
+                <div class="form-group">
+                    <label>Loom private key:</label>
+                    <input v-model="input.loomPrivateKey" type="text" class="form-control" placeholder="Your Loom private key">
+                </div>
+                <div class="form-group">
+                    <label>Rinkeby private key:</label>
+                    <input v-model="input.rinkebyPrivateKey" type="text" class="form-control" placeholder="Your Rinkeby private key">
+                </div>
             </div>
             <template slot="footer">
                 <button @click="onCreateAccountsFromPrivateKey()" class="btn btn-primary" >Connect</button>
@@ -189,6 +195,10 @@ export default {
                 token: 0,
                 pool: 0
             },
+            input: {
+                loomPrivateKey: '',
+                rinkebyPrivateKey: '',
+            },
             account: {
                 uid: null,
                 email: null,
@@ -238,6 +248,9 @@ export default {
 
             this.account.loom = THX.network.account;
             this.account.rinkeby = THX.network.rinkeby.account;
+
+            this.input.loomPrivateKey = THX.state.loomPrivateKey;
+            this.input.rinkebyPrivateKey = THX.state.rinkebyPrivateKey;
 
             firebase.database().ref(`wallets/${this.account.loom.address.toLowerCase()}`).child('uid').set(uid);
 
@@ -290,8 +303,8 @@ export default {
         onCreateAccountsFromPrivateKey() {
             const THX = window.THX;
 
-            THX.state.loomPrivateKey = this.account.loom.privateKey;
-            THX.state.rinkebyPrivateKey = this.account.rinkeby.privateKey;
+            THX.state.loomPrivateKey = this.input.loomPrivateKey;
+            THX.state.rinkebyPrivateKey = this.input.rinkebyPrivateKey;
             THX.state.save();
 
             alert('Your account is connected. The app will restart.');

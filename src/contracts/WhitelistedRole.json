@@ -397,7 +397,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3101,
+                              "referencedDeclaration": 3138,
                               "src": "677:3:9",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -463,10 +463,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3104,
-                        3105
+                        3141,
+                        3142
                       ],
-                      "referencedDeclaration": 3104,
+                      "referencedDeclaration": 3141,
                       "src": "655:7:9",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -958,7 +958,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3101,
+                          "referencedDeclaration": 3138,
                           "src": "1131:3:9",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1662,7 +1662,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3101,
+                              "referencedDeclaration": 3138,
                               "src": "677:3:9",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -1728,10 +1728,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3104,
-                        3105
+                        3141,
+                        3142
                       ],
-                      "referencedDeclaration": 3104,
+                      "referencedDeclaration": 3141,
                       "src": "655:7:9",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2223,7 +2223,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3101,
+                          "referencedDeclaration": 3138,
                           "src": "1131:3:9",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -2691,7 +2691,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-08-27T12:04:13.048Z",
+  "updatedAt": "2019-09-03T14:47:56.461Z",
   "devdoc": {
     "details": "Whitelisted accounts have been approved by a Whitelister to perform certain actions (e.g. participate in a crowdsale). This role is special in that the only accounts that can add it are Whitelisters (who can also remove it), and not Whitelisteds themselves.",
     "methods": {},

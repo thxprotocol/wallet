@@ -23,10 +23,7 @@ THX.state = new StateService();
 const loomPrivateKey = THX.state.loomPrivateKey;
 const rinkebyPrivateKey = THX.state.rinkebyPrivateKey;
 
-THX.network = new NetworkService(
-    loomPrivateKey ? loomPrivateKey : config.ganache.private,
-    rinkebyPrivateKey ? rinkebyPrivateKey : config.rinkeby.private,
-);
+THX.network = new NetworkService(loomPrivateKey, rinkebyPrivateKey);
 
 THX.network.init()
     .then(instances => {

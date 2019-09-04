@@ -26,11 +26,17 @@ h3 {
 }
 
 $yellow: #FDE542;
+$blue: #039be5;
 
 hr {
     border: 0;
     height: 0;
     border-top: 1px dotted black;
+}
+
+a,
+.btn-link {
+    color: $blue;
 }
 
 .table td {
@@ -99,9 +105,9 @@ hr {
     border-radius: 5px;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    background-color: #039be5;
+    background-color: $blue;
     margin: -1rem -1rem 0 -1rem;
-    padding: 1rem 1rem calc(42px + 1rem) 1rem;
+    padding: 2rem 1rem calc(42px + 1rem) 1rem;
     color: white;
     text-align: center;
 
@@ -124,6 +130,7 @@ hr {
     width: calc(100% - 4rem);
     overflow: auto;
     height: 100%;
+    box-shadow: 0 -10px 15px rgba(0, 0, 0, .2);
 }
 
 .section--notifications {
@@ -167,6 +174,11 @@ hr {
         opacity: .6;
         cursor: not-allowed;
         pointer-events: none;
+    }
+
+    &.btn-inverse {
+        background-color: $yellow;
+        color: black;
     }
 }
 

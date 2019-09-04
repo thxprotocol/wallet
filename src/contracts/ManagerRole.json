@@ -287,7 +287,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3101,
+                          "referencedDeclaration": 3138,
                           "src": "291:3:6",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -393,7 +393,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3101,
+                              "referencedDeclaration": 3138,
                               "src": "366:3:6",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -459,10 +459,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3104,
-                        3105
+                        3141,
+                        3142
                       ],
-                      "referencedDeclaration": 3104,
+                      "referencedDeclaration": 3141,
                       "src": "348:7:6",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -819,7 +819,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3101,
+                          "referencedDeclaration": 3138,
                           "src": "675:3:6",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1487,7 +1487,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3101,
+                          "referencedDeclaration": 3138,
                           "src": "291:3:6",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1593,7 +1593,7 @@
                               "name": "msg",
                               "nodeType": "Identifier",
                               "overloadedDeclarations": [],
-                              "referencedDeclaration": 3101,
+                              "referencedDeclaration": 3138,
                               "src": "366:3:6",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_magic_message",
@@ -1659,10 +1659,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3104,
-                        3105
+                        3141,
+                        3142
                       ],
-                      "referencedDeclaration": 3104,
+                      "referencedDeclaration": 3141,
                       "src": "348:7:6",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2019,7 +2019,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 3101,
+                          "referencedDeclaration": 3138,
                           "src": "675:3:6",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -2487,7 +2487,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-08-27T12:04:13.043Z",
+  "updatedAt": "2019-09-03T14:47:56.456Z",
   "devdoc": {
     "methods": {}
   },

@@ -25,12 +25,14 @@ export default {
     data: function() {
         return {
             events: new EventService(),
-            currentUser: firebase.auth().currentUser,
+            currentUser: null,
         }
     },
     created() {
         this.events.listen('event.Deposited', this.onPoolDeposit);
         this.events.listen('event.Withdrawn', this.onPoolWithdrawel);
+
+        this.currentUser = firebase.auth().currentUser;
     },
     methods: {
         toast(title, body, variant) {

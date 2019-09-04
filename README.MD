@@ -113,9 +113,7 @@ node ./transfer-gateway.js map-contracts token
 ### Testing
 
 ```
-node ./transfer-gateway.js token-balance -c eth
-node ./transfer-gateway.js token-balance -c extdev
-node ./transfer-gateway.js token-balance -c eth -a "0xs7ZkMkb7Ul5DkfnMSWxUZvYF9NIHkbW5Hb0EMizcWtU="
+node ./transfer-gateway.js token-balance -c eth -a "0xf154d41A2131564F5b95E05865C758Af4F3FE01a"
 ```
 
 ## VueJS app
