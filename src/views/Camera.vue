@@ -156,8 +156,9 @@ export default {
     }
 
     .ui-file input[type="file"] {
-        background: white;
+        background: rgba(255,255,255,.75);
         border: 2px dashed #EFEFEF;
+        border-radius: 35px;
         padding: 1rem;
         font-size: 1rem;
         font-family: "Ubuntu";

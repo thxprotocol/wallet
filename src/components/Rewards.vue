@@ -1,20 +1,20 @@
 <template>
     <article>
 
-        <div class="table-responsive" v-if="rewards.length > 0">
+        <BListGroup v-if="rewards && amountOfRewards > 0">
+            <Reward
+                v-bind:key="reward.id"
+                v-for="reward in rewards"
+                v-bind:reward="reward"
+                v-bind:account="account"
+                v-bind:contract="contract"></Reward>
+        </BListGroup>
 
-            <BListGroup v-if="rewards">
-                <Reward
-                    v-bind:key="reward.id"
-                    v-for="reward in rewards"
-                    v-bind:reward="reward"
-                    v-bind:account="account"
-                    v-bind:contract="contract"></Reward>
-            </BListGroup>
-
+        <div v-if="amountOfRewards == 0" class="alert alert-info">
+            <span>This pool currently contains no claimed rewards.</span>
         </div>
 
-        <div v-if="rewards.length <= 0" class="d-flex w-100 h-100 align-items-center justify-content-center">
+        <div v-if="amountOfRewards < 0" class="d-flex w-100 h-100 align-items-center justify-content-center">
             <BSpinner></BSpinner>
         </div>
 
@@ -30,7 +30,7 @@ import Reward from './Reward';
 import RewardJSON from '../contracts/Reward.json';
 import { BListGroup, BSpinner } from 'bootstrap-vue';
 
-const RewardState = ['Pending', 'Approved', 'Rejected'];
+const RewardState = ['Pending', 'Approved', 'Rejected', 'Withdrawn'];
 
 export default {
     name: 'Rewards',
@@ -43,7 +43,8 @@ export default {
         return {
             loading: false,
             events: new EventService(),
-            rewards: []
+            rewards: [],
+            amountOfRewards: -1
         }
     },
     props: {
@@ -96,9 +97,11 @@ export default {
         },
         async getRewards() {
             const THX = window.THX;
-            const amountOfRewards = parseInt( await this.contract.methods.countRewards().call() );
+            const utils = THX.network.loom.utils;
 
-            for (let i = 0; i < amountOfRewards; i++) {
+            this.amountOfRewards = parseInt( await this.contract.methods.countRewards().call() );
+
+            for (let i = 0; i < this.amountOfRewards; i++) {
                 const rewardAddress = await this.contract.methods.rewards(i).call();
                 const reward = await THX.network.contract(RewardJSON, rewardAddress);
                 const id = await reward.methods.id().call();
@@ -106,6 +109,7 @@ export default {
                 const uid = (await firebase.database().ref(`wallets/${beneficiary}`).once('value')).val().uid;
                 const user = (await firebase.database().ref(`users/${uid}`).once('value')).val();
                 const now = (await THX.network.loom.eth.getBlock('latest')).timestamp;
+                const amount = utils.fromWei((await reward.methods.amount().call()), 'ether');
 
                 Vue.set(this.rewards, id, {
                     contract: reward,
@@ -117,7 +121,7 @@ export default {
                     startTime: parseInt(await reward.methods.startTime().call()),
                     endTime: parseInt(await reward.methods.endTime().call()),
                     beneficiary: beneficiary,
-                    amount: await reward.methods.amount().call(),
+                    amount: amount,
                     state: RewardState[await reward.methods.state().call()],
                     created: parseInt(await reward.methods.created().call()),
                 });

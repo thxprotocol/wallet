@@ -10,7 +10,7 @@
                 <div class="col-12">
                     <BTabs content-class="mt-4" justified>
 
-                        <BTab title="Stream">
+                        <BTab title="Stream" active>
 
                             <div class="text-center" v-if="!orderedStream.length">
                                 <BSpinner label="Loading..."></BSpinner>
@@ -34,7 +34,7 @@
 
                         </BTab>
 
-                        <BTab title="Rewards" active>
+                        <BTab title="Rewards">
 
                             <Rewards v-if="contract && account" v-bind:contract="contract" v-bind:account="account"></Rewards>
 
@@ -102,6 +102,9 @@ import { BSpinner, BTab, BTabs, BListGroup, BListGroupItem } from 'bootstrap-vue
 const _ = require('lodash');
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
+
+const RuleState = ['Active', 'Disabled'];
+// const RewardState = ['Pending', 'Approved', 'Rejected', 'Withdrawn'];
 
 export default {
     name: 'pool',
@@ -184,7 +187,6 @@ export default {
                                 this[`on${event.event}`](event.returnValues, event.blockTime);
                             }
                         }
-
                     })
                     .catch(err => {
                         // eslint-disable-next-line
@@ -195,73 +197,64 @@ export default {
         onRulePollCreated(data, timestamp) {
             this.stream.push({
                 timestamp: parseInt(timestamp),
-                title: `New rule poll started!`,
-                body: `Change rule #${data.id} it's current amount to ${data.proposedAmount}.`,
-                variant: 'info'
+                title: `Rule #${data.id} size poll: ${new BN(data.proposedAmount).div(tokenMultiplier)} THX`,
             });
         },
         onRulePollFinished(data, timestamp) {
             this.stream.push({
                 timestamp: parseInt(timestamp),
-                title: data.approved ? 'Poll approved!' : 'Poll rejected...',
-                body: `The poll for rule #${data.id} has been ${data.approved ? 'approved' : 'rejected'}.`,
+                title: `Rule #${data.id} poll ${data.approved ? 'approved' : 'rejected'}`,
                 variant: data.approved ? 'success' : 'danger'
             });
         },
         onRuleStateChanged(data, timestamp) {
             this.stream.push({
                 timestamp: parseInt(timestamp),
-                title: `Rule state changed`,
-                body: `Rule #${data.id} has changed it's state.`,
-                variant: 'info'
+                title: `Rule #${data.id} set to ${RuleState[data.state]}`,
             });
         },
         onDeposited(data, timestamp) {
             this.stream.push({
                 timestamp: parseInt(timestamp),
-                title: `+${new BN(data.amount).div(tokenMultiplier)} THX`,
-                body: data.sender,
-                variant: 'success'
+                title: `+${new BN(data.amount).div(tokenMultiplier)} THX (Deposit)`,
+                body: `${data.sender}`,
+                variant: 'success',
             });
         },
         onWithdrawn(data, timestamp) {
             this.stream.push({
                 timestamp: parseInt(timestamp),
-                title: `-${new BN(data.amount).div(tokenMultiplier)} THX`,
-                body: data.sender,
-                variant: 'danger'
+                title: `-${new BN(data.amount).div(tokenMultiplier)} THX (Withdrawel)`,
+                body: `${data.sender}`,
+                variant: 'danger',
             });
         },
         onManagerAdded(data, timestamp) {
             this.stream.push({
                 timestamp: parseInt(timestamp),
-                title: `New manager added`,
-                body: `${data.account} is added as manager.`,
-                variant: 'info'
+                title: `New manager promotion`,
+                body: `${data.account}`
             });
         },
         onMemberAdded(data, timestamp) {
             this.stream.push({
                 timestamp: parseInt(timestamp),
-                title: `New member invited`,
-                body: `Welcome ${data.account} to the pool!`,
-                variant: 'success'
+                title: `New member added`,
+                body: `${data.account}`,
             });
         },
-        onRewardPollCreated(data, timestamp) {
-            this.stream.push({
-                timestamp: parseInt(timestamp),
-                title: `Reward poll started`,
-                variant: 'info'
-            });
-        },
-        onRewardPollFinished(data, timestamp) {
-            this.stream.push({
-                timestamp: parseInt(timestamp),
-                title: `Reward poll has finished`,
-                variant: 'info'
-            });
-        },
+        // onRewardPollCreated(data, timestamp) {
+        //     this.stream.push({
+        //         timestamp: parseInt(timestamp),
+        //         title: `Reward poll started`,
+        //     });
+        // },
+        // onRewardPollFinished(data, timestamp) {
+        //     this.stream.push({
+        //         timestamp: parseInt(timestamp),
+        //         title: `Reward poll finished`,
+        //     });
+        // },
         onAddManager() {
             this.loading = true;
 

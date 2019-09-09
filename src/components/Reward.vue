@@ -1,12 +1,15 @@
 <template>
     <article>
         <BListGroupItem>
-            <div class="d-flex w-100 justify-content-between align-items-center">
-                <div class="mr-2">
-                    <ProfilePicture size="sm" :uid="reward.user.uid"></ProfilePicture>
+            <div class="d-flex w-100 align-items-center">
+                <div>
+                    <ProfilePicture class="mr-3" size="sm" :uid="reward.user.uid"></ProfilePicture>
+                </div>
+                <div style="flex: 1;">
+                    <span><strong>{{reward.user.firstName}}</strong> claimed <strong>{{ reward.amount}} THX</strong> as a reward for the rule <strong>{{ reward.slug }}</strong>.</span>
                 </div>
                 <div>
-                    <strong>{{reward.user.firstName}} claims {{ reward.amount}} THX as a reward for the rule {{ reward.slug }}.</strong>
+                    <span class="badge badge-success float-right">{{reward.state}}</span>
                 </div>
             </div>
             <div class="row mb-2 mt-4">
@@ -25,7 +28,8 @@
                 </div>
             </div>
             <div class="d-flex w-100 justify-content-end">
-                <button v-if="reward.beneficiary == account.loom.address" class="btn btn-primary btn-block mt-1" @click="claim()">Claim your THX!</button>
+                <button v-if="reward.beneficiary === account.loom.address && reward.now > reward.endTime && reward.state === 'Pending'" class="btn btn-primary btn-block mt-1" @click="finalizePoll()">Finalize Poll</button>
+                <button v-if="reward.beneficiary === account.loom.address && reward.now > reward.endTime && reward.state === 'Approved'" class="btn btn-primary btn-block mt-1" @click="withdraw()">Withdraw {{reward.amount}} THX</button>
             </div>
         </BListGroupItem>
     </article>
@@ -60,12 +64,10 @@ export default {
 
     },
     methods: {
-        async claim() {
+        async withdraw() {
             const THX = window.THX;
 
             this.loading = true;
-
-            await this.finalizePoll();
 
             return await this.reward.contract.methods.withdraw()
                 .send({ from: THX.network.account.address })
@@ -89,6 +91,7 @@ export default {
                 .send({ from: THX.network.account.address })
                 .then(async tx => {
                     this.loading = false;
+                    this.reward.state = 'Approved';
                     // eslint-disable-next-line
                     console.log(tx);
                 })

@@ -23,7 +23,7 @@
             <strong>UID:</strong><br> {{account.uid}}
         </p>
         <p>
-            <strong>Main Network Address:</strong><br>
+            <strong>Rinkeby Address:</strong><br>
             <span v-if="account.rinkeby.address">{{account.rinkeby.address}}</span>
         </p>
         <p>
@@ -33,18 +33,18 @@
 
         <h3>Main Network actions</h3>
         <ul class="list-bullets">
-            <li><button class="btn btn-link" @click="showConnectKeysModal = true">Connect Accounts</button></li>
-            <li v-if="account.rinkeby.address"><button class="btn btn-link" @click="showDepositToGatewayModal = true">Deposit THX to Gateway</button></li>
-            <li v-if="account.rinkeby.address"><button class="btn btn-link" @click="showDepositToGatewayModal = true">Withdraw THX from Gateway</button></li>
-            <li v-if="account.rinkeby.address && isRinkebyMinter"><button class="btn btn-link" @click="showAddMinterModal = true">Add minter role</button></li>
-            <li v-if="account.rinkeby.address && isRinkebyMinter"><button class="btn btn-link" @click="showMintTokensModal = true">Mint tokens</button></li>
+            <li><button class="btn btn-link" @click="showModal('modal-connect')">Connect Accounts</button></li>
+            <li v-if="account.rinkeby.address"><button class="btn btn-link" @click="showModal('modal-gateway-deposit')">Deposit THX to Gateway</button></li>
+            <li v-if="account.rinkeby.address"><button class="btn btn-link" @click="showModal('modal-gateway-withdraw')">Withdraw THX from Gateway</button></li>
+            <li v-if="account.rinkeby.address && isRinkebyMinter"><button class="btn btn-link" @click="showModal('modal-add-minter')">Add minter role</button></li>
+            <li v-if="account.rinkeby.address && isRinkebyMinter"><button class="btn btn-link" @click="showModal('modal-mint-rinkeby')">Mint tokens</button></li>
         </ul>
 
         <template v-if="account.loom.address">
             <h3>Loom Network actions</h3>
             <ul class="list-bullets">
-                <li v-if="isLoomMinter"><button class="btn btn-link" @click="showMintLoomTokensModal = true">Mint Loom tokens</button></li>
-                <li><button class="btn btn-link" @click="showTransferTokensModal = true">Transfer tokens</button></li>
+                <li v-if="isLoomMinter"><button class="btn btn-link" @click="showModal('modal-mint-loom')">Mint Loom tokens</button></li>
+                <li><button class="btn btn-link" @click="showModal('modal-transfer')">Transfer tokens</button></li>
             </ul>
         </template>
 
@@ -58,98 +58,132 @@
             </li>
         </ul>
 
-        <Modal v-if="showConnectKeysModal" @close="showConnectKeysModal = false">
-            <h3 slot="header">Add private keys for accounts:</h3>
-            <div slot="body">
+        <BModal title="Connect accounts" centered ref="modal-connect">
+            <p>Add private keys for the loom sidechain and the parent Rinkeby network. These keys will only be stored on your device and used to verify transactions.</p>
+            <div class="form-group">
+                <label>Loom private key:</label>
+                <input v-model="input.loomPrivateKey" type="text" class="form-control" placeholder="Your Loom private key">
+            </div>
+            <div class="form-group">
+                <label>Rinkeby private key:</label>
+                <input v-model="input.rinkebyPrivateKey" type="text" class="form-control" placeholder="Your Rinkeby private key">
+            </div>
+
+            <template v-slot:modal-footer="{ ok, cancel, hide }">
+                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onCreateAccountsFromPrivateKey()">Connect</BButton>
+            </template>
+        </BModal>
+
+        <BModal title="Add minter role" centered ref="modal-add-minter">
+            <p>Provide an account with the minting role so it can generate THX on the sidechain.</p>
+
+            <template v-if="!loading">
+                <p>Lorem ipsum dolor sit amet.</p>
+                <input v-model="input.newMinterAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
+            </template>
+
+            <template v-if="loading">
+                <div class="text-center">
+                    <BSpinner label="Loading..."></BSpinner>
+                </div>
+            </template>
+
+            <template v-slot:modal-footer="{ ok, cancel, hide }">
+                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onAddMinter()">Connect Accounts</BButton>
+            </template>
+        </BModal>
+
+        <BModal title="Mint tokens for Rinkeby account" centered ref="modal-mint-rinkeby">
+
+            <template v-if="!loading" >
+                <input v-model="input.mintForAccount" type="number" class="form-control"  min="0" />
+            </template>
+
+            <template v-if="loading">
+                <div class="text-center">
+                    <BSpinner label="Loading..."></BSpinner>
+                </div>
+            </template>
+
+            <template v-slot:modal-footer="{ ok, cancel, hide }">
+                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onMintForAccount()">Mint {{ input.mintForAccount }} THX </BButton>
+            </template>
+        </BModal>
+
+        <BModal title="Mint tokens for Loom account" centered ref="modal-mint-loom">
+
+            <template v-if="!loading">
+                <input v-model="input.mintForLoomAccount" type="number" class="form-control"  min="0" />
+            </template>
+
+            <template v-if="loading">
+                <div class="text-center">
+                    <BSpinner label="Loading..."></BSpinner>
+                </div>
+            </template>
+
+            <template v-slot:modal-footer="{ ok, cancel, hide }">
+                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onMintForLoomAccount()">Mint {{ input.mintForLoomAccount }} THX </BButton>
+            </template>
+
+        </BModal>
+
+        <BModal title="Deposit THX to Transfer Gateway" centered ref="modal-gateway-deposit">
+            <p>Use the transfer gateway to move your THX from the sidechain on to the main ethereum chain.</p>
+            <template v-if="!loading">
+                <input v-model="input.depositToGateway" type="number" class="form-control"  min="0" />
+            </template>
+
+            <template v-if="loading">
+                <div class="text-center">
+                    <BSpinner label="Loading..."></BSpinner>
+                </div>
+            </template>
+
+            <template v-slot:modal-footer="{ ok, cancel, hide }">
+                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onDepositToGateway()">Deposit {{ input.depositToGateway }} THX </BButton>
+            </template>
+        </BModal>
+
+        <BModal title="Withdraw THX to Transfer Gateway" centered ref="modal-gateway-withdraw">
+            <p>Use the transfer gateway to move your THX from the sidechain on to the main ethereum chain.</p>
+            <template v-if="!loading">
+                <input v-model="input.withdrawToGateway" type="number" class="form-control"  min="0" />
+            </template>
+
+            <template v-if="loading">
+                <div class="text-center">
+                    <BSpinner label="Loading..."></BSpinner>
+                </div>
+            </template>
+
+            <template v-slot:modal-footer="{ ok, cancel, hide }">
+                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onWithdrawToGateway()">Withdraw {{ input.withdrawToGateway }} THX </BButton>
+            </template>
+        </BModal>
+
+        <BModal title="Transfer tokens on sidechain" centered ref="modal-transfer">
+            <p>Transfer an amount of THX to another wallet on the sidechain. To send it to a wallet on the main network, use the transfer gateway.</p>
+
+            <template v-if="!loading">
                 <div class="form-group">
-                    <label>Loom private key:</label>
-                    <input v-model="input.loomPrivateKey" type="text" class="form-control" placeholder="Your Loom private key">
+                    <input v-model="input.transferTokensAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000" />
                 </div>
                 <div class="form-group">
-                    <label>Rinkeby private key:</label>
-                    <input v-model="input.rinkebyPrivateKey" type="text" class="form-control" placeholder="Your Rinkeby private key">
+                    <input v-model="input.transferTokens" type="number" class="form-control"  v-bind:max="balance.token" />
                 </div>
-            </div>
-            <template slot="footer">
-                <button @click="onCreateAccountsFromPrivateKey()" class="btn btn-primary" >Connect</button>
             </template>
-        </Modal>
 
-        <Modal v-if="showAddMinterModal" @close="showAddMinterModal = false">
-            <h3 slot="header">Add minter role to account:</h3>
-            <div slot="body" v-if="!loading">
-                <input v-model="newMinterAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">>
-            </div>
-            <div slot="body" v-if="loading">
+            <template v-if="loading">
                 <div class="text-center">
                     <BSpinner label="Loading..."></BSpinner>
                 </div>
-            </div>
-            <template slot="footer">
-                <button @click="onAddMinter()" v-bind:class="{ disabled: loading }" class="btn btn-primary">Add minter</button>
             </template>
-        </Modal>
 
-        <Modal v-if="showMintTokensModal" @close="showMintTokensModal = false">
-            <h3 slot="header">Mint tokens for account:</h3>
-            <div slot="body" v-if="!loading" >
-                <input v-model="mintForAccountAmount" type="number" class="form-control"  min="0" />
-            </div>
-            <div slot="body" v-if="loading">
-                <div class="text-center">
-                    <BSpinner label="Loading..."></BSpinner>
-                </div>
-            </div>
-            <template slot="footer">
-                <button @click="onMintForAccount()" v-bind:class="{ disabled: loading }" class="btn btn-primary" type="submit">Mint {{ mintForAccountAmount }} THX</button>
+            <template v-slot:modal-footer="{ ok, cancel, hide }">
+                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onTransferTokens()">Transfer {{ input.transferTokens }} THX</BButton>
             </template>
-        </Modal>
-
-        <Modal v-if="showMintLoomTokensModal" @close="showMintLoomTokensModal = false">
-            <h3 slot="header">Mint tokens for Loom account:</h3>
-            <div slot="body" v-if="!loading" >
-                <input v-if="!loading" v-model="mintForLoomAccountAmount" type="number" class="form-control"  min="0" />
-            </div>
-            <div slot="body" v-if="loading">
-                <div class="text-center">
-                    <BSpinner label="Loading..."></BSpinner>
-                </div>
-            </div>
-            <template slot="footer">
-                <button @click="onMintForLoomAccount()" v-bind:class="{ disabled: loading }" class="btn btn-primary" type="submit">Mint {{ mintForLoomAccountAmount }} THX</button>
-            </template>
-        </Modal>
-
-        <Modal v-if="showDepositToGatewayModal" @close="showDepositToGatewayModal = false">
-            <h3 slot="header">Deposit to main network gateway:</h3>
-            <div slot="body" v-if="!loading">
-                <input v-if="!loading" v-model="depositToGatewayAmount" type="number" class="form-control"  min="0" />
-            </div>
-            <div slot="body" v-if="loading">
-                <div class="text-center">
-                    <BSpinner label="Loading..."></BSpinner>
-                </div>
-            </div>
-            <template slot="footer">
-                <button @click="onDepositToGateway()" v-bind:class="{ disabled: loading }" class="btn btn-primary">Deposit {{ depositToGatewayAmount }} THX</button>
-            </template>
-        </Modal>
-
-        <Modal v-if="showTransferTokensModal" @close="showTransferTokensModal = false">
-            <h3 slot="header">Transfer tokens to account:</h3>
-            <div slot="body" v-if="!loading">
-                <input v-model="transferTokensAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000" />
-                <input v-model="transferTokensAmount" type="number" class="form-control"  v-bind:max="balance.token" />
-            </div>
-            <div slot="body" v-if="loading">
-                <div class="text-center">
-                    <BSpinner label="Loading..."></BSpinner>
-                </div>
-            </div>
-            <template slot="footer">
-                <button @click="onTransferTokens()" v-bind:class="{ disabled: loading }" class="btn btn-primary">Transfer {{ transferTokensAmount }} THX</button>
-            </template>
-        </Modal>
+        </BModal>
 
     </main>
 </article>
@@ -159,8 +193,7 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/storage';
-import { BSpinner } from 'bootstrap-vue';
-import Modal from '../components/Modal';
+import { BButton, BModal, BSpinner } from 'bootstrap-vue';
 import ProfilePicture from '../components/ProfilePicture';
 
 const BN = require('bn.js');
@@ -169,28 +202,17 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
 export default {
     name: 'home',
     components: {
-        Modal,
         BSpinner,
+        BButton,
+        BModal,
         ProfilePicture,
     },
     data: function() {
         return {
+            loading: false,
             uid: firebase.auth().currentUser.uid,
             isLoomMinter: false,
             isRinkebyMinter: false,
-            showMintTokensModal: false,
-            showDepositToGatewayModal: false,
-            showConnectKeysModal: false,
-            showTransferTokensModal: false,
-            showMintLoomTokensModal: false,
-            showAddMinterModal: false,
-            mintForAccountAmount: 0,
-            mintForLoomAccountAmount: 0,
-            newMinterAddress: "",
-            transferTokensAddress: "",
-            transferTokensAmount: 0,
-            depositToGatewayAmount: 0,
-            loading: false,
             balance: {
                 token: 0,
                 pool: 0
@@ -198,6 +220,13 @@ export default {
             input: {
                 loomPrivateKey: '',
                 rinkebyPrivateKey: '',
+                mintForAccount: 0,
+                mintForLoomAccount: 0,
+                newMinterAddress: "",
+                transferTokensAddress: "",
+                transferTokens: 0,
+                depositToGateway: 0,
+                withdrawToGateway: 0,
             },
             account: {
                 uid: null,
@@ -239,6 +268,9 @@ export default {
 
     },
     methods: {
+        showModal(id) {
+            this.$refs[id].show();
+        },
         async init(uid) {
             const THX = window.THX;
             const token = THX.network.instances.token;
@@ -315,39 +347,42 @@ export default {
 
             this.loading = true;
 
-            return THX.network.depositToRinkebyGateway(this.depositToGatewayAmount)
+            return THX.network.depositToRinkebyGateway(this.input.depositToGateway)
                 .then(() => {
-                    this.depositToGatewayAmount = 0;
+                    this.input.depositToGateway = 0;
                     this.loading = false;
+                    this.$refs['modal-gateway-deposit'].hide();
                 });
         },
         onTransferTokens() {
             const THX = window.THX;
             const token = THX.network.instances.token;
-            const amount = new BN(this.transferTokensAmount).mul(tokenMultiplier);
+            const amount = new BN(this.input.transferTokens).mul(tokenMultiplier);
 
-            return token.methods.transfer(this.transferTokensAddress, amount.toString()).send({ from: this.account.loom.address }).then(async () => {
+            return token.methods.transfer(this.input.transferTokensAddress, amount.toString()).send({ from: this.account.loom.address }).then(async () => {
                 let balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
                 this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
 
                 this.$parent.$refs.header.updateBalance();
 
-                this.transferTokensAmount = 0;
+                this.input.transferTokens = 0;
+                this.$refs['modal-transfer'].hide();
             });
         },
         onMintForAccount() {
             const THX = window.THX;
 
-            return THX.network.mint(this.account.rinkeby.address, this.mintForAccountAmount)
+            return THX.network.mint(this.account.rinkeby.address, this.input.mintForAccount)
                 .then(() => {
-                    this.depositToGatewayAmount = 0;
+                    this.input.depositToGateway = 0;
                     this.loading = false;
+                    this.$refs['modal-mint-rinkeby'].hide();
                 });
         },
         onMintForLoomAccount() {
             const THX = window.THX;
             const token = THX.network.instances.token;
-            const amount = new BN(this.mintForLoomAccountAmount).mul(tokenMultiplier);
+            const amount = new BN(this.input.mintForLoomAccount).mul(tokenMultiplier);
 
             this.loading = true;
 
@@ -357,8 +392,9 @@ export default {
 
                 this.$parent.$refs.header.updateBalance();
 
-                this.mintForLoomAccountAmount = 0;
+                this.input.mintForLoomAccount = 0;
                 this.loading = false;
+                this.$refs['modal-mint-loom'].hide();
             });
         },
         onAddMinter() {
@@ -367,8 +403,9 @@ export default {
 
             this.loading = true;
 
-            return token.methods.addMinter(this.newMinterAddress).send({ from: this.account.loom.address }).then(async () => {
+            return token.methods.addMinter(this.input.newMinterAddress).send({ from: this.account.loom.address }).then(async () => {
                 this.loading = false;
+                this.$refs['modal-add-minter'].hide();
             });
         }
     }

@@ -242,12 +242,12 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"voter\",\"type\":\"address\"}],\"name\":\"revokeVote\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"pool\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"endTime\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"tryToFinalize\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"MAX_TOKENS_WEIGHT_DENOM\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"noCounter\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"startTime\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isNowApproved\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"votesByAddress\",\"outputs\":[{\"name\":\"time\",\"type\":\"uint256\"},{\"name\":\"weight\",\"type\":\"uint256\"},{\"name\":\"agree\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalVoted\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"finalized\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"voter\",\"type\":\"address\"},{\"name\":\"agree\",\"type\":\"bool\"}],\"name\":\"vote\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"yesCounter\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_tokenAddress\",\"type\":\"address\"},{\"name\":\"_poolAddress\",\"type\":\"address\"},{\"name\":\"_startTime\",\"type\":\"uint256\"},{\"name\":\"_endTime\",\"type\":\"uint256\"},{\"name\":\"_checkTransfersAfterEnd\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}],\"devdoc\":{\"methods\":{\"constructor\":{\"details\":\"BasePoll constructor\",\"params\":{\"_checkTransfersAfterEnd\":\"Checks transfer after end\",\"_endTime\":\"Poll end time\",\"_startTime\":\"Poll start time\",\"_tokenAddress\":\"ERC20 compatible token contract address\"}},\"revokeVote(address)\":{\"details\":\"Revoke user`s vote\",\"params\":{\"voter\":\"The address of the user voting\"}},\"vote(address,bool)\":{\"details\":\"Process user`s vote\",\"params\":{\"agree\":\"True if user endorses the proposal else False\",\"voter\":\"The address of the user voting\"}}}},\"userdoc\":{\"methods\":{\"tryToFinalize()\":{\"notice\":\"Finalize poll and call onPollFinish callback with result\"}}}},\"settings\":{\"compilationTarget\":{\"/Users/peterpolman/Sites/thx_client/contracts/poll/BasePoll.sol\":\"BasePoll\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/peterpolman/Sites/thx_client/contracts/IRewardPool.sol\":{\"keccak256\":\"0x83cc8afe9318cc342ccd84a1cc46bab5baab87b1cb87406375fd5715ad5c66d1\",\"urls\":[\"bzzr://8b7c5cfcaeceeb91407b1bbe376426b5bdf9339e56a13df6d82fc88bb8b1cd21\"]},\"/Users/peterpolman/Sites/thx_client/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x2372e813634f6aebdb7c794422ed2964edd53e1226410a73d39c1cc185cfb89e\",\"urls\":[\"bzzr://bf95de4f29e56d59f10a93f80362b797f9e442d711c7b32278bf414486030f5b\"]},\"/Users/peterpolman/Sites/thx_client/contracts/poll/BasePoll.sol\":{\"keccak256\":\"0xbadaddce44f6881feda22f096c53b55ac053cad7c9561a433348ea457ab26e4b\",\"urls\":[\"bzzr://473f81aeb30abf39e69c63be50c0fd8304a432f2bdc16b30021d48f1167a8ac2\"]},\"/Users/peterpolman/Sites/thx_client/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0xbe193134e851f172cfe1b101b7ccb4fa1271baecadfe58154ba14b50933dc3e5\",\"urls\":[\"bzzr://71ce21d63baaa78621c856300b4489d8b4d6e27ee6e8f24b2c93313ac6c658a9\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"voter\",\"type\":\"address\"}],\"name\":\"revokeVote\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"pool\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"endTime\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"tryToFinalize\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"MAX_TOKENS_WEIGHT_DENOM\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"noCounter\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"startTime\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isNowApproved\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"address\"}],\"name\":\"votesByAddress\",\"outputs\":[{\"name\":\"time\",\"type\":\"uint256\"},{\"name\":\"weight\",\"type\":\"uint256\"},{\"name\":\"agree\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalVoted\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"finalized\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"voter\",\"type\":\"address\"},{\"name\":\"agree\",\"type\":\"bool\"}],\"name\":\"vote\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"yesCounter\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"token\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"_tokenAddress\",\"type\":\"address\"},{\"name\":\"_poolAddress\",\"type\":\"address\"},{\"name\":\"_startTime\",\"type\":\"uint256\"},{\"name\":\"_endTime\",\"type\":\"uint256\"},{\"name\":\"_checkTransfersAfterEnd\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}],\"devdoc\":{\"methods\":{\"constructor\":{\"details\":\"BasePoll constructor\",\"params\":{\"_checkTransfersAfterEnd\":\"Checks transfer after end\",\"_endTime\":\"Poll end time\",\"_startTime\":\"Poll start time\",\"_tokenAddress\":\"ERC20 compatible token contract address\"}},\"revokeVote(address)\":{\"details\":\"Revoke user`s vote\",\"params\":{\"voter\":\"The address of the user voting\"}},\"vote(address,bool)\":{\"details\":\"Process user`s vote\",\"params\":{\"agree\":\"True if user endorses the proposal else False\",\"voter\":\"The address of the user voting\"}}}},\"userdoc\":{\"methods\":{\"tryToFinalize()\":{\"notice\":\"Finalize poll and call onPollFinish callback with result\"}}}},\"settings\":{\"compilationTarget\":{\"/Users/peterpolman/Sites/thx_client/contracts/poll/BasePoll.sol\":\"BasePoll\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/peterpolman/Sites/thx_client/contracts/IRewardPool.sol\":{\"keccak256\":\"0x83cc8afe9318cc342ccd84a1cc46bab5baab87b1cb87406375fd5715ad5c66d1\",\"urls\":[\"bzzr://8b7c5cfcaeceeb91407b1bbe376426b5bdf9339e56a13df6d82fc88bb8b1cd21\"]},\"/Users/peterpolman/Sites/thx_client/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x2372e813634f6aebdb7c794422ed2964edd53e1226410a73d39c1cc185cfb89e\",\"urls\":[\"bzzr://bf95de4f29e56d59f10a93f80362b797f9e442d711c7b32278bf414486030f5b\"]},\"/Users/peterpolman/Sites/thx_client/contracts/poll/BasePoll.sol\":{\"keccak256\":\"0x17c3655dacabf37fdb934e92d301bbbd4ec62e15b362c52a31bd2f07b429d052\",\"urls\":[\"bzzr://9ceaf3a3f6bbdfb8955e03c7155388614cac0fa7be6b4f868847120aef9b0e6e\"]},\"/Users/peterpolman/Sites/thx_client/contracts/token/ERC20/IERC20.sol\":{\"keccak256\":\"0xbe193134e851f172cfe1b101b7ccb4fa1271baecadfe58154ba14b50933dc3e5\",\"urls\":[\"bzzr://71ce21d63baaa78621c856300b4489d8b4d6e27ee6e8f24b2c93313ac6c658a9\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.5.0;\n\nimport '../math/SafeMath.sol';\nimport '../token/ERC20/IERC20.sol';\nimport '../IRewardPool.sol';\n\ncontract BasePoll {\n    using SafeMath for uint256;\n\n    struct Vote {\n        uint256 time;\n        uint256 weight;\n        bool agree;\n    }\n\n    uint256 public constant MAX_TOKENS_WEIGHT_DENOM = 1000;\n\n    IERC20 public token;\n    IRewardPool public pool;\n\n    uint256 public startTime;\n    uint256 public endTime;\n    bool checkTransfersAfterEnd;\n\n    uint256 public yesCounter = 0;\n    uint256 public noCounter = 0;\n    uint256 public totalVoted = 0;\n\n    bool public finalized;\n    mapping(address => Vote) public votesByAddress;\n\n    modifier checkTime() {\n        require(now >= startTime && now <= endTime);\n        _;\n    }\n\n    modifier notFinalized() {\n        require(!finalized);\n        _;\n    }\n\n    /**\n     * @dev BasePoll constructor\n     * @param _tokenAddress ERC20 compatible token contract address\n     * @param _startTime Poll start time\n     * @param _endTime Poll end time\n     * @param _checkTransfersAfterEnd Checks transfer after end\n     */\n    constructor(\n        address _tokenAddress,\n        address _poolAddress,\n        uint256 _startTime,\n        uint256 _endTime,\n        bool _checkTransfersAfterEnd\n    ) public {\n        require(_tokenAddress != address(0));\n        require(_startTime >= now && _endTime > _startTime);\n\n        token = IERC20(_tokenAddress);\n        pool = IRewardPool(_poolAddress);\n\n        startTime = _startTime;\n        endTime = _endTime;\n        finalized = false;\n        checkTransfersAfterEnd = _checkTransfersAfterEnd;\n    }\n\n    /**\n     * @dev Process user`s vote\n     * @param voter The address of the user voting\n     * @param agree True if user endorses the proposal else False\n     */\n    function vote(address voter, bool agree) external checkTime {\n        require(voter != address(0));\n        require(votesByAddress[voter].time == 0);\n\n        uint256 voiceWeight = token.balanceOf(voter);\n        uint256 maxVoiceWeight = token.totalSupply().div(MAX_TOKENS_WEIGHT_DENOM);\n        voiceWeight = voiceWeight <= maxVoiceWeight ? voiceWeight : maxVoiceWeight;\n\n        if(agree) {\n            yesCounter = yesCounter.add(voiceWeight);\n        } else {\n            noCounter = noCounter.add(voiceWeight);\n        }\n\n        votesByAddress[voter].time = now;\n        votesByAddress[voter].weight = voiceWeight;\n        votesByAddress[voter].agree = agree;\n\n        totalVoted = totalVoted.add(1);\n    }\n\n    /**\n     * @dev Revoke user`s vote\n     * @param voter The address of the user voting\n     */\n    function revokeVote(address voter) external checkTime {\n        require(votesByAddress[voter].time > 0);\n\n        uint256 voiceWeight = votesByAddress[voter].weight;\n        bool agree = votesByAddress[voter].agree;\n\n        votesByAddress[voter].time = 0;\n        votesByAddress[voter].weight = 0;\n        votesByAddress[voter].agree = false;\n\n        totalVoted = totalVoted.sub(1);\n        if(agree) {\n            yesCounter = yesCounter.sub(voiceWeight);\n        } else {\n            noCounter = noCounter.sub(voiceWeight);\n        }\n    }\n\n    /**\n     * @dev Function is called after token transfer from user`s wallet to check and correct user`s vote\n     *\n     */\n    /* function onTokenTransfer(address tokenHolder, uint256 amount) public {\n        require(msg.sender == fundAddress);\n        if(votesByAddress[tokenHolder].time == 0) {\n            return;\n        }\n        if(!checkTransfersAfterEnd) {\n             if(finalized || (now < startTime || now > endTime)) {\n                 return;\n             }\n        }\n\n        if(token.balanceOf(tokenHolder) >= votesByAddress[tokenHolder].weight) {\n            return;\n        }\n        uint256 voiceWeight = amount;\n        if(amount > votesByAddress[tokenHolder].weight) {\n            voiceWeight = votesByAddress[tokenHolder].weight;\n        }\n\n        if(votesByAddress[tokenHolder].agree) {\n            yesCounter = yesCounter.sub(voiceWeight);\n        } else {\n            noCounter = noCounter.sub(voiceWeight);\n        }\n        votesByAddress[tokenHolder].weight = votesByAddress[tokenHolder].weight.sub(voiceWeight);\n    } */\n\n    /**\n     * Finalize poll and call onPollFinish callback with result\n     */\n    function tryToFinalize() public notFinalized returns(bool) {\n        if(now < endTime) {\n            return false;\n        }\n        finalized = true;\n        onPollFinish(isSubjectApproved());\n        return true;\n    }\n\n    function isNowApproved() public view returns(bool) {\n        return isSubjectApproved();\n    }\n\n    function isSubjectApproved() internal view returns(bool) {\n        return yesCounter >= noCounter;\n    }\n\n    /**\n     * @dev callback called after poll finalization\n     */\n    function onPollFinish(bool agree) internal;\n}\n",
+  "source": "pragma solidity ^0.5.0;\n\nimport '../math/SafeMath.sol';\nimport '../token/ERC20/IERC20.sol';\nimport '../IRewardPool.sol';\n\ncontract BasePoll {\n    using SafeMath for uint256;\n\n    struct Vote {\n        uint256 time;\n        uint256 weight;\n        bool agree;\n    }\n\n    uint256 public constant MAX_TOKENS_WEIGHT_DENOM = 1000;\n\n    IERC20 public token;\n    IRewardPool public pool;\n\n    uint256 public startTime;\n    uint256 public endTime;\n    bool checkTransfersAfterEnd;\n\n    uint256 public yesCounter = 0;\n    uint256 public noCounter = 0;\n    uint256 public totalVoted = 0;\n\n    bool public finalized;\n    mapping(address => Vote) public votesByAddress;\n\n    modifier checkTime() {\n        require(now >= startTime && now <= endTime);\n        _;\n    }\n\n    modifier notFinalized() {\n        require(!finalized);\n        _;\n    }\n\n    /**\n     * @dev BasePoll constructor\n     * @param _tokenAddress ERC20 compatible token contract address\n     * @param _startTime Poll start time\n     * @param _endTime Poll end time\n     * @param _checkTransfersAfterEnd Checks transfer after end\n     */\n    constructor(\n        address _tokenAddress,\n        address _poolAddress,\n        uint256 _startTime,\n        uint256 _endTime,\n        bool _checkTransfersAfterEnd\n    ) public {\n        require(_tokenAddress != address(0));\n        require(_startTime >= now && _endTime > _startTime);\n\n        token = IERC20(_tokenAddress);\n        pool = IRewardPool(_poolAddress);\n\n        startTime = _startTime;\n        endTime = _endTime;\n        finalized = false;\n        checkTransfersAfterEnd = _checkTransfersAfterEnd;\n    }\n\n    /**\n     * @dev Process user`s vote\n     * @param voter The address of the user voting\n     * @param agree True if user endorses the proposal else False\n     */\n    function vote(address voter, bool agree) external checkTime {\n        require(voter != address(0));\n        require(votesByAddress[voter].time == 0);\n\n        uint256 voiceWeight = token.balanceOf(voter);\n        uint256 maxVoiceWeight = token.totalSupply().div(MAX_TOKENS_WEIGHT_DENOM);\n        voiceWeight = voiceWeight <= maxVoiceWeight ? voiceWeight : maxVoiceWeight;\n\n        if(agree) {\n            yesCounter = yesCounter.add(voiceWeight);\n        } else {\n            noCounter = noCounter.add(voiceWeight);\n        }\n\n        votesByAddress[voter].time = now;\n        votesByAddress[voter].weight = voiceWeight;\n        votesByAddress[voter].agree = agree;\n\n        totalVoted = totalVoted.add(1);\n    }\n\n    /**\n     * @dev Revoke user`s vote\n     * @param voter The address of the user voting\n     */\n    function revokeVote(address voter) external checkTime {\n        require(votesByAddress[voter].time > 0);\n\n        uint256 voiceWeight = votesByAddress[voter].weight;\n        bool agree = votesByAddress[voter].agree;\n\n        votesByAddress[voter].time = 0;\n        votesByAddress[voter].weight = 0;\n        votesByAddress[voter].agree = false;\n\n        totalVoted = totalVoted.sub(1);\n        if(agree) {\n            yesCounter = yesCounter.sub(voiceWeight);\n        } else {\n            noCounter = noCounter.sub(voiceWeight);\n        }\n    }\n\n    /**\n     * @dev Function is called after token transfer from user`s wallet to check and correct user`s vote\n     *\n     */\n    /* function onTokenTransfer(address tokenHolder, uint256 amount) public {\n        require(msg.sender == fundAddress);\n        if(votesByAddress[tokenHolder].time == 0) {\n            return;\n        }\n        if(!checkTransfersAfterEnd) {\n             if(finalized || (now < startTime || now > endTime)) {\n                 return;\n             }\n        }\n\n        if(token.balanceOf(tokenHolder) >= votesByAddress[tokenHolder].weight) {\n            return;\n        }\n        uint256 voiceWeight = amount;\n        if(amount > votesByAddress[tokenHolder].weight) {\n            voiceWeight = votesByAddress[tokenHolder].weight;\n        }\n\n        if(votesByAddress[tokenHolder].agree) {\n            yesCounter = yesCounter.sub(voiceWeight);\n        } else {\n            noCounter = noCounter.sub(voiceWeight);\n        }\n        votesByAddress[tokenHolder].weight = votesByAddress[tokenHolder].weight.sub(voiceWeight);\n    } */\n\n    /**\n     * Finalize poll and call onPollFinish callback with result\n     */\n    function tryToFinalize() public notFinalized returns(bool) {\n        if(now < endTime) {\n            return false;\n        }\n        finalized = true;\n        onPollFinish(isSubjectApproved());\n        return true;\n    }\n\n    function isNowApproved() public view returns(bool) {\n        return isSubjectApproved();\n    }\n\n    function isSubjectApproved() internal view returns(bool) {\n        return yesCounter > noCounter;\n    }\n\n    /**\n     * @dev callback called after poll finalization\n     */\n    function onPollFinish(bool agree) internal;\n}\n",
   "sourcePath": "/Users/peterpolman/Sites/thx_client/contracts/poll/BasePoll.sol",
   "ast": {
     "absolutePath": "/Users/peterpolman/Sites/thx_client/contracts/poll/BasePoll.sol",
@@ -287,7 +287,7 @@
         "id": 1490,
         "nodeType": "ImportDirective",
         "scope": 1839,
-        "sourceUnit": 3124,
+        "sourceUnit": 3130,
         "src": "56:35:13",
         "symbolAliases": [],
         "unitAlias": ""
@@ -485,7 +485,7 @@
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_IERC20_$3123",
+              "typeIdentifier": "t_contract$_IERC20_$3129",
               "typeString": "contract IERC20"
             },
             "typeName": {
@@ -493,10 +493,10 @@
               "id": 1505,
               "name": "IERC20",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3123,
+              "referencedDeclaration": 3129,
               "src": "331:6:13",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC20_$3123",
+                "typeIdentifier": "t_contract$_IERC20_$3129",
                 "typeString": "contract IERC20"
               }
             },
@@ -849,7 +849,7 @@
                             "name": "now",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3140,
+                            "referencedDeclaration": 3146,
                             "src": "702:3:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -896,7 +896,7 @@
                             "name": "now",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3140,
+                            "referencedDeclaration": 3146,
                             "src": "722:3:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -942,10 +942,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "694:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1041,10 +1041,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "795:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1199,10 +1199,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1285:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1274,7 +1274,7 @@
                             "name": "now",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3140,
+                            "referencedDeclaration": 3146,
                             "src": "1353:3:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -1352,10 +1352,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1331:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1397,7 +1397,7 @@
                       "referencedDeclaration": 1506,
                       "src": "1393:5:13",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_IERC20_$3123",
+                        "typeIdentifier": "t_contract$_IERC20_$3129",
                         "typeString": "contract IERC20"
                       }
                     },
@@ -1431,10 +1431,10 @@
                         "name": "IERC20",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3123,
+                        "referencedDeclaration": 3129,
                         "src": "1401:6:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_IERC20_$3123_$",
+                          "typeIdentifier": "t_type$_t_contract$_IERC20_$3129_$",
                           "typeString": "type(contract IERC20)"
                         }
                       },
@@ -1448,13 +1448,13 @@
                       "nodeType": "FunctionCall",
                       "src": "1401:21:13",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_IERC20_$3123",
+                        "typeIdentifier": "t_contract$_IERC20_$3129",
                         "typeString": "contract IERC20"
                       }
                     },
                     "src": "1393:29:13",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IERC20_$3123",
+                      "typeIdentifier": "t_contract$_IERC20_$3129",
                       "typeString": "contract IERC20"
                     }
                   },
@@ -2003,10 +2003,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1858:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2140,10 +2140,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1896:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2234,7 +2234,7 @@
                         "referencedDeclaration": 1506,
                         "src": "1969:5:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20_$3123",
+                          "typeIdentifier": "t_contract$_IERC20_$3129",
                           "typeString": "contract IERC20"
                         }
                       },
@@ -2245,7 +2245,7 @@
                       "lValueRequested": false,
                       "memberName": "balanceOf",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3068,
+                      "referencedDeclaration": 3074,
                       "src": "1969:15:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
@@ -2340,7 +2340,7 @@
                             "referencedDeclaration": 1506,
                             "src": "2026:5:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_IERC20_$3123",
+                              "typeIdentifier": "t_contract$_IERC20_$3129",
                               "typeString": "contract IERC20"
                             }
                           },
@@ -2351,7 +2351,7 @@
                           "lValueRequested": false,
                           "memberName": "totalSupply",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 3061,
+                          "referencedDeclaration": 3067,
                           "src": "2026:17:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_uint256_$",
@@ -2821,7 +2821,7 @@
                       "name": "now",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3140,
+                      "referencedDeclaration": 3146,
                       "src": "2352:3:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -3335,10 +3335,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "2668:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -4259,7 +4259,7 @@
                       "name": "now",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3140,
+                      "referencedDeclaration": 3146,
                       "src": "4361:3:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -4643,7 +4643,7 @@
             "body": {
               "id": 1831,
               "nodeType": "Block",
-              "src": "4672:47:13",
+              "src": "4672:46:13",
               "statements": [
                 {
                   "expression": {
@@ -4671,7 +4671,7 @@
                       }
                     },
                     "nodeType": "BinaryOperation",
-                    "operator": ">=",
+                    "operator": ">",
                     "rightExpression": {
                       "argumentTypes": null,
                       "id": 1828,
@@ -4679,13 +4679,13 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 1520,
-                      "src": "4703:9:13",
+                      "src": "4702:9:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "4689:23:13",
+                    "src": "4689:22:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -4694,7 +4694,7 @@
                   "functionReturnParameters": 1826,
                   "id": 1830,
                   "nodeType": "Return",
-                  "src": "4682:30:13"
+                  "src": "4682:29:13"
                 }
               ]
             },
@@ -4745,7 +4745,7 @@
               "src": "4665:6:13"
             },
             "scope": 1838,
-            "src": "4615:104:13",
+            "src": "4615:103:13",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "internal"
@@ -4769,7 +4769,7 @@
                   "name": "agree",
                   "nodeType": "VariableDeclaration",
                   "scope": 1837,
-                  "src": "4815:10:13",
+                  "src": "4814:10:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -4780,7 +4780,7 @@
                     "id": 1833,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4815:4:13",
+                    "src": "4814:4:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -4790,26 +4790,26 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "4814:12:13"
+              "src": "4813:12:13"
             },
             "returnParameters": {
               "id": 1836,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "4835:0:13"
+              "src": "4834:0:13"
             },
             "scope": 1838,
-            "src": "4793:43:13",
+            "src": "4792:43:13",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
         "scope": 1839,
-        "src": "122:4716:13"
+        "src": "122:4715:13"
       }
     ],
-    "src": "0:4839:13"
+    "src": "0:4838:13"
   },
   "legacyAST": {
     "absolutePath": "/Users/peterpolman/Sites/thx_client/contracts/poll/BasePoll.sol",
@@ -4849,7 +4849,7 @@
         "id": 1490,
         "nodeType": "ImportDirective",
         "scope": 1839,
-        "sourceUnit": 3124,
+        "sourceUnit": 3130,
         "src": "56:35:13",
         "symbolAliases": [],
         "unitAlias": ""
@@ -5047,7 +5047,7 @@
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
-              "typeIdentifier": "t_contract$_IERC20_$3123",
+              "typeIdentifier": "t_contract$_IERC20_$3129",
               "typeString": "contract IERC20"
             },
             "typeName": {
@@ -5055,10 +5055,10 @@
               "id": 1505,
               "name": "IERC20",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 3123,
+              "referencedDeclaration": 3129,
               "src": "331:6:13",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC20_$3123",
+                "typeIdentifier": "t_contract$_IERC20_$3129",
                 "typeString": "contract IERC20"
               }
             },
@@ -5411,7 +5411,7 @@
                             "name": "now",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3140,
+                            "referencedDeclaration": 3146,
                             "src": "702:3:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -5458,7 +5458,7 @@
                             "name": "now",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3140,
+                            "referencedDeclaration": 3146,
                             "src": "722:3:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -5504,10 +5504,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "694:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -5603,10 +5603,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "795:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -5761,10 +5761,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1285:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -5836,7 +5836,7 @@
                             "name": "now",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 3140,
+                            "referencedDeclaration": 3146,
                             "src": "1353:3:13",
                             "typeDescriptions": {
                               "typeIdentifier": "t_uint256",
@@ -5914,10 +5914,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1331:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -5959,7 +5959,7 @@
                       "referencedDeclaration": 1506,
                       "src": "1393:5:13",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_IERC20_$3123",
+                        "typeIdentifier": "t_contract$_IERC20_$3129",
                         "typeString": "contract IERC20"
                       }
                     },
@@ -5993,10 +5993,10 @@
                         "name": "IERC20",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3123,
+                        "referencedDeclaration": 3129,
                         "src": "1401:6:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_type$_t_contract$_IERC20_$3123_$",
+                          "typeIdentifier": "t_type$_t_contract$_IERC20_$3129_$",
                           "typeString": "type(contract IERC20)"
                         }
                       },
@@ -6010,13 +6010,13 @@
                       "nodeType": "FunctionCall",
                       "src": "1401:21:13",
                       "typeDescriptions": {
-                        "typeIdentifier": "t_contract$_IERC20_$3123",
+                        "typeIdentifier": "t_contract$_IERC20_$3129",
                         "typeString": "contract IERC20"
                       }
                     },
                     "src": "1393:29:13",
                     "typeDescriptions": {
-                      "typeIdentifier": "t_contract$_IERC20_$3123",
+                      "typeIdentifier": "t_contract$_IERC20_$3129",
                       "typeString": "contract IERC20"
                     }
                   },
@@ -6565,10 +6565,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1858:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -6702,10 +6702,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1896:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -6796,7 +6796,7 @@
                         "referencedDeclaration": 1506,
                         "src": "1969:5:13",
                         "typeDescriptions": {
-                          "typeIdentifier": "t_contract$_IERC20_$3123",
+                          "typeIdentifier": "t_contract$_IERC20_$3129",
                           "typeString": "contract IERC20"
                         }
                       },
@@ -6807,7 +6807,7 @@
                       "lValueRequested": false,
                       "memberName": "balanceOf",
                       "nodeType": "MemberAccess",
-                      "referencedDeclaration": 3068,
+                      "referencedDeclaration": 3074,
                       "src": "1969:15:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_external_view$_t_address_$returns$_t_uint256_$",
@@ -6902,7 +6902,7 @@
                             "referencedDeclaration": 1506,
                             "src": "2026:5:13",
                             "typeDescriptions": {
-                              "typeIdentifier": "t_contract$_IERC20_$3123",
+                              "typeIdentifier": "t_contract$_IERC20_$3129",
                               "typeString": "contract IERC20"
                             }
                           },
@@ -6913,7 +6913,7 @@
                           "lValueRequested": false,
                           "memberName": "totalSupply",
                           "nodeType": "MemberAccess",
-                          "referencedDeclaration": 3061,
+                          "referencedDeclaration": 3067,
                           "src": "2026:17:13",
                           "typeDescriptions": {
                             "typeIdentifier": "t_function_external_view$__$returns$_t_uint256_$",
@@ -7383,7 +7383,7 @@
                       "name": "now",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3140,
+                      "referencedDeclaration": 3146,
                       "src": "2352:3:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -7897,10 +7897,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "2668:7:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -8821,7 +8821,7 @@
                       "name": "now",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 3140,
+                      "referencedDeclaration": 3146,
                       "src": "4361:3:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
@@ -9205,7 +9205,7 @@
             "body": {
               "id": 1831,
               "nodeType": "Block",
-              "src": "4672:47:13",
+              "src": "4672:46:13",
               "statements": [
                 {
                   "expression": {
@@ -9233,7 +9233,7 @@
                       }
                     },
                     "nodeType": "BinaryOperation",
-                    "operator": ">=",
+                    "operator": ">",
                     "rightExpression": {
                       "argumentTypes": null,
                       "id": 1828,
@@ -9241,13 +9241,13 @@
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
                       "referencedDeclaration": 1520,
-                      "src": "4703:9:13",
+                      "src": "4702:9:13",
                       "typeDescriptions": {
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       }
                     },
-                    "src": "4689:23:13",
+                    "src": "4689:22:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -9256,7 +9256,7 @@
                   "functionReturnParameters": 1826,
                   "id": 1830,
                   "nodeType": "Return",
-                  "src": "4682:30:13"
+                  "src": "4682:29:13"
                 }
               ]
             },
@@ -9307,7 +9307,7 @@
               "src": "4665:6:13"
             },
             "scope": 1838,
-            "src": "4615:104:13",
+            "src": "4615:103:13",
             "stateMutability": "view",
             "superFunction": null,
             "visibility": "internal"
@@ -9331,7 +9331,7 @@
                   "name": "agree",
                   "nodeType": "VariableDeclaration",
                   "scope": 1837,
-                  "src": "4815:10:13",
+                  "src": "4814:10:13",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -9342,7 +9342,7 @@
                     "id": 1833,
                     "name": "bool",
                     "nodeType": "ElementaryTypeName",
-                    "src": "4815:4:13",
+                    "src": "4814:4:13",
                     "typeDescriptions": {
                       "typeIdentifier": "t_bool",
                       "typeString": "bool"
@@ -9352,26 +9352,26 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "4814:12:13"
+              "src": "4813:12:13"
             },
             "returnParameters": {
               "id": 1836,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "4835:0:13"
+              "src": "4834:0:13"
             },
             "scope": 1838,
-            "src": "4793:43:13",
+            "src": "4792:43:13",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "internal"
           }
         ],
         "scope": 1839,
-        "src": "122:4716:13"
+        "src": "122:4715:13"
       }
     ],
-    "src": "0:4839:13"
+    "src": "0:4838:13"
   },
   "compiler": {
     "name": "solc",
@@ -9379,7 +9379,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-09-03T14:47:56.471Z",
+  "updatedAt": "2019-09-09T10:01:58.990Z",
   "devdoc": {
     "methods": {
       "constructor": {

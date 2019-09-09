@@ -1,24 +1,11 @@
 <template>
     <article>
-        <div class="table-responsive">
-            <table class="table table-striped" style="min-width: 438px;">
-                <thead>
-                    <th>#</th>
-                    <th>slug</th>
-                    <th>amount</th>
-                    <th>actions</th>
-                    <th>state</th>
-                </thead>
-
-                <Rule
-                    v-bind:key="rule.id"
-                    v-for="rule in rules"
-                    v-bind:rule="rule"
-                    v-bind:account="account"
-                    v-bind:contract="contract"></Rule>
-
-            </table>
-        </div>
+        <Rule
+            v-bind:key="rule.id"
+            v-for="rule in rules"
+            v-bind:rule="rule"
+            v-bind:account="account"
+            v-bind:contract="contract"></Rule>
 
         <div class="d-flex w-100 justify-content-end">
             <button v-if="account.isManager" class="btn btn-primary" @click="modal.createRule = true">Add new rule</button>
@@ -106,11 +93,14 @@ export default {
             Vue.set(this.rules[rule.id], 'poll', rule.poll);
         },
         async onRulePollFinished(data) {
+            const THX = window.THX;
+            const utils = THX.network.loom;
             const r = data.detail;
             const rule = await this.contract.methods.rules(r.id).call();
+            const amount = utils.fromWei(rule.amount, 'ether');
 
             Vue.set(this.rules[rule.id], 'poll', rule.poll);
-            Vue.set(this.rules[rule.id], 'amount', rule.amount);
+            Vue.set(this.rules[rule.id], 'amount', amount);
         },
         async onRuleStateChanged(data) {
             const r = data.detail;
@@ -161,14 +151,16 @@ export default {
             // const rulesRef = firebase.database().ref(`pools/${this.contract._address}/rules`);
             // Check the firebase for objects that are not in contracts and vice versa.
             // TODO index the id and not the slug
-
+            const THX = window.THX;
+            const utils = THX.network.loom.utils;
             const amountOfRules = parseInt( await this.contract.methods.countRules().call() );
 
             for (let i = 0; i < amountOfRules; i++) {
                 const rule = await this.contract.methods.rules(i).call();
+                const amount = utils.fromWei(rule.amount, 'ether');
 
                 Vue.set(this.rules, rule.id, {
-                    amount: rule.amount,
+                    amount: amount,
                     created: rule.created,
                     creator: rule.creator,
                     id: rule.id,
