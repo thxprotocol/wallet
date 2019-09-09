@@ -2,7 +2,7 @@
 <div id="app" v-bind:class="`section--${$router.currentRoute.name}`">
     <Header v-if="$router.currentRoute.meta.header" ref="header" />
     <router-view />
-    <Footer v-if="currentUser" ref="footer" />
+    <Footer v-if="$router.currentRoute.meta.footer" ref="footer" />
 </div>
 </template>
 

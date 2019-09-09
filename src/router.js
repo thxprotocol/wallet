@@ -10,6 +10,7 @@ import Register from './views/Register.vue';
 import Camera from './views/Camera.vue';
 import Pools from './views/Pools.vue';
 import Pool from './views/Pool.vue';
+import Widget from './Widget.vue';
 
 Vue.use(VueRouter);
 
@@ -21,6 +22,7 @@ const router = new VueRouter({
         visible: true,
         meta: {
             header: true,
+            footer: true,
             requiresAuth: true
         }
     }, {
@@ -31,6 +33,7 @@ const router = new VueRouter({
         props: true,
         meta: {
             header: true,
+            footer: true,
             requiresAuth: true
         }
     }, {
@@ -40,6 +43,7 @@ const router = new VueRouter({
         visible: true,
         meta: {
             header: true,
+            footer: true,
             requiresAuth: true
         }
     }, {
@@ -49,6 +53,7 @@ const router = new VueRouter({
         visible: true,
         meta: {
             header: false,
+            footer: false,
             requiresAuth: true
         }
     }, {
@@ -58,6 +63,7 @@ const router = new VueRouter({
         visible: true,
         meta: {
             header: false,
+            footer: true,
             requiresAuth: true
         }
     }, {
@@ -67,6 +73,7 @@ const router = new VueRouter({
         visible: false,
         meta: {
             header: true,
+            footer: true,
             requiresAuth: true
         }
     }, {
@@ -81,6 +88,16 @@ const router = new VueRouter({
         name: 'register',
         path: '/register',
         component: Register
+    },
+    {
+        name: 'widget',
+        path: '/widget/:pool/:rule',
+        component: Widget,
+        meta: {
+            header: false,
+            footer: false,
+            requiresAuth: true,
+        }
     }]
 })
 

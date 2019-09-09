@@ -38,18 +38,19 @@
 
         .popup {
             font-family: 'Exo 2';
-            width: 450px;
+            width: calc(100% - 40px);
+            max-width: 430px;
+            height: 207px;
             position: fixed;
+            border: 0;
             right: 20px;
-            bottom: -100%;
-            background-color: #FDE542;
+            bottom: 120px;
             z-index: 999999;
-            padding: 2em;
             border-radius: 3px;
             box-shadow: 0 1px 30px 1px rgba(0,0,0,.2);
             overflow: hidden;
             user-select: none;
-            transform: translateY(0);
+            transform: translateX(120%);
             transition: all .35s cubic-bezier(.215,.61,.355,1);
         }
 
@@ -70,8 +71,9 @@
             transition: .2s ease all;
         }
 
-        .badge.show {
-            opacity: 1;
+        .badge-danger {
+            background-color: red;
+            color: white;
         }
 
         @keyframes bubble {
@@ -88,86 +90,23 @@
             }
         }
 
-        .badge-danger {
-            background-color: red;
-            color: white;
-        }
-
-        .popup p {
-            margin: 0;
-        }
-
-        #canvas {
-            float: right;
-        }
-
-        .row {
-            display: flex;
-        }
-
-        .col-7 {
-            flex: 0 60%;
-        }
-
-        .col-5 {
-            flex: 0 40%;
-        }
-
-        .popup h2 {
-            margin-top: 0;
-        }
-
-        .popup a {
-            color: black;
+        .badge.show {
+            opacity: 1;
         }
 
         .popup.show {
-            bottom: 120px;
+            transform: translateX(0);
         }
     </style>
 </head>
 <body>
     <h1>Software Integration Examples</h1>
-    <button onclick="getReward()">Mock Get Reward</button>
 
-    <button onclick="showReward()" class="toggle">
-        <div class="badge badge-danger" id="popup-reward-badge">1</div>
-    </button>
-    <div class="popup" id="popup-reward">
-        <div class="row">
-            <div class="col-7">
-                <h1 style="font-weight: normal; margin-bottom: 2rem !important;">
-                    <strong style="font-size: 1.75rem; display: block; margin: 0;">Congratulations!</strong>
-                    <span style="font-size: 1.25rem;">You have earned <strong>250 THX</strong>.</span>
-                </h1>
-                <p>Use the <a href="https://www.thxproject.com" target="_blank">THX Wallet</a> to claim your reward by scanning this QR code.</p>
-            </div>
-            <div class="col-5">
-                <canvas id="canvas"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <p><strong>Example data:</strong></p>
-    <pre>
-{
-    rule: 0,
-    pool: "0x7a88146E97E8A2F4b78E4BBDbeEbF9CF33CB4FCB"
-}
-    </pre>
+    <iframe class="popup" id="popup-reward" src="http://localhost:8080/#/widget/0x7a88146E97E8A2F4b78E4BBDbeEbF9CF33CB4FCB/0"></iframe>
+    <button onclick="showReward()" class="toggle"><div class="badge badge-danger" id="popup-reward-badge">1</div></button>
 
     <script>
-      QRCode.toCanvas(
-          document.getElementById('canvas'),
-          JSON.stringify({
-              rule: 0,
-              pool: "0x7a88146E97E8A2F4b78E4BBDbeEbF9CF33CB4FCB"
-          }), function (error) {
-            if (error) {
-                console.error(error)
-            }
-            console.log('success!');
-        });
+
     </script>
 </body>
 </html>
