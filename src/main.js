@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import VueQrcodeReader from 'vue-qrcode-reader';
 import VueMoment from 'vue-moment';
 
 import { BVToastPlugin } from 'bootstrap-vue';
@@ -38,7 +37,6 @@ THX.network.init()
 let app;
 
 Vue.use(VueMoment);
-Vue.use(VueQrcodeReader);
 Vue.use(BVToastPlugin);
 Vue.config.productionTip = false
 

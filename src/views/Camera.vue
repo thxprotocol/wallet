@@ -6,10 +6,10 @@
 
         <div class="ui-file">
             <h3>Upload QR code image</h3>
-            <qrcode-capture @decode="onDecode" />
+            <QrcodeCapture @decode="onDecode"></QrcodeCapture>
         </div>
 
-        <qrcode-stream @init="onInit" @decode="onDecode" :track="repaint"></qrcode-stream>
+        <QrcodeStream @init="onInit" @decode="onDecode" :track="repaint"></QrcodeStream>
 
         <div v-if="!loading && hasStream" class="ui-camera">
             <span></span>
@@ -26,11 +26,14 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import RewardPool from '../contracts/RewardPool.json';
 import { BSpinner } from 'bootstrap-vue';
+import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 
 export default {
     name: 'Camera',
     components: {
-        BSpinner
+        BSpinner,
+        QrcodeStream,
+        QrcodeCapture
     },
     data: function() {
         return {
@@ -57,17 +60,17 @@ export default {
                 this.hasStream = true;
             } catch (error) {
                 if (error.name === 'NotAllowedError') {
-                    this.toast('Camera error:', "user denied camera access permisson");
+                    this.toast('Camera error:', "user denied camera access permisson", 'danger');
                 } else if (error.name === 'NotFoundError') {
-                    this.toast('Camera error:', "no suitable camera device installed");
+                    this.toast('Camera error:', "no suitable camera device installed", 'danger');
                 } else if (error.name === 'NotSupportedError') {
-                    this.toast('Camera error:', "page is not served over HTTPS (or localhost)");
+                    this.toast('Camera error:', "page is not served over HTTPS (or localhost)", 'danger');
                 } else if (error.name === 'NotReadableError') {
-                    this.toast('Camera error:', "maybe camera is already in use");
+                    this.toast('Camera error:', "maybe camera is already in use", 'danger');
                 } else if (error.name === 'OverconstrainedError') {
-                    this.toast('Camera error:', "did you requested the front camera although there is none?");
+                    this.toast('Camera error:', "did you requested the front camera although there is none?", 'danger');
                 } else if (error.name === 'StreamApiNotSupportedError') {
-                    this.toast('Camera error:', "browser seems to be lacking features");
+                    this.toast('Camera error:', "browser seems to be lacking features", 'danger');
                 }
                 this.hasStream = false;
             } finally {
@@ -75,9 +78,11 @@ export default {
             }
         },
         async onDecode (decodedString) {
-            const THX = window.THX;
+            //eslint-disable-next-line
+            console.log(decodedString)
 
             if (decodedString.length > 0) {
+                const THX = window.THX;
                 const poolsRef = firebase.database().ref(`pools`);
                 const data = JSON.parse(decodedString);
                 const pool = await THX.network.contract(RewardPool, data.pool);

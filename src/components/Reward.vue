@@ -9,7 +9,7 @@
                     <span><strong>{{reward.user.firstName}}</strong> claimed <strong>{{ reward.amount}} THX</strong> as a reward for the rule <strong>{{ reward.slug }}</strong>.</span>
                 </div>
                 <div>
-                    <span class="badge badge-success float-right">{{reward.state}}</span>
+                    <span :class="`badge badge-${reward.state == 'Approved' ? 'success' : reward.state == 'Rejected' ? 'danger' : 'info'} float-right`">{{reward.state}}</span>
                 </div>
             </div>
             <div class="row mb-2 mt-4">
@@ -91,7 +91,7 @@ export default {
                 .send({ from: THX.network.account.address })
                 .then(async tx => {
                     this.loading = false;
-                    this.reward.state = 'Approved';
+                    this.reward.state = await this.reward.contract.methods.state().call();
                     // eslint-disable-next-line
                     console.log(tx);
                 })

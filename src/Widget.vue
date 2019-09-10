@@ -14,10 +14,6 @@
 </template>
 
 <script>
-// import firebase from 'firebase/app';
-// import 'firebase/auth';
-// import 'firebase/database';
-
 export default {
     name: 'Widget',
     components: {},
@@ -27,20 +23,24 @@ export default {
         }
     },
     mounted() {
-        const rule = this.$route.params.rule;
-        const pool = this.$route.params.pool;
+        const QRCode = window.QRCode;
 
-        if (rule && pool) {
-            const canvas = document.getElementById('canvas');
-            const json = JSON.stringify({
-                rule: rule,
-                pool: pool,
-            });
-
-            window.QRCode.toCanvas(canvas, json, (error) => {
-                //eslint-disable-next-line
-                if (error) console.error(error)
-            });
+        if (this.$route.params.rule && this.$route.params.pool) {
+            QRCode.toCanvas(
+                document.getElementById('canvas'),
+                JSON.stringify({
+                     rule: parseInt(this.$route.params.rule),
+                     pool: this.$route.params.pool
+                }),
+                (error) => {
+                    if (error) {
+                        //eslint-disable-next-line
+                        console.error(error)
+                    }
+                    //eslint-disable-next-line
+                    console.log('success')
+                }
+            );
         }
     },
     methods: {
