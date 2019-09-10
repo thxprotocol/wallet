@@ -14,9 +14,9 @@
 </template>
 
 <script>
-import firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/database';
+// import firebase from 'firebase/app';
+// import 'firebase/auth';
+// import 'firebase/database';
 
 export default {
     name: 'Widget',
@@ -37,7 +37,8 @@ export default {
                 pool: pool,
             });
 
-            QRCode.toCanvas(canvas, json, (error) => {
+            window.QRCode.toCanvas(canvas, json, (error) => {
+                //eslint-disable-next-line
                 if (error) console.error(error)
             });
         }
@@ -67,9 +68,9 @@ export default {
     }
 
     #canvas {
-        width: 135px !important;
-        height: 135px !important;
-        
+        width: 165px !important;
+        height: 165px !important;
+
         @media (max-width: 430px) {
             width: 120px !important;
             height: 120px !important;

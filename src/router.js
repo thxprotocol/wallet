@@ -53,7 +53,7 @@ const router = new VueRouter({
         visible: true,
         meta: {
             header: false,
-            footer: false,
+            footer: true,
             requiresAuth: true
         }
     }, {

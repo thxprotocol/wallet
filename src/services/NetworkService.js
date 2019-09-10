@@ -12,6 +12,7 @@ const gas = 350000;
 
 export default class NetworkService {
     constructor(loomPrivateKey, rinkebyPrivateKey) {
+        this.rinkeby = new Web3(`wss://rinkeby.infura.io/ws/v3/${Config.infura.key}`);
         this.loomPrivateKey = loomPrivateKey;
         this.rinkebyPrivateKey = rinkebyPrivateKey;
     }
@@ -20,8 +21,7 @@ export default class NetworkService {
         let networkConfig;
 
         if (this.rinkebyPrivateKey) {
-            this.rinkeby = new Web3(`wss://rinkeby.infura.io/ws/v3/${Config.infura.key}`);
-            this.rinkeby.account = this.rinkeby.eth.accounts.privateKeyToAccount(`0x${this.rinkebyPrivateKey}`);
+            this.rinkeby.account = this.rinkeby.eth.accounts.privateKeyToAccount(this.rinkebyPrivateKey);
         }
 
         if (process.env.NETWORK === 'ganache') {
@@ -36,15 +36,23 @@ export default class NetworkService {
             this.account = networkConfig;
         }
 
-        return new Promise(async (resolve) => {
-            this.instances = {
-                token: await this.contract(THXToken, null),
-                tokenRinkeby: this.rinkebyContract(THXTokenRinkeby, this.rinkeby.account.address),
-                gateway: this.rinkebyContract(RinkebyGateway, this.rinkeby.account.address),
-            };
-
-            resolve(this.instances);
+        return new Promise(async (resolve, reject) => {
+            if (this.loomPrivateKey && this.rinkebyPrivateKey) {
+                this.instances = {
+                    token: await this.contract(THXToken, null),
+                    tokenRinkeby: this.rinkebyContract(THXTokenRinkeby, this.rinkeby.account.address),
+                    gateway: this.rinkebyContract(RinkebyGateway, this.rinkeby.account.address),
+                };
+                resolve(this.instances);
+            }
+            else {
+                reject('Instances not loaded due to missing Loom and Rinkeby private keys.');
+            }
         });
+    }
+
+    get hasKeys() {
+        return this.loomPrivateKey && this.rinkebyPrivateKey
     }
 
     // Returns the default network Contract class
@@ -64,7 +72,6 @@ export default class NetworkService {
     // Returns a Rinkeby Contract class
     rinkebyContract(json, account) {
         const Contract = this.rinkeby.eth.Contract;
-
         return new Contract(json.abi, json.networks[4].address, { from: account })
     }
 

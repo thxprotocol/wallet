@@ -1,29 +1,31 @@
 <template>
-    <article class="region region--container">
-        <main class="region region--content">
+    <article class="region region-container">
+        <main class="region region-content">
             <h2>Pools</h2>
+
             <BCard
-                v-bind:key="p.address"
+                :key="p.address"
                 v-for="p in pools"
                 footer-tag="footer"
                 header-tag="header"
                 tag="article"
-                class="mb-2">
+                class="mb-2 card-pool">
 
-                <template slot="header" class="">
+                <span slot="header" class="font-size-xl text-light">{{p.balance}} THX</span>
+
+                <BCardText>
                     <span v-if="p.outOfSync" class="badge badge-danger float-right">Out of sync</span>
                     <span v-if="!p.outOfSync" class="badge badge-success float-right">Up to date</span>
                     <strong>{{p.name}}</strong><br>
                     <small>{{p.address}}</small>
-                </template>
+                </BCardText>
 
-                <BCardText>
-                    <p><strong>Pool size: {{p.balance}} THX</strong></p>
+                <template slot="footer" class="">
                     <div class="text-right">
                         <button class="btn btn-link card-link" @click="onLeavePool(p.address)">Leave pool</button>
                         <button class="btn btn-link card-link" @click="openPool(p.address)">Open pool</button>
                     </div>
-                </BCardText>
+                </template>
 
             </BCard>
 
@@ -74,7 +76,11 @@ export default {
         }
     },
     created() {
-        this.init();
+        const THX = window.THX;
+
+        if (THX.network.hasKeys) {
+            this.init();
+        }
     },
     methods: {
         init() {
@@ -129,3 +135,20 @@ export default {
     }
 }
 </script>
+
+<style>
+.card-pool .card-header {
+    background-color: #039be5;
+    height: 125px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@media (min-width: 768px) {
+    .card-pool .card-header {
+        height: 200px;
+    }
+}
+
+</style>

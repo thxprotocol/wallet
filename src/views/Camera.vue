@@ -1,5 +1,5 @@
 <template>
-    <article class="region region--container">
+    <article class="region region-container">
         <div v-if="loading" class="d-flex w-100 h-100 align-items-center justify-content-center">
             <BSpinner></BSpinner>
         </div>
@@ -42,23 +42,32 @@ export default {
         repaint () {
             return
         },
+        toast(title, body, variant = 'info') {
+            this.$bvToast.toast(body, {
+                title: title,
+                toaster: 'b-toaster-bottom-full',
+                autoHideDelay: 3000,
+                appendToast: true,
+                variant: variant,
+            })
+        },
         async onInit (promise) {
             try {
                 await promise
                 this.hasStream = true;
             } catch (error) {
                 if (error.name === 'NotAllowedError') {
-                    alert("user denied camera access permisson");
+                    this.toast('Camera error:', "user denied camera access permisson");
                 } else if (error.name === 'NotFoundError') {
-                    alert("no suitable camera device installed");
+                    this.toast('Camera error:', "no suitable camera device installed");
                 } else if (error.name === 'NotSupportedError') {
-                    alert("page is not served over HTTPS (or localhost)");
+                    this.toast('Camera error:', "page is not served over HTTPS (or localhost)");
                 } else if (error.name === 'NotReadableError') {
-                    alert("maybe camera is already in use");
+                    this.toast('Camera error:', "maybe camera is already in use");
                 } else if (error.name === 'OverconstrainedError') {
-                    alert("did you requested the front camera although there is none?");
+                    this.toast('Camera error:', "did you requested the front camera although there is none?");
                 } else if (error.name === 'StreamApiNotSupportedError') {
-                    alert("browser seems to be lacking features");
+                    this.toast('Camera error:', "browser seems to be lacking features");
                 }
                 this.hasStream = false;
             } finally {
@@ -75,12 +84,19 @@ export default {
 
                 poolsRef.child(data.pool).child(`rewards`).push().set(data);
 
-                alert(`Claiming your reward...`);
+                this.toast(
+                    'Reward status update',
+                    `Claiming your reward for rule #${data.rule} in pool ${data.pool}...`,
+                );
 
                 pool.methods.createReward(data.rule).send({ from: THX.network.account.address }).then((tx) => {
-                    // eslint-disable-next-line
+                    this.toast(
+                        'Reward status update',
+                        'Your claim is up for review!',
+                        'success'
+                    );
+                    //eslint-disable-next-line
                     console.log(tx);
-                    alert(`Your claim is up for review!`);
                 });
             }
         }
@@ -157,7 +173,6 @@ export default {
 
     .ui-file input[type="file"] {
         background: rgba(255,255,255,.75);
-        border: 2px dashed #EFEFEF;
         border-radius: 35px;
         padding: 1rem;
         font-size: 1rem;

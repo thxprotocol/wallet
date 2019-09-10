@@ -1,6 +1,6 @@
 <template>
-<article class="region region--container">
-    <main class="region region--content">
+<article class="region region-container">
+    <main class="region region-content">
         <h2>Wallet</h2>
 
         <div class="text-center" v-if="!orderedTokenTransfers.length">
@@ -43,12 +43,17 @@ export default {
     },
     data: function() {
         return {
-            events: new EventService(),
+            events: null,
             tokenTransfers: {},
         }
     },
     created() {
-        this.init();
+        const THX = window.THX;
+
+        if (THX.network.hasKeys) {
+            this.events = new EventService();
+            this.init();
+        }
     },
     methods: {
         async init() {

@@ -22,7 +22,10 @@
             <BCardText>
                 <p>{{meta.description}}</p>
                 <strong>Reward: {{ rule.amount }} THX</strong>
-                <div class="text-right">
+            </BCardText>
+
+            <template slot="footer">
+                <div class="justify-content-end d-flex">
                     <button
                         v-if="rule.poll !== '0x0000000000000000000000000000000000000000'"
                         class="btn btn-link"
@@ -32,7 +35,7 @@
                         class="btn btn-link"
                         @click="modal.startPoll = true">Propose reward size</button>
                 </div>
-            </BCardText>
+            </template>
         </template>
 
         <Modal v-if="modal.rulePoll" @close="modal.rulePoll = false">

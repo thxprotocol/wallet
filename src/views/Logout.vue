@@ -1,5 +1,5 @@
 <template>
-    <article class="region region--container">
+    <article class="region region-container">
         <p>Logging out...</p>
     </article>
 </template>

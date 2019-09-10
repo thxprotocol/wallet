@@ -58,6 +58,10 @@ export default {
 </script>
 
 <style lang="scss">
+.region-header .account-picture {
+    box-shadow: 0 0 0px 4px rgba(255,255,255,.3);
+}
+
 .account-picture {
     height: 100%;
     width: 100%;

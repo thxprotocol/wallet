@@ -1,9 +1,9 @@
 <template>
-<div id="app" v-bind:class="`section--${$router.currentRoute.name}`">
-    <Header v-if="$router.currentRoute.meta.header" ref="header" />
-    <router-view />
-    <Footer v-if="$router.currentRoute.meta.footer" ref="footer" />
-</div>
+    <div id="app" :class="`section-${$router.currentRoute.name}`">
+        <Header v-if="$router.currentRoute.meta.header" ref="header" />
+        <router-view />
+        <Footer v-if="$router.currentRoute.meta.footer" ref="footer" />
+    </div>
 </template>
 
 <script>
@@ -24,15 +24,20 @@ export default {
     },
     data: function() {
         return {
-            events: new EventService(),
+            events: null,
             currentUser: null,
         }
     },
     created() {
-        this.events.listen('event.Deposited', this.onPoolDeposit);
-        this.events.listen('event.Withdrawn', this.onPoolWithdrawel);
+        const THX = window.THX;
 
         this.currentUser = firebase.auth().currentUser;
+
+        if (this.currentUser && THX.network.hasKeys) {
+            this.events = new EventService();
+            this.events.listen('event.Deposited', this.onPoolDeposit);
+            this.events.listen('event.Withdrawn', this.onPoolWithdrawel);
+        }
     },
     methods: {
         toast(title, body, variant) {
@@ -49,7 +54,11 @@ export default {
             const time = this.$moment(timestamp).format("MMMM Do YYYY, HH:mm");
             const amount = parseInt(new BN(data.detail.amount).div(tokenMultiplier))
 
-            return this.toast('New pool deposit!', `${amount} THX deposited by ${data.detail.created} at ${time}.`, 'info');
+            return this.toast(
+                'New pool deposit!',
+                `${amount} THX deposited by ${data.detail.created} at ${time}.`,
+                'info'
+            );
         },
         onPoolWithdrawel(data) {
             const timestamp = parseInt(data.detail.created);

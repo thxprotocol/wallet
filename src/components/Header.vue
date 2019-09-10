@@ -1,5 +1,5 @@
 <template>
-<header class="region region--header">
+<header class="region region-header">
     <button v-on:click="goToAccount()" class="link-settings">
         <ProfilePicture size="sm" :uid="uid"></ProfilePicture>
     </button>
@@ -36,10 +36,18 @@ export default {
         }
     },
     created() {
-        this.updateBalance();
-        this.ea.listen('event.Transfer', this.updateBalance);
+        const THX = window.THX;
+
+        if (THX.network.hasKeys) {
+            this.init();
+        }
     },
     methods: {
+        init() {
+            this.updateBalance();
+            
+            this.ea.listen('event.Transfer', this.updateBalance);
+        },
         async updateBalance() {
             const THX = window.THX;
             const token = THX.network.instances.token;

@@ -1,75 +1,109 @@
 <template>
-<article class="region region--container">
-    <main class="region region--content">
+<article class="region region-container">
+    <main class="region region-content">
 
-        <h2>Account</h2>
-        <label class="upload-group">
-            <div v-if="!account.picture">
-                <label>
-                    <ProfilePicture size="lg" :uid="uid"></ProfilePicture>
-                    <input type="file" @change="onFileChange" class="invisible">
-                </label>
+        <h2>{{account.firstName}} {{account.lastName}}</h2>
+
+        <BAlert v-if="alert" show :variant="alert.variant ? alert.variant : 'info'">
+          {{ alert.text }}
+        </BAlert>
+
+        <div class="card mb-3">
+            <div class="card-body">
+                <span v-if="!account.picture" class="float-left mr-3">
+                    <label class="text-center">
+                        <ProfilePicture size="lg" :uid="uid"></ProfilePicture><br>
+                        <span class="btn btn-link">Upload image</span>
+                        <input type="file" @change="onFileChange" class="d-none">
+                    </label>
+                </span>
+                <span v-else class="float-left mr-3 text-center">
+                    <ProfilePicture size="lg" :uid="uid"></ProfilePicture><br>
+                    <button class="btn btn-link" @click="removeImage">Delete</button>
+                </span>
+
+                <h3>E-mail:</h3>
+                <p>{{account.email}}</p>
+
+                <h3>UID:</h3>
+                <p>{{account.uid}}</p>
+                <hr class="mt-5">
+                <button class="btn btn-link btn-block" @click="showModal('modal-connect')">Connect Accounts</button>
             </div>
-            <div v-else>
-                <ProfilePicture size="lg" :uid="uid"></ProfilePicture>
-                <button class="btn btn-link" @click="removeImage">Delete</button>
+        </div>
+
+        <div class="card mb-3" v-if="account.rinkeby.address">
+            <div class="card-header">
+                <strong>Rinkeby Network</strong><br>
+                <small>{{account.rinkeby.address}} <a class="text-primary" @click="copyClipboard(account.rinkeby.address)">({{clipboard === account.rinkeby.address ? 'Copied!' : 'Copy'}})</a></small>
             </div>
-        </label>
+            <div class="card-body">
+                <ul class="list-bullets">
+                    <li><button class="btn btn-link" @click="showModal('modal-gateway-deposit')">Deposit THX to Gateway</button></li>
+                    <li><button class="btn btn-link" @click="showModal('modal-gateway-withdraw')">Withdraw THX from Gateway</button></li>
+                    <li v-if="isRinkebyMinter"><button class="btn btn-link" @click="showModal('modal-add-minter')">Add minter role</button></li>
+                    <li v-if="isRinkebyMinter"><button class="btn btn-link" @click="showModal('modal-mint-rinkeby')">Mint tokens</button></li>
+                </ul>
+            </div>
+        </div>
 
-        <p>
-            <strong>E-mail:</strong><br> {{account.email}}
-        </p>
-        <p>
-            <strong>UID:</strong><br> {{account.uid}}
-        </p>
-        <p>
-            <strong>Rinkeby Address:</strong><br>
-            <span v-if="account.rinkeby.address">{{account.rinkeby.address}}</span>
-        </p>
-        <p>
-            <strong>Loom Address:</strong><br>
-            <span v-if="account.loom.address">{{account.loom.address}}</span>
-        </p>
+        <div class="card mb-3" v-if="account.loom.address">
+            <div class="card-header">
+                <strong>Loom Network</strong><br>
+                <small>{{account.loom.address}} <a class="text-primary" @click="copyClipboard(account.loom.address)">({{clipboard === account.loom.address ? 'Copied!' : 'Copy'}})</a></small>
+            </div>
+            <div class="card-body">
+                <ul class="list-bullets">
+                    <!-- <li><button class="btn btn-link" @click="showModal('modal-account-mapping')">Remove account mapping</button></li> -->
+                    <li v-if="isLoomMinter"><button class="btn btn-link" @click="showModal('modal-mint-loom')">Mint Loom tokens</button></li>
+                    <li><button class="btn btn-link" @click="showModal('modal-transfer')">Transfer tokens</button></li>
+                </ul>
+            </div>
+        </div>
 
-        <h3>Main Network actions</h3>
-        <ul class="list-bullets">
-            <li><button class="btn btn-link" @click="showModal('modal-connect')">Connect Accounts</button></li>
-            <li v-if="account.rinkeby.address"><button class="btn btn-link" @click="showModal('modal-gateway-deposit')">Deposit THX to Gateway</button></li>
-            <li v-if="account.rinkeby.address"><button class="btn btn-link" @click="showModal('modal-gateway-withdraw')">Withdraw THX from Gateway</button></li>
-            <li v-if="account.rinkeby.address && isRinkebyMinter"><button class="btn btn-link" @click="showModal('modal-add-minter')">Add minter role</button></li>
-            <li v-if="account.rinkeby.address && isRinkebyMinter"><button class="btn btn-link" @click="showModal('modal-mint-rinkeby')">Mint tokens</button></li>
-        </ul>
+        <div class="d-flex justify-content-end">
+            <button @click="reset()" class="btn btn-link mr-2">Reset</button>
+            <button @click="logout()" class="btn btn-primary">Logout</button>
+        </div>
 
-        <template v-if="account.loom.address">
-            <h3>Loom Network actions</h3>
-            <ul class="list-bullets">
-                <li v-if="isLoomMinter"><button class="btn btn-link" @click="showModal('modal-mint-loom')">Mint Loom tokens</button></li>
-                <li><button class="btn btn-link" @click="showModal('modal-transfer')">Transfer tokens</button></li>
-            </ul>
-        </template>
-
-        <h3>Auth actions</h3>
-        <ul class="list list-bullets">
-            <li>
-                <button @click="reset()" class="btn btn-link">Reset</button>
-            </li>
-            <li>
-                <button @click="logout()" class="btn btn-link">Logout user</button>
-            </li>
-        </ul>
+        <BModal title="Decouple account from wallet" centered ref="modal-account-mapping">
+            <hr>
+            <div class="text-center">
+                <small>Loom Network address </small><br>
+                <small class="badge badge-primary">{{account.loom.address}}</small><br>
+                <small>is mapped to User ID</small><br>
+                <small class="badge badge-primary">{{account.uid}}</small>
+            </div>
+            <hr>
+            <p>Use this feature to decouple the Loom address from your User account and use your Loom address for another THX user account.</p>
+            <template slot="modal-footer">
+                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="removeMapping(account.loom.address)">Decouple wallet</BButton>
+            </template>
+        </BModal>
 
         <BModal title="Connect accounts" centered ref="modal-connect">
             <p>Add private keys for the loom sidechain and the parent Rinkeby network. These keys will only be stored on your device and used to verify transactions.</p>
+            <div class="alert alert-warning"><strong>Make sure to store your private keys safely and not only on this device. We can not recover your keys!</strong></div>
             <div class="form-group">
                 <label>Loom private key:</label>
-                <input v-model="input.loomPrivateKey" type="text" class="form-control" placeholder="Your Loom private key">
+                <div class="input-group">
+                    <input v-model="input.loomPrivateKey" type="text" class="form-control" placeholder="Paste or create your Loom private key">
+                    <div class="input-group-append">
+                        <span @click="createLoomKey()" class="input-group-text btn btn-link">Create new key</span>
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label>Rinkeby private key:</label>
-                <input v-model="input.rinkebyPrivateKey" type="text" class="form-control" placeholder="Your Rinkeby private key">
+                <div class="input-group">
+                    <input v-model="input.rinkebyPrivateKey" type="text" class="form-control" placeholder="Paste or create your Rinkeby private key">
+                    <div class="input-group-append">
+                        <span @click="createRinkebyKey()" class="input-group-text btn btn-link">Create new key</span>
+                    </div>
+                </div>
             </div>
 
-            <template v-slot:modal-footer="{ ok, cancel, hide }">
+            <template slot="modal-footer">
                 <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onCreateAccountsFromPrivateKey()">Connect</BButton>
             </template>
         </BModal>
@@ -88,7 +122,7 @@
                 </div>
             </template>
 
-            <template v-slot:modal-footer="{ ok, cancel, hide }">
+            <template slot="modal-footer">
                 <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onAddMinter()">Connect Accounts</BButton>
             </template>
         </BModal>
@@ -105,7 +139,7 @@
                 </div>
             </template>
 
-            <template v-slot:modal-footer="{ ok, cancel, hide }">
+            <template slot="modal-footer">
                 <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onMintForAccount()">Mint {{ input.mintForAccount }} THX </BButton>
             </template>
         </BModal>
@@ -122,7 +156,7 @@
                 </div>
             </template>
 
-            <template v-slot:modal-footer="{ ok, cancel, hide }">
+            <template slot="modal-footer">
                 <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onMintForLoomAccount()">Mint {{ input.mintForLoomAccount }} THX </BButton>
             </template>
 
@@ -140,7 +174,7 @@
                 </div>
             </template>
 
-            <template v-slot:modal-footer="{ ok, cancel, hide }">
+            <template slot="modal-footer">
                 <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onDepositToGateway()">Deposit {{ input.depositToGateway }} THX </BButton>
             </template>
         </BModal>
@@ -157,7 +191,7 @@
                 </div>
             </template>
 
-            <template v-slot:modal-footer="{ ok, cancel, hide }">
+            <template slot="modal-footer">
                 <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onWithdrawToGateway()">Withdraw {{ input.withdrawToGateway }} THX </BButton>
             </template>
         </BModal>
@@ -180,7 +214,7 @@
                 </div>
             </template>
 
-            <template v-slot:modal-footer="{ ok, cancel, hide }">
+            <template slot="modal-footer">
                 <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onTransferTokens()">Transfer {{ input.transferTokens }} THX</BButton>
             </template>
         </BModal>
@@ -193,8 +227,9 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/storage';
-import { BButton, BModal, BSpinner } from 'bootstrap-vue';
+import { BAlert, BButton, BModal, BSpinner } from 'bootstrap-vue';
 import ProfilePicture from '../components/ProfilePicture';
+import { CryptoUtils, LocalAddress } from 'loom-js';
 
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
@@ -205,6 +240,7 @@ export default {
         BSpinner,
         BButton,
         BModal,
+        BAlert,
         ProfilePicture,
     },
     data: function() {
@@ -213,6 +249,8 @@ export default {
             uid: firebase.auth().currentUser.uid,
             isLoomMinter: false,
             isRinkebyMinter: false,
+            alert: null,
+            clipboard: null,
             balance: {
                 token: 0,
                 pool: 0
@@ -246,6 +284,7 @@ export default {
         }
     },
     created() {
+        const THX = window.THX;
         const uid = firebase.auth().currentUser.uid;
 
         firebase.database().ref(`users/${uid}`).once('value').then(async s => {
@@ -261,17 +300,48 @@ export default {
             this.account.uid = u.uid;
             this.account.email = u.email;
 
-            this.init(uid);
+            if (THX.network.hasKeys) {
+                this.init();
+            }
         });
-    },
-    mounted() {
-
     },
     methods: {
         showModal(id) {
             this.$refs[id].show();
         },
-        async init(uid) {
+        copyClipboard(value) {
+            const input = document.createElement('input');
+
+            input.id = 'clippy';
+            input.type = 'type';
+            input.value = value;
+            input.style = {
+                position: 'absolute',
+                left: '-999999px',
+                width: '0px',
+                height: '0px',
+            }
+
+            document.getElementById('app').appendChild(input);
+            document.getElementById('clippy').select();
+            document.execCommand('copy');
+            document.getElementById('clippy').remove();
+
+            this.clipboard = value;
+        },
+        createLoomKey() {
+            const privateKeyArray = CryptoUtils.generatePrivateKey()
+            const privateKeyString = CryptoUtils.Uint8ArrayToB64(privateKeyArray);
+
+            this.input.loomPrivateKey = privateKeyString;
+        },
+        createRinkebyKey() {
+            const THX = window.THX;
+            const account = THX.network.rinkeby.eth.accounts.create();
+
+            this.input.rinkebyPrivateKey = account.privateKey;
+        },
+        async init() {
             const THX = window.THX;
             const token = THX.network.instances.token;
             const tokenRinkeby = THX.network.instances.tokenRinkeby;
@@ -283,8 +353,6 @@ export default {
             this.input.loomPrivateKey = THX.state.loomPrivateKey;
             this.input.rinkebyPrivateKey = THX.state.rinkebyPrivateKey;
 
-            firebase.database().ref(`wallets/${this.account.loom.address.toLowerCase()}`).child('uid').set(uid);
-
             balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
             this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
             this.isLoomMinter = await token.methods.isMinter(this.account.loom.address).call();
@@ -294,6 +362,13 @@ export default {
             this.isRinkebyMinter = await tokenRinkeby.methods.isMinter(this.account.rinkeby.address).call();
 
             this.$parent.$refs.header.updateBalance();
+        },
+        isDuplicateAddress(address) {
+            const walletRef = firebase.database().ref(`wallets/${address}`);
+
+            return walletRef.once('value').then(s => {
+                return s.exists();
+            });
         },
         onFileChange(e) {
             const uid = firebase.auth().currentUser.uid;
@@ -324,23 +399,57 @@ export default {
         logout() {
             this.$router.push('/logout');
         },
+        async removeMapping(address) {
+            const walletRef = firebase.database().ref(`wallets/${address}`);
+            await walletRef.remove();
+
+            return this.$refs['modal-account-mapping'].hide();
+        },
         reset() {
             const THX = window.THX;
-
             THX.state.clear();
+
+            this.removeMapping(this.account.loom.address);
 
             return window.location.reload();
         },
-        onCreateAccountsFromPrivateKey() {
+        async onCreateAccountsFromPrivateKey() {
             const THX = window.THX;
+            const uid = firebase.auth().currentUser.uid;
+            const privateKeyArray = CryptoUtils.B64ToUint8Array(this.input.loomPrivateKey);
+            const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKeyArray);
+            const address = LocalAddress.fromPublicKey(publicKey).toString().toLowerCase();
+            const prevWalletRef = firebase.database().ref(`wallets/${this.account.loom.address}`);
+            const walletRef = firebase.database().ref(`wallets/${address}`);
+            const isDuplicate = await this.isDuplicateAddress(address);
 
-            THX.state.loomPrivateKey = this.input.loomPrivateKey;
+            if (!isDuplicate) {
+                prevWalletRef.remove();
+
+                walletRef.child('uid').set(uid);
+
+                this.alert = {
+                    text: 'Your account is connected. The app will restart in 3 seconds.',
+                    variant: 'success',
+                }
+
+                THX.state.loomPrivateKey = this.input.loomPrivateKey;
+
+                window.setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            }
+            else {
+                this.alert = {
+                    text: 'The loom private key provided is already in use and will not be stored.',
+                    variant: 'danger',
+                }
+            }
+
             THX.state.rinkebyPrivateKey = this.input.rinkebyPrivateKey;
             THX.state.save();
 
-            alert('Your account is connected. The app will restart.');
-
-            return window.location.reload();
+            this.$refs['modal-connect'].hide();
         },
         onDepositToGateway() {
             const THX = window.THX;

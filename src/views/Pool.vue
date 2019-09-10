@@ -1,7 +1,7 @@
 <template>
-    <article class="region region--container">
-        <main class="region region--content">
-            <div class="region region--jumbotron">
+    <article class="region region-container">
+        <main class="region region-content">
+            <div class="region region-jumbotron">
                 <strong class="font-size-xl">{{this.pool.balance}} THX</strong>
                 <p>{{ pool.name }}</p>
             </div>
@@ -154,7 +154,11 @@ export default {
         }
     },
     created() {
-        this.init();
+        const THX = window.THX;
+
+        if (THX.network.hasKeys) {
+            this.init();
+        }
     },
     methods: {
         async init() {
@@ -197,7 +201,7 @@ export default {
         onRulePollCreated(data, timestamp) {
             this.stream.push({
                 timestamp: parseInt(timestamp),
-                title: `Rule #${data.id} size poll: ${new BN(data.proposedAmount).div(tokenMultiplier)} THX`,
+                title: `Rule #${data.id} poll: ${new BN(data.proposedAmount).div(tokenMultiplier)} THX`,
             });
         },
         onRulePollFinished(data, timestamp) {

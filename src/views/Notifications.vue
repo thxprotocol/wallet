@@ -1,11 +1,11 @@
 <template>
-<article class="region region--container overflow">
+<article class="region region-container overflow">
 
     <div v-if="notifications.length == 0" class="d-flex w-100 h-100 align-items-center justify-content-center">
         <BSpinner variant="light" label="Loading..."></BSpinner>
     </div>
 
-    <b-card
+    <BCard
         v-bind:key="n.id"
         v-for="n in notifications"
         header-tag="header"
@@ -28,7 +28,7 @@
             </div>
         </template>
 
-        <b-card-text>
+        <BCardText>
             <p>
                 {{ n.pool.name }} <strong>[{{ n.pool.balance }} THX]</strong><br>
                 <small>{{ n.created | moment('MMMM Do YYYY HH:mm') }}</small>
@@ -69,7 +69,7 @@
                     </div>
                 </div>
             </div>
-        </b-card-text>
+        </BCardText>
 
         <template slot="footer">
             <div class="row" v-if="!n.hasVoted && n.poll.now < n.poll.endTime">
@@ -93,7 +93,7 @@
             </div>
         </template>
 
-    </b-card>
+    </BCard>
 
 </article>
 </template>
@@ -116,14 +116,14 @@ export default {
     components: {
         BSpinner,
         ProfilePicture,
-        'b-card': BCard,
-        'b-card-text': BCardText,
+        BCard,
+        BCardText,
         BProgress,
         BProgressBar,
     },
     data: function() {
         return {
-            events: new EventService(),
+            events: null,
             network: null,
             notifications: [],
             currentNotification: 0,
@@ -131,8 +131,13 @@ export default {
         }
     },
     created() {
+        const THX = window.THX;
         const uid = firebase.auth().currentUser.uid;
-        this.init(uid);
+
+        if (THX.network.hasKeys) {
+            this.events = new EventService();
+            this.init(uid);
+        }
     },
     methods: {
         async init(uid) {

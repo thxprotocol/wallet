@@ -27,7 +27,7 @@
                 </div>
             </div>
             <template slot="footer">
-                <button @click="createRule()" v-bind:class="{ disabled: loading }" class="btn btn-primary">Add new rule</button>
+                <button @click="createRule()" v-bind:class="{ disabled: loading }" class="btn btn-primary btn-block">Add new rule</button>
             </template>
         </Modal>
 

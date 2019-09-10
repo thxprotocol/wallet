@@ -1,14 +1,14 @@
 <template>
-    <article class="region region--container">
-        <header class="region region--header" style="background: black;">
+    <article class="region region-container">
+        <header class="region region-header" style="background: black;">
             <p class="logo">
                 <img width="50" height="50" src="../assets/thx_logo.svg" alt="THX Logo" />
             </p>
             <p style="color: white;">A token of appreciation</p>
         </header>
 
-        <div class="region region--container">
-            <main class="region region--content">
+        <div class="region region-container">
+            <main class="region region-content">
 
                 <div class="text-center" v-if="loading">
                     <BSpinner label="Loading..."></BSpinner>
@@ -46,6 +46,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
 import { BSpinner } from 'bootstrap-vue';
+import { CryptoUtils } from 'loom-js';
 
 export default {
     name: 'register',
@@ -76,6 +77,10 @@ export default {
         createAccount() {
             firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
                 .then((r) => {
+                    const THX = window.THX;
+                    const privateKeyArray = CryptoUtils.generatePrivateKey()
+                    const privateKeyString = CryptoUtils.Uint8ArrayToB64(privateKeyArray);
+                    const account = THX.network.rinkeby.eth.accounts.create();
                     const user = {
                         uid: r.user.uid,
                         email: r.user.email,
@@ -84,9 +89,14 @@ export default {
                         userName: r.user.userName,
                     }
 
+                    THX.state.loomPrivateKey = privateKeyString;
+                    THX.state.rinkebyPrivateKey = account.privateKey;
+                    THX.state.save();
+
                     firebase.database().ref('users').child(user.uid).set(user);
+
                     this.loading = false;
-                    this.$router.replace('/');
+                    this.$router.replace('/account');
                 })
                 .catch((err) => {
                     if (typeof err != 'undefined') {

@@ -1,5 +1,5 @@
 <template>
-<footer class="region region--navigation">
+<footer class="region region-navigation">
     <b-nav fill>
         <b-nav-item v-bind:key="route.name" v-for="route in routes" v-bind:to="route.path">
             <span v-if="route.name == 'notifications' && amountOfNewRewards > 0" class="badge badge--warning">
@@ -41,15 +41,11 @@ export default {
         }
     },
     created() {
-        // const THX = window.THX;
+        const THX = window.THX;
 
-        // if (firebase.auth().currentUser) {
-        //     const uid = firebase.auth().currentUser.uid;
-        //     const loomKey = (typeof THX.state.loomPrivateKey !== "undefined") ? THX.state.loomPrivateKey : null;
-        //     const ethKey = (typeof THX.state.ethPrivateKey !== "undefined") ? THX.state.ethPrivateKey : null;
-        //
-        //     this.init(uid, loomKey, ethKey);
-        // }
+        if (THX.network.hasKeys) {
+            this.init();
+        }
     },
     methods: {
         async init() {
