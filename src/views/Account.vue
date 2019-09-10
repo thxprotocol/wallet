@@ -364,10 +364,11 @@ export default {
             this.$parent.$refs.header.updateBalance();
         },
         isDuplicateAddress(address) {
+            const uid = firebase.auth().currentUser.uid;
             const walletRef = firebase.database().ref(`wallets/${address}`);
 
             return walletRef.once('value').then(s => {
-                return s.exists();
+                return s.exists() && s.val().uid !== uid;
             });
         },
         onFileChange(e) {
