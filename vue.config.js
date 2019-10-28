@@ -2,6 +2,10 @@ const webpack = require('webpack');
 
 // vue.config.js
 module.exports = {
+    publicPath: process.env.NODE_ENV === 'production'
+        ? '/wallet/'
+        : '/',
+    outputDir: "./dist/wallet/",
     configureWebpack: {
         plugins: [
             new webpack.DefinePlugin({
