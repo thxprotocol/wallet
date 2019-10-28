@@ -1,15 +1,15 @@
 {
   "contractName": "SafeMath",
   "abi": [],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"details\":\"Math operations with safety checks that revert on error\",\"methods\":{},\"title\":\"SafeMath\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/peterpolman/Sites/thx_client/contracts/math/SafeMath.sol\":\"SafeMath\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/peterpolman/Sites/thx_client/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x2372e813634f6aebdb7c794422ed2964edd53e1226410a73d39c1cc185cfb89e\",\"urls\":[\"bzzr://bf95de4f29e56d59f10a93f80362b797f9e442d711c7b32278bf414486030f5b\"]}},\"version\":1}",
-  "bytecode": "0x604c6023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea165627a7a723058205d54a2c679977629d0befdbfa67b91688bf12c01bd8e7ab29675e7da2c47904e0029",
-  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea165627a7a723058205d54a2c679977629d0befdbfa67b91688bf12c01bd8e7ab29675e7da2c47904e0029",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"details\":\"Math operations with safety checks that revert on error\",\"methods\":{},\"title\":\"SafeMath\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/peterpolman/Sites/thx/thx-wallet/contracts/math/SafeMath.sol\":\"SafeMath\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/peterpolman/Sites/thx/thx-wallet/contracts/math/SafeMath.sol\":{\"keccak256\":\"0x2372e813634f6aebdb7c794422ed2964edd53e1226410a73d39c1cc185cfb89e\",\"urls\":[\"bzzr://bf95de4f29e56d59f10a93f80362b797f9e442d711c7b32278bf414486030f5b\"]}},\"version\":1}",
+  "bytecode": "0x604c6023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea165627a7a72305820e026fc2f480c88ea04cf2ee2af06303736304211c82ce4e0a8bb146a45caf99e0029",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea165627a7a72305820e026fc2f480c88ea04cf2ee2af06303736304211c82ce4e0a8bb146a45caf99e0029",
   "sourceMap": "116:3317:12:-;;132:2:-1;166:7;155:9;146:7;137:37;255:7;249:14;246:1;241:23;235:4;232:33;222:2;;269:9;222:2;293:9;290:1;283:20;323:4;314:7;306:22;347:7;338;331:24",
   "deployedSourceMap": "116:3317:12:-;;;;;;;;",
   "source": "pragma solidity ^0.5.0;\n\n/**\n * @title SafeMath\n * @dev Math operations with safety checks that revert on error\n */\nlibrary SafeMath {\n    int256 constant private INT256_MIN = -2**255;\n\n    /**\n    * @dev Multiplies two unsigned integers, reverts on overflow.\n    */\n    function mul(uint256 a, uint256 b) internal pure returns (uint256) {\n        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the\n        // benefit is lost if 'b' is also tested.\n        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522\n        if (a == 0) {\n            return 0;\n        }\n\n        uint256 c = a * b;\n        require(c / a == b);\n\n        return c;\n    }\n\n    /**\n    * @dev Multiplies two signed integers, reverts on overflow.\n    */\n    function mul(int256 a, int256 b) internal pure returns (int256) {\n        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the\n        // benefit is lost if 'b' is also tested.\n        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522\n        if (a == 0) {\n            return 0;\n        }\n\n        require(!(a == -1 && b == INT256_MIN)); // This is the only case of overflow not detected by the check below\n\n        int256 c = a * b;\n        require(c / a == b);\n\n        return c;\n    }\n\n    /**\n    * @dev Integer division of two unsigned integers truncating the quotient, reverts on division by zero.\n    */\n    function div(uint256 a, uint256 b) internal pure returns (uint256) {\n        // Solidity only automatically asserts when dividing by 0\n        require(b > 0);\n        uint256 c = a / b;\n        // assert(a == b * c + a % b); // There is no case in which this doesn't hold\n\n        return c;\n    }\n\n    /**\n    * @dev Integer division of two signed integers truncating the quotient, reverts on division by zero.\n    */\n    function div(int256 a, int256 b) internal pure returns (int256) {\n        require(b != 0); // Solidity only automatically asserts when dividing by 0\n        require(!(b == -1 && a == INT256_MIN)); // This is the only case of overflow\n\n        int256 c = a / b;\n\n        return c;\n    }\n\n    /**\n    * @dev Subtracts two unsigned integers, reverts on overflow (i.e. if subtrahend is greater than minuend).\n    */\n    function sub(uint256 a, uint256 b) internal pure returns (uint256) {\n        require(b <= a);\n        uint256 c = a - b;\n\n        return c;\n    }\n\n    /**\n    * @dev Subtracts two signed integers, reverts on overflow.\n    */\n    function sub(int256 a, int256 b) internal pure returns (int256) {\n        int256 c = a - b;\n        require((b >= 0 && c <= a) || (b < 0 && c > a));\n\n        return c;\n    }\n\n    /**\n    * @dev Adds two unsigned integers, reverts on overflow.\n    */\n    function add(uint256 a, uint256 b) internal pure returns (uint256) {\n        uint256 c = a + b;\n        require(c >= a);\n\n        return c;\n    }\n\n    /**\n    * @dev Adds two signed integers, reverts on overflow.\n    */\n    function add(int256 a, int256 b) internal pure returns (int256) {\n        int256 c = a + b;\n        require((b >= 0 && c >= a) || (b < 0 && c < a));\n\n        return c;\n    }\n\n    /**\n    * @dev Divides two unsigned integers and returns the remainder (unsigned integer modulo),\n    * reverts when dividing by zero.\n    */\n    function mod(uint256 a, uint256 b) internal pure returns (uint256) {\n        require(b != 0);\n        return a % b;\n    }\n}\n",
-  "sourcePath": "/Users/peterpolman/Sites/thx_client/contracts/math/SafeMath.sol",
+  "sourcePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/math/SafeMath.sol",
   "ast": {
-    "absolutePath": "/Users/peterpolman/Sites/thx_client/contracts/math/SafeMath.sol",
+    "absolutePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/math/SafeMath.sol",
     "exportedSymbols": {
       "SafeMath": [
         1486
@@ -405,10 +405,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "647:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -831,10 +831,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1123:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1033,10 +1033,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1267:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1259,10 +1259,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1583:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1566,10 +1566,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1936:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -1773,10 +1773,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "2019:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2075,10 +2075,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "2355:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2694,10 +2694,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "2607:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -2996,10 +2996,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "2865:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -3534,10 +3534,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "3085:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -3760,10 +3760,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "3387:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -3954,7 +3954,7 @@
     "src": "0:3434:12"
   },
   "legacyAST": {
-    "absolutePath": "/Users/peterpolman/Sites/thx_client/contracts/math/SafeMath.sol",
+    "absolutePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/math/SafeMath.sol",
     "exportedSymbols": {
       "SafeMath": [
         1486
@@ -4350,10 +4350,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "647:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -4776,10 +4776,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1123:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -4978,10 +4978,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1267:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -5204,10 +5204,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1583:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -5511,10 +5511,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "1936:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -5718,10 +5718,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "2019:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -6020,10 +6020,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "2355:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -6639,10 +6639,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "2607:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -6941,10 +6941,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "2865:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -7479,10 +7479,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "3085:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -7705,10 +7705,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        3141,
-                        3142
+                        3147,
+                        3148
                       ],
-                      "referencedDeclaration": 3141,
+                      "referencedDeclaration": 3147,
                       "src": "3387:7:12",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$returns$__$",
@@ -7904,7 +7904,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-09-03T14:47:56.466Z",
+  "updatedAt": "2019-10-23T10:02:37.720Z",
   "devdoc": {
     "details": "Math operations with safety checks that revert on error",
     "methods": {},

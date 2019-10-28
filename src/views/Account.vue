@@ -464,6 +464,18 @@ export default {
                     this.$refs['modal-gateway-deposit'].hide();
                 });
         },
+        onWithdrawToGateway() {
+            const THX = window.THX;
+
+            this.loading = true;
+
+            return THX.network.withdrawFromRinkebyGateway(this.input.withdrawToGateway)
+                .then(() => {
+                    this.input.withdrawToGateway = 0;
+                    this.loading = false;
+                    this.$refs['modal-gateway-withdraw'].hide();
+                });
+        },
         onTransferTokens() {
             const THX = window.THX;
             const token = THX.network.instances.token;

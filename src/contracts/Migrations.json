@@ -64,15 +64,15 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"new_address\",\"type\":\"address\"}],\"name\":\"upgrade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"last_completed_migration\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"completed\",\"type\":\"uint256\"}],\"name\":\"setCompleted\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/peterpolman/Sites/thx_client/contracts/Migrations.sol\":\"Migrations\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/peterpolman/Sites/thx_client/contracts/Migrations.sol\":{\"keccak256\":\"0x6e749b7280cd7d0a44e847ed4a2da8c4a2f80ae5b42097a7f26a6f620924248d\",\"urls\":[\"bzzr://d5a181dd8cba0b09c5cd92038f8bd6403bf7418ce3304af0ea62276d3e2358c0\"]}},\"version\":1}",
-  "bytecode": "0x608060405234801561001057600080fd5b50600080546001600160a01b031916331790556101aa806100326000396000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c80630900f01014610051578063445df0ac146100795780638da5cb5b14610093578063fdacd576146100b7575b600080fd5b6100776004803603602081101561006757600080fd5b50356001600160a01b03166100d4565b005b610081610151565b60408051918252519081900360200190f35b61009b610157565b604080516001600160a01b039092168252519081900360200190f35b610077600480360360208110156100cd57600080fd5b5035610166565b6000546001600160a01b031633141561014e576000819050806001600160a01b031663fdacd5766001546040518263ffffffff1660e01b815260040180828152602001915050600060405180830381600087803b15801561013457600080fd5b505af1158015610148573d6000803e3d6000fd5b50505050505b50565b60015481565b6000546001600160a01b031681565b6000546001600160a01b031633141561014e5760015556fea165627a7a723058206428344556d03efd1cb3c9f3aa65f6f9fb41418593fd8124d701303d48bc3e530029",
-  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061004c5760003560e01c80630900f01014610051578063445df0ac146100795780638da5cb5b14610093578063fdacd576146100b7575b600080fd5b6100776004803603602081101561006757600080fd5b50356001600160a01b03166100d4565b005b610081610151565b60408051918252519081900360200190f35b61009b610157565b604080516001600160a01b039092168252519081900360200190f35b610077600480360360208110156100cd57600080fd5b5035610166565b6000546001600160a01b031633141561014e576000819050806001600160a01b031663fdacd5766001546040518263ffffffff1660e01b815260040180828152602001915050600060405180830381600087803b15801561013457600080fd5b505af1158015610148573d6000803e3d6000fd5b50505050505b50565b60015481565b6000546001600160a01b031681565b6000546001600160a01b031633141561014e5760015556fea165627a7a723058206428344556d03efd1cb3c9f3aa65f6f9fb41418593fd8124d701303d48bc3e530029",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"new_address\",\"type\":\"address\"}],\"name\":\"upgrade\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"last_completed_migration\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"completed\",\"type\":\"uint256\"}],\"name\":\"setCompleted\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/peterpolman/Sites/thx/thx-wallet/contracts/Migrations.sol\":\"Migrations\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/peterpolman/Sites/thx/thx-wallet/contracts/Migrations.sol\":{\"keccak256\":\"0x6e749b7280cd7d0a44e847ed4a2da8c4a2f80ae5b42097a7f26a6f620924248d\",\"urls\":[\"bzzr://d5a181dd8cba0b09c5cd92038f8bd6403bf7418ce3304af0ea62276d3e2358c0\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50600080546001600160a01b031916331790556101aa806100326000396000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c80630900f01014610051578063445df0ac146100795780638da5cb5b14610093578063fdacd576146100b7575b600080fd5b6100776004803603602081101561006757600080fd5b50356001600160a01b03166100d4565b005b610081610151565b60408051918252519081900360200190f35b61009b610157565b604080516001600160a01b039092168252519081900360200190f35b610077600480360360208110156100cd57600080fd5b5035610166565b6000546001600160a01b031633141561014e576000819050806001600160a01b031663fdacd5766001546040518263ffffffff1660e01b815260040180828152602001915050600060405180830381600087803b15801561013457600080fd5b505af1158015610148573d6000803e3d6000fd5b50505050505b50565b60015481565b6000546001600160a01b031681565b6000546001600160a01b031633141561014e5760015556fea165627a7a72305820fdc3175a7169d99557c46d8de915261787fc15b9632c8b4d168f628fb87896080029",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061004c5760003560e01c80630900f01014610051578063445df0ac146100795780638da5cb5b14610093578063fdacd576146100b7575b600080fd5b6100776004803603602081101561006757600080fd5b50356001600160a01b03166100d4565b005b610081610151565b60408051918252519081900360200190f35b61009b610157565b604080516001600160a01b039092168252519081900360200190f35b610077600480360360208110156100cd57600080fd5b5035610166565b6000546001600160a01b031633141561014e576000819050806001600160a01b031663fdacd5766001546040518263ffffffff1660e01b815260040180828152602001915050600060405180830381600087803b15801561013457600080fd5b505af1158015610148573d6000803e3d6000fd5b50505050505b50565b60015481565b6000546001600160a01b031681565b6000546001600160a01b031633141561014e5760015556fea165627a7a72305820fdc3175a7169d99557c46d8de915261787fc15b9632c8b4d168f628fb87896080029",
   "sourceMap": "25:480:1:-;;;114:50;8:9:-1;5:2;;;30:1;27;20:12;5:2;-1:-1;141:5:1;:18;;-1:-1:-1;;;;;;141:18:1;149:10;141:18;;;25:480;;;;;;",
   "deployedSourceMap": "25:480:1:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;25:480:1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;338:165;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;338:165:1;-1:-1:-1;;;;;338:165:1;;:::i;:::-;;73:36;;;:::i;:::-;;;;;;;;;;;;;;;;49:20;;;:::i;:::-;;;;-1:-1:-1;;;;;49:20:1;;;;;;;;;;;;;;231:103;;;;;;13:2:-1;8:3;5:11;2:2;;;29:1;26;19:12;2:2;-1:-1;231:103:1;;:::i;338:165::-;214:5;;-1:-1:-1;;;;;214:5:1;200:10;:19;196:26;;;400:19;433:11;400:45;;451:8;-1:-1:-1;;;;;451:21:1;;473:24;;451:47;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;451:47:1;;;;8:9:-1;5:2;;;45:16;42:1;39;24:38;77:16;74:1;67:27;5:2;451:47:1;;;;221:1;196:26;338:165;:::o;73:36::-;;;;:::o;49:20::-;;;-1:-1:-1;;;;;49:20:1;;:::o;231:103::-;214:5;;-1:-1:-1;;;;;214:5:1;200:10;:19;196:26;;;293:24;:36;231:103::o",
   "source": "pragma solidity ^0.5.0;\n\ncontract Migrations {\n  address public owner;\n  uint public last_completed_migration;\n\n  constructor() public {\n    owner = msg.sender;\n  }\n\n  modifier restricted() {\n    if (msg.sender == owner) _;\n  }\n\n  function setCompleted(uint completed) public restricted {\n    last_completed_migration = completed;\n  }\n\n  function upgrade(address new_address) public restricted {\n    Migrations upgraded = Migrations(new_address);\n    upgraded.setCompleted(last_completed_migration);\n  }\n}\n",
-  "sourcePath": "/Users/peterpolman/Sites/thx_client/contracts/Migrations.sol",
+  "sourcePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/Migrations.sol",
   "ast": {
-    "absolutePath": "/Users/peterpolman/Sites/thx_client/contracts/Migrations.sol",
+    "absolutePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/Migrations.sol",
     "exportedSymbols": {
       "Migrations": [
         86
@@ -195,7 +195,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3138,
+                        "referencedDeclaration": 3144,
                         "src": "149:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -279,7 +279,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3138,
+                        "referencedDeclaration": 3144,
                         "src": "200:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -718,7 +718,7 @@
     "src": "0:506:1"
   },
   "legacyAST": {
-    "absolutePath": "/Users/peterpolman/Sites/thx_client/contracts/Migrations.sol",
+    "absolutePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/Migrations.sol",
     "exportedSymbols": {
       "Migrations": [
         86
@@ -841,7 +841,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3138,
+                        "referencedDeclaration": 3144,
                         "src": "149:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -925,7 +925,7 @@
                         "name": "msg",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 3138,
+                        "referencedDeclaration": 3144,
                         "src": "200:3:1",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_message",
@@ -1371,18 +1371,18 @@
     "4": {
       "events": {},
       "links": {},
-      "address": "0xbD460Cb9d0a4162A0df4a36d9632c580d917A5E4",
-      "transactionHash": "0x79658d78c63403f33bc55684ca5569851aa8f0398ead323bf5bf619c56dfd08b"
+      "address": "0x51505Ddf8775C0349fc1098c6340aA5DD68F8F3F",
+      "transactionHash": "0x3591d4d0b6709012e1a94d9f486d2496868a5ca666d96f7fdcee665d14fdf665"
     },
     "9545242630824": {
       "events": {},
       "links": {},
-      "address": "0x10421928D78fB5FBC4d1b84b61dfA11416E76759",
-      "transactionHash": "0xd8e8866f7f295e1222c8590846ba245144836a4c1a979e0b6ede5c64cb3589e3"
+      "address": "0xc0af825404e986da2414095f280746390877b9fB",
+      "transactionHash": "0x32928abebdd2037df19c12a61cf407443f39fc85e1ab57089a9fccf10d97b5f0"
     }
   },
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-09-09T10:02:37.116Z",
+  "updatedAt": "2019-10-23T17:44:12.698Z",
   "devdoc": {
     "methods": {}
   },

@@ -155,17 +155,17 @@ async function getExtdevEthBalance(client, accountAddress) {
     return balance.toString();
 }
 
-async function getExtdevTokenBalance(web3js, accountAddress) {
-    const contract = await getExtdevTokenContract(web3js)
-    const addr = accountAddress.toLowerCase()
-    const total = await contract.methods.balanceOf(addr).call({from: addr})
-    const tokens = []
-    for (let i = 0; i < Math.min(total, 5); i++) {
-        const tokenId = await contract.methods.tokenOfOwnerByIndex(addr, i).call({from: addr})
-        tokens.push(tokenId)
-    }
-    return {total, tokens}
-}
+// async function getExtdevTokenBalance(web3js, accountAddress) {
+//     const contract = await getExtdevTokenContract(web3js)
+//     const addr = accountAddress.toLowerCase()
+//     const total = await contract.methods.balanceOf(addr).call({from: addr})
+//     const tokens = []
+//     for (let i = 0; i < Math.min(total, 5); i++) {
+//         const tokenId = await contract.methods.tokenOfOwnerByIndex(addr, i).call({from: addr})
+//         tokens.push(tokenId)
+//     }
+//     return {total, tokens}
+// }
 
 // Returns a promise that will be resolved with a hex string containing the signature that must
 // be submitted to the Ethereum Gateway to withdraw a token.

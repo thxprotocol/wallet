@@ -68,15 +68,15 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"agree\",\"type\":\"bool\"},{\"name\":\"proposedAmount\",\"type\":\"uint256\"}],\"name\":\"onRulePollFinish\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"agree\",\"type\":\"bool\"}],\"name\":\"onRewardPollFinish\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"beneficiary\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"},{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"created\",\"type\":\"uint256\"}],\"name\":\"onWithdrawel\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Fund callbacks used by polling contracts\",\"methods\":{\"onRewardPollFinish(uint256,bool)\":{\"details\":\"RewardPoll callback\",\"params\":{\"agree\":\"True if the rule should apply or change\",\"id\":\"The referenced reward\"}},\"onRulePollFinish(uint256,bool,uint256)\":{\"details\":\"RulePoll callback\",\"params\":{\"agree\":\"True if the rule should apply or change\",\"id\":\"The referenced rule\",\"proposedAmount\":\"The proposed reward size\"}},\"onWithdrawel(address,uint256,uint256,uint256)\":{\"details\":\"Withdrawel callback\",\"params\":{\"amount\":\"The amount the beneficiary will receive\",\"beneficiary\":\"The addres of the account receiving the reward\",\"created\":\"The timestamp of the moment the reward was claimed\",\"id\":\"The id of the reward that is processed\"}}},\"title\":\"IRewardPool\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/peterpolman/Sites/thx_client/contracts/IRewardPool.sol\":\"IRewardPool\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/peterpolman/Sites/thx_client/contracts/IRewardPool.sol\":{\"keccak256\":\"0x83cc8afe9318cc342ccd84a1cc46bab5baab87b1cb87406375fd5715ad5c66d1\",\"urls\":[\"bzzr://8b7c5cfcaeceeb91407b1bbe376426b5bdf9339e56a13df6d82fc88bb8b1cd21\"]}},\"version\":1}",
+  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"agree\",\"type\":\"bool\"},{\"name\":\"proposedAmount\",\"type\":\"uint256\"}],\"name\":\"onRulePollFinish\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"agree\",\"type\":\"bool\"}],\"name\":\"onRewardPollFinish\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"beneficiary\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"},{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"created\",\"type\":\"uint256\"}],\"name\":\"onWithdrawel\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Fund callbacks used by polling contracts\",\"methods\":{\"onRewardPollFinish(uint256,bool)\":{\"details\":\"RewardPoll callback\",\"params\":{\"agree\":\"True if the rule should apply or change\",\"id\":\"The referenced reward\"}},\"onRulePollFinish(uint256,bool,uint256)\":{\"details\":\"RulePoll callback\",\"params\":{\"agree\":\"True if the rule should apply or change\",\"id\":\"The referenced rule\",\"proposedAmount\":\"The proposed reward size\"}},\"onWithdrawel(address,uint256,uint256,uint256)\":{\"details\":\"Withdrawel callback\",\"params\":{\"amount\":\"The amount the beneficiary will receive\",\"beneficiary\":\"The addres of the account receiving the reward\",\"created\":\"The timestamp of the moment the reward was claimed\",\"id\":\"The id of the reward that is processed\"}}},\"title\":\"IRewardPool\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol\":\"IRewardPool\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol\":{\"keccak256\":\"0x83cc8afe9318cc342ccd84a1cc46bab5baab87b1cb87406375fd5715ad5c66d1\",\"urls\":[\"bzzr://8b7c5cfcaeceeb91407b1bbe376426b5bdf9339e56a13df6d82fc88bb8b1cd21\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.5.0;\n\n/**\n * @title IRewardPool\n * @dev Fund callbacks used by polling contracts\n */\ninterface IRewardPool {\n    /**\n     * @dev RulePoll callback\n     * @param id The referenced rule\n     * @param agree True if the rule should apply or change\n     * @param proposedAmount The proposed reward size\n     */\n    function onRulePollFinish(uint256 id, bool agree, uint256 proposedAmount) external;\n\n    /**\n     * @dev RewardPoll callback\n     * @param id The referenced reward\n     * @param agree True if the rule should apply or change\n     */\n    function onRewardPollFinish(uint256 id, bool agree) external;\n\n    /**\n     * @dev Withdrawel callback\n     * @param beneficiary The addres of the account receiving the reward\n     * @param amount The amount the beneficiary will receive\n     * @param id The id of the reward that is processed\n     * @param created The timestamp of the moment the reward was claimed\n     */\n    function onWithdrawel(address beneficiary, uint256 amount, uint256 id, uint256 created) external;\n}\n",
-  "sourcePath": "/Users/peterpolman/Sites/thx_client/contracts/IRewardPool.sol",
+  "sourcePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol",
   "ast": {
-    "absolutePath": "/Users/peterpolman/Sites/thx_client/contracts/IRewardPool.sol",
+    "absolutePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol",
     "exportedSymbols": {
       "IRewardPool": [
         29
@@ -436,7 +436,7 @@
     "src": "0:1043:0"
   },
   "legacyAST": {
-    "absolutePath": "/Users/peterpolman/Sites/thx_client/contracts/IRewardPool.sol",
+    "absolutePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol",
     "exportedSymbols": {
       "IRewardPool": [
         29
@@ -801,7 +801,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-09-03T14:47:56.445Z",
+  "updatedAt": "2019-10-23T10:02:37.690Z",
   "devdoc": {
     "details": "Fund callbacks used by polling contracts",
     "methods": {
