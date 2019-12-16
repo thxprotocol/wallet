@@ -34,7 +34,7 @@
         "firebase": "^6.2.4",
         "ganache-time-traveler": "^1.0.3",
         "lodash": "^4.17.14",
-        "loom-js": "^1.55.0",
+        "loom-js": "1.70.0",
         "loom-truffle-provider": "^0.13.0",
         "path": "^0.12.7",
         "truffle": "^5.0.32",
@@ -54,7 +54,7 @@
         "node-sass": "^4.9.0",
         "sass-loader": "^7.0.1",
         "vue-template-compiler": "^2.5.21",
-        "web3": "1.0.0-beta.33"
+        "web3": "1.2.1"
     },
     "eslintConfig": {
         "root": true,

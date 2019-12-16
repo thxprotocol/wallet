@@ -7354,12 +7354,13 @@
         }
       },
       "links": {},
-      "address": "0x0572609A9847736A77d25BFE9f57Eb7c8EDe54Fb",
-      "transactionHash": "0x31982fbaa61699917aa08880f49f8d6d52e164a29b413bca3009e3856d8ed74b"
+      "address": "0x3D6c2F410B381595eCC6a69C6696b14AF8bA1EeD",
+      "transactionHash": "0xf163ed1070e1c8582d0027d2b37e0ad52821e5aa0ef2d1698394695646dd5290"
     }
   },
-  "schemaVersion": "3.0.12",
-  "updatedAt": "2019-12-16T10:57:44.105Z",
+  "schemaVersion": "3.0.19",
+  "updatedAt": "2019-12-16T15:00:20.045Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {
       "countRewards()": {

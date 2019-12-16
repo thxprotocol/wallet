@@ -4195,12 +4195,13 @@
         }
       },
       "links": {},
-      "address": "0xb5Fd09cC34fe5508fBC65f27Aa208DB9Bf9C90b6",
-      "transactionHash": "0x358d6952e1935a5fe7606354870d224ef42267137a9b7266582664c06e25a1a4"
+      "address": "0xe7eED17EC12Ec770297cCa3392C8C31Ea73E94B2",
+      "transactionHash": "0xce77f0dc9d64297146c4fd1257cdb74a2eb57f928ea7f7afb411fe0a08656ec1"
     }
   },
-  "schemaVersion": "3.0.12",
-  "updatedAt": "2019-12-16T10:57:44.098Z",
+  "schemaVersion": "3.0.19",
+  "updatedAt": "2019-12-16T15:00:20.038Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {
