@@ -120,7 +120,7 @@ export default class NetworkService {
             networkId = 'extdev-plasma-us1';
         }
 
-        this.client = new Client(networkId, writeUrl, readUrl);
+        this.client = client = new Client(networkId, writeUrl, readUrl);
 
         this.client.on('error', msg => {
             // eslint-disable-next-line

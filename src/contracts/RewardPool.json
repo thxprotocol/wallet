@@ -7354,12 +7354,12 @@
         }
       },
       "links": {},
-      "address": "0x9ee63f18C46Ba433DD2Bf3B68BDbf1BeCe0BF2fB",
-      "transactionHash": "0x9b200a4e81e675a44d315b07601e5889e036ba375e2ef27374b8974798cfcb02"
+      "address": "0x0572609A9847736A77d25BFE9f57Eb7c8EDe54Fb",
+      "transactionHash": "0x31982fbaa61699917aa08880f49f8d6d52e164a29b413bca3009e3856d8ed74b"
     }
   },
   "schemaVersion": "3.0.12",
-  "updatedAt": "2019-10-23T17:43:42.600Z",
+  "updatedAt": "2019-12-16T10:57:44.105Z",
   "devdoc": {
     "methods": {
       "countRewards()": {
