@@ -526,8 +526,7 @@ export default {
             const tokenRinkeby = THX.network.instances.tokenRinkeby;
 
             this.loading = true;
-            console.log(this.account.rinkeby.address)
-            console.log(this.input.newMinterAddress)
+
             return tokenRinkeby.methods.addMinter(this.input.newMinterAddress).send({ from: this.account.rinkeby.address }).then(async () => {
                 this.loading = false;
                 this.$refs['modal-add-minter'].hide();
