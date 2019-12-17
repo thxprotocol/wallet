@@ -41,6 +41,8 @@ export default class GatewayService {
     constructor(loomPrivateKey, rinkebyPrivateKey) {
         this.loomPrivateKeyString = loomPrivateKey;
         this.rinkebyPrivateKeyString = rinkebyPrivateKey;
+
+        this.resumeWithdrawal();
     }
 
     // Returns a promise that will be resolved with the signed withdrawal receipt that contains the
@@ -387,9 +389,7 @@ export default class GatewayService {
             const myRinkebyCoinAddress = Address.fromString(`eth:${MyRinkebyCoinJSON.networks[networkId].address}`)
             const receipt = await this.getPendingWithdrawalReceipt(extdev.client, extdev.account)
 
-            console.log(receipt.tokenContract.toString() === myRinkebyCoinAddress.toString())
-
-            if (receipt.tokenContract.toString() === myRinkebyCoinAddress.toString()) {
+            if (receipt && receipt.tokenContract.toString() === myRinkebyCoinAddress.toString()) {
                 console.log(`Found pending withdrawal of ${receipt.tokenAmount.div(coinMultiplier).toString()} coins.`)
                 const txHash = await this.withdrawCoinFromRinkebyGateway({
                     web3js: rinkeby.web3js,
@@ -400,7 +400,7 @@ export default class GatewayService {
                 console.log(`${receipt.tokenAmount.div(coinMultiplier).toString()} tokens withdrawn from Etheruem Gateway.`)
                 console.log(`Rinkeby tx hash: ${txHash}`)
             } else {
-                console.log("Unsupported asset type!")
+                console.log("No pending withdrawels found!")
             }
         } catch (err) {
             console.error(err)
