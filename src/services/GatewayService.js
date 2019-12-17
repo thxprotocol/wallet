@@ -217,7 +217,7 @@ export default class GatewayService {
 
     loadRinkebyAccount() {
         const privateKey = this.rinkebyPrivateKeyString;
-        const web3js = new Web3(`https://rinkeby.infura.io/v3/${INFURA_API_KEY}`)
+        const web3js = new Web3(`wss://rinkeby.infura.io/ws/v3/${INFURA_API_KEY}`);
         const ownerAccount = web3js.eth.accounts.privateKeyToAccount(privateKey)
         web3js.eth.accounts.wallet.add(ownerAccount)
         return {

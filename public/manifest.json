@@ -5,8 +5,8 @@
     "background_color": "#000000",
     "display": "standalone",
     "orientation": "portrait",
-    "Scope": "/",
-    "start_url": "/",
+    "Scope": "/wallet/",
+    "start_url": "/wallet/",
     "icons": [{
         "src": "/pwa_icon.png",
         "type": "image/png",
