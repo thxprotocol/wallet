@@ -429,6 +429,8 @@ export default {
 
                 walletRef.child('uid').set(uid);
 
+                await THX.gateway.mapAccounts(this.input.rinkebyPrivateKey, this.input.loomPrivateKey)
+
                 this.alert = {
                     text: 'Your account is connected. The app will restart in 3 seconds.',
                     variant: 'success',
@@ -457,7 +459,7 @@ export default {
 
             this.loading = true;
 
-            return THX.network.depositToRinkebyGateway(this.input.depositToGateway)
+            return THX.gateway.depositCoin(this.input.depositToGateway)
                 .then(() => {
                     this.input.depositToGateway = 0;
                     this.loading = false;
@@ -469,7 +471,7 @@ export default {
 
             this.loading = true;
 
-            return THX.network.withdrawFromRinkebyGateway(this.input.withdrawToGateway)
+            return THX.gateway.withdrawCoin(this.input.withdrawToGateway)
                 .then(() => {
                     this.input.withdrawToGateway = 0;
                     this.loading = false;
@@ -521,11 +523,12 @@ export default {
         },
         onAddMinter() {
             const THX = window.THX;
-            const token = THX.network.instances.token;
+            const tokenRinkeby = THX.network.instances.tokenRinkeby;
 
             this.loading = true;
-
-            return token.methods.addMinter(this.input.newMinterAddress).send({ from: this.account.loom.address }).then(async () => {
+            console.log(this.account.rinkeby.address)
+            console.log(this.input.newMinterAddress)
+            return tokenRinkeby.methods.addMinter(this.input.newMinterAddress).send({ from: this.account.rinkeby.address }).then(async () => {
                 this.loading = false;
                 this.$refs['modal-add-minter'].hide();
             });

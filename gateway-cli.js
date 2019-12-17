@@ -674,9 +674,11 @@ program
 
       const networkId = await rinkeby.web3js.eth.net.getId()
       const myRinkebyCoinAddress = Address.fromString(`eth:${MyRinkebyCoinJSON.networks[networkId].address}`)
-      const myRinkebyTokenAddress = Address.fromString(`eth:${MyRinkebyTokenJSON.networks[networkId].address}`)
+      // const myRinkebyTokenAddress = Address.fromString(`eth:${MyRinkebyTokenJSON.networks[networkId].address}`)
       const myRinkebyGatewayAddress = Address.fromString(`eth:${rinkebyGatewayAddress}`)
       const receipt = await getPendingWithdrawalReceipt(extdev.client, extdev.account)
+
+      console.log(receipt.tokenContract.toString() === myRinkebyCoinAddress.toString())
 
       if (receipt.tokenContract.toString() === myRinkebyCoinAddress.toString()) {
         console.log(`Found pending withdrawal of ${receipt.tokenAmount.div(coinMultiplier).toString()} coins.`)
@@ -688,16 +690,16 @@ program
         })
         console.log(`${receipt.tokenAmount.div(coinMultiplier).toString()} tokens withdrawn from Etheruem Gateway.`)
         console.log(`Rinkeby tx hash: ${txHash}`)
-      } else if (receipt.tokenContract.toString() === myRinkebyTokenAddress.toString()){
-        console.log(`Found pending withdrawal of token ${receipt.tokenId.toString()}.`)
-        const txHash = await withdrawTokenFromRinkebyGateway({
-          web3js: rinkeby.web3js,
-          web3Account: rinkeby.account,
-          receipt,
-          gas: options.gas || 350000
-        })
-        console.log(`Token ${receipt.tokenId.toString()} withdrawn from Ethereum Gateway.`)
-        console.log(`Rinkeby tx hash: ${txHash}`)
+      // } else if (receipt.tokenContract.toString() === myRinkebyTokenAddress.toString()){
+      //   console.log(`Found pending withdrawal of token ${receipt.tokenId.toString()}.`)
+      //   const txHash = await withdrawTokenFromRinkebyGateway({
+      //     web3js: rinkeby.web3js,
+      //     web3Account: rinkeby.account,
+      //     receipt,
+      //     gas: options.gas || 350000
+      //   })
+      //   console.log(`Token ${receipt.tokenId.toString()} withdrawn from Ethereum Gateway.`)
+      //   console.log(`Rinkeby tx hash: ${txHash}`)
       } else if (receipt.tokenContract.toString() === myRinkebyGatewayAddress.toString()) {
         console.log(`Found pending withdrawal of ${amountInEth.toString()} ETH.`)
         const txHash = await withdrawEthFromRinkebyGateway({

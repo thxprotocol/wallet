@@ -14,6 +14,7 @@ import config from './config.js';
 
 import StateService from './services/StateService';
 import NetworkService from './services/NetworkService';
+import GatewayService from './services/GatewayService';
 
 /*global THX*/
 window.THX = {};
@@ -23,6 +24,7 @@ const loomPrivateKey = THX.state.loomPrivateKey;
 const rinkebyPrivateKey = THX.state.rinkebyPrivateKey;
 
 THX.network = new NetworkService(loomPrivateKey, rinkebyPrivateKey);
+THX.gateway = new GatewayService(loomPrivateKey, rinkebyPrivateKey);
 
 THX.network.init()
     .then(instances => {
