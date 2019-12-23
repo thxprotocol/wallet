@@ -41,37 +41,37 @@ export default class Rule extends Vue {
         proposedAmount: 0,
     };
 
-    @Prop() rule: any = null;
-    @Prop() contract: any = null;
-    @Prop() account: any = {
+    @Prop() public rule: any = null;
+    @Prop() public contract: any = null;
+    @Prop() public account: any = {
         loom: {
-            address: ''
+            address: '',
         },
         isMember: false,
         isManager: false,
     };
 
-    mounted() {
+    public mounted() {
         this.init();
     }
 
-    async init() {
+    public async init() {
         this.loading = true;
         this.meta = (await this.getRuleMeta()).val();
         this.loading = false;
     }
-    async getRuleMeta() {
+    public async getRuleMeta() {
         const rulesRef = firebase.database().ref(`pools/${this.contract._address}/rules`);
 
         return await rulesRef.child(this.rule.slug).once('value');
     }
-    async showRulePoll() {
+    public async showRulePoll() {
         this.loading = true;
         this.modal.rulePoll = true;
         this.poll = await this.getRulePoll();
     }
-    async getRulePoll() {
-        if (this.rule.poll !== "0x0000000000000000000000000000000000000000") {
+    public async getRulePoll() {
+        if (this.rule.poll !== '0x0000000000000000000000000000000000000000') {
             const utils = THX.network.loom.utils;
             const rulePoll = await THX.network.contract(RulePoll, this.rule.poll);
             const id = parseInt(await rulePoll.methods.id().call());
@@ -92,27 +92,27 @@ export default class Rule extends Vue {
             this.loading = false;
 
             return this.poll = {
-                id: id,
+                id,
                 amount: this.rule.amount,
-                proposedAmount: proposedAmount,
-                minVotedTokensPerc: minVotedTokensPerc,
+                proposedAmount,
+                minVotedTokensPerc,
                 // votedTokensPerc: votedTokensPerc,
                 yesCounter: parseInt(new BN(yesCounter).div(tokenMultiplier)),
                 noCounter: parseInt(new BN(noCounter).div(tokenMultiplier)),
-                totalVoted: totalVoted,
+                totalVoted,
                 hasVoted: parseInt(vote.time) > 0,
-                now: now,
+                now,
                 startTime: parseInt(startTime),
                 endTime: parseInt(endTime),
-                diff: diff,
+                diff,
                 address: this.rule.poll,
-                finalized: finalized,
-                meta: meta,
-            }
+                finalized,
+                meta,
+            };
         }
 
     }
-    async vote(agree: boolean) {
+    public async vote(agree: boolean) {
         this.loading = true;
 
         return await this.contract.methods.voteForRule(this.poll.id, agree)
@@ -131,7 +131,7 @@ export default class Rule extends Vue {
                 console.error(err);
             });
     }
-    async revokeVote() {
+    public async revokeVote() {
         this.loading = true;
 
         return await this.contract.methods.revokeVoteForRule(this.poll.id)
@@ -149,7 +149,7 @@ export default class Rule extends Vue {
                 console.error(err);
             });
     }
-    async finalizePoll() {
+    public async finalizePoll() {
         const rulePoll = await THX.network.contract(RulePoll, this.rule.poll);
 
         this.loading = true;
@@ -159,7 +159,7 @@ export default class Rule extends Vue {
             .then(async (tx: any) => {
                 this.loading = false;
                 this.modal.rulePoll = false;
-                this.rule.poll = "0x0000000000000000000000000000000000000000";
+                this.rule.poll = '0x0000000000000000000000000000000000000000';
 
                 // eslint-disable-next-line
                 console.log(tx);
@@ -168,9 +168,9 @@ export default class Rule extends Vue {
                 this.loading = false;
                 // eslint-disable-next-line
                 console.error(err);
-            })
+            });
     }
-    async startPoll() {
+    public async startPoll() {
         const utils = THX.network.loom.utils;
         const amount = utils.toWei(this.input.proposedAmount, 'ether');
 
@@ -191,6 +191,6 @@ export default class Rule extends Vue {
                 this.loading = false;
                 // eslint-disable-next-line
                 console.error(err);
-            })
+            });
     }
 }

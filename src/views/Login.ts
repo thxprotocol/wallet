@@ -6,7 +6,7 @@ import { BSpinner } from 'bootstrap-vue';
 @Component({
     name: 'login',
     components: {
-        BSpinner
+        BSpinner,
     },
 })
 export default class Login extends Vue {
@@ -20,7 +20,7 @@ export default class Login extends Vue {
         return firebase.auth().signInWithEmailAndPassword(this.email, this.password)
             .then(() => {
                 this.loading = false;
-                this.$router.replace('/')
+                this.$router.replace('/');
             })
             .catch((err) => {
                 if (typeof err != 'undefined') {

@@ -22,4 +22,4 @@
 </article>
 </template>
 
-<script src="./Wallet.ts"></script>
+<script src="./Wallet.ts" lang="ts"></script>

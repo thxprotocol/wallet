@@ -25,21 +25,20 @@ export default class Register extends Vue {
         super();
     }
 
-    register() {
+    public register() {
         this.loading = true;
 
         if (this.password === this.passwordVerify) {
             this.createAccount();
-        }
-        else {
-            alert("Your passwords do not match.");
+        } else {
+            alert('Your passwords do not match.');
         }
     }
 
-    createAccount() {
+    public createAccount() {
         firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
             .then((r: any) => {
-                const privateKeyArray = CryptoUtils.generatePrivateKey()
+                const privateKeyArray = CryptoUtils.generatePrivateKey();
                 const privateKeyString = CryptoUtils.Uint8ArrayToB64(privateKeyArray);
                 const account = THX.network.rinkeby.eth.accounts.create();
                 const user = {
@@ -48,7 +47,7 @@ export default class Register extends Vue {
                     firstName: r.user.firstName,
                     lastName: r.user.lastName,
                     userName: r.user.userName,
-                }
+                };
 
                 THX.state.loomPrivateKey = privateKeyString;
                 THX.state.rinkebyPrivateKey = account.privateKey;
@@ -61,9 +60,9 @@ export default class Register extends Vue {
             })
             .catch((err) => {
                 if (typeof err != 'undefined') {
-                    alert("Error during account registration.")
+                    alert('Error during account registration.');
                 }
                 this.loading = false;
-            })
+            });
     }
 }

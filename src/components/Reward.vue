@@ -35,4 +35,4 @@
     </article>
 </template>
 
-<script src="./Reward.ts"></script>
+<script src="./Reward.ts" lang="ts"></script>

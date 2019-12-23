@@ -24,19 +24,19 @@ export default class Rewards extends Vue {
     public rewards: any = [];
     public amountOfRewards: any = -1;
 
-    @Prop() contract: any = null;
-    @Prop() account: any = {
+    @Prop() public contract: any = null;
+    @Prop() public account: any = {
         loom: {
-            address: ''
+            address: '',
         },
         isManager: false,
         isMember: false,
     };
 
-    mounted() {
+    public mounted() {
         this.loading = true;
 
-        this.getRewards().then(()=> {
+        this.getRewards().then(() => {
             this.loading = false;
         });
 
@@ -45,22 +45,22 @@ export default class Rewards extends Vue {
         this.events.listen('event.RewardPollFinished', this.onRewardPollFinished);
     }
 
-    onRewardStateChanged(data: any) {
+    public onRewardStateChanged(data: any) {
         // eslint-disable-next-line
-        console.log(data)
-    };
+        console.log(data);
+    }
 
-    onRewardPollCreated(data: any) {
+    public onRewardPollCreated(data: any) {
         // eslint-disable-next-line
-        console.log(data)
-    };
+        console.log(data);
+    }
 
-    onRewardPollFinished(data: any) {
+    public onRewardPollFinished(data: any) {
         // eslint-disable-next-line
-        console.log(data)
-    };
+        console.log(data);
+    }
 
-    async subscribeRewardEvents() {
+    public async subscribeRewardEvents() {
         const amount = await this.contract.methods.countRewards().call();
 
         for (let i = 0; i < parseInt(amount); i++) {
@@ -74,7 +74,7 @@ export default class Rewards extends Vue {
         }
     }
 
-    async getRewards() {
+    public async getRewards() {
         const utils = THX.network.loom.utils;
 
         this.amountOfRewards = parseInt( await this.contract.methods.countRewards().call() );
@@ -91,15 +91,15 @@ export default class Rewards extends Vue {
 
             Vue.set(this.rewards, id, {
                 contract: reward,
-                id: id,
-                uid: uid,
-                user: user,
+                id,
+                uid,
+                user,
                 slug: await reward.methods.slug().call(),
-                now: now,
+                now,
                 startTime: parseInt(await reward.methods.startTime().call()),
                 endTime: parseInt(await reward.methods.endTime().call()),
-                beneficiary: beneficiary,
-                amount: amount,
+                beneficiary,
+                amount,
                 state: RewardState[await reward.methods.state().call()],
                 created: parseInt(await reward.methods.created().call()),
             });

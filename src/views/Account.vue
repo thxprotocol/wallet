@@ -1,8 +1,8 @@
 <template>
 <article class="region region-container">
-    <main class="region region-content">
+    <main class="region region-content" v-if="$account.profile">
 
-        <h2>{{account.firstName}} {{account.lastName}}</h2>
+        <h2>{{$account.profile.firstName}} {{$account.profile.lastName}}</h2>
 
         <BAlert v-if="alert" show :variant="alert.variant ? alert.variant : 'info'">
           {{ alert.text }}
@@ -10,29 +10,29 @@
 
         <div class="card mb-3">
             <div class="card-body">
-                <span v-if="!account.picture" class="float-left mr-3">
+                <span v-if="!$account.profile.picture" class="float-left mr-3">
                     <label class="text-center">
-                        <ProfilePicture size="lg" :uid="uid"></ProfilePicture><br>
+                        <ProfilePicture size="lg" :profile="$account.profile" /><br>
                         <span class="btn btn-link">Upload image</span>
                         <input type="file" @change="onFileChange" class="d-none">
                     </label>
                 </span>
-                <span v-else class="float-left mr-3 text-center">
-                    <ProfilePicture size="lg" :uid="uid"></ProfilePicture><br>
+                <span v-if="$account.profile.picture" class="float-left mr-3 text-center">
+                    <ProfilePicture size="lg" :profile="$account.profile" /><br>
                     <button class="btn btn-link" @click="removeImage">Delete</button>
                 </span>
 
                 <h3>E-mail:</h3>
-                <p>{{account.email}}</p>
+                <p>{{$account.profile.email}}</p>
 
                 <h3>UID:</h3>
-                <p>{{account.uid}}</p>
+                <p>{{$account.uid}}</p>
                 <hr class="mt-5">
                 <button class="btn btn-link btn-block" @click="showModal('modal-connect')">Connect Accounts</button>
             </div>
         </div>
 
-        <div class="card mb-3" v-if="account.rinkeby.address">
+        <div class="card mb-3" v-if="$network.rinkeby">
             <div class="card-header">
                 <strong>Rinkeby Network</strong><br>
                 <small>{{account.rinkeby.address}} <a class="text-primary" @click="copyClipboard(account.rinkeby.address)">({{clipboard === account.rinkeby.address ? 'Copied!' : 'Copy'}})</a></small>
@@ -47,7 +47,7 @@
             </div>
         </div>
 
-        <div class="card mb-3" v-if="account.loom.address">
+        <div class="card mb-3" v-if="$network.extdev">
             <div class="card-header">
                 <strong>Loom Network</strong><br>
                 <small>{{account.loom.address}} <a class="text-primary" @click="copyClipboard(account.loom.address)">({{clipboard === account.loom.address ? 'Copied!' : 'Copy'}})</a></small>
@@ -87,7 +87,7 @@
             <div class="form-group">
                 <label>Loom private key:</label>
                 <div class="input-group">
-                    <input v-model="input.loomPrivateKey" type="text" class="form-control" placeholder="Paste or create your Loom private key">
+                    <input v-model="input.extdevPrivateKey" type="text" class="form-control" placeholder="Paste or create your Loom private key">
                     <div class="input-group-append">
                         <span @click="createLoomKey()" class="input-group-text btn btn-link">Create new key</span>
                     </div>
@@ -223,4 +223,4 @@
 </article>
 </template>
 
-<script src="./Account.ts"></script>
+<script src="./Account.ts" lang="ts"></script>

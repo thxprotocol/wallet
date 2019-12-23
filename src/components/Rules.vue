@@ -34,4 +34,4 @@
     </article>
 </template>
 
-<script src="./Rules.ts"></script>
+<script src="./Rules.ts" lang="ts"></script>

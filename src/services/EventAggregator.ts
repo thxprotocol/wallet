@@ -1,33 +1,33 @@
 export default class EventAggregator {
-    public listeners: {
+    public listeners: Array<{
         e: string,
-        cb: Function
-    }[];
+        cb: Function,
+    }>;
 
     constructor() {
         this.listeners = [];
     }
 
-    listen(e: string, callback: Function) {
+    public listen(e: string, callback: Function) {
         const listener = {
-            e: e,
-            cb: callback
+            e,
+            cb: callback,
         };
         const id = this.listeners.push(listener);
 
-        window.addEventListener(listener.e, listener.cb)
+        window.addEventListener(listener.e, listener.cb);
 
-        return id-1;
+        return id - 1;
     }
 
-    dispatch(e: string, data: any) {
+    public dispatch(e: string, data: any) {
         const event = new CustomEvent(e, { detail: data });
         return window.dispatchEvent(event);
     }
 
-    remove(id: number) {
+    public remove(id: number) {
         window.removeEventListener(this.listeners[id].e, this.listeners[id].cb);
-        return delete this.listeners[id]
+        return delete this.listeners[id];
     }
 
 }

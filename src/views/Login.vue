@@ -25,4 +25,4 @@
     </main>
 </template>
 
-<script src="./Login.ts"></script>
+<script src="./Login.ts" lang="ts"></script>

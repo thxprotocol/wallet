@@ -30,7 +30,7 @@ const RuleState = ['Active', 'Disabled'];
 export default class Pool extends Vue {
 
     get orderedStream() {
-        return _.orderBy(this.stream, 'timestamp').reverse()
+        return _.orderBy(this.stream, 'timestamp').reverse();
     }
 
     public contract: any = null;
@@ -40,22 +40,22 @@ export default class Pool extends Vue {
 
     public account: any = {
         loom: {
-            address: ''
+            address: '',
         },
         isManager: false,
         isMember: false,
     };
-    public pool:any = {
+    public pool: any = {
         address: '',
         name: '',
         balance: 0,
     };
-    public input:any = {
+    public input: any = {
         poolDeposit: 0,
         addMember: '',
         addManager: '',
     };
-    public modal:any = {
+    public modal: any = {
         addMember: false,
         addManager: false,
         poolDeposit: false,
@@ -63,13 +63,13 @@ export default class Pool extends Vue {
 
     constructor() {
         super();
-        
+
         if (THX.network.hasKeys) {
             this.init();
         }
     }
 
-    async init() {
+    public async init() {
         const token = THX.network.instances.token;
 
         this.pool.address = this.$route.params.id;
@@ -90,11 +90,11 @@ export default class Pool extends Vue {
         const hash = RewardPool.networks[9545242630824].transactionHash;
         const receipt = await THX.network.loom.eth.getTransactionReceipt(hash);
 
-        for (let e of this.events.poolEvents) {
+        for (const e of this.events.poolEvents) {
             this.contract.getPastEvents(e, { fromBlock: receipt.blockNumber, toBlock: 'latest'})
                 .then((events: any[]) => {
                     if (events.length > 0) {
-                        for (let event of events) {
+                        for (const event of events) {
                             this[`on${event.event}`](event.returnValues, event.blockTime);
                         }
                     }
@@ -106,29 +106,29 @@ export default class Pool extends Vue {
         }
     }
 
-    onRulePollCreated(data: any, timestamp: string) {
+    public onRulePollCreated(data: any, timestamp: string) {
         this.stream.push({
             timestamp: parseInt(timestamp, 10),
             title: `Rule #${data.id} poll: ${new BN(data.proposedAmount).div(tokenMultiplier)} THX`,
         });
     }
 
-    onRulePollFinished(data: any, timestamp: string) {
+    public onRulePollFinished(data: any, timestamp: string) {
         this.stream.push({
             timestamp: parseInt(timestamp),
             title: `Rule #${data.id} poll ${data.approved ? 'approved' : 'rejected'}`,
-            variant: data.approved ? 'success' : 'danger'
+            variant: data.approved ? 'success' : 'danger',
         });
     }
 
-    onRuleStateChanged(data: any, timestamp: string) {
+    public onRuleStateChanged(data: any, timestamp: string) {
         this.stream.push({
             timestamp: parseInt(timestamp),
             title: `Rule #${data.id} set to ${RuleState[data.state]}`,
         });
     }
 
-    onDeposited(data: any, timestamp: string) {
+    public onDeposited(data: any, timestamp: string) {
         this.stream.push({
             timestamp: parseInt(timestamp),
             title: `+${new BN(data.amount).div(tokenMultiplier)} THX (Deposit)`,
@@ -137,7 +137,7 @@ export default class Pool extends Vue {
         });
     }
 
-    onWithdrawn(data: any, timestamp: string) {
+    public onWithdrawn(data: any, timestamp: string) {
         this.stream.push({
             timestamp: parseInt(timestamp),
             title: `-${new BN(data.amount).div(tokenMultiplier)} THX (Withdrawel)`,
@@ -146,15 +146,15 @@ export default class Pool extends Vue {
         });
     }
 
-    onManagerAdded(data: any, timestamp: string) {
+    public onManagerAdded(data: any, timestamp: string) {
         this.stream.push({
             timestamp: parseInt(timestamp),
             title: `New manager promotion`,
-            body: `${data.account}`
+            body: `${data.account}`,
         });
     }
 
-    onMemberAdded(data: any, timestamp: string) {
+    public onMemberAdded(data: any, timestamp: string) {
         this.stream.push({
             timestamp: parseInt(timestamp),
             title: `New member added`,
@@ -175,7 +175,7 @@ export default class Pool extends Vue {
     //     });
     // },
 
-    onAddManager() {
+    public onAddManager() {
         this.loading = true;
 
         return this.contract.methods.addManager(this.input.addManager)
@@ -185,7 +185,7 @@ export default class Pool extends Vue {
             });
     }
 
-    onAddMember() {
+    public onAddMember() {
         this.loading = true;
 
         return this.contract.methods.addMember(this.input.addMember).send({ from: this.account.loom.address })
@@ -198,7 +198,7 @@ export default class Pool extends Vue {
             });
     }
 
-    onTransferToPool() {
+    public onTransferToPool() {
         const tokenAmount = new BN(this.input.poolDeposit).mul(tokenMultiplier);
 
         this.loading = true;

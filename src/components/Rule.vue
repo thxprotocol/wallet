@@ -135,4 +135,4 @@
 
 </template>
 
-<script src="./Rule.ts"></script>
+<script src="./Rule.ts" lang="ts"></script>

@@ -12,4 +12,4 @@
 </footer>
 </template>
 
-<script src="./Footer.ts"></script>
+<script src="./Footer.ts" lang="ts"></script>

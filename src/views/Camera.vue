@@ -102,4 +102,4 @@
         background: #EFEFEF;
     }
 </style>
-<script src="./Camera.ts"></script>
+<script src="./Camera.ts" lang="ts"></script>

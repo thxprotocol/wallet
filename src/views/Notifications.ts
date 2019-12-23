@@ -41,18 +41,18 @@ export default class Notifications extends Vue {
         }
     }
 
-    async init(uid: string) {
-        firebase.database().ref(`users/${uid}/pools`).once('value').then(async s => {
+    public async init(uid: string) {
+        firebase.database().ref(`users/${uid}/pools`).once('value').then(async (s) => {
             const pools = s.val();
 
             // Get all the pools
-            for (let poolAddress in pools) {
+            for (const poolAddress in pools) {
                 const pool = await THX.network.contract(RewardPool, poolAddress);
-                const amountOfRewards = await pool.methods.countRewards().call()
-                const isManager = await pool.methods.isManager(THX.network.account.address).call()
+                const amountOfRewards = await pool.methods.countRewards().call();
+                const isManager = await pool.methods.isManager(THX.network.account.address).call();
 
                 if (isManager) {
-                    for (var i = 0; i < amountOfRewards; i++) {
+                    for (let i = 0; i < amountOfRewards; i++) {
                         const rewardAddress = await pool.methods.rewards(i).call();
                         const contract = await THX.network.contract(Reward, rewardAddress);
                         const state = await contract.methods.state().call();
@@ -66,10 +66,10 @@ export default class Notifications extends Vue {
                     }
                 }
             }
-        })
+        });
     }
 
-    async formatReward(contract: any, pool: any) {
+    public async formatReward(contract: any, pool: any) {
         const token = THX.network.instances.token;
         const utils = THX.network.loom.utils;
         const address = THX.network.account.address;
@@ -98,7 +98,7 @@ export default class Notifications extends Vue {
         const balance = await token.methods.balanceOf(pool._address).call();
 
         return {
-            id: id,
+            id,
             pool: {
                 address: pool._address,
                 name: poolName,
@@ -106,24 +106,24 @@ export default class Notifications extends Vue {
             },
             user: user.val(),
             rule: rule.val(),
-            slug: slug,
-            amount: amount,
-            state: state,
+            slug,
+            amount,
+            state,
             created: dateTime,
             poll: {
                 now: parseInt(now),
-                diff: diff,
-                totalVoted: totalVoted,
+                diff,
+                totalVoted,
                 startTime: parseInt(startTime),
                 endTime: parseInt(endTime),
                 hasVoted: (parseInt(vote.time) > 0),
                 yesCounter: parseInt(utils.fromWei(yesCounter, 'ether')),
                 noCounter: parseInt(utils.fromWei(noCounter, 'ether')),
-            }
-        }
+            },
+        };
     }
 
-    async finalizePoll(id: number, poolAddress: string) {
+    public async finalizePoll(id: number, poolAddress: string) {
         const pool = await THX.network.contract(RewardPool, poolAddress);
         const rewardAddress = await pool.methods.rewards(id).call();
         const reward = await THX.network.contract(Reward, rewardAddress);
@@ -141,12 +141,12 @@ export default class Notifications extends Vue {
                 this.loading = false;
                 // eslint-disable-next-line
                 console.error(err);
-            })
+            });
     }
 
-    async vote(id: number, agree: boolean, poolAddress: string) {
+    public async vote(id: number, agree: boolean, poolAddress: string) {
         const pool = await THX.network.contract(RewardPool, poolAddress);
-        const isManager = await pool.methods.isManager(THX.network.account.address).call()
+        const isManager = await pool.methods.isManager(THX.network.account.address).call();
 
         this.loading = true;
 
@@ -161,16 +161,15 @@ export default class Notifications extends Vue {
                     // eslint-disable-next-line
                     return console.error(e);
                 });
-        }
-        else {
+        } else {
             this.loading = false;
         }
 
     }
 
-    async revokeVote(id: number, poolAddress: string) {
+    public async revokeVote(id: number, poolAddress: string) {
         const pool = await THX.network.contract(RewardPool, poolAddress);
-        const isManager = await pool.methods.isManager(THX.network.account.address).call()
+        const isManager = await pool.methods.isManager(THX.network.account.address).call();
 
         if (isManager) {
             return pool.methods.revokeVoteForReward(id).send({ from: THX.network.account.address })
@@ -183,8 +182,7 @@ export default class Notifications extends Vue {
                     // eslint-disable-next-line
                     return console.error(e);
                 });
-        }
-        else {
+        } else {
             this.loading = false;
         }
 

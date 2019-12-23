@@ -6,22 +6,22 @@ const QRCode = window.QRCode;
     name: 'Widget',
 })
 export default class Widget extends Vue {
-    mounted() {
+    public mounted() {
         if (this.$route.params.rule && this.$route.params.pool) {
             QRCode.toCanvas(
                 document.getElementById('canvas'),
                 JSON.stringify({
-                     rule: parseInt(this.$route.params.rule),
-                     pool: this.$route.params.pool
+                     rule: parseInt(this.$route.params.rule, 10),
+                     pool: this.$route.params.pool,
                 }),
                 (error: string) => {
                     if (error) {
-                        //eslint-disable-next-line
-                        console.error(error)
+                        // eslint-disable-next-line
+                        console.error(error);
                     }
-                    //eslint-disable-next-line
-                    console.log('success')
-                }
+                    // eslint-disable-next-line
+                    console.log('success');
+                },
             );
         }
     }

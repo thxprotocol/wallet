@@ -31,16 +31,16 @@ export default class Rules extends Vue {
         description: '',
     };
 
-    @Prop() contract: any = null;
-    @Prop() account: any = {
+    @Prop() public contract: any = null;
+    @Prop() public account: any = {
         loom: {
-            address: ''
+            address: '',
         },
         isManager: false,
         isMember: false,
-    }
+    };
 
-    mounted() {
+    public mounted() {
         this.getRules();
 
         this.events.listen('event.RuleStateChanged', this.onRuleStateChanged);
@@ -48,14 +48,14 @@ export default class Rules extends Vue {
         this.events.listen('event.RulePollFinished', this.onRulePollFinished);
     }
 
-    async onRulePollCreated(data: any) {
+    public async onRulePollCreated(data: any) {
         const r = data.detail;
         const rule = await this.contract.methods.rules(r.id).call();
 
         Vue.set(this.rules[rule.id], 'poll', rule.poll);
     }
 
-    async onRulePollFinished(data: any) {
+    public async onRulePollFinished(data: any) {
         const utils = THX.network.loom;
         const r = data.detail;
         const rule = await this.contract.methods.rules(r.id).call();
@@ -65,7 +65,7 @@ export default class Rules extends Vue {
         Vue.set(this.rules[rule.id], 'amount', amount);
     }
 
-    async onRuleStateChanged(data: any) {
+    public async onRuleStateChanged(data: any) {
         const r = data.detail;
         const rule = await this.contract.methods.rules(r.id).call();
         const rulesRef = firebase.database().ref(`pools/${this.contract._address}/rules`);
@@ -74,10 +74,10 @@ export default class Rules extends Vue {
             Vue.set(this.rules[rule.id], 'state', RuleState[rule.state]);
         }
 
-        rulesRef.child(rule.slug).update({ state: RuleState[rule.state] })
+        rulesRef.child(rule.slug).update({ state: RuleState[rule.state] });
     }
 
-    createRule() {
+    public createRule() {
         const rulesRef = firebase.database().ref(`pools/${this.contract._address}/rules`);
 
         this.loading = true;
@@ -95,8 +95,8 @@ export default class Rules extends Vue {
                     const rule = await this.contract.methods.rules(id).call();
 
                     rulesRef.child(rule.slug).update({
-                        id: id,
-                        state: RuleState[rule.state]
+                        id,
+                        state: RuleState[rule.state],
                     });
 
                     this.modal.createRule = false;
@@ -112,7 +112,7 @@ export default class Rules extends Vue {
         });
     }
 
-    async getRules() {
+    public async getRules() {
         // const rulesRef = firebase.database().ref(`pools/${this.contract._address}/rules`);
         // Check the firebase for objects that are not in contracts and vice versa.
         // TODO index the id and not the slug
@@ -124,7 +124,7 @@ export default class Rules extends Vue {
             const amount = utils.fromWei(rule.amount, 'ether');
 
             Vue.set(this.rules, rule.id, {
-                amount: amount,
+                amount,
                 created: rule.created,
                 creator: rule.creator,
                 id: rule.id,

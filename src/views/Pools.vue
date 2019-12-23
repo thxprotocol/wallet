@@ -50,7 +50,7 @@
     </article>
 </template>
 
-<script src="./Pools.ts"></script>
+<script src="./Pools.ts" lang="ts"></script>
 
 <style>
 .card-pool .card-header {

@@ -6,9 +6,9 @@ import 'firebase/auth';
     name: 'logout',
 })
 export default class Logout extends Vue {
-    mounted() {
+    public mounted() {
         firebase.auth().signOut().then(() => {
-            this.$router.replace('login')
-        })
+            this.$router.replace('login');
+        });
     }
 }

@@ -91,4 +91,4 @@
     </article>
 </template>
 
-<script src="./Pool.ts"></script>
+<script src="./Pool.ts" lang="ts"></script>

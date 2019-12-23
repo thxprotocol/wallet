@@ -15,19 +15,19 @@ const THX = window.THX;
 export default class Reward extends Vue {
     public loading: boolean = false;
 
-    @Prop() reward: any = null;
-    @Prop() contract: any = null;
-    @Prop() account: any = {
+    @Prop() public reward: any = null;
+    @Prop() public contract: any = null;
+    @Prop() public account: any = {
             loom: {
-                address: ''
-            }
+                address: '',
+            },
         };
 
     public mounted() {
 
     }
 
-    async withdraw() {
+    public async withdraw() {
         this.loading = true;
 
         return await this.reward.contract.methods.withdraw()
@@ -41,9 +41,9 @@ export default class Reward extends Vue {
                 this.loading = false;
                 // eslint-disable-next-line
                 console.error(err);
-            })
+            });
     }
-    async finalizePoll() {
+    public async finalizePoll() {
         this.loading = true;
 
         return await this.reward.contract.methods.tryToFinalize()
@@ -58,6 +58,6 @@ export default class Reward extends Vue {
                 this.loading = false;
                 // eslint-disable-next-line
                 console.error(err);
-            })
+            });
     }
 }

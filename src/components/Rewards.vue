@@ -21,4 +21,4 @@
     </article>
 </template>
 
-<script src="./Rewards.ts"></script>
+<script src="./Rewards.ts" lang="ts"></script>

@@ -43,4 +43,4 @@
 
 </style>
 
-<script src="./Widget.ts"></script>
+<script src="./Widget.ts" lang="ts"></script>

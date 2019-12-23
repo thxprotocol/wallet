@@ -41,4 +41,4 @@
     </article>
 </template>
 
-<script src="./Register.ts"></script>
+<script src="./Register.ts" lang="ts"></script>

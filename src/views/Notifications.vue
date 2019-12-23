@@ -98,4 +98,4 @@
 </article>
 </template>
 
-<script src="./Notifications.ts"></script>
+<script src="./Notifications.ts" lang="ts"></script>

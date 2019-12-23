@@ -34,7 +34,7 @@ export default class Pools extends Vue {
         }
     }
 
-    init() {
+    public init() {
 
         this.loading = true;
 
@@ -44,7 +44,7 @@ export default class Pools extends Vue {
             const hash = RewardPool.networks[9545242630824].transactionHash;
             const receipt = await THX.network.loom.eth.getTransactionReceipt(hash);
 
-            let data = s.val();
+            const data = s.val();
 
             this.contracts[data.address] = await THX.network.contract(RewardPool, data.address);
 
@@ -62,22 +62,22 @@ export default class Pools extends Vue {
 
         firebase.database().ref(`users/${this.uid}/pools`).on('child_removed', (s: any) => {
             Vue.delete(this.pools, s.key);
-        })
+        });
     }
 
-    onJoinPool() {
+    public onJoinPool() {
         firebase.database().ref(`users/${this.uid}/pools`).child(this.poolAddress).set({
-            address: this.poolAddress
+            address: this.poolAddress,
         });
 
         return this.showJoinPoolModal = false;
     }
 
-    onLeavePool(poolAddress: string) {
+    public onLeavePool(poolAddress: string) {
         return firebase.database().ref(`users/${this.uid}/pools`).child(poolAddress).remove();
     }
 
-    openPool(poolAddress: string) {
+    public openPool(poolAddress: string) {
         return this.$router.replace(`/pools/${poolAddress}`);
     }
 }

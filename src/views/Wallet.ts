@@ -1,8 +1,6 @@
-import Vue from 'vue';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import EventService from '../services/EventService';
 import { BSpinner, BListGroup, BListGroupItem } from 'bootstrap-vue';
-
-const THX = window.THX;
 
 @Component({
     name: 'home',
@@ -10,23 +8,25 @@ const THX = window.THX;
         'b-spinner': BSpinner,
         'b-list-group': BListGroup,
         'b-list-group-item': BListGroupItem,
-    }
+    },
 })
 export default class Wallet extends Vue {
     public events: any = null;
     public tokenTransfers: any[] = [];
 
     get orderedTokenTransfers() {
-        let arr: any[] = [];
-        for (let hash in this.tokenTransfers) {
+        const arr: any[] = [];
+        for (const hash in this.tokenTransfers) {
             arr.unshift(this.tokenTransfers[hash]);
         }
 
-        return arr.reverse()
+        return arr.reverse();
     }
 
     constructor() {
         super();
+
+        const THX = window.THX;
 
         if (THX.network.hasKeys) {
             this.events = new EventService();
@@ -34,7 +34,9 @@ export default class Wallet extends Vue {
         }
     }
 
-    async init() {
+    public async init() {
+        const THX = window.THX;
+
         const token = await THX.network.instances.token;
         const fromBlock = await this.getCurrentBlockId();
         const offset = 10000;
@@ -49,7 +51,7 @@ export default class Wallet extends Vue {
         token.getPastEvents('Transfer', {
             filter: { from: address },
             fromBlock: (fromBlock - offset),
-            toBlock: 'latest'
+            toBlock: 'latest',
         }, (error, events) => {
             this.addMyTransfers(events);
         });
@@ -57,26 +59,26 @@ export default class Wallet extends Vue {
         token.getPastEvents('Transfer', {
             filter: { to: address },
             fromBlock: (fromBlock - offset),
-            toBlock: 'latest'
+            toBlock: 'latest',
         }, (error, events) => {
             this.addMyTransfers(events);
         });
     }
 
-    getCurrentBlockId() {
+    public getCurrentBlockId() {
         return THX.network.loom.eth.getBlockNumber().then((data: any) => {
             return data;
         });
     }
 
-    addMyTransfers(data: any) {
+    public addMyTransfers(data: any) {
         const utils = THX.network.loom.utils;
 
-        for (let key in data) {
+        for (const key in data) {
             const hash = data[key].transactionHash;
             const value = data[key].returnValues;
-            const from = (value.from) ? value.from.toLowerCase(): '';
-            const to = (value.to) ? value.to.toLowerCase(): '';
+            const from = (value.from) ? value.from.toLowerCase() : '';
+            const to = (value.to) ? value.to.toLowerCase() : '';
             const amount = utils.fromWei(value.value, 'ether');
             const timestamp = data[key].blockTime;
 
@@ -84,12 +86,12 @@ export default class Wallet extends Vue {
         }
     }
 
-    addMyTransfer(data: any) {
+    public addMyTransfer(data: any) {
         const utils = THX.network.loom.utils;
         const value = data.detail;
         const hash  = event.transactionHash;
-        const from = (value.from) ? value.from.toLowerCase(): '';
-        const to = (value.to) ? value.to.toLowerCase(): '';
+        const from = (value.from) ? value.from.toLowerCase() : '';
+        const to = (value.to) ? value.to.toLowerCase() : '';
         const amount = utils.fromWei(value.value, 'ether');
         const timestamp = event.blockTime;
 
@@ -98,13 +100,13 @@ export default class Wallet extends Vue {
         this.$parent.$refs.header.updateBalance();
     }
 
-    _createTransfer(hash: string, from: string, to: string, amount: string, timestamp: string) {
+    public _createTransfer(hash: string, from: string, to: string, amount: string, timestamp: string) {
         Vue.set(this.tokenTransfers, hash, {
-            hash: hash,
-            from: from,
-            to: to,
+            hash,
+            from,
+            to,
             amount: Number(amount),
-            timestamp: timestamp,
+            timestamp,
         });
     }
 }

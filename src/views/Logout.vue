@@ -3,4 +3,4 @@
         <p>Logging out...</p>
     </article>
 </template>
-<script src="./Logout.ts"></script>
+<script src="./Logout.ts" lang="ts"></script>

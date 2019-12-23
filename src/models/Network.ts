@@ -1,3 +1,4 @@
+import { Vue } from 'vue-property-decorator';
 import {
     Client,
     NonceTxMiddleware,
@@ -11,20 +12,12 @@ import {
     soliditySha3,
 } from 'loom-js';
 import Web3 from 'web3';
-const config = require('../config');
-
-// TODO: fix this export in loom-js
-const {
-    OfflineWeb3Signer,
-} = require('loom-js/dist/solidity-helpers');
+const Config = require('../config');
+const { OfflineWeb3Signer } = require('loom-js/dist/solidity-helpers');
+const { ethers } = require('ethers');
 const BN = require('bn.js');
-const {
-    ethers,
-} = require('ethers');
-
 const MyRinkebyCoinJSON = require('../contracts/THXTokenRinkeby.json');
 const MyCoinJSON = require('../contracts/THXToken.json');
-
 const TransferGateway = Contracts.TransferGateway;
 const AddressMapper = Contracts.AddressMapper;
 
@@ -33,19 +26,31 @@ const AddressMapper = Contracts.AddressMapper;
 const rinkebyGatewayAddress = '0x9c67fD4eAF0497f9820A3FBf782f81D6b6dC4Baa';
 const extdevGatewayAddress = '0xE754d9518bF4a9C63476891eF9Aa7D91c8236a5d';
 const extdevChainId = 'extdev-plasma-us1';
-const INFURA_API_KEY = config.infura.key;
+const INFURA_API_KEY = Config.infura.key;
 
 const coinMultiplier = new BN(10).pow(new BN(18));
 
-export default class GatewayService {
+export class Network extends Vue {
     public loomPrivateKeyString: string;
     public rinkebyPrivateKeyString: string;
+    public extdev: any;
+    public rinkeby: any;
 
-    constructor(loomPrivateKey: string, rinkebyPrivateKey: string) {
-        this.loomPrivateKeyString = loomPrivateKey;
+    constructor(
+        extdevPrivateKey: string,
+        rinkebyPrivateKey: string
+    ) {
+        super();
+
+        this.loomPrivateKeyString = extdevPrivateKey;
         this.rinkebyPrivateKeyString = rinkebyPrivateKey;
 
-        this.resumeWithdrawal();
+        if (extdevPrivateKey && rinkebyPrivateKey) {
+            this.extdev = this.loadExtdevAccount();
+            this.rinkeby = this.loadRinkebyAccount();
+
+            this.resumeWithdrawal();
+        }
     }
 
     // Returns a promise that will be resolved with the signed withdrawal receipt that contains the

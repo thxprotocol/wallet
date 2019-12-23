@@ -27,7 +27,7 @@ export default class NetworkService {
         this.rinkebyPrivateKey = rinkebyPrivateKey;
     }
 
-    async init() {
+    public async init() {
         let networkConfig;
 
         if (this.rinkebyPrivateKey) {
@@ -54,20 +54,19 @@ export default class NetworkService {
                     gateway: this.rinkebyContract(RinkebyGateway, this.rinkeby.account.address),
                 };
                 resolve(this.instances);
-            }
-            else {
+            } else {
                 reject('Instances not loaded due to missing Loom and Rinkeby private keys.');
             }
         });
     }
 
     get hasKeys() {
-        return this.loomPrivateKey && this.rinkebyPrivateKey
+        return this.loomPrivateKey && this.rinkebyPrivateKey;
     }
 
     // Returns the default network Contract class
     // @param address If set to null the default network will apply
-    async contract(json: any, address: string) {
+    public async contract(json: any, address: string) {
         const Contract = this.loom.eth.Contract;
         let nid;
 
@@ -82,10 +81,10 @@ export default class NetworkService {
     // Returns a Rinkeby Contract class
     public rinkebyContract(json: any, account: any) {
         const Contract = this.rinkeby.eth.Contract;
-        return new Contract(json.abi, json.networks[4].address, { from: account })
+        return new Contract(json.abi, json.networks[4].address, { from: account });
     }
 
-    async mint(address: string, amount: number) {
+    public async mint(address: string, amount: number) {
         let tx;
         const tokenAmount = new BN(amount).mul(tokenMultiplier);
         const contractAddress = this.instances.tokenRinkeby._address;
@@ -96,21 +95,21 @@ export default class NetworkService {
     }
 
     // Create loom account for private key
-    _networkConfig(privateKey: string) {
+    public _networkConfig(privateKey: string) {
         const privateKeyArray = CryptoUtils.B64ToUint8Array(privateKey);
         const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKeyArray);
         const address = LocalAddress.fromPublicKey(publicKey).toString().toLowerCase();
 
         return {
-            address: address,
-            privateKey: privateKey,
+            address,
+            privateKey,
             privateArray: privateKeyArray,
             public: publicKey,
-        }
+        };
     }
 
     // Get the loom provider configuration
-    _networkProvider(privateKey: string) {
+    public _networkProvider(privateKey: string) {
         let writeUrl!: string,
             readUrl!: string,
             networkId!: string,
@@ -132,24 +131,24 @@ export default class NetworkService {
 
         this.client.on('error', (msg: string) => {
             // eslint-disable-next-line
-            console.error('Error on connect to client', msg)
+            console.error('Error on connect to client', msg);
             // eslint-disable-next-line
-            console.warn('Please verify if loom command is running')
+            console.warn('Please verify if loom command is running');
         });
 
         return new LoomProvider(client, privateKey);
     }
 
-    async _signContractMethod(to: string, data: any) {
+    public async _signContractMethod(to: string, data: any) {
         return await this.rinkeby.eth.accounts.signTransaction({
             chainId: 4,
-            to: to,
-            data: data,
-            gas: gas,
+            to,
+            data,
+            gas,
         }, this.rinkebyPrivateKey);
     }
 
-    async _sendSignedTransaction(tx: string) {
+    public async _sendSignedTransaction(tx: string) {
         return await this.rinkeby.eth.sendSignedTransaction(tx)
             .on('transactionHash', (t: string) => {
                 // eslint-disable-next-line

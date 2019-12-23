@@ -1,21 +1,21 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import firebase from 'firebase/app';
-import Wallet from './views/Wallet.vue';
-import Notifications from './views/Notifications.vue';
-import Account from './views/Account.vue';
-import Login from './views/Login.vue';
-import Logout from './views/Logout.vue';
-import Register from './views/Register.vue';
-import Camera from './views/Camera.vue';
-import Pools from './views/Pools.vue';
-import Pool from './views/Pool.vue';
-import Widget from './Widget.vue';
+import Wallet from '../views/Wallet.vue';
+import Notifications from '../views/Notifications.vue';
+import Account from '../views/Account.vue';
+import Login from '../views/Login.vue';
+import Logout from '../views/Logout.vue';
+import Register from '../views/Register.vue';
+import Camera from '../views/Camera.vue';
+import Pools from '../views/Pools.vue';
+import Pool from '../views/Pool.vue';
+import Widget from '../Widget.vue';
+import App from '../App';
 
 Vue.use(VueRouter);
 
-const router = new VueRouter({
-    routes: [{
+const routes: any = [{
         path: '/pools',
         name: 'pools',
         component: Pools,
@@ -98,8 +98,14 @@ const router = new VueRouter({
             footer: false,
             requiresAuth: true,
         }
-    }]
-})
+    },
+];
+
+const router = new VueRouter({
+    mode: 'history',
+    base: process.env.BASE_URL,
+    routes,
+});
 
 router.beforeEach((to, from, next) => {
     let currentUser = firebase.auth().currentUser;

@@ -5,4 +5,4 @@
         <Footer v-if="$router.currentRoute.meta.footer" ref="footer" />
     </div>
 </template>
-<script src="./App.ts" lang="ts"></script>
+<script src="./App.ts" lang="ts" lang="ts"></script>

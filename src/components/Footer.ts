@@ -2,8 +2,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import EventAggregator from '../services/EventAggregator';
 import { BNav, BNavItem } from 'bootstrap-vue';
 
-const THX = window.THX;
-
 @Component({
     name: 'Footer',
     components: {
@@ -11,7 +9,7 @@ const THX = window.THX;
         'b-nav-item': BNavItem,
     },
 })
-export default class Footer extends Vue{
+export default class Footer extends Vue {
     public ea: any = new EventAggregator();
     public amountOfNewRewards: number = 0;
     public assets: any = {
@@ -27,12 +25,12 @@ export default class Footer extends Vue{
     }
 
     public created() {
-        if (THX.network.hasKeys) {
+        if (this.$network) {
             this.init();
         }
     }
 
-    async init() {
+    public async init() {
         // firebase.database().ref(`users/${uid}/pools`).once('value').then(async s => {
         //     const pools = s.val();
         //
@@ -43,24 +41,24 @@ export default class Footer extends Vue{
         //     }
         // })
 
-        this.ea.listen('event.RewardStateChanged', this.onRewardStateChange);
-        this.ea.listen('event.RuleStateChanged', this.onRuleStateChange);
-        this.ea.listen('event.clearNotifications', this.clearNotifications);
+        // this.ea.listen('event.RewardStateChanged', this.onRewardStateChange);
+        // this.ea.listen('event.RuleStateChanged', this.onRuleStateChange);
+        // this.ea.listen('event.clearNotifications', this.clearNotifications);
     }
-    async clearNotifications() {
+    public async clearNotifications() {
         // const pool = THX.network.instances.pool;
         // const amountOfRewards = parseInt(await pool.methods.countRewards().call());
         //
         // THX.state.setItem('lastRewardId', amountOfRewards);
     }
-    async onRewardStateChange() {
+    public async onRewardStateChange() {
         // const pool = THX.network.poolInstance();
         // const prevAmountOfRewards = parseInt(this.state.lastRewardId);
         // const currentAmountOfRewards = parseInt(await pool.methods.countRewards().call());
         //
         // this.amountOfNewRewards = currentAmountOfRewards - prevAmountOfRewards;
     }
-    async onRuleStateChange() {
+    public async onRuleStateChange() {
 
     }
 }

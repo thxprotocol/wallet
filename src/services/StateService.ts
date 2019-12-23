@@ -1,33 +1,43 @@
-const KEY = 'THX:StateService';
+import { Vue } from 'vue-property-decorator';
 
-export default class StateService {
-    loomPrivateKey = null;
-    rinkebyPrivateKey = null;
+const KEY = 'thx:wallet:state:';
 
-    constructor() {
-        const state = localStorage.getItem(KEY);
+export default class StateService extends Vue {
+    private key: string;
+    public extdevPrivateKey: string = '';
+    public rinkebyPrivateKey: string = '';
+
+    constructor(uid: string) {
+        super();
+
+        const key = KEY + uid;
+        const state = localStorage.getItem(key);
+
+        this.key = key;
 
         if (state !== null) {
             const rows = JSON.parse(state);
 
-            for (let row in rows) {
+            for (const row in rows) {
                 this[row] = rows[row];
             }
         }
+
+        this.save();
     }
 
-    clear() {
-        this.loomPrivateKey = null;
-        this.rinkebyPrivateKey = null;
+    public clear() {
+        this.extdevPrivateKey = '';
+        this.rinkebyPrivateKey = '';
 
         return this.save();
     }
 
-    save() {
+    public save() {
         const val = JSON.stringify({
-            loomPrivateKey: this.loomPrivateKey,
+            extdevPrivateKey: this.extdevPrivateKey,
             rinkebyPrivateKey: this.rinkebyPrivateKey,
         });
-        localStorage.setItem(KEY, val)
+        localStorage.setItem(this.key, val);
     }
 }

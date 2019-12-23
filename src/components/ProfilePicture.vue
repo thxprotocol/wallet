@@ -1,17 +1,16 @@
 <template>
-    <div :class="`account-picture account-picture-${size} bg-yellow`">
-        <img
-            v-if="account.picture"
+    <div v-if="profile" :class="`account-picture account-picture-${size} bg-yellow`">
+        <img v-if="profile.picture"
+            :src="profile.picture.url"
+            :alt="profile.picture.name"
             width="100%"
             height="100%"
-            class="rounded-circle"
-            :src="account.picture.url"
-            :alt="account.firstName + account.lastName" />
-        <span v-if="!account.picture">{{ account.initials}}</span>
+            class="rounded-circle" />
+        <span v-if="!profile.picture && profile.initials">
+            {{ profile.initials}}
+        </span>
     </div>
 </template>
-
-<script src="./ProfilePicture.ts"></script>
 
 <style lang="scss">
 .region-header .account-picture {
@@ -54,3 +53,5 @@
     }
 }
 </style>
+
+<script src="./ProfilePicture.ts" lang="ts"></script>

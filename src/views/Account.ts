@@ -3,15 +3,14 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/storage';
 import { BAlert, BButton, BModal, BSpinner } from 'bootstrap-vue';
-import ProfilePicture from '../components/ProfilePicture';
+import ProfilePicture from '../components/ProfilePicture.vue';
 import { CryptoUtils, LocalAddress } from 'loom-js';
 
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
-const THX = window.THX;
 
 @Component({
-    name: 'home',
+    name: 'Account',
     components: {
         BSpinner,
         BButton,
@@ -22,22 +21,22 @@ const THX = window.THX;
 })
 export default class Account extends Vue {
     public loading: any = false;
-    public uid: any;
+    public uid: string = '';
     public isLoomMinter: any = false;
     public isRinkebyMinter: any = false;
     public alert: any = null;
     public clipboard: any = null;
     public balance: any = {
         token: 0,
-        pool: 0
+        pool: 0,
     };
     public input: any = {
-        loomPrivateKey: '',
+        extdevPrivateKey: '',
         rinkebyPrivateKey: '',
         mintForAccount: 0,
         mintForLoomAccount: 0,
-        newMinterAddress: "",
-        transferTokensAddress: "",
+        newMinterAddress: '',
+        transferTokensAddress: '',
         transferTokens: 0,
         depositToGateway: 0,
         withdrawToGateway: 0,
@@ -55,13 +54,13 @@ export default class Account extends Vue {
         rinkeby: {
             address: null,
             privateKey: null,
-        }
-    }
+        },
+    };
 
-    created() {
+    public created() {
         this.uid = firebase.auth().currentUser.uid;
 
-        firebase.database().ref(`users/${this.uid}`).once('value').then(async s => {
+        firebase.database().ref(`users/${this.uid}`).once('value').then(async (s) => {
             const u = s.val();
             const picture = u.picture;
 
@@ -73,18 +72,14 @@ export default class Account extends Vue {
             this.account.lastName = u.lastName;
             this.account.uid = u.uid;
             this.account.email = u.email;
-
-            if (THX.network.hasKeys) {
-                this.init();
-            }
         });
     }
 
-    showModal(id: string) {
+    public showModal(id: string) {
         this.$refs[id].show();
     }
 
-    copyClipboard(value: string) {
+    public copyClipboard(value: string) {
         const input = document.createElement('input');
 
         input.id = 'clippy';
@@ -103,28 +98,28 @@ export default class Account extends Vue {
         this.clipboard = value;
     }
 
-    createLoomKey() {
-        const privateKeyArray = CryptoUtils.generatePrivateKey()
+    public createLoomKey() {
+        const privateKeyArray = CryptoUtils.generatePrivateKey();
         const privateKeyString = CryptoUtils.Uint8ArrayToB64(privateKeyArray);
 
-        this.input.loomPrivateKey = privateKeyString;
+        this.input.extdevPrivateKey = privateKeyString;
     }
 
-    createRinkebyKey() {
+    public createRinkebyKey() {
         const account = THX.network.rinkeby.eth.accounts.create();
 
         this.input.rinkebyPrivateKey = account.privateKey;
     }
 
-    async init() {
+    public async init() {
         const token = THX.network.instances.token;
         const tokenRinkeby = THX.network.instances.tokenRinkeby;
-        let balanceInWei
+        let balanceInWei;
 
         this.account.loom = THX.network.account;
         this.account.rinkeby = THX.network.rinkeby.account;
 
-        this.input.loomPrivateKey = THX.state.loomPrivateKey;
+        this.input.extdevPrivateKey = THX.state.extdevPrivateKey;
         this.input.rinkebyPrivateKey = THX.state.rinkebyPrivateKey;
 
         balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
@@ -138,52 +133,52 @@ export default class Account extends Vue {
         this.$parent.$refs.header.updateBalance();
     }
 
-    isDuplicateAddress(address: string) {
+    public isDuplicateAddress(address: string) {
         const walletRef = firebase.database().ref(`wallets/${address}`);
 
-        return walletRef.once('value').then(s => {
+        return walletRef.once('value').then((s) => {
             return s.exists() && s.val().uid !== this.uid;
         });
     }
 
-    onFileChange(e: any) {
+    public onFileChange(e: any) {
         const avatarRef = firebase.storage().ref('avatars');
         const files = e.target.files || e.dataTransfer.files;
         const fileName = `${this.uid}.jpg`;
 
-        avatarRef.child(fileName).put(files[0]).then(async s => {
+        avatarRef.child(fileName).put(files[0]).then(async (s) => {
             const url = await s.ref.getDownloadURL();
 
             this.account.picture = url;
 
-            firebase.database().ref('users').child(this.uid).update({ picture: { name: fileName, url: url }});
+            firebase.database().ref('users').child(this.uid).update({ picture: { name: fileName, url }});
         });
     }
 
-    async removeImage() {
+    public async removeImage() {
         const avatarRef = firebase.storage().ref('avatars');
         const pictureRef = firebase.database().ref(`users/${this.uid}/picture`);
         const fileName = (await pictureRef.child('name').once('value')).val();
 
         avatarRef.child(fileName).delete().then(() => {
             pictureRef.remove().then(() => {
-                this.account.picture = null
+                this.account.picture = null;
             });
         });
     }
 
-    logout() {
+    public logout() {
         this.$router.push('/logout');
     }
 
-    async removeMapping(address: string) {
+    public async removeMapping(address: string) {
         const walletRef = firebase.database().ref(`wallets/${address}`);
         await walletRef.remove();
 
         return this.$refs['modal-account-mapping'].hide();
     }
 
-    reset() {
+    public reset() {
         THX.state.clear();
 
         this.removeMapping(this.account.loom.address);
@@ -191,8 +186,8 @@ export default class Account extends Vue {
         return window.location.reload();
     }
 
-    async onCreateAccountsFromPrivateKey() {
-        const privateKeyArray = CryptoUtils.B64ToUint8Array(this.input.loomPrivateKey);
+    public async onCreateAccountsFromPrivateKey() {
+        const privateKeyArray = CryptoUtils.B64ToUint8Array(this.input.extdevPrivateKey);
         const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKeyArray);
         const address = LocalAddress.fromPublicKey(publicKey).toString().toLowerCase();
         const prevWalletRef = firebase.database().ref(`wallets/${this.account.loom.address}`);
@@ -204,33 +199,32 @@ export default class Account extends Vue {
 
             walletRef.child('uid').set(this.uid);
 
-            await THX.gateway.mapAccounts(this.input.rinkebyPrivateKey, this.input.loomPrivateKey)
+            await this.$network.mapAccounts(this.input.rinkebyPrivateKey, this.input.extdevPrivateKey);
 
             this.alert = {
                 text: 'Your account is connected. The app will restart in 3 seconds.',
                 variant: 'success',
-            }
+            };
 
-            THX.state.loomPrivateKey = this.input.loomPrivateKey;
+            this.$state.extdevPrivateKey = this.input.extdevPrivateKey;
 
             window.setTimeout(() => {
                 window.location.reload();
             }, 3000);
-        }
-        else {
+        } else {
             this.alert = {
                 text: 'The loom private key provided is already in use and will not be stored.',
                 variant: 'danger',
-            }
+            };
         }
 
-        THX.state.rinkebyPrivateKey = this.input.rinkebyPrivateKey;
-        THX.state.save();
+        this.$state.rinkebyPrivateKey = this.input.rinkebyPrivateKey;
+        this.$state.save();
 
         this.$refs['modal-connect'].hide();
     }
 
-    onDepositToGateway() {
+    public onDepositToGateway() {
         this.loading = true;
 
         return THX.gateway.depositCoin(this.input.depositToGateway)
@@ -241,7 +235,7 @@ export default class Account extends Vue {
             });
     }
 
-    onWithdrawToGateway() {
+    public onWithdrawToGateway() {
         this.loading = true;
 
         return THX.gateway.withdrawCoin(this.input.withdrawToGateway)
@@ -252,12 +246,12 @@ export default class Account extends Vue {
             });
     }
 
-    onTransferTokens() {
+    public onTransferTokens() {
         const token = THX.network.instances.token;
         const amount = new BN(this.input.transferTokens).mul(tokenMultiplier);
 
         return token.methods.transfer(this.input.transferTokensAddress, amount.toString()).send({ from: this.account.loom.address }).then(async () => {
-            let balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
+            const balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
             this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
 
             this.$parent.$refs.header.updateBalance();
@@ -267,7 +261,7 @@ export default class Account extends Vue {
         });
     }
 
-    onMintForAccount() {
+    public onMintForAccount() {
         return THX.network.mint(this.account.rinkeby.address, this.input.mintForAccount)
             .then(() => {
                 this.input.depositToGateway = 0;
@@ -276,7 +270,7 @@ export default class Account extends Vue {
             });
     }
 
-    onMintForLoomAccount() {
+    public onMintForLoomAccount() {
         const token = THX.network.instances.token;
         const amount = new BN(this.input.mintForLoomAccount).mul(tokenMultiplier);
 
@@ -294,7 +288,7 @@ export default class Account extends Vue {
         });
     }
 
-    onAddMinter() {
+    public onAddMinter() {
         const tokenRinkeby = THX.network.instances.tokenRinkeby;
 
         this.loading = true;

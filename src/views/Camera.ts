@@ -12,44 +12,44 @@ const THX = window.THX;
     components: {
         BSpinner,
         QrcodeStream,
-        QrcodeCapture
+        QrcodeCapture,
     },
 })
 export default class Camera extends Vue {
     public loading: boolean = true;
     public hasStream: boolean = false;
 
-    repaint () {
-        return
+    public repaint() {
+        return;
     }
 
-    toast(title: string, body: string, variant: string = 'info') {
+    public toast(title: string, body: string, variant: string = 'info') {
         this.$bvToast.toast(body, {
-            title: title,
+            title,
             toaster: 'b-toaster-bottom-full',
             autoHideDelay: 3000,
             appendToast: true,
-            variant: variant,
-        })
+            variant,
+        });
     }
 
-    async onInit (promise: Promise) {
+    public async onInit(promise: Promise) {
         try {
-            await promise
+            await promise;
             this.hasStream = true;
         } catch (error) {
             if (error.name === 'NotAllowedError') {
-                this.toast('Camera error:', "user denied camera access permisson", 'danger');
+                this.toast('Camera error:', 'user denied camera access permisson', 'danger');
             } else if (error.name === 'NotFoundError') {
-                this.toast('Camera error:', "no suitable camera device installed", 'danger');
+                this.toast('Camera error:', 'no suitable camera device installed', 'danger');
             } else if (error.name === 'NotSupportedError') {
-                this.toast('Camera error:', "page is not served over HTTPS (or localhost)", 'danger');
+                this.toast('Camera error:', 'page is not served over HTTPS (or localhost)', 'danger');
             } else if (error.name === 'NotReadableError') {
-                this.toast('Camera error:', "maybe camera is already in use", 'danger');
+                this.toast('Camera error:', 'maybe camera is already in use', 'danger');
             } else if (error.name === 'OverconstrainedError') {
-                this.toast('Camera error:', "did you requested the front camera although there is none?", 'danger');
+                this.toast('Camera error:', 'did you requested the front camera although there is none?', 'danger');
             } else if (error.name === 'StreamApiNotSupportedError') {
-                this.toast('Camera error:', "browser seems to be lacking features", 'danger');
+                this.toast('Camera error:', 'browser seems to be lacking features', 'danger');
             }
             this.hasStream = false;
         } finally {
@@ -57,9 +57,9 @@ export default class Camera extends Vue {
         }
     }
 
-    async onDecode (decodedString: string) {
-        //eslint-disable-next-line
-        console.log(decodedString)
+    public async onDecode(decodedString: string) {
+        // eslint-disable-next-line
+        console.log(decodedString);
 
         if (decodedString.length > 0) {
             const poolsRef = firebase.database().ref(`pools`);
@@ -77,9 +77,9 @@ export default class Camera extends Vue {
                 this.toast(
                     'Reward status update',
                     'Your claim is up for review!',
-                    'success'
+                    'success',
                 );
-                //eslint-disable-next-line
+                // eslint-disable-next-line
                 console.log(tx);
             });
         }

@@ -34,17 +34,17 @@ export default class EventService extends EventAggregator {
             'RulePollCreated',
             'RulePollFinished',
             'RuleStateChanged',
-            'Withdrawn'
+            'Withdrawn',
         ];
     }
 
-    subscribePoolEvents(events: string[]) {
-        for (let e of this.poolEvents) {
+    public subscribePoolEvents(events: string[]) {
+        for (const e of this.poolEvents) {
             events[e]({}, (error: string, event: any) => this.dispatch(`event.${e}`, event.returnValues));
         }
     }
 
-    subscribeRewardEvents(events: any) {
+    public subscribeRewardEvents(events: any) {
         events.RewardStateChanged({}, (error: string, event: any) => this.dispatch(`event.RewardStateChanged`, event.returnValues));
     }
 }

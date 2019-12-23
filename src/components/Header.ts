@@ -4,10 +4,6 @@ import 'firebase/auth';
 import EventAggregator from '../services/EventAggregator';
 import ProfilePicture from '../components/ProfilePicture.vue';
 
-const BN = require('bn.js');
-const tokenMultiplier = new BN(10).pow(new BN(18));
-const THX = window.THX;
-
 @Component({
     name: 'Header',
     components: {
@@ -15,27 +11,13 @@ const THX = window.THX;
     },
 })
 export default class Header extends Vue {
-    public uid: string = firebase.auth().currentUser.uid;
-    public ea: EventAggregator = new EventAggregator();
     public balance: any = {
         eth: 0,
         token: 0,
         tokenRinkeby: 0,
     };
 
-    created() {
-        if (THX.network.hasKeys) {
-            this.init();
-        }
-    }
-
-    init() {
-        this.updateBalance();
-
-        this.ea.listen('event.Transfer', this.updateBalance);
-    }
-
-    async updateBalance() {
+    public async updateBalance() {
         const token = THX.network.instances.token;
         const tokenRinkeby = THX.network.instances.tokenRinkeby;
         const address = THX.network.account.address;
@@ -52,7 +34,7 @@ export default class Header extends Vue {
         this.balance.tokenRinkeby = new BN(balanceInWei).div(tokenMultiplier);
     }
 
-    goToAccount() {
+    public goToAccount() {
         this.$router.replace('/account');
     }
 }
