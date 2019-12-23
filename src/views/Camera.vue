@@ -20,94 +20,6 @@
 
     </article>
 </template>
-
-<script>
-import firebase from 'firebase/app';
-import 'firebase/database';
-import RewardPool from '../contracts/RewardPool.json';
-import { BSpinner } from 'bootstrap-vue';
-import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
-
-export default {
-    name: 'Camera',
-    components: {
-        BSpinner,
-        QrcodeStream,
-        QrcodeCapture
-    },
-    data: function() {
-        return {
-            loading: true,
-            hasStream: false,
-        }
-    },
-    methods: {
-        repaint () {
-            return
-        },
-        toast(title, body, variant = 'info') {
-            this.$bvToast.toast(body, {
-                title: title,
-                toaster: 'b-toaster-bottom-full',
-                autoHideDelay: 3000,
-                appendToast: true,
-                variant: variant,
-            })
-        },
-        async onInit (promise) {
-            try {
-                await promise
-                this.hasStream = true;
-            } catch (error) {
-                if (error.name === 'NotAllowedError') {
-                    this.toast('Camera error:', "user denied camera access permisson", 'danger');
-                } else if (error.name === 'NotFoundError') {
-                    this.toast('Camera error:', "no suitable camera device installed", 'danger');
-                } else if (error.name === 'NotSupportedError') {
-                    this.toast('Camera error:', "page is not served over HTTPS (or localhost)", 'danger');
-                } else if (error.name === 'NotReadableError') {
-                    this.toast('Camera error:', "maybe camera is already in use", 'danger');
-                } else if (error.name === 'OverconstrainedError') {
-                    this.toast('Camera error:', "did you requested the front camera although there is none?", 'danger');
-                } else if (error.name === 'StreamApiNotSupportedError') {
-                    this.toast('Camera error:', "browser seems to be lacking features", 'danger');
-                }
-                this.hasStream = false;
-            } finally {
-                this.loading = false;
-            }
-        },
-        async onDecode (decodedString) {
-            //eslint-disable-next-line
-            console.log(decodedString)
-
-            if (decodedString.length > 0) {
-                const THX = window.THX;
-                const poolsRef = firebase.database().ref(`pools`);
-                const data = JSON.parse(decodedString);
-                const pool = await THX.network.contract(RewardPool, data.pool);
-
-                poolsRef.child(data.pool).child(`rewards`).push().set(data);
-
-                this.toast(
-                    'Reward status update',
-                    `Claiming your reward for rule #${data.rule} in pool ${data.pool}...`,
-                );
-
-                pool.methods.createReward(data.rule).send({ from: THX.network.account.address }).then((tx) => {
-                    this.toast(
-                        'Reward status update',
-                        'Your claim is up for review!',
-                        'success'
-                    );
-                    //eslint-disable-next-line
-                    console.log(tx);
-                });
-            }
-        }
-    }
-}
-</script>
 <style>
     .wrapper,
     .inside,
@@ -190,3 +102,4 @@ export default {
         background: #EFEFEF;
     }
 </style>
+<script src="./Camera.ts"></script>

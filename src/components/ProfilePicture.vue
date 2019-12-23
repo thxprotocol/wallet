@@ -11,51 +11,7 @@
     </div>
 </template>
 
-<script>
-import firebase from 'firebase';
-import 'firebase/database';
-import 'firebase/auth';
-
-export default {
-    name: 'ProfilePicture',
-    data: function() {
-        return {
-            account: {
-                firstName: '',
-                lastName: '',
-                picture: {
-                    url: '',
-                    name: '',
-                },
-                initials: '',
-            }
-        }
-    },
-    props: {
-        uid: null,
-        size: null,
-    },
-    created() {
-        const userRef = firebase.database().ref(`users/${this.uid}`);
-
-        userRef.once('value').then(s => {
-            this.account = s.val();
-
-            if (this.account.firstName && this.account.firstName) {
-                this.account.initials = this.account.firstName.charAt(0) + this.account.lastName.charAt(0);
-            }
-        });
-
-        userRef.on('child_added', (s) => {
-            this.account[s.key] = s.val();
-        });
-
-        userRef.on('child_removed', (s) => {
-            if (s.key === 'picture') this.account.picture = null;
-        });
-    }
-}
-</script>
+<script src="./ProfilePicture.ts"></script>
 
 <style lang="scss">
 .region-header .account-picture {

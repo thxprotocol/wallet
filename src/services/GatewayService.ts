@@ -11,7 +11,7 @@ import {
     soliditySha3
 } from 'loom-js';
 import Web3 from 'web3';
-import config from '../config';
+const config = require('../config');
 
 // TODO: fix this export in loom-js
 const {
@@ -38,7 +38,10 @@ const INFURA_API_KEY = config.infura.key;
 const coinMultiplier = new BN(10).pow(new BN(18))
 
 export default class GatewayService {
-    constructor(loomPrivateKey, rinkebyPrivateKey) {
+    public loomPrivateKeyString: string;
+    public rinkebyPrivateKey: string;
+
+    constructor(loomPrivateKey: string, rinkebyPrivateKey: string) {
         this.loomPrivateKeyString = loomPrivateKey;
         this.rinkebyPrivateKeyString = rinkebyPrivateKey;
 
@@ -55,8 +58,8 @@ export default class GatewayService {
         ownerRinkebyAddress,
         tokenExtdevAddress,
         tokenRinkebyAddress,
-        timeout
-    }) {
+        timeout,
+    }: any) {
         const ownerExtdevAddr = Address.fromString(`${client.chainId}:${ownerExtdevAddress}`)
         const gatewayContract = await TransferGateway.createAsync(client, ownerExtdevAddr)
 
@@ -74,11 +77,11 @@ export default class GatewayService {
 
         const ownerRinkebyAddr = Address.fromString(`eth:${ownerRinkebyAddress}`)
         const receiveSignedWithdrawalEvent = new Promise((resolve, reject) => {
-            let timer = setTimeout(
+            let timer: any = setTimeout(
                 () => reject(new Error('Timeout while waiting for withdrawal to be signed')),
                 timeout
             )
-            const listener = event => {
+            const listener = (event: any) => {
                 const tokenEthAddr = Address.fromString(`eth:${tokenRinkebyAddress}`)
                 if (
                     event.tokenContract.toString() === tokenEthAddr.toString() &&
@@ -106,7 +109,7 @@ export default class GatewayService {
         return gatewayContract.withdrawalReceiptAsync(ownerExtdevAddr)
     }
 
-    async depositCoinToRinkebyGateway(web3js, amount, ownerAccount, gas) {
+    async depositCoinToRinkebyGateway(web3js: string, amount: number, ownerAccount: any, gas: number) {
         const contract = await this.getRinkebyCoinContract(web3js)
         const contractAddress = await this.getRinkebyCoinContractAddress(web3js)
         const gateway = await this.getRinkebyGatewayContract(web3js, ownerAccount)
@@ -134,7 +137,7 @@ export default class GatewayService {
         return tx.hash
     }
 
-    async getRinkebyCoinBalance(web3js, accountAddress) {
+    async getRinkebyCoinBalance(web3js: any, accountAddress: string) {
         const contract = await this.getRinkebyCoinContract(web3js)
         const balance = await contract.methods
             .balanceOf(accountAddress)
@@ -142,7 +145,7 @@ export default class GatewayService {
         return balance
     }
 
-    async getExtdevCoinBalance(web3js, accountAddress) {
+    async getExtdevCoinBalance(web3js: any, accountAddress: string) {
         const contract = await this.getExtdevCoinContract(web3js)
         const addr = accountAddress.toLowerCase()
         const balance = await contract.methods
@@ -153,7 +156,7 @@ export default class GatewayService {
         return balance
     }
 
-    async getRinkebyCoinContract(web3js) {
+    async getRinkebyCoinContract(web3js: any) {
         const networkId = await web3js.eth.net.getId()
         return new web3js.eth.Contract(
             MyRinkebyCoinJSON.abi,
@@ -161,7 +164,7 @@ export default class GatewayService {
         )
     }
 
-    async getExtdevCoinContract(web3js) {
+    async getExtdevCoinContract(web3js: any) {
         const networkId = await web3js.eth.net.getId()
         return new web3js.eth.Contract(
             MyCoinJSON.abi,
@@ -169,12 +172,12 @@ export default class GatewayService {
         )
     }
 
-    async getRinkebyCoinContractAddress(web3js) {
+    async getRinkebyCoinContractAddress(web3js: any) {
         const networkId = await web3js.eth.net.getId()
         return MyRinkebyCoinJSON.networks[networkId].address
     }
 
-    async getRinkebyGatewayContract(web3js, web3Account) {
+    async getRinkebyGatewayContract(web3js: any, web3Account: any) {
         const networkId = await web3js.eth.net.getId()
 
         let version
@@ -192,8 +195,8 @@ export default class GatewayService {
         }
 
         return createEthereumGatewayAsync(
-            version,
-            rinkebyGatewayAddress,
+            version: string,
+            rinkebyGatewayAddress: string,
             new ethers.Wallet(web3Account.privateKey, new ethers.providers.Web3Provider(web3js.currentProvider))
         )
     }

@@ -25,39 +25,4 @@
     </main>
 </template>
 
-<script>
-import firebase from 'firebase/app';
-import 'firebase/auth';
-import { BSpinner } from 'bootstrap-vue';
-
-export default {
-    name: 'login',
-    components: {
-        BSpinner
-    },
-    data: function() {
-        return {
-            email: '',
-            password: '',
-            loading: false
-        }
-    },
-    methods: {
-        login: function() {
-            this.loading = true;
-            firebase.auth().signInWithEmailAndPassword(this.email, this.password)
-                .then(() => {
-                    this.loading = false;
-                    this.$router.replace('/')
-                })
-                .catch((err) => {
-                    if (typeof err != 'undefined') {
-                        // eslint-disable-next-line
-                        console.error(err.code + ' ' + err.message);
-                        alert('Error during authentication');
-                    }
-                });
-        }
-    }
-}
-</script>
+<script src="./Login.ts"></script>

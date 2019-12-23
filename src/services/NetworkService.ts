@@ -4,19 +4,24 @@ import { Client,
     LoomProvider,
 } from 'loom-js';
 import Web3 from 'web3';
-
-import THXToken from '../contracts/THXToken.json';
-import THXTokenRinkeby from '../contracts/THXTokenRinkeby.json';
-import RinkebyGateway from '../Gateway.json';
-import Config from '../config.js';
-
+const THXToken = require('../contracts/THXToken.json');
+const RinkebyGateway = require('../Gateway.json');
+const Config = require('../config.js');
+const THXTokenRinkeby = require('../contracts/THXTokenRinkeby.json');
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
-
 const gas = 350000;
 
 export default class NetworkService {
-    constructor(loomPrivateKey, rinkebyPrivateKey) {
+    public rinkeby: Web3;
+    public loomPrivateKey: string;
+    public rinkebyPrivateKey: string;
+    public instances: any;
+    public loom: any;
+    public account: any;
+    public client: any;
+
+    constructor(loomPrivateKey: string, rinkebyPrivateKey: string) {
         this.rinkeby = new Web3(`wss://rinkeby.infura.io/ws/v3/${Config.infura.key}`);
         this.loomPrivateKey = loomPrivateKey;
         this.rinkebyPrivateKey = rinkebyPrivateKey;
@@ -62,7 +67,7 @@ export default class NetworkService {
 
     // Returns the default network Contract class
     // @param address If set to null the default network will apply
-    async contract(json, address) {
+    async contract(json: any, address: string) {
         const Contract = this.loom.eth.Contract;
         let nid;
 
@@ -75,12 +80,12 @@ export default class NetworkService {
     }
 
     // Returns a Rinkeby Contract class
-    rinkebyContract(json, account) {
+    public rinkebyContract(json: any, account: any) {
         const Contract = this.rinkeby.eth.Contract;
         return new Contract(json.abi, json.networks[4].address, { from: account })
     }
 
-    async mint(address, amount) {
+    async mint(address: string, amount: number) {
         let tx;
         const tokenAmount = new BN(amount).mul(tokenMultiplier);
         const contractAddress = this.instances.tokenRinkeby._address;
@@ -91,7 +96,7 @@ export default class NetworkService {
     }
 
     // Create loom account for private key
-    _networkConfig(privateKey) {
+    _networkConfig(privateKey: string) {
         const privateKeyArray = CryptoUtils.B64ToUint8Array(privateKey);
         const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKeyArray);
         const address = LocalAddress.fromPublicKey(publicKey).toString().toLowerCase();
@@ -105,8 +110,11 @@ export default class NetworkService {
     }
 
     // Get the loom provider configuration
-    _networkProvider(privateKey) {
-        let writeUrl, readUrl, networkId, client;
+    _networkProvider(privateKey: string) {
+        let writeUrl!: string,
+            readUrl!: string,
+            networkId!: string,
+            client!: any;
 
         if (!process.env.NETWORK) {
             writeUrl = 'ws://127.0.0.1:46658/websocket';
@@ -122,7 +130,7 @@ export default class NetworkService {
 
         this.client = client = new Client(networkId, writeUrl, readUrl);
 
-        this.client.on('error', msg => {
+        this.client.on('error', (msg: string) => {
             // eslint-disable-next-line
             console.error('Error on connect to client', msg)
             // eslint-disable-next-line
@@ -132,7 +140,7 @@ export default class NetworkService {
         return new LoomProvider(client, privateKey);
     }
 
-    async _signContractMethod(to, data) {
+    async _signContractMethod(to: string, data: any) {
         return await this.rinkeby.eth.accounts.signTransaction({
             chainId: 4,
             to: to,
@@ -141,21 +149,21 @@ export default class NetworkService {
         }, this.rinkebyPrivateKey);
     }
 
-    async _sendSignedTransaction(tx) {
+    async _sendSignedTransaction(tx: string) {
         return await this.rinkeby.eth.sendSignedTransaction(tx)
-            .on('transactionHash', (t) => {
+            .on('transactionHash', (t: string) => {
                 // eslint-disable-next-line
                 console.info(t);
             })
-            .on('receipt', (r) => {
+            .on('receipt', (r: any) => {
                 // eslint-disable-next-line
                 console.info(r);
             })
-            .on('confirmation', (l) => {
+            .on('confirmation', (l: string) => {
                 // eslint-disable-next-line
                 console.info(l);
             })
-            .on('error', (e) => {
+            .on('error', (e: string) => {
                 // eslint-disable-next-line
                 console.error(e);
             });

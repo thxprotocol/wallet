@@ -13,42 +13,6 @@
     </div>
 </template>
 
-<script>
-export default {
-    name: 'Widget',
-    components: {},
-    data: function() {
-        return {
-
-        }
-    },
-    mounted() {
-        const QRCode = window.QRCode;
-
-        if (this.$route.params.rule && this.$route.params.pool) {
-            QRCode.toCanvas(
-                document.getElementById('canvas'),
-                JSON.stringify({
-                     rule: parseInt(this.$route.params.rule),
-                     pool: this.$route.params.pool
-                }),
-                (error) => {
-                    if (error) {
-                        //eslint-disable-next-line
-                        console.error(error)
-                    }
-                    //eslint-disable-next-line
-                    console.log('success')
-                }
-            );
-        }
-    },
-    methods: {
-
-    }
-}
-</script>
-
 <style lang="scss" scoped>
     h1 {
         font-weight: bold;
@@ -78,3 +42,5 @@ export default {
     }
 
 </style>
+
+<script src="./Widget.ts"></script>

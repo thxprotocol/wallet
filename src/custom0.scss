@@ -1,0 +1,213 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700,800&display=swap');
+
+html,
+body {
+    height: 100%;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+body {
+    display: flex;
+}
+
+h1, h2, h3, h4, h5,
+.h1, .h2, .h3, .h4, .h5 {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-weight: normal;
+}
+
+
+blockquote {
+    border-left: 4px solid #ccc;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    padding-left: 16px;
+}
+
+@media (max-width: 768px) {
+    .h3 {
+        font-size: 1.2rem;
+    }
+}
+
+/*
+ * Component: Region
+ *
+ */
+
+.region-main {
+    flex: 1;
+    overflow: auto;
+}
+
+.region-content {
+    margin: auto;
+    padding: 0;
+}
+
+
+/*
+ * Component: Card
+ *
+ */
+
+.card {
+    border-radius: 0;
+    border: 0;
+    box-shadow: 0 0 50px rgba(0,0,0,0.25);
+    max-width: 768px;
+    margin: auto;
+}
+
+.card + .alert {
+    max-width: 768px;
+    margin: auto;
+}
+
+.card-body {
+    overflow: auto;
+    max-height: 60vh;
+}
+
+.card-body .brand-logo {
+    margin: auto;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.card-footer {
+    padding: 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.card-footer .btn {
+    flex: 1 50%;
+    border-radius: 0;
+    line-height: 2.5;
+    color: rgba(0,0,0,0.5)
+}
+
+.card-footer .btn:hover {
+    color: black;
+}
+
+.card-footer .btn .fas {
+    margin-top: .5rem;
+    position: relative;
+    font-size: 1.5rem;
+}
+
+@media (min-width: 768px) {
+
+    .card-body {
+        overflow: none;
+        max-height: none;
+    }
+
+    .card-footer .btn .fas {
+        position: absolute;
+    }
+
+    .card-footer .btn .fas.fa-angle-left {
+        margin-left: -1.25rem;
+    }
+
+    .card-footer .btn .fas.fa-file-contract {
+        margin-left: -1.75rem;
+    }
+
+    .card-footer .btn .fas.fa-undo {
+        margin-left: -1.75rem;
+    }
+
+}
+
+/*
+ * Component: Carousel
+ *
+ */
+
+ .carousel-inner {
+     padding: 1rem;
+ }
+
+ .carousel-item {
+     transition: opacity .3s ease;
+ }
+
+ .carousel-item:not(.active) {
+     opacity: 0;
+ }
+
+ .carousel-item.active {
+     opacity: 1;
+ }
+
+.carousel-item:first-child [data-slide="prev"] {
+    display: none;
+}
+
+.carousel .custom-radio {
+    padding-left: 0;
+}
+
+.carousel .custom-radio input[type="radio"]:checked + .custom-control-label {
+    background: #007bff;
+    color: white;
+}
+
+.carousel .custom-radio input[type="radio"]:focus + .custom-control-label {
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.carousel .custom-radio input[type="radio"]:checked + .custom-control-label:before {
+    color: #fff;
+    border-color: rgba(255,255,255,.25);
+    background-color: rgba(255,255,255,.25);
+}
+
+.carousel .custom-radio .custom-control-label {
+    padding-left: 2rem;
+    min-width: 200px;
+    text-align: left;
+    cursor: pointer;
+    border: 1px solid #ced4da;
+}
+
+.carousel .custom-radio .custom-control-label.btn-lg:before,
+.carousel .custom-radio .custom-control-label.btn-lg:after {
+    left: .5rem;
+    top: .95rem;
+}
+
+.card-report {
+    max-width: 1024px;
+    width: 100%;
+}
+
+.card-report .card-body {
+    height: 100%;
+    max-height: calc(80vh - 5rem);
+}
+
+.shake {
+  animation: shake 0.5s ease both;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+@keyframes shake {
+  20%, 80% {
+    transform: translate3d(10px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-20px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(20px, 0, 0);
+  }
+}
