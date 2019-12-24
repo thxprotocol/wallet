@@ -1,13 +1,12 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import firebase from 'firebase/app';
 import 'firebase/database';
-import EventService from '../services/EventService';
 import Rule from './Rule';
 import Modal from './Modal.vue';
 import { BSpinner } from 'bootstrap-vue';
+import { Network } from '@/models/Network';
 
 const RuleState = ['Active', 'Disabled'];
-const THX = window.THX;
 
 @Component({
     name: 'Rules',
@@ -18,8 +17,8 @@ const THX = window.THX;
     },
 })
 export default class Rules extends Vue {
+    private $network!: Network;
     public loading: any = false;
-    public events: any = new EventService();
     public rules: any = [];
     public modal: any = {
         createRule: false,
@@ -43,9 +42,9 @@ export default class Rules extends Vue {
     public mounted() {
         this.getRules();
 
-        this.events.listen('event.RuleStateChanged', this.onRuleStateChanged);
-        this.events.listen('event.RulePollCreated', this.onRulePollCreated);
-        this.events.listen('event.RulePollFinished', this.onRulePollFinished);
+        // this.events.listen('event.RuleStateChanged', this.onRuleStateChanged);
+        // this.events.listen('event.RulePollCreated', this.onRulePollCreated);
+        // this.events.listen('event.RulePollFinished', this.onRulePollFinished);
     }
 
     public async onRulePollCreated(data: any) {
@@ -56,7 +55,7 @@ export default class Rules extends Vue {
     }
 
     public async onRulePollFinished(data: any) {
-        const utils = THX.network.loom;
+        const utils = this.$network.web3js.utils;
         const r = data.detail;
         const rule = await this.contract.methods.rules(r.id).call();
         const amount = utils.fromWei(rule.amount, 'ether');
@@ -116,7 +115,7 @@ export default class Rules extends Vue {
         // const rulesRef = firebase.database().ref(`pools/${this.contract._address}/rules`);
         // Check the firebase for objects that are not in contracts and vice versa.
         // TODO index the id and not the slug
-        const utils = THX.network.loom.utils;
+        const utils = this.$network.web3js.utils;
         const amountOfRules = parseInt( await this.contract.methods.countRules().call() );
 
         for (let i = 0; i < amountOfRules; i++) {

@@ -48,10 +48,13 @@ export default class AccountDetail extends Vue {
     private async created() {
         this.input.extdevPrivateKey = this.$state.extdevPrivateKey;
         this.input.rinkebyPrivateKey = this.$state.rinkebyPrivateKey;
-        this.isExtdevMinter = await this.$network.isExtdevMinter(this.$network.extdev.web3js, this.$network.extdev.account);
-        this.isRinkebyMinter = await this.$network.isRinkebyMinter(this.$network.rinkeby.web3js, this.$network.rinkeby.account.address);
 
-        // Subscribe for minter role events
+        if (this.$network.extdev && this.$network.extdev.account) {
+            this.isExtdevMinter = await this.$network.isExtdevMinter(this.$network.extdev.web3js, this.$network.extdev.account);
+        }
+        if (this.$network.rinkeby && this.$network.rinkeby.account) {
+            this.isRinkebyMinter = await this.$network.isRinkebyMinter(this.$network.rinkeby.web3js, this.$network.rinkeby.account.address);
+        }
     }
 
     private showModal(id: string) {
@@ -87,7 +90,7 @@ export default class AccountDetail extends Vue {
     }
 
     private createRinkebyKey() {
-        const account = this.$network.rinkeby.web3js.eth.accounts.create();
+        const account = this.$network.web3js.eth.accounts.create();
 
         this.input.rinkebyPrivateKey = account.privateKey;
     }
@@ -158,12 +161,17 @@ export default class AccountDetail extends Vue {
         const privateKeyArray = CryptoUtils.B64ToUint8Array(this.input.extdevPrivateKey);
         const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKeyArray);
         const address = LocalAddress.fromPublicKey(publicKey).toString().toLowerCase();
-        const prevWalletRef = firebase.database().ref(`wallets/${this.$network.extdev.account}`);
         const walletRef = firebase.database().ref(`wallets/${address}`);
         const isDuplicate = await this.isDuplicateAddress(address);
 
+        // If there is a connection remove the current wallet mapping before
+        // setting the new mapping
+        if (this.$network.extdev) {
+            firebase.database().ref(`wallets/${this.$network.extdev.account}`)
+                .remove();
+        }
+
         if (!isDuplicate) {
-            prevWalletRef.remove();
 
             walletRef.child('uid').set(this.$account.uid);
 

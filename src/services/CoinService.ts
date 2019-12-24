@@ -33,6 +33,13 @@ export default class CoinService extends Vue {
             });
     }
 
+    async getBalance(address: string) {
+        const contract: any = await this.$network.getExtdevCoinContract(this.$network.extdev.web3js);
+        const rewardPoolBalance = await contract.methods.balanceOf(address).call({ from: this.$network.extdev.account })
+
+        return new BN(rewardPoolBalance).div(coinMultiplier);
+    }
+
     //
     // public subscribePoolEvents(events: string[]) {
     //     for (const e of this.poolEvents) {
@@ -43,11 +50,4 @@ export default class CoinService extends Vue {
     // public subscribeRewardEvents(events: any) {
     //     events.RewardStateChanged({}, (error: string, event: any) => this.dispatch(`event.RewardStateChanged`, event.returnValues));
     // }
-
-    async getBalance(address: string) {
-        const contract: any = await this.$network.getExtdevCoinContract(this.$network.extdev.web3js);
-        const rewardPoolBalance = await contract.methods.balanceOf(address).call({ from: this.$network.extdev.account })
-
-        return new BN(rewardPoolBalance).div(coinMultiplier);
-    }
 }

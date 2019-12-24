@@ -2,13 +2,12 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import firebase from 'firebase/app';
 import 'firebase/database';
 import { BCard, BCardText, BSpinner, BProgress, BProgressBar } from 'bootstrap-vue';
+import { Network } from '@/models/Network';
 
 const Modal = require('../components/Modal');
 const RulePoll = require('../contracts/RulePoll.json');
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
-
-const THX = window.THX;
 
 @Component({
     name: 'Rule',
@@ -22,6 +21,7 @@ const THX = window.THX;
     },
 })
 export default class Rule extends Vue {
+    private $network!: Network;
     public loading: boolean = false;
     public modal: any = {
         rulePoll: false,
@@ -72,8 +72,12 @@ export default class Rule extends Vue {
     }
     public async getRulePoll() {
         if (this.rule.poll !== '0x0000000000000000000000000000000000000000') {
-            const utils = THX.network.loom.utils;
-            const rulePoll = await THX.network.contract(RulePoll, this.rule.poll);
+            const utils = this.$network.web3js.utils;
+            const rulePoll = await this.$network.getExtdevContract(
+                this.$network.extdev.web3js,
+                RulePoll,
+                this.rule.poll
+            );
             const id = parseInt(await rulePoll.methods.id().call());
             const proposedAmount = utils.fromWei(await rulePoll.methods.proposedAmount().call(), 'ether');
             const vote = await rulePoll.methods.votesByAddress(this.account.loom.address).call();
@@ -85,7 +89,7 @@ export default class Rule extends Vue {
             const finalized = await rulePoll.methods.finalized().call();
             const startTime = await rulePoll.methods.startTime().call();
             const endTime = await rulePoll.methods.endTime().call();
-            const now = (await THX.network.loom.eth.getBlock('latest')).timestamp;
+            const now = (await this.$network.web3js.eth.getBlock('latest')).timestamp;
             const diff = (endTime - now);
             const meta = (await this.getRuleMeta()).val();
 
@@ -150,7 +154,11 @@ export default class Rule extends Vue {
             });
     }
     public async finalizePoll() {
-        const rulePoll = await THX.network.contract(RulePoll, this.rule.poll);
+        const rulePoll = await this.$network.getExtdevContract(
+            this.$network.extdev.web3js,
+            RulePoll,
+            this.rule.poll
+        );
 
         this.loading = true;
 
@@ -171,7 +179,7 @@ export default class Rule extends Vue {
             });
     }
     public async startPoll() {
-        const utils = THX.network.loom.utils;
+        const utils = this.$network.web3js.utils;
         const amount = utils.toWei(this.input.proposedAmount, 'ether');
 
         this.modal.startPoll = false;

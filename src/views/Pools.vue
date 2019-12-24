@@ -3,6 +3,10 @@
         <main class="region region-content">
             <h2>Pools</h2>
 
+            <div class="alert alert-danger" v-if="error">
+                {{error}}
+            </div>
+
             <BCard
                 v-for="p in pools"
                 footer-tag="footer"
@@ -39,10 +43,10 @@
             <modal v-if="showJoinPoolModal" @close="showJoinPoolModal = false">
                 <h3 slot="header">Join Reward Pool:</h3>
                 <div slot="body">
-                    <input v-model="poolAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000" />
+                    <input v-model="input.poolAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000" />
                 </div>
                 <template slot="footer">
-                    <button @click="onJoinPool()" class="btn btn-primary">Join Pool</button>
+                    <button @click="onJoinRewardPool()" class="btn btn-primary">Join Pool</button>
                 </template>
             </modal>
         </main>

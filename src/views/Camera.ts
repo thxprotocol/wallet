@@ -3,9 +3,9 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import { BSpinner } from 'bootstrap-vue';
 import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
+import PoolService from '@/services/PoolService';
 
 const RewardPool = require('../contracts/RewardPool.json');
-const THX = window.THX;
 
 @Component({
     name: 'Camera',
@@ -16,6 +16,7 @@ const THX = window.THX;
     },
 })
 export default class Camera extends Vue {
+    private poolService: PoolService = new PoolService();
     public loading: boolean = true;
     public hasStream: boolean = false;
 
@@ -33,7 +34,7 @@ export default class Camera extends Vue {
         });
     }
 
-    public async onInit(promise: Promise) {
+    public async onInit(promise: any) {
         try {
             await promise;
             this.hasStream = true;
@@ -64,7 +65,7 @@ export default class Camera extends Vue {
         if (decodedString.length > 0) {
             const poolsRef = firebase.database().ref(`pools`);
             const data = JSON.parse(decodedString);
-            const pool = await THX.network.contract(RewardPool, data.pool);
+            const pool = await this.poolService.getRewardPool(data.pool);
 
             poolsRef.child(data.pool).child(`rewards`).push().set(data);
 
@@ -73,15 +74,16 @@ export default class Camera extends Vue {
                 `Claiming your reward for rule #${data.rule} in pool ${data.pool}...`,
             );
 
-            pool.methods.createReward(data.rule).send({ from: THX.network.account.address }).then((tx: any) => {
-                this.toast(
-                    'Reward status update',
-                    'Your claim is up for review!',
-                    'success',
-                );
-                // eslint-disable-next-line
-                console.log(tx);
-            });
+            pool.createReward(data.rule)
+                .then((tx: any) => {
+                    this.toast(
+                        'Reward status update',
+                        'Your claim is up for review!',
+                        'success',
+                    );
+                    // eslint-disable-next-line
+                    console.log(tx);
+                });
         }
     }
 

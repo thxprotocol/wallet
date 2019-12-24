@@ -1,6 +1,6 @@
 <template>
 <header class="region region-header">
-    <button href="/account" class="link-settings">
+    <button @click="goToAccount()" class="link-settings">
         <ProfilePicture v-if="$account.profile.picture" size="sm" :profile="$account.profile" />
     </button>
     <div class="account_balance">

@@ -29,20 +29,23 @@ firebase.initializeApp(config.firebase);
 firebase.auth()
     .onAuthStateChanged(function() {
         const currentUser: firebase.User | any = firebase.auth().currentUser;
-        const state: StateService = new StateService(currentUser.uid);
 
-        Vue.prototype.$account = new Account(currentUser);
-        Vue.prototype.$state = state;
-        Vue.prototype.$network = new Network(
-            state.extdevPrivateKey,
-            state.rinkebyPrivateKey,
-        );
+        if (currentUser) {
+            const state: StateService = new StateService(currentUser.uid);
 
-        if (!state.rinkebyPrivateKey) {
-            console.warn('It looks like you misconfigured your rinkeby private key. Provide it through the accounts page.')
-        }
-        if (!state.extdevPrivateKey) {
-            console.warn('It looks like you misconfigured your extdev private key. Provide it through the accounts page.')
+            Vue.prototype.$account = new Account(currentUser);
+            Vue.prototype.$state = state;
+            Vue.prototype.$network = new Network(
+                state.extdevPrivateKey,
+                state.rinkebyPrivateKey,
+            );
+
+            if (!state.rinkebyPrivateKey) {
+                console.warn('It looks like you misconfigured your rinkeby private key. Provide it through the accounts page.')
+            }
+            if (!state.extdevPrivateKey) {
+                console.warn('It looks like you misconfigured your extdev private key. Provide it through the accounts page.')
+            }
         }
 
         if (!app) {

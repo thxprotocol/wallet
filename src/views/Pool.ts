@@ -1,15 +1,16 @@
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import EventService from '../services/EventService';
+import { Component, Vue } from 'vue-property-decorator';
 import Rules from '../components/Rules.vue';
 import Rewards from '../components/Rewards.vue';
 import Modal from '../components/Modal.vue';
 import { BSpinner, BTab, BTabs, BListGroup, BListGroupItem } from 'bootstrap-vue';
+import { Network } from '@/models/Network';
+import PoolService from '@/services/PoolService';
+import { RewardPool } from '@/models/RewardPool';
+import CoinService from '@/services/CoinService';
 
-const RewardPool = require('../contracts/RewardPool.json');
 const _ = require('lodash');
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
-const THX = window.THX;
 
 const RuleState = ['Active', 'Disabled'];
 // const RewardState = ['Pending', 'Approved', 'Rejected', 'Withdrawn'];
@@ -28,82 +29,64 @@ const RuleState = ['Active', 'Disabled'];
     },
 })
 export default class Pool extends Vue {
-
-    get orderedStream() {
-        return _.orderBy(this.stream, 'timestamp').reverse();
-    }
-
-    public contract: any = null;
+    private $network!: Network;
+    public error: string = '';
     public loading: boolean = false;
-    public events: any = new EventService();
-    public stream: any[] = [];
+    public poolService: PoolService = new PoolService();
+    public coinService: CoinService = new CoinService();
 
-    public account: any = {
-        loom: {
-            address: '',
-        },
-        isManager: false,
-        isMember: false,
-    };
-    public pool: any = {
-        address: '',
-        name: '',
-        balance: 0,
-    };
+    public stream: any[] = [];
+    public isManager: boolean = false;
+    public isMember: boolean = false;
+
+    public pool: RewardPool | null = null;
+
     public input: any = {
         poolDeposit: 0,
         addMember: '',
         addManager: '',
     };
+
     public modal: any = {
         addMember: false,
         addManager: false,
         poolDeposit: false,
     };
 
-    constructor() {
-        super();
+    created() {
+        this.poolService.getRewardPool(this.$route.params.id)
+            .then(async (pool: RewardPool) => {
+                const balance = await this.coinService.getBalance(pool.address);
 
-        if (THX.network.hasKeys) {
-            this.init();
-        }
+                pool.setBalance(balance);
+
+                this.pool = pool;
+
+                this.isManager = await pool.isManager(this.$network.extdev.account);
+                this.isMember = await pool.isMember(this.$network.extdev.account);
+            });
+
+
+        // for (const e of this.events.poolEvents) {
+
+        // This should be done with stored history somehow
+        // this.contract.getPastEvents(e, { fromBlock: receipt.blockNumber, toBlock: 'latest'})
+        //     .then((events: any[]) => {
+        //         if (events.length > 0) {
+        //             for (const event of events) {
+        //                 this[`on${event.event}`](event.returnValues, event.blockTime);
+        //             }
+        //         }
+        //     })
+        //     .catch((err: string) => {
+        //         // eslint-disable-next-line
+        //         console.error(err);
+        //     });
+        // }
     }
 
-    public async init() {
-        const token = THX.network.instances.token;
-
-        this.pool.address = this.$route.params.id;
-        this.contract = await THX.network.contract(RewardPool, this.pool.address);
-
-        this.account.loom = THX.network.account;
-        this.account.rinkeby = THX.network.rinkeby.account;
-        this.account.isManager = await this.contract.methods.isManager(this.account.loom.address).call();
-        this.account.isMember = await this.contract.methods.isMember(this.account.loom.address).call();
-
-        this.pool.name = await this.contract.methods.name().call();
-        this.pool.balance = new BN( await token.methods.balanceOf(this.pool.address).call() ).div(tokenMultiplier);
-
-        this.$parent.$refs.header.updateBalance();
-
-        this.events.subscribePoolEvents(this.contract.events);
-
-        const hash = RewardPool.networks[9545242630824].transactionHash;
-        const receipt = await THX.network.loom.eth.getTransactionReceipt(hash);
-
-        for (const e of this.events.poolEvents) {
-            this.contract.getPastEvents(e, { fromBlock: receipt.blockNumber, toBlock: 'latest'})
-                .then((events: any[]) => {
-                    if (events.length > 0) {
-                        for (const event of events) {
-                            this[`on${event.event}`](event.returnValues, event.blockTime);
-                        }
-                    }
-                })
-                .catch((err: string) => {
-                    // eslint-disable-next-line
-                    console.error(err);
-                });
-        }
+    get orderedStream() {
+        return _.orderBy(this.stream, 'timestamp').reverse();
     }
 
     public onRulePollCreated(data: any, timestamp: string) {
@@ -178,24 +161,30 @@ export default class Pool extends Vue {
     public onAddManager() {
         this.loading = true;
 
-        return this.contract.methods.addManager(this.input.addManager)
-            .send({ from: this.account.loom.address })
-            .then(async () => {
-                this.loading = false;
-            });
+        if (this.pool) {
+            return this.pool.addManager(this.input.addManager)
+                .then(() => {
+                    this.loading = false;
+                })
+                .catch((err: string) => {
+                    this.loading = false;
+                    this.error = err;
+                });
+        }
     }
 
     public onAddMember() {
         this.loading = true;
 
-        return this.contract.methods.addMember(this.input.addMember).send({ from: this.account.loom.address })
-            .then(async () => {
-                this.loading = false;
-            })
-            .catch(async (err: string) => {
-                // eslint-disable-next-line
-                console.error(err);
-            });
+        if (this.pool) {
+            return this.pool.addMember(this.input.addMember)
+                .then(() => {
+                    this.loading = false;
+                })
+                .catch((err: string) => {
+                    this.error = err;
+                });
+        }
     }
 
     public onTransferToPool() {
@@ -203,16 +192,18 @@ export default class Pool extends Vue {
 
         this.loading = true;
 
-        return this.contract.methods.deposit(tokenAmount.toString())
-            .send({ from: this.account.loom.address })
-            .then(async () => {
-                const token = THX.network.instances.token;
-
-                this.pool.balance = new BN(await token.methods.balanceOf(this.pool.address).call()).div(tokenMultiplier);
-                this.input.poolDeposit = 0;
-                this.loading = false;
-
-                this.$parent.$refs.header.updateBalance();
-            });
+        // return this.contract.methods.deposit(tokenAmount.toString())
+        //     .send({ from: this.account.loom.address })
+        //     .then(async () => {
+        //         const token = await this.$network.getExtdevCoinContract(
+        //             this.$network.extdev.web3js,
+        //         );
+        //
+        //         this.pool.balance = new BN(await token.methods.balanceOf(this.pool.address).call()).div(tokenMultiplier);
+        //         this.input.poolDeposit = 0;
+        //         this.loading = false;
+        //
+        //         (this.$parent.$refs.header as any).updateBalance();
+        //     });
     }
 }

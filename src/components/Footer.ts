@@ -1,6 +1,6 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BNav, BNavItem } from 'bootstrap-vue';
-import EventAggregator from '@/services/EventAggregator';
+import { Network } from '@/models/Network';
 
 @Component({
     name: 'Footer',
@@ -10,7 +10,7 @@ import EventAggregator from '@/services/EventAggregator';
     },
 })
 export default class Footer extends Vue {
-    public ea: any = new EventAggregator();
+    private $network!: Network;
     public amountOfNewRewards: number = 0;
     public assets: any = {
         wallet: require('../assets/wallet.svg'),
@@ -21,7 +21,7 @@ export default class Footer extends Vue {
     };
 
     get routes(): any {
-        return this.$router.options.routes.filter((item: any) => item.visible);
+        return (this.$router as any).options.routes.filter((item: any) => item.visible);
     }
 
     public created() {

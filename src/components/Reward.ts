@@ -1,8 +1,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import ProfilePicture from '../components/ProfilePicture';
 import { BProgress, BListGroupItem } from 'bootstrap-vue';
-
-const THX = window.THX;
+import { Network } from '@/models/Network';
 
 @Component({
     name: 'Reward',
@@ -13,6 +12,7 @@ const THX = window.THX;
     },
 })
 export default class Reward extends Vue {
+    private $network!: Network;
     public loading: boolean = false;
 
     @Prop() public reward: any = null;
@@ -31,7 +31,7 @@ export default class Reward extends Vue {
         this.loading = true;
 
         return await this.reward.contract.methods.withdraw()
-            .send({ from: THX.network.account.address })
+            .send({ from: this.$network.extdev.account.address })
             .then(async (tx: any) => {
                 this.loading = false;
                 // eslint-disable-next-line
@@ -47,7 +47,7 @@ export default class Reward extends Vue {
         this.loading = true;
 
         return await this.reward.contract.methods.tryToFinalize()
-            .send({ from: THX.network.account.address })
+            .send({ from: this.$network.extdev.account.address })
             .then(async (tx: any) => {
                 this.loading = false;
                 this.reward.state = await this.reward.contract.methods.state().call();

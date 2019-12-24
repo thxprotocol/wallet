@@ -35,6 +35,7 @@ export class Network extends Vue {
     public rinkebyPrivateKeyString: string;
     public extdev: any;
     public rinkeby: any;
+    public web3js: any = new Web3();
 
     constructor(
         extdevPrivateKey: string,
@@ -158,11 +159,11 @@ export class Network extends Vue {
         );
     }
 
-    public async getExtdevContract(web3js: any, ContractJSON: any) {
+    public async getExtdevContract(web3js: any, contractAbi: any, contractAddr: string) {
         const networkId = await web3js.eth.net.getId();
         return new web3js.eth.Contract(
-            ContractJSON.abi,
-            ContractJSON.networks[networkId].address,
+            contractAbi,
+            contractAddr,
         );
     }
 

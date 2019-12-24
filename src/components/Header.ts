@@ -1,7 +1,4 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import firebase from 'firebase';
-import 'firebase/auth';
-import EventAggregator from '../services/EventAggregator';
 import ProfilePicture from '../components/ProfilePicture.vue';
 import { Network } from '../models/Network';
 
@@ -23,21 +20,22 @@ export default class Header extends Vue {
     };
 
     created() {
+        // Subscribe for coin balance events if there is a network
         this.updateBalance();
-
-        // Subscribe for coin balance events
     }
 
     public async updateBalance() {
-        const rinkebyAddr = this.$network.rinkeby.account.address;
-        const extdevAddr = this.$network.extdev.account;
-        const rinkebyCoinBalance = await this.$network.getRinkebyCoinBalance(this.$network.rinkeby.web3js, rinkebyAddr);
-        const extdevCoinBalance = await this.$network.getExtdevCoinBalance(this.$network.extdev.web3js, extdevAddr);
-        const balanceInWei = await this.$network.rinkeby.web3js.eth.getBalance(rinkebyAddr);
+        if (this.$network.rinkeby && this.$network.extdev) {
+            const rinkebyAddr = this.$network.rinkeby.account.address;
+            const extdevAddr = this.$network.extdev.account;
+            const rinkebyCoinBalance = await this.$network.getRinkebyCoinBalance(this.$network.rinkeby.web3js, rinkebyAddr);
+            const extdevCoinBalance = await this.$network.getExtdevCoinBalance(this.$network.extdev.web3js, extdevAddr);
+            const balanceInWei = await this.$network.rinkeby.web3js.eth.getBalance(rinkebyAddr);
 
-        this.balance.tokenRinkeby = new BN(rinkebyCoinBalance).div(tokenMultiplier);
-        this.balance.token = new BN(extdevCoinBalance).div(tokenMultiplier);
-        this.balance.eth = this.$network.rinkeby.web3js.utils.fromWei(balanceInWei, 'ether');
+            this.balance.tokenRinkeby = new BN(rinkebyCoinBalance).div(tokenMultiplier);
+            this.balance.token = new BN(extdevCoinBalance).div(tokenMultiplier);
+            this.balance.eth = this.$network.rinkeby.web3js.utils.fromWei(balanceInWei, 'ether');
+        }
     }
 
     public goToAccount() {

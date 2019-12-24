@@ -1,6 +1,6 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
-const QRCode = window.QRCode;
+const QRCode = (window as any).QRCode;
 
 @Component({
     name: 'Widget',

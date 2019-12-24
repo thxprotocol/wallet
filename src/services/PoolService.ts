@@ -9,49 +9,66 @@ const RewardPoolJSON = require('@/contracts/RewardPool.json');
 export default class PoolService extends Vue {
     private $account!: Account;
     private $network!: Network;
-    public events: string[];
+    public events: string[] = [
+        'Deposited',
+        'ManagerAdded',
+        'ManagerRemoved',
+        'MemberAdded',
+        'MemberRemoved',
+        'RulePollCreated',
+        'RulePollFinished',
+        'RuleStateChanged',
+        'Withdrawn',
+    ];
 
-    constructor() {
-        super();
-
-        this.events = [
-            'Deposited',
-            'ManagerAdded',
-            'ManagerRemoved',
-            'MemberAdded',
-            'MemberRemoved',
-            'RulePollCreated',
-            'RulePollFinished',
-            'RuleStateChanged',
-            'Withdrawn',
-        ];
-    }
-
-    async getRewardPoolContract() {
+    async getRewardPoolContract(address: string) {
         return await this.$network.getExtdevContract(
             this.$network.extdev.web3js,
-            RewardPoolJSON,
+            RewardPoolJSON.abi,
+            address,
         );
     }
 
-    public getRewardPools() {
+    public async getRewardPool(address: string) {
+        return new RewardPool(
+            address,
+            await this.getRewardPoolContract(address),
+            this.$network.extdev.account,
+        );
+    }
+
+    public getMyRewardPools() {
         if (this.$account) {
             return firebase.database().ref(`users/${this.$account.uid}/pools`)
                 .once('value').then(async (s: any) => {
+                    const nid = await this.$network.extdev.web3js.eth.net.getId();
+                    const hash = RewardPoolJSON.networks[nid].transactionHash;
+                    const receipt = await this.$network.extdev.web3js.eth.getTransactionReceipt(hash);
                     const data: any = s.val();
+
                     let pools: any = {};
 
                     for (const a in data) {
-                        pools[data[a].address] = new RewardPool(
-                            data[a].address,
-                            await this.getRewardPoolContract(),
+                        const pool = new RewardPool(
+                            a,
+                            await this.getRewardPoolContract(a),
                             this.$network.extdev.account,
                         );
+                        pool.setOutOfSync(a !== receipt.contractAddress);
+
+                        pools[data[a].address] = pool;
                     }
 
                     return pools;
                 });
         }
+    }
+
+    public joinRewardPool(address: string) {
+        return firebase.database().ref(`users/${this.$account.uid}/pools`).child(address)
+            .set({
+                address: address,
+            });
     }
 
 }

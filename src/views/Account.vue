@@ -1,6 +1,6 @@
 <template>
 <article class="region region-container">
-    <main class="region region-content" v-if="$account.profile">
+    <main class="region region-content">
 
         <h2>{{$account.profile.firstName}} {{$account.profile.lastName}}</h2>
 
@@ -32,7 +32,7 @@
             </div>
         </div>
 
-        <div class="card mb-3" v-if="$network.rinkeby">
+        <div class="card mb-3" v-if="$network.rinkeby && $network.rinkeby.account">
             <div class="card-header">
                 <strong>Rinkeby Network</strong><br>
                 <small>{{$network.rinkeby.account.address}} <a class="text-primary" @click="copyClipboard($network.rinkeby.account.address)">({{clipboard === $network.rinkeby.account.address ? 'Copied!' : 'Copy'}})</a></small>
@@ -47,7 +47,7 @@
             </div>
         </div>
 
-        <div class="card mb-3" v-if="$network.extdev">
+        <div class="card mb-3" v-if="$network.extdev && $network.extdev.account">
             <div class="card-header">
                 <strong>Loom Network</strong><br>
                 <small>{{$network.extdev.account}}
@@ -58,7 +58,6 @@
             </div>
             <div class="card-body">
                 <ul class="list-bullets">
-                    <!-- <li><button class="btn btn-link" @click="showModal('modal-account-mapping')">Remove account mapping</button></li> -->
                     <li v-if="isExtdevMinter"><button class="btn btn-link" @click="showModal('modal-mint-extdev')">Mint Loom tokens</button></li>
                     <li><button class="btn btn-link" @click="showModal('modal-transfer')">Transfer tokens</button></li>
                 </ul>
@@ -69,23 +68,6 @@
             <button @click="reset()" class="btn btn-link mr-2">Reset</button>
             <button @click="logout()" class="btn btn-primary">Logout</button>
         </div>
-
-        <BModal title="Decouple account from wallet" centered ref="modal-account-mapping">
-            <hr>
-            <div class="text-center">
-                <small>Loom Network address </small><br>
-                <small class="badge badge-primary">{{$network.extdev.account}}</small><br>
-                <small>is mapped to User ID</small><br>
-                <small class="badge badge-primary">{{$account.uid}}</small>
-            </div>
-            <hr>
-            <p>Use this feature to decouple the Loom address from your User account and use your Loom address for another THX user account.</p>
-            <template slot="modal-footer">
-                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="removeMapping($network.extdev.account)">
-                    Decouple wallet
-                </BButton>
-            </template>
-        </BModal>
 
         <BModal title="Connect accounts" centered ref="modal-connect">
             <p>Add private keys for the loom sidechain and the parent Rinkeby network. These keys will only be stored on your device and used to verify transactions.</p>

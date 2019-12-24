@@ -1,6 +1,6 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import EventService from '../services/EventService';
 import { BSpinner, BListGroup, BListGroupItem } from 'bootstrap-vue';
+import { Network } from '@/models/Network';
 
 @Component({
     name: 'home',
@@ -11,6 +11,7 @@ import { BSpinner, BListGroup, BListGroupItem } from 'bootstrap-vue';
     },
 })
 export default class Wallet extends Vue {
+    private $network!: Network;
     public events: any = null;
     public tokenTransfers: any[] = [];
 
@@ -23,26 +24,15 @@ export default class Wallet extends Vue {
         return arr.reverse();
     }
 
-    constructor() {
-        super();
-
-        const THX = window.THX;
-
-        if (THX.network.hasKeys) {
-            this.events = new EventService();
-            this.init();
-        }
-    }
-
-    public async init() {
-        const THX = window.THX;
-
-        const token = await THX.network.instances.token;
+    async created() {
+        const token = await this.$network.getExtdevCoinContract(
+            this.$network.extdev.web3js,
+        );
         const fromBlock = await this.getCurrentBlockId();
         const offset = 10000;
-        const address = THX.network.account.address;
+        const address = this.$network.extdev.account;
 
-        this.$parent.$refs.header.updateBalance();
+        (this.$parent.$refs.header as any).updateBalance();
 
         this.events.listen('event.Transfer', this.addMyTransfer);
         // this.events.listen('event.Deposited', this.addDeposit);
@@ -52,7 +42,7 @@ export default class Wallet extends Vue {
             filter: { from: address },
             fromBlock: (fromBlock - offset),
             toBlock: 'latest',
-        }, (error, events) => {
+        }, (error: string, events: any) => {
             this.addMyTransfers(events);
         });
 
@@ -60,19 +50,19 @@ export default class Wallet extends Vue {
             filter: { to: address },
             fromBlock: (fromBlock - offset),
             toBlock: 'latest',
-        }, (error, events) => {
+        }, (error: string, events: any) => {
             this.addMyTransfers(events);
         });
     }
 
     public getCurrentBlockId() {
-        return THX.network.loom.eth.getBlockNumber().then((data: any) => {
+        return this.$network.extdev.web3js.eth.getBlockNumber().then((data: any) => {
             return data;
         });
     }
 
     public addMyTransfers(data: any) {
-        const utils = THX.network.loom.utils;
+        const utils = this.$network.extdev.web3js.utils;
 
         for (const key in data) {
             const hash = data[key].transactionHash;
@@ -87,17 +77,17 @@ export default class Wallet extends Vue {
     }
 
     public addMyTransfer(data: any) {
-        const utils = THX.network.loom.utils;
+        const utils = this.$network.extdev.web3js.utils;
         const value = data.detail;
-        const hash  = event.transactionHash;
+        const hash  = (event as any).transactionHash;
         const from = (value.from) ? value.from.toLowerCase() : '';
         const to = (value.to) ? value.to.toLowerCase() : '';
         const amount = utils.fromWei(value.value, 'ether');
-        const timestamp = event.blockTime;
+        const timestamp = (event as any).blockTime;
 
         this._createTransfer(hash, from, to, amount, timestamp);
 
-        this.$parent.$refs.header.updateBalance();
+        (this.$parent.$refs.header as any).updateBalance();
     }
 
     public _createTransfer(hash: string, from: string, to: string, amount: string, timestamp: string) {

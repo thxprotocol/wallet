@@ -4,8 +4,8 @@ import 'firebase/database';
 import 'firebase/auth';
 import { BSpinner } from 'bootstrap-vue';
 import { CryptoUtils } from 'loom-js';
-
-const THX = window.THX;
+import StateService from '@/services/StateService';
+import { Network } from '@/models/Network';
 
 @Component({
     name: 'register',
@@ -14,6 +14,8 @@ const THX = window.THX;
     },
 })
 export default class Register extends Vue {
+    private $network!: Network;
+    private $state!: StateService;
     public firstName: any = '';
     public lastName: any = '';
     public email: any = '';
@@ -39,8 +41,8 @@ export default class Register extends Vue {
         firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
             .then((r: any) => {
                 const privateKeyArray = CryptoUtils.generatePrivateKey();
-                const privateKeyString = CryptoUtils.Uint8ArrayToB64(privateKeyArray);
-                const account = THX.network.rinkeby.eth.accounts.create();
+                const extdevPrivateKeyString = CryptoUtils.Uint8ArrayToB64(privateKeyArray);
+                const rinkebyAccount = this.$network.web3js.eth.accounts.create();
                 const user = {
                     uid: r.user.uid,
                     email: r.user.email,
@@ -49,9 +51,9 @@ export default class Register extends Vue {
                     userName: r.user.userName,
                 };
 
-                THX.state.loomPrivateKey = privateKeyString;
-                THX.state.rinkebyPrivateKey = account.privateKey;
-                THX.state.save();
+                this.$state.extdevPrivateKey = extdevPrivateKeyString;
+                this.$state.rinkebyPrivateKey = rinkebyAccount.privateKey;
+                this.$state.save();
 
                 firebase.database().ref('users').child(user.uid).set(user);
 
