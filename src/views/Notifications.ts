@@ -22,13 +22,13 @@ const RewardState = ['Pending', 'Approved', 'Rejected', 'Withdrawn'];
     },
 })
 export default class Notifications extends Vue {
-    private $network!: Network;
-    private $account!: Account;
     public events: any = null;
     public network: any = null;
     public notifications: any[] = [];
     public currentNotification: any = 0;
     public loading: any = false;
+    private $network!: Network;
+    private $account!: Account;
 
 
     public async created() {

@@ -14,7 +14,7 @@ export class Profile {
     } | null = null;
 
     constructor(
-        uid: string
+        uid: string,
     ) {
         if (uid) {
             firebase.database().ref(`users/${uid}`)

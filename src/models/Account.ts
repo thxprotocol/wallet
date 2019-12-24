@@ -5,7 +5,7 @@ export class Account {
     public profile: Profile | null = null;
 
     constructor(
-        currentUser: firebase.User | any
+        currentUser: firebase.User | any,
     ) {
         if (currentUser) {
             this.uid = currentUser.uid;
@@ -13,11 +13,11 @@ export class Account {
         }
     }
 
-    getCoinBalance() {
+    public getCoinBalance() {
 
     }
 
-    getEthBalance() {
+    public getEthBalance() {
 
     }
 }

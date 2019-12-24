@@ -10,7 +10,10 @@ import { Network } from '@/models/Network';
     },
 })
 export default class Footer extends Vue {
-    private $network!: Network;
+
+    get routes(): any {
+        return (this.$router as any).options.routes.filter((item: any) => item.visible);
+    }
     public amountOfNewRewards: number = 0;
     public assets: any = {
         wallet: require('../assets/wallet.svg'),
@@ -19,10 +22,7 @@ export default class Footer extends Vue {
         camera: require('../assets/qrcode.svg'),
         pools: require('../assets/community.svg'),
     };
-
-    get routes(): any {
-        return (this.$router as any).options.routes.filter((item: any) => item.visible);
-    }
+    private $network!: Network;
 
     public created() {
         if (this.$network) {

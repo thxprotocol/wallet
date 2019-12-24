@@ -39,7 +39,7 @@ export class Network extends Vue {
 
     constructor(
         extdevPrivateKey: string,
-        rinkebyPrivateKey: string
+        rinkebyPrivateKey: string,
     ) {
         super();
 

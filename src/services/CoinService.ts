@@ -11,15 +11,15 @@ export default class CoinService extends Vue {
         super();
     }
 
-    async listen() {
-        const contract: any = await this.$network.getExtdevCoinContract(this.$network.rinkeby.web3js)
+    public async listen() {
+        const contract: any = await this.$network.getExtdevCoinContract(this.$network.rinkeby.web3js);
 
         contract.events
             .Transfer({
                 to: this.$network.rinkeby.account.address,
             }, (error: string, event: any) => {
                 console.log(event);
-                debugger
+                debugger;
                 return this.$emit('event.RinkebyTransfer', event.returnValues);
             });
 
@@ -28,14 +28,14 @@ export default class CoinService extends Vue {
                 from: this.$network.rinkeby.account.address,
             }, (error: string, event: any) => {
                 console.log(event);
-                debugger
-                return this.$emit('event.RinkebyTransfer', event.returnValues)
+                debugger;
+                return this.$emit('event.RinkebyTransfer', event.returnValues);
             });
     }
 
-    async getBalance(address: string) {
+    public async getBalance(address: string) {
         const contract: any = await this.$network.getExtdevCoinContract(this.$network.extdev.web3js);
-        const rewardPoolBalance = await contract.methods.balanceOf(address).call({ from: this.$network.extdev.account })
+        const rewardPoolBalance = await contract.methods.balanceOf(address).call({ from: this.$network.extdev.account });
 
         return new BN(rewardPoolBalance).div(coinMultiplier);
     }

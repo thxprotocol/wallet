@@ -12,14 +12,14 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
     },
 })
 export default class Header extends Vue {
-    private $network!: Network;
     public balance: any = {
         eth: 0,
         token: 0,
         tokenRinkeby: 0,
     };
+    private $network!: Network;
 
-    created() {
+    public created() {
         // Subscribe for coin balance events if there is a network
         this.updateBalance();
     }

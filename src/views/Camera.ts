@@ -16,9 +16,9 @@ const RewardPool = require('../contracts/RewardPool.json');
     },
 })
 export default class Camera extends Vue {
-    private poolService: PoolService = new PoolService();
     public loading: boolean = true;
     public hasStream: boolean = false;
+    private poolService: PoolService = new PoolService();
 
     public repaint() {
         return;

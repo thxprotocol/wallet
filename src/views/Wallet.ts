@@ -11,9 +11,6 @@ import { Network } from '@/models/Network';
     },
 })
 export default class Wallet extends Vue {
-    private $network!: Network;
-    public events: any = null;
-    public tokenTransfers: any[] = [];
 
     get orderedTokenTransfers() {
         const arr: any[] = [];
@@ -23,8 +20,11 @@ export default class Wallet extends Vue {
 
         return arr.reverse();
     }
+    public events: any = null;
+    public tokenTransfers: any[] = [];
+    private $network!: Network;
 
-    async created() {
+    public async created() {
         const token = await this.$network.getExtdevCoinContract(
             this.$network.extdev.web3js,
         );

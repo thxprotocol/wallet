@@ -17,7 +17,6 @@ const RuleState = ['Active', 'Disabled'];
     },
 })
 export default class Rules extends Vue {
-    private $network!: Network;
     public loading: any = false;
     public rules: any = [];
     public modal: any = {
@@ -38,6 +37,7 @@ export default class Rules extends Vue {
         isManager: false,
         isMember: false,
     };
+    private $network!: Network;
 
     public mounted() {
         this.getRules();

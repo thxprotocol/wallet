@@ -12,7 +12,6 @@ import { Network } from '@/models/Network';
     },
 })
 export default class Reward extends Vue {
-    private $network!: Network;
     public loading: boolean = false;
 
     @Prop() public reward: any = null;
@@ -22,6 +21,7 @@ export default class Reward extends Vue {
                 address: '',
             },
         };
+    private $network!: Network;
 
     public mounted() {
 

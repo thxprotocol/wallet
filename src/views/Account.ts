@@ -24,9 +24,6 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
     },
 })
 export default class AccountDetail extends Vue {
-    private $account!: Account;
-    private $network!: Network;
-    private $state!: StateService;
 
     public loading: any = false;
     public isExtdevMinter: boolean = false;
@@ -44,56 +41,9 @@ export default class AccountDetail extends Vue {
         depositToGateway: 0,
         withdrawToGateway: 0,
     };
-
-    private async created() {
-        this.input.extdevPrivateKey = this.$state.extdevPrivateKey;
-        this.input.rinkebyPrivateKey = this.$state.rinkebyPrivateKey;
-
-        if (this.$network.extdev && this.$network.extdev.account) {
-            this.isExtdevMinter = await this.$network.isExtdevMinter(this.$network.extdev.web3js, this.$network.extdev.account);
-        }
-        if (this.$network.rinkeby && this.$network.rinkeby.account) {
-            this.isRinkebyMinter = await this.$network.isRinkebyMinter(this.$network.rinkeby.web3js, this.$network.rinkeby.account.address);
-        }
-    }
-
-    private showModal(id: string) {
-        const modal: any = this.$refs[id];
-        modal.show();
-    }
-
-    private copyClipboard(value: string) {
-        const input = document.createElement('input');
-        const d: any = document;
-
-        input.id = 'clippy';
-        input.type = 'type';
-        input.value = value;
-        input.style.position = 'absolute';
-        input.style.left = '-999999px';
-        input.style.width = '0px';
-        input.style.height = '0px';
-
-        d.getElementById('app').appendChild(input);
-        d.getElementById('clippy').select();
-        d.execCommand('copy');
-        d.getElementById('clippy').remove();
-
-        this.clipboard = value;
-    }
-
-    private createExtdevKey() {
-        const privateKeyArray = CryptoUtils.generatePrivateKey();
-        const privateKeyString = CryptoUtils.Uint8ArrayToB64(privateKeyArray);
-
-        this.input.extdevPrivateKey = privateKeyString;
-    }
-
-    private createRinkebyKey() {
-        const account = this.$network.web3js.eth.accounts.create();
-
-        this.input.rinkebyPrivateKey = account.privateKey;
-    }
+    private $account!: Account;
+    private $network!: Network;
+    private $state!: StateService;
 
     public isDuplicateAddress(address: string) {
         const walletRef = firebase.database().ref(`wallets/${address}`);
@@ -118,8 +68,8 @@ export default class AccountDetail extends Vue {
                         .update({
                             picture: {
                                 name: fileName,
-                                url: url,
-                            }
+                                url,
+                            },
                         });
                 }
             });
@@ -247,7 +197,7 @@ export default class AccountDetail extends Vue {
 
         return this.$network.mintRinkebyCoin(
             this.$network.rinkeby.account.address,
-            amount
+            amount,
         )
             .then(() => {
                 this.input.mintForAccount = 0;
@@ -264,7 +214,7 @@ export default class AccountDetail extends Vue {
 
         return this.$network.mintExtdevCoin(
             this.$network.extdev.address,
-            amount.toString()
+            amount.toString(),
         )
             .then(() => {
                 this.input.mintForExtdevAccount = 0;
@@ -283,5 +233,55 @@ export default class AccountDetail extends Vue {
 
                 return (this.$refs['modal-add-minter'] as any).hide();
             });
+    }
+
+    private async created() {
+        this.input.extdevPrivateKey = this.$state.extdevPrivateKey;
+        this.input.rinkebyPrivateKey = this.$state.rinkebyPrivateKey;
+
+        if (this.$network.extdev && this.$network.extdev.account) {
+            this.isExtdevMinter = await this.$network.isExtdevMinter(this.$network.extdev.web3js, this.$network.extdev.account);
+        }
+        if (this.$network.rinkeby && this.$network.rinkeby.account) {
+            this.isRinkebyMinter = await this.$network.isRinkebyMinter(this.$network.rinkeby.web3js, this.$network.rinkeby.account.address);
+        }
+    }
+
+    private showModal(id: string) {
+        const modal: any = this.$refs[id];
+        modal.show();
+    }
+
+    private copyClipboard(value: string) {
+        const input = document.createElement('input');
+        const d: any = document;
+
+        input.id = 'clippy';
+        input.type = 'type';
+        input.value = value;
+        input.style.position = 'absolute';
+        input.style.left = '-999999px';
+        input.style.width = '0px';
+        input.style.height = '0px';
+
+        d.getElementById('app').appendChild(input);
+        d.getElementById('clippy').select();
+        d.execCommand('copy');
+        d.getElementById('clippy').remove();
+
+        this.clipboard = value;
+    }
+
+    private createExtdevKey() {
+        const privateKeyArray = CryptoUtils.generatePrivateKey();
+        const privateKeyString = CryptoUtils.Uint8ArrayToB64(privateKeyArray);
+
+        this.input.extdevPrivateKey = privateKeyString;
+    }
+
+    private createRinkebyKey() {
+        const account = this.$network.web3js.eth.accounts.create();
+
+        this.input.rinkebyPrivateKey = account.privateKey;
     }
 }

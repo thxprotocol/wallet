@@ -22,10 +22,6 @@ const coinMultiplier = new BN(10).pow(new BN(18));
     },
 })
 export default class Pools extends Vue {
-    private $account!: Account;
-    private $network!: Network;
-    private poolService: PoolService = new PoolService();
-    private coinService: CoinService = new CoinService();
 
     public error: string = '';
     public loading: any = false;
@@ -34,6 +30,10 @@ export default class Pools extends Vue {
     public input: any = {
         poolAddress: '',
     };
+    private $account!: Account;
+    private $network!: Network;
+    private poolService: PoolService = new PoolService();
+    private coinService: CoinService = new CoinService();
 
     constructor() {
         super();
@@ -54,7 +54,7 @@ export default class Pools extends Vue {
             });
     }
 
-    mounted() {
+    public mounted() {
         this.loading = true;
 
         (this.poolService as any).getMyRewardPools()
@@ -62,7 +62,7 @@ export default class Pools extends Vue {
                 this.pools = pools;
                 this.loading = false;
 
-                for (let a in pools) {
+                for (const a in pools) {
                     const pool: RewardPool = pools[a];
                     const balance = await this.coinService.getBalance(pool.address);
 

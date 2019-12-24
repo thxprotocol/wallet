@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueMoment from 'vue-moment';
 
-import App from './App.vue'
+import App from './App.vue';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 
@@ -9,8 +9,8 @@ import router from './router';
 import store from './store';
 import './registerServiceWorker';
 
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap-vue/dist/bootstrap-vue.css';
 import './custom.scss';
 
 import { Account } from './models/Account';
@@ -41,10 +41,10 @@ firebase.auth()
             );
 
             if (!state.rinkebyPrivateKey) {
-                console.warn('It looks like you misconfigured your rinkeby private key. Provide it through the accounts page.')
+                console.warn('It looks like you misconfigured your rinkeby private key. Provide it through the accounts page.');
             }
             if (!state.extdevPrivateKey) {
-                console.warn('It looks like you misconfigured your extdev private key. Provide it through the accounts page.')
+                console.warn('It looks like you misconfigured your extdev private key. Provide it through the accounts page.');
             }
         }
 

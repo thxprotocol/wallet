@@ -21,7 +21,6 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
     },
 })
 export default class Rule extends Vue {
-    private $network!: Network;
     public loading: boolean = false;
     public modal: any = {
         rulePoll: false,
@@ -50,6 +49,7 @@ export default class Rule extends Vue {
         isMember: false,
         isManager: false,
     };
+    private $network!: Network;
 
     public mounted() {
         this.init();
@@ -76,7 +76,7 @@ export default class Rule extends Vue {
             const rulePoll = await this.$network.getExtdevContract(
                 this.$network.extdev.web3js,
                 RulePoll,
-                this.rule.poll
+                this.rule.poll,
             );
             const id = parseInt(await rulePoll.methods.id().call());
             const proposedAmount = utils.fromWei(await rulePoll.methods.proposedAmount().call(), 'ether');
@@ -157,7 +157,7 @@ export default class Rule extends Vue {
         const rulePoll = await this.$network.getExtdevContract(
             this.$network.extdev.web3js,
             RulePoll,
-            this.rule.poll
+            this.rule.poll,
         );
 
         this.loading = true;

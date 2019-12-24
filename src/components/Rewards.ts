@@ -17,7 +17,6 @@ const RewardState = ['Pending', 'Approved', 'Rejected', 'Withdrawn'];
     },
 })
 export default class Rewards extends Vue {
-    private $network!: Network;
     public loading: any = false;
     public rewards: any = [];
     public amountOfRewards: any = -1;
@@ -30,6 +29,7 @@ export default class Rewards extends Vue {
         isManager: false,
         isMember: false,
     };
+    private $network!: Network;
 
     public mounted() {
         this.loading = true;
@@ -66,7 +66,7 @@ export default class Rewards extends Vue {
             const reward = await this.$network.getExtdevContract(
                 this.$network.web3js,
                 RewardJSON,
-                rewardAddress
+                rewardAddress,
             );
             const state = await reward.methods.state().call();
 
@@ -86,7 +86,7 @@ export default class Rewards extends Vue {
             const reward = await this.$network.getExtdevContract(
                 this.$network.web3js,
                 RewardJSON,
-                rewardAddress
+                rewardAddress,
             );
             const id = await reward.methods.id().call();
             const beneficiary = (await reward.methods.beneficiary().call()).toLowerCase();

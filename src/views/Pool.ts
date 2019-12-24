@@ -29,7 +29,10 @@ const RuleState = ['Active', 'Disabled'];
     },
 })
 export default class Pool extends Vue {
-    private $network!: Network;
+
+    get orderedStream() {
+        return _.orderBy(this.stream, 'timestamp').reverse();
+    }
     public error: string = '';
     public loading: boolean = false;
     public poolService: PoolService = new PoolService();
@@ -52,8 +55,9 @@ export default class Pool extends Vue {
         addManager: false,
         poolDeposit: false,
     };
+    private $network!: Network;
 
-    created() {
+    public created() {
         this.poolService.getRewardPool(this.$route.params.id)
             .then(async (pool: RewardPool) => {
                 const balance = await this.coinService.getBalance(pool.address);
@@ -83,10 +87,6 @@ export default class Pool extends Vue {
         //         console.error(err);
         //     });
         // }
-    }
-
-    get orderedStream() {
-        return _.orderBy(this.stream, 'timestamp').reverse();
     }
 
     public onRulePollCreated(data: any, timestamp: string) {

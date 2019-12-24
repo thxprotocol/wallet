@@ -5,12 +5,12 @@ export class RewardRule {
 export class RewardPool {
     public address: string = '';
 
-    private contract: any;
-    private owner: string = '';
-
     public name: string = '';
     public balance: number = 0;
     public outOfSync: boolean = true;
+
+    private contract: any;
+    private owner: string = '';
 
     constructor(
         address: string,
@@ -27,34 +27,34 @@ export class RewardPool {
             });
     }
 
-    setBalance(amount: number) {
+    public setBalance(amount: number) {
         this.balance = amount;
     }
 
-    setOutOfSync(state: boolean) {
+    public setOutOfSync(state: boolean) {
         this.outOfSync = state;
     }
 
-    async isManager(address: string) {
+    public async isManager(address: string) {
         return await this.contract.methods.isManager(address).call({
             from: this.owner,
         });
     }
 
-    async isMember(address: string) {
+    public async isMember(address: string) {
         return await this.contract.methods.isMember(address).call({
             from: this.owner,
         });
     }
 
-    async addManager(address: string) {
+    public async addManager(address: string) {
         return await this.contract.methods.addManager(address)
             .send({
                 from: this.owner,
             });
     }
 
-    async addMember(address: string) {
+    public async addMember(address: string) {
         return await this.contract.methods.addManager(address)
             .send({
                 from: this.owner,
@@ -62,7 +62,7 @@ export class RewardPool {
     }
 
 
-    async createReward(ruleId: number) {
+    public async createReward(ruleId: number) {
         return await this.contract.methods.createReward(ruleId)
             .send({
                 from: this.owner,

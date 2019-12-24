@@ -3,9 +3,9 @@ import { Vue } from 'vue-property-decorator';
 const KEY = 'thx:wallet:state:';
 
 export default class StateService extends Vue {
-    private key: string;
     public extdevPrivateKey: string = '';
     public rinkebyPrivateKey: string = '';
+    private key: string;
 
     constructor(uid: string) {
         super();

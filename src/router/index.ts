@@ -23,8 +23,8 @@ const routes: any = [{
         meta: {
             header: true,
             footer: true,
-            requiresAuth: true
-        }
+            requiresAuth: true,
+        },
     }, {
         path: '/pools/:id',
         name: 'pool',
@@ -34,8 +34,8 @@ const routes: any = [{
         meta: {
             header: true,
             footer: true,
-            requiresAuth: true
-        }
+            requiresAuth: true,
+        },
     }, {
         path: '/',
         name: 'wallet',
@@ -44,8 +44,8 @@ const routes: any = [{
         meta: {
             header: true,
             footer: true,
-            requiresAuth: true
-        }
+            requiresAuth: true,
+        },
     }, {
         path: '/camera',
         name: 'camera',
@@ -54,8 +54,8 @@ const routes: any = [{
         meta: {
             header: false,
             footer: true,
-            requiresAuth: true
-        }
+            requiresAuth: true,
+        },
     }, {
         path: '/notifications',
         name: 'notifications',
@@ -64,8 +64,8 @@ const routes: any = [{
         meta: {
             header: false,
             footer: true,
-            requiresAuth: true
-        }
+            requiresAuth: true,
+        },
     }, {
         path: '/account',
         name: 'account',
@@ -74,20 +74,20 @@ const routes: any = [{
         meta: {
             header: true,
             footer: true,
-            requiresAuth: true
-        }
+            requiresAuth: true,
+        },
     }, {
         name: 'login',
         path: '/login',
-        component: Login
+        component: Login,
     }, {
         name: 'logout',
         path: '/logout',
-        component: Logout
+        component: Logout,
     }, {
         name: 'register',
         path: '/register',
-        component: Register
+        component: Register,
     },
     {
         name: 'widget',
@@ -97,7 +97,7 @@ const routes: any = [{
             header: false,
             footer: false,
             requiresAuth: true,
-        }
+        },
     },
 ];
 
@@ -108,13 +108,14 @@ const router = new VueRouter({
 });
 
 router.beforeEach((to, from, next) => {
-    let currentUser = firebase.auth().currentUser;
-    let requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+    const currentUser = firebase.auth().currentUser;
+    const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
-    if (requiresAuth && !currentUser)
-        next('login')
-    else
-        next()
+    if (requiresAuth && !currentUser) {
+        next('login');
+    } else {
+        next();
+    }
 });
 
 export default router;

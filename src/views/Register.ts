@@ -14,14 +14,14 @@ import { Network } from '@/models/Network';
     },
 })
 export default class Register extends Vue {
-    private $network!: Network;
-    private $state!: StateService;
     public firstName: any = '';
     public lastName: any = '';
     public email: any = '';
     public password: any = '';
     public passwordVerify: any = '';
     public loading: any = false;
+    private $network!: Network;
+    private $state!: StateService;
 
     constructor() {
         super();

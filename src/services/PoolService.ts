@@ -7,8 +7,6 @@ import { RewardPool } from '@/models/RewardPool';
 const RewardPoolJSON = require('@/contracts/RewardPool.json');
 
 export default class PoolService extends Vue {
-    private $account!: Account;
-    private $network!: Network;
     public events: string[] = [
         'Deposited',
         'ManagerAdded',
@@ -20,8 +18,10 @@ export default class PoolService extends Vue {
         'RuleStateChanged',
         'Withdrawn',
     ];
+    private $account!: Account;
+    private $network!: Network;
 
-    async getRewardPoolContract(address: string) {
+    public async getRewardPoolContract(address: string) {
         return await this.$network.getExtdevContract(
             this.$network.extdev.web3js,
             RewardPoolJSON.abi,
@@ -46,7 +46,7 @@ export default class PoolService extends Vue {
                     const receipt = await this.$network.extdev.web3js.eth.getTransactionReceipt(hash);
                     const data: any = s.val();
 
-                    let pools: any = {};
+                    const pools: any = {};
 
                     for (const a in data) {
                         const pool = new RewardPool(
@@ -67,7 +67,7 @@ export default class PoolService extends Vue {
     public joinRewardPool(address: string) {
         return firebase.database().ref(`users/${this.$account.uid}/pools`).child(address)
             .set({
-                address: address,
+                address,
             });
     }
 
