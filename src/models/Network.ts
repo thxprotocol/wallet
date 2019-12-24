@@ -387,7 +387,18 @@ export class Network extends Vue {
     }
 
     public async transferCoin(receiver: string, amount: number) {
-
+        const contract = await this.getExtdevCoinContract(this.extdev.web3js);
+        const approvedTx = await contract.methods
+            .approve(receiver, amount.toString())
+            .send({
+                from: this.extdev.account,
+            });
+        const sendTx = await contract.methods
+            .transfer(receiver, amount.toString())
+            .send({
+                from: this.extdev.account
+            });
+        console.log(sendTx)
     }
 
     public async mintRinkebyCoin(receiver: string, amount: number) {
