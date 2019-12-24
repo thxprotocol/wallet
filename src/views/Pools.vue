@@ -4,7 +4,6 @@
             <h2>Pools</h2>
 
             <BCard
-                :key="p.address"
                 v-for="p in pools"
                 footer-tag="footer"
                 header-tag="header"

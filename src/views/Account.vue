@@ -35,7 +35,7 @@
         <div class="card mb-3" v-if="$network.rinkeby">
             <div class="card-header">
                 <strong>Rinkeby Network</strong><br>
-                <small>{{account.rinkeby.address}} <a class="text-primary" @click="copyClipboard(account.rinkeby.address)">({{clipboard === account.rinkeby.address ? 'Copied!' : 'Copy'}})</a></small>
+                <small>{{$network.rinkeby.account.address}} <a class="text-primary" @click="copyClipboard($network.rinkeby.account.address)">({{clipboard === $network.rinkeby.account.address ? 'Copied!' : 'Copy'}})</a></small>
             </div>
             <div class="card-body">
                 <ul class="list-bullets">
@@ -50,12 +50,16 @@
         <div class="card mb-3" v-if="$network.extdev">
             <div class="card-header">
                 <strong>Loom Network</strong><br>
-                <small>{{account.loom.address}} <a class="text-primary" @click="copyClipboard(account.loom.address)">({{clipboard === account.loom.address ? 'Copied!' : 'Copy'}})</a></small>
+                <small>{{$network.extdev.account}}
+                    <a class="text-primary" @click="copyClipboard($network.extdev.account)">
+                        ({{clipboard === $network.extdev.account ? 'Copied!' : 'Copy'}})
+                    </a>
+                </small>
             </div>
             <div class="card-body">
                 <ul class="list-bullets">
                     <!-- <li><button class="btn btn-link" @click="showModal('modal-account-mapping')">Remove account mapping</button></li> -->
-                    <li v-if="isLoomMinter"><button class="btn btn-link" @click="showModal('modal-mint-loom')">Mint Loom tokens</button></li>
+                    <li v-if="isExtdevMinter"><button class="btn btn-link" @click="showModal('modal-mint-extdev')">Mint Loom tokens</button></li>
                     <li><button class="btn btn-link" @click="showModal('modal-transfer')">Transfer tokens</button></li>
                 </ul>
             </div>
@@ -70,14 +74,16 @@
             <hr>
             <div class="text-center">
                 <small>Loom Network address </small><br>
-                <small class="badge badge-primary">{{account.loom.address}}</small><br>
+                <small class="badge badge-primary">{{$network.extdev.account}}</small><br>
                 <small>is mapped to User ID</small><br>
-                <small class="badge badge-primary">{{account.uid}}</small>
+                <small class="badge badge-primary">{{$account.uid}}</small>
             </div>
             <hr>
             <p>Use this feature to decouple the Loom address from your User account and use your Loom address for another THX user account.</p>
             <template slot="modal-footer">
-                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="removeMapping(account.loom.address)">Decouple wallet</BButton>
+                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="removeMapping($network.extdev.account)">
+                    Decouple wallet
+                </BButton>
             </template>
         </BModal>
 
@@ -89,7 +95,7 @@
                 <div class="input-group">
                     <input v-model="input.extdevPrivateKey" type="text" class="form-control" placeholder="Paste or create your Loom private key">
                     <div class="input-group-append">
-                        <span @click="createLoomKey()" class="input-group-text btn btn-link">Create new key</span>
+                        <span @click="createExtdevKey()" class="input-group-text btn btn-link">Create new key</span>
                     </div>
                 </div>
             </div>
@@ -140,11 +146,11 @@
             </template>
 
             <template slot="modal-footer">
-                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onMintForAccount()">Mint {{ input.mintForAccount }} THX </BButton>
+                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onMintRinkebyCoin()">Mint {{ input.mintForAccount }} THX </BButton>
             </template>
         </BModal>
 
-        <BModal title="Mint tokens for Loom account" centered ref="modal-mint-loom">
+        <BModal title="Mint tokens for Loom account" centered ref="modal-mint-extdev">
 
             <template v-if="!loading">
                 <input v-model="input.mintForLoomAccount" type="number" class="form-control"  min="0" />
@@ -157,7 +163,7 @@
             </template>
 
             <template slot="modal-footer">
-                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onMintForLoomAccount()">Mint {{ input.mintForLoomAccount }} THX </BButton>
+                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onMintExtdevCoin()">Mint {{ input.mintForLoomAccount }} THX </BButton>
             </template>
 
         </BModal>
@@ -204,7 +210,7 @@
                     <input v-model="input.transferTokensAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000" />
                 </div>
                 <div class="form-group">
-                    <input v-model="input.transferTokens" type="number" class="form-control"  v-bind:max="balance.token" />
+                    <input v-model="input.transferTokens" type="number" class="form-control"  v-bind:max="$parent.$refs.header.balance.token" />
                 </div>
             </template>
 

@@ -1,7 +1,6 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import firebase from 'firebase/app';
 import 'firebase/database';
-import EventService from '../services/EventService';
 import Reward from './Reward';
 import { BListGroup, BSpinner } from 'bootstrap-vue';
 

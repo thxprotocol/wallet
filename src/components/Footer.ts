@@ -1,6 +1,6 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import EventAggregator from '../services/EventAggregator';
 import { BNav, BNavItem } from 'bootstrap-vue';
+import EventAggregator from '@/services/EventAggregator';
 
 @Component({
     name: 'Footer',

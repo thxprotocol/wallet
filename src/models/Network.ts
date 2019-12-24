@@ -142,25 +142,6 @@ export class Network extends Vue {
         return tx.hash;
     }
 
-    public async getRinkebyCoinBalance(web3js: any, accountAddress: string) {
-        const contract = await this.getRinkebyCoinContract(web3js);
-        const balance = await contract.methods
-            .balanceOf(accountAddress)
-            .call();
-        return balance;
-    }
-
-    public async getExtdevCoinBalance(web3js: any, accountAddress: string) {
-        const contract = await this.getExtdevCoinContract(web3js);
-        const addr = accountAddress.toLowerCase();
-        const balance = await contract.methods
-            .balanceOf(addr)
-            .call({
-                from: addr,
-            });
-        return balance;
-    }
-
     public async getRinkebyCoinContract(web3js: any) {
         const networkId = await web3js.eth.net.getId();
         return new web3js.eth.Contract(
@@ -174,6 +155,14 @@ export class Network extends Vue {
         return new web3js.eth.Contract(
             MyCoinJSON.abi,
             MyCoinJSON.networks[networkId].address,
+        );
+    }
+
+    public async getExtdevContract(web3js: any, ContractJSON: any) {
+        const networkId = await web3js.eth.net.getId();
+        return new web3js.eth.Contract(
+            ContractJSON.abi,
+            ContractJSON.networks[networkId].address,
         );
     }
 
@@ -356,6 +345,64 @@ export class Network extends Vue {
         } catch (err) {
             console.error(err);
         }
+    }
+
+    public async getRinkebyCoinBalance(web3js: any, accountAddress: string) {
+        const contract = await this.getRinkebyCoinContract(web3js);
+        const balance = await contract.methods
+            .balanceOf(accountAddress)
+            .call();
+        return balance;
+    }
+
+    public async getExtdevCoinBalance(web3js: any, accountAddress: string) {
+        const contract = await this.getExtdevCoinContract(web3js);
+        const addr = accountAddress.toLowerCase();
+        const balance = await contract.methods
+            .balanceOf(addr)
+            .call({
+                from: addr,
+            });
+        return balance;
+    }
+
+    public async isExtdevMinter(web3js: any, accountAddress: string) {
+        const contract = await this.getExtdevCoinContract(web3js);
+        const addr = accountAddress.toLowerCase();
+        const isMinter = await contract.methods
+            .isMinter(addr)
+            .call({
+                from: addr,
+            });
+        return isMinter;
+    }
+
+    public async isRinkebyMinter(web3js: any, accountAddress: string) {
+        const contract = await this.getRinkebyCoinContract(web3js);
+        const isMinter = await contract.methods
+            .isMinter(accountAddress)
+            .call();
+        return isMinter;
+    }
+
+    public async transferCoin(receiver: string, amount: number) {
+
+    }
+
+    public async mintRinkebyCoin(receiver: string, amount: number) {
+
+    }
+
+    public async mintExtdevCoin(receiver: string, amount: number) {
+
+    }
+
+    public async addRinkebyMinter(address: string) {
+
+    }
+
+    public async addExtdevMinter(address: string) {
+
     }
 
     public async withdrawCoin(amount: string) {

@@ -1,16 +1,20 @@
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/storage';
+import { CryptoUtils, LocalAddress } from 'loom-js';
 import { BAlert, BButton, BModal, BSpinner } from 'bootstrap-vue';
 import ProfilePicture from '../components/ProfilePicture.vue';
-import { CryptoUtils, LocalAddress } from 'loom-js';
+import Header from '../components/Header';
+import { Account } from '../models/Account';
+import { Network } from '../models/Network';
+import StateService from '@/services/StateService';
 
 const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
 
 @Component({
-    name: 'Account',
+    name: 'AccountDetail',
     components: {
         BSpinner,
         BButton,
@@ -19,68 +23,45 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
         ProfilePicture,
     },
 })
-export default class Account extends Vue {
+export default class AccountDetail extends Vue {
+    private $account!: Account;
+    private $network!: Network;
+    private $state!: StateService;
+
     public loading: any = false;
-    public uid: string = '';
-    public isLoomMinter: any = false;
-    public isRinkebyMinter: any = false;
+    public isExtdevMinter: boolean = false;
+    public isRinkebyMinter: boolean = false;
     public alert: any = null;
     public clipboard: any = null;
-    public balance: any = {
-        token: 0,
-        pool: 0,
-    };
     public input: any = {
         extdevPrivateKey: '',
         rinkebyPrivateKey: '',
         mintForAccount: 0,
-        mintForLoomAccount: 0,
+        mintForExtdevAccount: 0,
         newMinterAddress: '',
         transferTokensAddress: '',
         transferTokens: 0,
         depositToGateway: 0,
         withdrawToGateway: 0,
     };
-    public account: any = {
-        uid: null,
-        email: null,
-        picture: null,
-        firstName: '',
-        lastName: '',
-        loom: {
-            address: null,
-            privateKey: null,
-        },
-        rinkeby: {
-            address: null,
-            privateKey: null,
-        },
-    };
 
-    public created() {
-        this.uid = firebase.auth().currentUser.uid;
+    private async created() {
+        this.input.extdevPrivateKey = this.$state.extdevPrivateKey;
+        this.input.rinkebyPrivateKey = this.$state.rinkebyPrivateKey;
+        this.isExtdevMinter = await this.$network.isExtdevMinter(this.$network.extdev.web3js, this.$network.extdev.account);
+        this.isRinkebyMinter = await this.$network.isRinkebyMinter(this.$network.rinkeby.web3js, this.$network.rinkeby.account.address);
 
-        firebase.database().ref(`users/${this.uid}`).once('value').then(async (s) => {
-            const u = s.val();
-            const picture = u.picture;
-
-            if (picture) {
-                this.account.picture = picture.url;
-            }
-
-            this.account.firstName = u.firstName;
-            this.account.lastName = u.lastName;
-            this.account.uid = u.uid;
-            this.account.email = u.email;
-        });
+        // Subscribe for minter role events
     }
 
-    public showModal(id: string) {
-        this.$refs[id].show();
+    private showModal(id: string) {
+        const modal: any = this.$refs[id];
+        modal.show();
     }
 
-    public copyClipboard(value: string) {
+    private copyClipboard(value: string) {
         const input = document.createElement('input');
+        const d: any = document;
 
         input.id = 'clippy';
         input.type = 'type';
@@ -90,79 +71,66 @@ export default class Account extends Vue {
         input.style.width = '0px';
         input.style.height = '0px';
 
-        document.getElementById('app').appendChild(input);
-        document.getElementById('clippy').select();
-        document.execCommand('copy');
-        document.getElementById('clippy').remove();
+        d.getElementById('app').appendChild(input);
+        d.getElementById('clippy').select();
+        d.execCommand('copy');
+        d.getElementById('clippy').remove();
 
         this.clipboard = value;
     }
 
-    public createLoomKey() {
+    private createExtdevKey() {
         const privateKeyArray = CryptoUtils.generatePrivateKey();
         const privateKeyString = CryptoUtils.Uint8ArrayToB64(privateKeyArray);
 
         this.input.extdevPrivateKey = privateKeyString;
     }
 
-    public createRinkebyKey() {
-        const account = THX.network.rinkeby.eth.accounts.create();
+    private createRinkebyKey() {
+        const account = this.$network.rinkeby.web3js.eth.accounts.create();
 
         this.input.rinkebyPrivateKey = account.privateKey;
-    }
-
-    public async init() {
-        const token = THX.network.instances.token;
-        const tokenRinkeby = THX.network.instances.tokenRinkeby;
-        let balanceInWei;
-
-        this.account.loom = THX.network.account;
-        this.account.rinkeby = THX.network.rinkeby.account;
-
-        this.input.extdevPrivateKey = THX.state.extdevPrivateKey;
-        this.input.rinkebyPrivateKey = THX.state.rinkebyPrivateKey;
-
-        balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
-        this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
-        this.isLoomMinter = await token.methods.isMinter(this.account.loom.address).call();
-
-        balanceInWei = await tokenRinkeby.methods.balanceOf(this.account.rinkeby.address).call();
-        this.balance.tokenRinkeby = new BN(balanceInWei).div(tokenMultiplier);
-        this.isRinkebyMinter = await tokenRinkeby.methods.isMinter(this.account.rinkeby.address).call();
-
-        this.$parent.$refs.header.updateBalance();
     }
 
     public isDuplicateAddress(address: string) {
         const walletRef = firebase.database().ref(`wallets/${address}`);
 
         return walletRef.once('value').then((s) => {
-            return s.exists() && s.val().uid !== this.uid;
+            return s.exists() && s.val().uid !== this.$account.uid;
         });
     }
 
     public onFileChange(e: any) {
-        const avatarRef = firebase.storage().ref('avatars');
         const files = e.target.files || e.dataTransfer.files;
-        const fileName = `${this.uid}.jpg`;
+        const fileName = `${this.$account.uid}.jpg`;
 
-        avatarRef.child(fileName).put(files[0]).then(async (s) => {
-            const url = await s.ref.getDownloadURL();
+        firebase.storage().ref('avatars').child(fileName)
+            .put(files[0]).then(async (s: any) => {
+                const url = await s.ref.getDownloadURL();
 
-            this.account.picture = url;
+                if (this.$account.profile && this.$account.profile.picture) {
+                    this.$account.profile.picture.url = url;
 
-            firebase.database().ref('users').child(this.uid).update({ picture: { name: fileName, url }});
-        });
+                    firebase.database().ref('users').child(this.$account.uid)
+                        .update({
+                            picture: {
+                                name: fileName,
+                                url: url,
+                            }
+                        });
+                }
+            });
     }
 
     public async removeImage() {
-        const avatarRef = firebase.storage().ref('avatars');
-        const pictureRef = firebase.database().ref(`users/${this.uid}/picture`);
+        const pictureRef = firebase.database().ref(`users/${this.$account.uid}/picture`);
         const fileName = (await pictureRef.child('name').once('value')).val();
 
-        avatarRef.child(fileName).delete().then(() => {
+        firebase.storage().ref('avatars').child(fileName).delete().then(() => {
             pictureRef.remove().then(() => {
-                this.account.picture = null;
+                if (this.$account.profile) {
+                    this.$account.profile.picture = null;
+                }
             });
         });
     }
@@ -175,13 +143,13 @@ export default class Account extends Vue {
         const walletRef = firebase.database().ref(`wallets/${address}`);
         await walletRef.remove();
 
-        return this.$refs['modal-account-mapping'].hide();
+        return (this.$refs['modal-account-mapping'] as any).hide();
     }
 
     public reset() {
-        THX.state.clear();
+        this.$state.clear();
 
-        this.removeMapping(this.account.loom.address);
+        this.removeMapping(this.$network.extdev.account);
 
         return window.location.reload();
     }
@@ -190,14 +158,14 @@ export default class Account extends Vue {
         const privateKeyArray = CryptoUtils.B64ToUint8Array(this.input.extdevPrivateKey);
         const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKeyArray);
         const address = LocalAddress.fromPublicKey(publicKey).toString().toLowerCase();
-        const prevWalletRef = firebase.database().ref(`wallets/${this.account.loom.address}`);
+        const prevWalletRef = firebase.database().ref(`wallets/${this.$network.extdev.account}`);
         const walletRef = firebase.database().ref(`wallets/${address}`);
         const isDuplicate = await this.isDuplicateAddress(address);
 
         if (!isDuplicate) {
             prevWalletRef.remove();
 
-            walletRef.child('uid').set(this.uid);
+            walletRef.child('uid').set(this.$account.uid);
 
             await this.$network.mapAccounts(this.input.rinkebyPrivateKey, this.input.extdevPrivateKey);
 
@@ -213,7 +181,7 @@ export default class Account extends Vue {
             }, 3000);
         } else {
             this.alert = {
-                text: 'The loom private key provided is already in use and will not be stored.',
+                text: 'The extdev private key provided is already in use and will not be stored.',
                 variant: 'danger',
             };
         }
@@ -221,81 +189,91 @@ export default class Account extends Vue {
         this.$state.rinkebyPrivateKey = this.input.rinkebyPrivateKey;
         this.$state.save();
 
-        this.$refs['modal-connect'].hide();
+        (this.$refs['modal-connect'] as any).hide();
     }
 
     public onDepositToGateway() {
         this.loading = true;
 
-        return THX.gateway.depositCoin(this.input.depositToGateway)
+        return this.$network.depositCoin(this.input.depositToGateway)
             .then(() => {
                 this.input.depositToGateway = 0;
                 this.loading = false;
-                this.$refs['modal-gateway-deposit'].hide();
+                (this.$parent.$refs.header as Header).updateBalance();
+
+                return (this.$refs['modal-gateway-deposit'] as any).hide();
             });
     }
 
     public onWithdrawToGateway() {
         this.loading = true;
 
-        return THX.gateway.withdrawCoin(this.input.withdrawToGateway)
+        return this.$network.withdrawCoin(this.input.withdrawToGateway)
             .then(() => {
                 this.input.withdrawToGateway = 0;
                 this.loading = false;
-                this.$refs['modal-gateway-withdraw'].hide();
+                (this.$refs['modal-gateway-withdraw'] as any).hide();
             });
     }
 
     public onTransferTokens() {
-        const token = THX.network.instances.token;
         const amount = new BN(this.input.transferTokens).mul(tokenMultiplier);
 
-        return token.methods.transfer(this.input.transferTokensAddress, amount.toString()).send({ from: this.account.loom.address }).then(async () => {
-            const balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
-            this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
+        this.loading = true;
 
-            this.$parent.$refs.header.updateBalance();
-
-            this.input.transferTokens = 0;
-            this.$refs['modal-transfer'].hide();
-        });
-    }
-
-    public onMintForAccount() {
-        return THX.network.mint(this.account.rinkeby.address, this.input.mintForAccount)
+        return this.$network.transferCoin(this.input.transferTokensAddress, amount)
             .then(() => {
-                this.input.depositToGateway = 0;
                 this.loading = false;
-                this.$refs['modal-mint-rinkeby'].hide();
+                this.input.withdrawToGateway = 0;
+                (this.$parent.$refs.header as Header).updateBalance();
+
+                this.input.transferTokens = 0;
+                (this.$refs['modal-transfer'] as any).hide();
             });
     }
 
-    public onMintForLoomAccount() {
-        const token = THX.network.instances.token;
+    public onMintRinkebyCoin() {
+        const amount = new BN(this.input.mintForAccount).mul(tokenMultiplier);
+
+        this.loading = true;
+
+        return this.$network.mintRinkebyCoin(
+            this.$network.rinkeby.account.address,
+            amount
+        )
+            .then(() => {
+                this.input.mintForAccount = 0;
+                this.loading = false;
+
+                return (this.$refs['modal-mint-rinkeby'] as any).hide();
+            });
+    }
+
+    public onMintExtdevCoin() {
         const amount = new BN(this.input.mintForLoomAccount).mul(tokenMultiplier);
 
         this.loading = true;
 
-        return token.methods.mint(this.account.loom.address, amount.toString()).send({ from: this.account.loom.address}).then(async () => {
-            const balanceInWei = await token.methods.balanceOf(this.account.loom.address).call();
-            this.balance.token = new BN(balanceInWei).div(tokenMultiplier);
+        return this.$network.mintExtdevCoin(
+            this.$network.extdev.address,
+            amount.toString()
+        )
+            .then(() => {
+                this.input.mintForExtdevAccount = 0;
+                this.loading = false;
 
-            this.$parent.$refs.header.updateBalance();
-
-            this.input.mintForLoomAccount = 0;
-            this.loading = false;
-            this.$refs['modal-mint-loom'].hide();
-        });
+                return (this.$refs['modal-mint-extdev'] as any).hide();
+            });
     }
 
-    public onAddMinter() {
-        const tokenRinkeby = THX.network.instances.tokenRinkeby;
-
+    public onAddRinkebyMinter() {
         this.loading = true;
 
-        return tokenRinkeby.methods.addMinter(this.input.newMinterAddress).send({ from: this.account.rinkeby.address }).then(async () => {
-            this.loading = false;
-            this.$refs['modal-add-minter'].hide();
-        });
+        return this.$network.addRinkebyMinter(this.input.newMinterAddress)
+            .then(() => {
+                this.loading = false;
+
+                return (this.$refs['modal-add-minter'] as any).hide();
+            });
     }
 }
