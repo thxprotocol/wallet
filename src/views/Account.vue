@@ -12,13 +12,24 @@
             <div class="card-body">
                 <span v-if="!$account.profile.picture" class="float-left mr-3">
                     <label class="text-center">
-                        <ProfilePicture size="lg" :profile="$account.profile" /><br>
+                        <div class="account-picture account-picture-lg bg-yellow">
+                            <span>
+                                {{ $account.profile.initials}}
+                            </span>
+                        </div><br>
                         <span class="btn btn-link">Upload image</span>
                         <input type="file" @change="onFileChange" class="d-none">
                     </label>
                 </span>
                 <span v-if="$account.profile.picture" class="float-left mr-3 text-center">
-                    <ProfilePicture size="lg" :profile="$account.profile" /><br>
+                    <div class="account-picture account-picture-lg bg-yellow">
+                        <img v-if="$account.profile.picture"
+                            :src="$account.profile.picture.url"
+                            :alt="$account.profile.picture.name"
+                            width="100%"
+                            height="100%"
+                            class="rounded-circle" />
+                    </div><br>
                     <button class="btn btn-link" @click="removeImage">Delete</button>
                 </span>
 

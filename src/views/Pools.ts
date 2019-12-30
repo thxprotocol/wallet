@@ -64,7 +64,7 @@ export default class Pools extends Vue {
 
                 for (const a in pools) {
                     const pool: RewardPool = pools[a];
-                    const balance = await this.coinService.getBalance(pool.address);
+                    const balance = await this.coinService.getExtdevBalance(pool.address);
 
                     pool.setBalance(balance);
                 }

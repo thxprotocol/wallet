@@ -12,9 +12,4 @@ import Footer from './components/Footer.vue';
     },
 })
 export default class App extends Vue {
-
-    public created() {
-
-    }
-
 }

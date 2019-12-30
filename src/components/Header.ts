@@ -1,9 +1,9 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import ProfilePicture from '../components/ProfilePicture.vue';
 import { Network } from '../models/Network';
-
-const BN = require('bn.js');
-const tokenMultiplier = new BN(10).pow(new BN(18));
+import { Account } from '../models/Account';
+import CoinService from '@/services/CoinService';
+import EventService from '@/services/EventService';
 
 @Component({
     name: 'Header',
@@ -12,29 +12,36 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
     },
 })
 export default class Header extends Vue {
+    private $network!: Network;
+    private $account!: Account;
+    private $events!: EventService;
+    private coinService: CoinService = new CoinService();
+
     public balance: any = {
         eth: 0,
         token: 0,
         tokenRinkeby: 0,
     };
-    private $network!: Network;
 
     public created() {
-        // Subscribe for coin balance events if there is a network
         this.updateBalance();
+
+        this.coinService.init();
+
+        this.$events.listen('event.ExtdevTransfer', async () => {
+            this.balance.token = await this.$account.getExtdevCoinBalance();
+        });
+
+        this.$events.listen('event.RinkebyTransfer', async () => {
+            this.balance.tokenRinkeby = await this.$account.getRinkebyCoinBalance();
+        });
     }
 
     public async updateBalance() {
         if (this.$network.rinkeby && this.$network.extdev) {
-            const rinkebyAddr = this.$network.rinkeby.account.address;
-            const extdevAddr = this.$network.extdev.account;
-            const rinkebyCoinBalance = await this.$network.getRinkebyCoinBalance(this.$network.rinkeby.web3js, rinkebyAddr);
-            const extdevCoinBalance = await this.$network.getExtdevCoinBalance(this.$network.extdev.web3js, extdevAddr);
-            const balanceInWei = await this.$network.rinkeby.web3js.eth.getBalance(rinkebyAddr);
-
-            this.balance.tokenRinkeby = new BN(rinkebyCoinBalance).div(tokenMultiplier);
-            this.balance.token = new BN(extdevCoinBalance).div(tokenMultiplier);
-            this.balance.eth = this.$network.rinkeby.web3js.utils.fromWei(balanceInWei, 'ether');
+            this.balance.tokenRinkeby = await this.$account.getRinkebyCoinBalance();
+            this.balance.token = await this.$account.getExtdevCoinBalance();
+            this.balance.eth = await this.$account.getEthBalance();
         }
     }
 

@@ -3,7 +3,7 @@ import firebase from 'firebase';
 import 'firebase/database';
 import 'firebase/auth';
 
-export class Profile {
+export class Profile extends Vue {
     public firstName: string = '';
     public lastName: string = '';
     public initials: string = '';
@@ -16,14 +16,17 @@ export class Profile {
     constructor(
         uid: string,
     ) {
+        super();
+        
         if (uid) {
             firebase.database().ref(`users/${uid}`)
                 .once('value').then((s: any) => {
                     this.firstName = s.val().firstName;
                     this.lastName = s.val().lastName;
+                    this.initials = s.val().firstName.charAt(0) + s.val().lastName.charAt(0);
+                    console.log(this.initials)
                     this.picture = s.val().picture;
                     this.email = s.val().email;
-                    this.initials = s.val().firstName.charAt(0) + s.val().lastName.charAt(0);
                 });
 
             firebase.database().ref(`users/${uid}`)

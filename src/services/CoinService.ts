@@ -1,43 +1,60 @@
 import { Vue } from 'vue-property-decorator';
 import { Network } from '@/models/Network';
+import EventService from './EventService';
 
 const BN = require('bn.js');
 const coinMultiplier = new BN(10).pow(new BN(18));
 
 export default class CoinService extends Vue {
+    private $events!: EventService;
     private $network!: Network;
 
-    constructor() {
-        super();
-    }
+    public async init() {
+        const rinkebyContract: any = await this.$network.getRinkebyCoinContract(this.$network.rinkeby.web3js);
+        const extdevContract: any = await this.$network.getExtdevCoinContract(this.$network.extdev.web3js);
 
-    public async listen() {
-        const contract: any = await this.$network.getExtdevCoinContract(this.$network.rinkeby.web3js);
-
-        contract.events
+        rinkebyContract.events
             .Transfer({
                 to: this.$network.rinkeby.account.address,
             }, (error: string, event: any) => {
-                console.log(event);
-                debugger;
-                return this.$emit('event.RinkebyTransfer', event.returnValues);
+                return this.$events.dispatch('event.RinkebyTransfer');
             });
 
-        contract.events
+        rinkebyContract.events
             .Transfer({
                 from: this.$network.rinkeby.account.address,
             }, (error: string, event: any) => {
-                console.log(event);
-                debugger;
-                return this.$emit('event.RinkebyTransfer', event.returnValues);
+                return this.$events.dispatch('event.RinkebyTransfer');
+            });
+
+        extdevContract.events
+            .Transfer({
+                to: this.$network.extdev.account,
+            }, (error: string, event: any) => {
+                return this.$events.dispatch('event.ExtdevTransfer');
+            });
+
+        extdevContract.events
+            .Transfer({
+                from: this.$network.extdev.account,
+            }, (error: string, event: any) => {
+                return this.$events.dispatch('event.ExtdevTransfer');
             });
     }
 
-    public async getBalance(address: string) {
-        const contract: any = await this.$network.getExtdevCoinContract(this.$network.extdev.web3js);
-        const rewardPoolBalance = await contract.methods.balanceOf(address).call({ from: this.$network.extdev.account });
 
-        return new BN(rewardPoolBalance).div(coinMultiplier);
+    public async getExtdevBalance(address: string) {
+        const contract: any = await this.$network.getExtdevCoinContract(this.$network.extdev.web3js);
+        const balance = await contract.methods.balanceOf(address).call({ from: this.$network.extdev.account });
+
+        return new BN(balance).div(coinMultiplier);
+    }
+
+    public async getRinkebyBalance(address: string) {
+        const contract: any = await this.$network.getRinkebyCoinContract(this.$network.extdev.web3js);
+        const balance = await contract.methods.balanceOf(address).call({ from: this.$network.rinkeby.account });
+
+        return new BN(balance).div(coinMultiplier);
     }
 
     //

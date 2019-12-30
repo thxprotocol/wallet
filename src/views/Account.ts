@@ -254,7 +254,6 @@ export default class AccountDetail extends Vue {
 
     private copyClipboard(value: string) {
         const input = document.createElement('input');
-        const d: any = document;
 
         input.id = 'clippy';
         input.type = 'type';
@@ -264,10 +263,10 @@ export default class AccountDetail extends Vue {
         input.style.width = '0px';
         input.style.height = '0px';
 
-        d.getElementById('app').appendChild(input);
-        d.getElementById('clippy').select();
-        d.execCommand('copy');
-        d.getElementById('clippy').remove();
+        document.getElementById('app').appendChild(input);
+        document.getElementById('clippy').select();
+        document.execCommand('copy');
+        document.getElementById('clippy').remove();
 
         this.clipboard = value;
     }
