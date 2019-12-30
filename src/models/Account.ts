@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import { Vue } from 'vue-property-decorator';
 import { Profile } from './Profile';
 import { Network } from './Network';
 
@@ -45,4 +45,5 @@ export class Account extends Vue {
 
         return Math.floor(utils.fromWei(balanceInWei) * 100000) / 100000;
     }
+
 }

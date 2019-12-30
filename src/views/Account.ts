@@ -4,9 +4,10 @@ import 'firebase/database';
 import 'firebase/storage';
 import { CryptoUtils, LocalAddress } from 'loom-js';
 import { BAlert, BButton, BModal, BSpinner } from 'bootstrap-vue';
-import ProfilePicture from '../components/ProfilePicture.vue';
+// import ProfilePicture from '../components/ProfilePicture.vue';
 import Header from '../components/Header';
 import { Account } from '../models/Account';
+import { ProfilePicture } from '../models/Profile';
 import { Network } from '../models/Network';
 import StateService from '@/services/StateService';
 
@@ -16,11 +17,10 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
 @Component({
     name: 'AccountDetail',
     components: {
-        BSpinner,
-        BButton,
-        BModal,
-        BAlert,
-        ProfilePicture,
+        'b-spinner': BSpinner,
+        'b-button': BButton,
+        'b-modal': BModal,
+        'b-alert': BAlert,
     },
 })
 export default class AccountDetail extends Vue {
@@ -41,9 +41,14 @@ export default class AccountDetail extends Vue {
         depositToGateway: 0,
         withdrawToGateway: 0,
     };
+
     private $account!: Account;
     private $network!: Network;
     private $state!: StateService;
+
+    get account() {
+        return this.$account;
+    }
 
     public isDuplicateAddress(address: string) {
         const walletRef = firebase.database().ref(`wallets/${address}`);
@@ -54,38 +59,18 @@ export default class AccountDetail extends Vue {
     }
 
     public onFileChange(e: any) {
+        const name = `${this.$account.uid}.jpg`;
         const files = e.target.files || e.dataTransfer.files;
-        const fileName = `${this.$account.uid}.jpg`;
 
-        firebase.storage().ref('avatars').child(fileName)
-            .put(files[0]).then(async (s: any) => {
-                const url = await s.ref.getDownloadURL();
-
-                if (this.$account.profile && this.$account.profile.picture) {
-                    this.$account.profile.picture.url = url;
-
-                    firebase.database().ref('users').child(this.$account.uid)
-                        .update({
-                            picture: {
-                                name: fileName,
-                                url,
-                            },
-                        });
-                }
-            });
+        if (this.$account.profile) {
+            this.$account.profile.setPicture(name, files);
+        }
     }
 
     public async removeImage() {
-        const pictureRef = firebase.database().ref(`users/${this.$account.uid}/picture`);
-        const fileName = (await pictureRef.child('name').once('value')).val();
-
-        firebase.storage().ref('avatars').child(fileName).delete().then(() => {
-            pictureRef.remove().then(() => {
-                if (this.$account.profile) {
-                    this.$account.profile.picture = null;
-                }
-            });
-        });
+        if (this.$account.profile) {
+            this.$account.profile.removePicture();
+        }
     }
 
     public logout() {
@@ -254,6 +239,7 @@ export default class AccountDetail extends Vue {
 
     private copyClipboard(value: string) {
         const input = document.createElement('input');
+        const d: any = document;
 
         input.id = 'clippy';
         input.type = 'type';
@@ -263,10 +249,10 @@ export default class AccountDetail extends Vue {
         input.style.width = '0px';
         input.style.height = '0px';
 
-        document.getElementById('app').appendChild(input);
-        document.getElementById('clippy').select();
-        document.execCommand('copy');
-        document.getElementById('clippy').remove();
+        d.getElementById('app').appendChild(input);
+        d.getElementById('clippy').select();
+        d.execCommand('copy');
+        d.getElementById('clippy').remove();
 
         this.clipboard = value;
     }

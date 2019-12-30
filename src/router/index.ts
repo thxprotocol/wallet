@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import { Vue } from 'vue-property-decorator';
 import VueRouter from 'vue-router';
 import firebase from 'firebase/app';
 import Wallet from '../views/Wallet.vue';

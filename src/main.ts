@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import { Vue } from 'vue-property-decorator';
 import VueMoment from 'vue-moment';
 
 import App from './App.vue';
@@ -9,8 +9,8 @@ import router from './router';
 import store from './store';
 import './registerServiceWorker';
 
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap-vue/dist/bootstrap-vue.css';
+// import 'bootstrap/dist/css/bootstrap.css';
+// import 'bootstrap-vue/dist/bootstrap-vue.css';
 import './custom.scss';
 
 import { Account } from './models/Account';

@@ -60,7 +60,7 @@ export default class Pool extends Vue {
     public created() {
         this.poolService.getRewardPool(this.$route.params.id)
             .then(async (pool: RewardPool) => {
-                const balance = await this.coinService.getBalance(pool.address);
+                const balance = await this.coinService.getExtdevBalance(pool.address);
 
                 pool.setBalance(balance);
 

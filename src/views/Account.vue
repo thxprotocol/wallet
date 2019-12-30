@@ -2,30 +2,29 @@
 <article class="region region-container">
     <main class="region region-content">
 
-        <h2>{{$account.profile.firstName}} {{$account.profile.lastName}}</h2>
+        <h2>{{account.profile.firstName}} {{account.profile.lastName}}</h2>
 
-        <BAlert v-if="alert" show :variant="alert.variant ? alert.variant : 'info'">
+        <b-alert v-if="alert" show :variant="alert.variant ? alert.variant : 'info'">
           {{ alert.text }}
-        </BAlert>
+        </b-alert>
 
         <div class="card mb-3">
             <div class="card-body">
-                <span v-if="!$account.profile.picture" class="float-left mr-3">
+                <span v-if="!account.profile.picture" class="float-left mr-3">
                     <label class="text-center">
                         <div class="account-picture account-picture-lg bg-yellow">
                             <span>
-                                {{ $account.profile.initials}}
+                                {{ account.profile.initials}}
                             </span>
                         </div><br>
                         <span class="btn btn-link">Upload image</span>
                         <input type="file" @change="onFileChange" class="d-none">
                     </label>
                 </span>
-                <span v-if="$account.profile.picture" class="float-left mr-3 text-center">
+                <span v-if="account.profile.picture" class="float-left mr-3 text-center">
                     <div class="account-picture account-picture-lg bg-yellow">
-                        <img v-if="$account.profile.picture"
-                            :src="$account.profile.picture.url"
-                            :alt="$account.profile.picture.name"
+                        <img :src="account.profile.picture.url"
+                            :alt="account.profile.picture.name"
                             width="100%"
                             height="100%"
                             class="rounded-circle" />
@@ -34,10 +33,10 @@
                 </span>
 
                 <h3>E-mail:</h3>
-                <p>{{$account.profile.email}}</p>
+                <p>{{account.profile.email}}</p>
 
                 <h3>UID:</h3>
-                <p>{{$account.uid}}</p>
+                <p>{{account.uid}}</p>
                 <hr class="mt-5">
                 <button class="btn btn-link btn-block" @click="showModal('modal-connect')">Connect Accounts</button>
             </div>
@@ -80,7 +79,7 @@
             <button @click="logout()" class="btn btn-primary">Logout</button>
         </div>
 
-        <BModal title="Connect accounts" centered ref="modal-connect">
+        <b-modal title="Connect accounts" centered ref="modal-connect">
             <p>Add private keys for the loom sidechain and the parent Rinkeby network. These keys will only be stored on your device and used to verify transactions.</p>
             <div class="alert alert-warning"><strong>Make sure to store your private keys safely and not only on this device. We can not recover your keys!</strong></div>
             <div class="form-group">
@@ -103,11 +102,11 @@
             </div>
 
             <template slot="modal-footer">
-                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onCreateAccountsFromPrivateKey()">Connect</BButton>
+                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onCreateAccountsFromPrivateKey()">Connect</b-button>
             </template>
-        </BModal>
+        </b-modal>
 
-        <BModal title="Add minter role" centered ref="modal-add-minter">
+        <b-modal title="Add minter role" centered ref="modal-add-minter">
             <p>Provide an account with the minting role so it can generate THX on the sidechain.</p>
 
             <template v-if="!loading">
@@ -117,16 +116,16 @@
 
             <template v-if="loading">
                 <div class="text-center">
-                    <BSpinner label="Loading..."></BSpinner>
+                    <b-spinner label="Loading..."></b-spinner>
                 </div>
             </template>
 
             <template slot="modal-footer">
-                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onAddMinter()">Connect Accounts</BButton>
+                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onAddMinter()">Connect Accounts</b-button>
             </template>
-        </BModal>
+        </b-modal>
 
-        <BModal title="Mint tokens for Rinkeby account" centered ref="modal-mint-rinkeby">
+        <b-modal title="Mint tokens for Rinkeby account" centered ref="modal-mint-rinkeby">
 
             <template v-if="!loading" >
                 <input v-model="input.mintForAccount" type="number" class="form-control"  min="0" />
@@ -134,16 +133,16 @@
 
             <template v-if="loading">
                 <div class="text-center">
-                    <BSpinner label="Loading..."></BSpinner>
+                    <b-spinner label="Loading..."></b-spinner>
                 </div>
             </template>
 
             <template slot="modal-footer">
-                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onMintRinkebyCoin()">Mint {{ input.mintForAccount }} THX </BButton>
+                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onMintRinkebyCoin()">Mint {{ input.mintForAccount }} THX </b-button>
             </template>
-        </BModal>
+        </b-modal>
 
-        <BModal title="Mint tokens for Loom account" centered ref="modal-mint-extdev">
+        <b-modal title="Mint tokens for Loom account" centered ref="modal-mint-extdev">
 
             <template v-if="!loading">
                 <input v-model="input.mintForLoomAccount" type="number" class="form-control"  min="0" />
@@ -151,17 +150,17 @@
 
             <template v-if="loading">
                 <div class="text-center">
-                    <BSpinner label="Loading..."></BSpinner>
+                    <b-spinner label="Loading..."></b-spinner>
                 </div>
             </template>
 
             <template slot="modal-footer">
-                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onMintExtdevCoin()">Mint {{ input.mintForLoomAccount }} THX </BButton>
+                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onMintExtdevCoin()">Mint {{ input.mintForLoomAccount }} THX </b-button>
             </template>
 
-        </BModal>
+        </b-modal>
 
-        <BModal title="Deposit THX to Transfer Gateway" centered ref="modal-gateway-deposit">
+        <b-modal title="Deposit THX to Transfer Gateway" centered ref="modal-gateway-deposit">
             <p>Use the transfer gateway to move your THX from the sidechain on to the main ethereum chain.</p>
             <template v-if="!loading">
                 <input v-model="input.depositToGateway" type="number" class="form-control"  min="0" />
@@ -169,16 +168,16 @@
 
             <template v-if="loading">
                 <div class="text-center">
-                    <BSpinner label="Loading..."></BSpinner>
+                    <b-spinner label="Loading..."></b-spinner>
                 </div>
             </template>
 
             <template slot="modal-footer">
-                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onDepositToGateway()">Deposit {{ input.depositToGateway }} THX </BButton>
+                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onDepositToGateway()">Deposit {{ input.depositToGateway }} THX </b-button>
             </template>
-        </BModal>
+        </b-modal>
 
-        <BModal title="Withdraw THX to Transfer Gateway" centered ref="modal-gateway-withdraw">
+        <b-modal title="Withdraw THX to Transfer Gateway" centered ref="modal-gateway-withdraw">
             <p>Use the transfer gateway to move your THX from the sidechain on to the main ethereum chain.</p>
             <template v-if="!loading">
                 <input v-model="input.withdrawToGateway" type="number" class="form-control"  min="0" />
@@ -186,16 +185,16 @@
 
             <template v-if="loading">
                 <div class="text-center">
-                    <BSpinner label="Loading..."></BSpinner>
+                    <b-spinner label="Loading..."></b-spinner>
                 </div>
             </template>
 
             <template slot="modal-footer">
-                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onWithdrawToGateway()">Withdraw {{ input.withdrawToGateway }} THX </BButton>
+                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onWithdrawToGateway()">Withdraw {{ input.withdrawToGateway }} THX </b-button>
             </template>
-        </BModal>
+        </b-modal>
 
-        <BModal title="Transfer tokens on sidechain" centered ref="modal-transfer">
+        <b-modal title="Transfer tokens on sidechain" centered ref="modal-transfer">
             <p>Transfer an amount of THX to another wallet on the sidechain. To send it to a wallet on the main network, use the transfer gateway.</p>
 
             <template v-if="!loading">
@@ -209,14 +208,14 @@
 
             <template v-if="loading">
                 <div class="text-center">
-                    <BSpinner label="Loading..."></BSpinner>
+                    <b-spinner label="Loading..."></b-spinner>
                 </div>
             </template>
 
             <template slot="modal-footer">
-                <BButton size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onTransferTokens()">Transfer {{ input.transferTokens }} THX</BButton>
+                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onTransferTokens()">Transfer {{ input.transferTokens }} THX</b-button>
             </template>
-        </BModal>
+        </b-modal>
 
     </main>
 </article>

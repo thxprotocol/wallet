@@ -61,7 +61,6 @@ export class RewardPool {
             });
     }
 
-
     public async createReward(ruleId: number) {
         return await this.contract.methods.createReward(ruleId)
             .send({
