@@ -15,7 +15,8 @@ import Web3 from 'web3';
 const Config = require('../config');
 const { OfflineWeb3Signer } = require('loom-js/dist/solidity-helpers');
 const { ethers } = require('ethers');
-const BN = require('bn.js');
+import BN from 'bn.js';
+import { BigNumber } from 'ethers/utils';
 const MyRinkebyCoinJSON = require('../contracts/THXTokenRinkeby.json');
 const MyCoinJSON = require('../contracts/THXToken.json');
 const TransferGateway = Contracts.TransferGateway;
@@ -115,7 +116,7 @@ export class Network extends Vue {
         return gatewayContract.withdrawalReceiptAsync(ownerExtdevAddr);
     }
 
-    public async depositCoinToRinkebyGateway(web3js: string, amount: number, ownerAccount: any, gas: number) {
+    public async depositCoinToRinkebyGateway(web3js: string, amount: BN, ownerAccount: any, gas: number) {
         const contract = await this.getRinkebyCoinContract(web3js);
         const contractAddress = await this.getRinkebyCoinContractAddress(web3js);
         const gateway = await this.getRinkebyGatewayContract(web3js, ownerAccount);
@@ -341,7 +342,7 @@ export class Network extends Vue {
             const txHash = await this.depositCoinToRinkebyGateway(
                 web3js, actualAmount, account, 350000,
             );
-            console.log(`${amount} tokens deposited to Ethereum Gateway.`);
+            console.log(`${amount} tokens deposited to Transfer Gateway.`);
             console.log(`Rinkeby tx hash: ${txHash}`);
         } catch (err) {
             console.error(err);
@@ -386,7 +387,7 @@ export class Network extends Vue {
         return isMinter;
     }
 
-    public async transferCoin(receiver: string, amount: number) {
+    public async transferExtdevCoin(receiver: string, amount: BN) {
         const contract = await this.getExtdevCoinContract(this.extdev.web3js);
         const approvedTx = await contract.methods
             .approve(receiver, amount.toString())
@@ -398,14 +399,49 @@ export class Network extends Vue {
             .send({
                 from: this.extdev.account
             });
-        console.log(sendTx)
     }
 
-    public async mintRinkebyCoin(receiver: string, amount: number) {
+    public async transferRinkebyCoin(receiver: string, amount: BN) {
+        const rinkeby = this.loadRinkebyAccount();
+        const contract = await this.getRinkebyCoinContract(rinkeby.web3js);
+
+        const approvedTx = await contract.methods
+            .approve(receiver, amount.toString())
+            .send({
+                from: rinkeby.account.address,
+                gas: 350000,
+            });
+
+        const sendTx = await contract.methods
+            .transfer(receiver, amount.toString())
+            .send({
+                from: rinkeby.account.address,
+                gas: 350000,
+            });
+    }
+
+    public async transferEther(receiver: string, amount: BN) {
+        const rinkeby = this.loadRinkebyAccount();
+
+        return rinkeby.web3js.eth.sendTransaction({
+                to: receiver,
+                from: rinkeby.account.address,
+                value: amount,
+                gas: 350000,
+            })
+            .then((tx: any) => {
+                return console.log(tx);
+            })
+            .catch((err: string) => {
+                return console.error(err);
+            });
+    }
+
+    public async mintRinkebyCoin(receiver: string, amount: BN) {
 
     }
 
-    public async mintExtdevCoin(receiver: string, amount: number) {
+    public async mintExtdevCoin(receiver: string, amount: BN) {
 
     }
 
@@ -440,7 +476,7 @@ export class Network extends Vue {
                 receipt,
                 gas: 350000,
             });
-            console.log(`${amount} tokens withdrawn from Ethereum Gateway.`);
+            console.log(`${amount} tokens withdrawn from Transfer Gateway.`);
             console.log(`Rinkeby tx hash: ${txHash}`);
         } catch (err) {
             console.error(err);
@@ -464,7 +500,7 @@ export class Network extends Vue {
                     receipt,
                     gas: 350000,
                 });
-                console.log(`${receipt.tokenAmount.div(coinMultiplier).toString()} tokens withdrawn from Etheruem Gateway.`);
+                console.log(`${receipt.tokenAmount.div(coinMultiplier).toString()} tokens withdrawn from Transfer Gateway.`);
                 console.log(`Rinkeby tx hash: ${txHash}`);
             } else {
                 console.log('No pending withdrawels found!');

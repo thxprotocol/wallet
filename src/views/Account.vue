@@ -50,8 +50,10 @@
             </div>
             <div class="card-body">
                 <ul class="list-bullets">
-                    <li><button class="btn btn-link" @click="showModal('modal-gateway-deposit')">Deposit THX to Gateway</button></li>
-                    <li><button class="btn btn-link" @click="showModal('modal-gateway-withdraw')">Withdraw THX from Gateway</button></li>
+                    <li><button class="btn btn-link" @click="showModal('modal-gateway-deposit')">Deposit THX</button></li>
+                    <li><button class="btn btn-link" @click="showModal('modal-gateway-withdraw')">Withdraw THX</button></li>
+                    <li><button class="btn btn-link" @click="showModal('modal-transfer-coin-rinkeby')">Transfer THX</button></li>
+                    <li><button class="btn btn-link" @click="showModal('modal-transfer-ether')">Transfer ETH</button></li>
                     <li v-if="isRinkebyMinter"><button class="btn btn-link" @click="showModal('modal-add-minter')">Add minter role</button></li>
                     <li v-if="isRinkebyMinter"><button class="btn btn-link" @click="showModal('modal-mint-rinkeby')">Mint tokens</button></li>
                 </ul>
@@ -70,7 +72,7 @@
             <div class="card-body">
                 <ul class="list-bullets">
                     <li v-if="isExtdevMinter"><button class="btn btn-link" @click="showModal('modal-mint-extdev')">Mint Loom tokens</button></li>
-                    <li><button class="btn btn-link" @click="showModal('modal-transfer')">Transfer tokens</button></li>
+                    <li><button class="btn btn-link" @click="showModal('modal-transfer-coin-extdev')">Transfer THX</button></li>
                 </ul>
             </div>
         </div>
@@ -108,10 +110,7 @@
         </b-modal>
 
         <b-modal title="Add minter role" centered ref="modal-add-minter">
-            <p>Provide an account with the minting role so it can generate THX on the sidechain.</p>
-
             <template v-if="!loading">
-                <p>Lorem ipsum dolor sit amet.</p>
                 <input v-model="input.newMinterAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
             </template>
 
@@ -161,8 +160,8 @@
 
         </b-modal>
 
-        <b-modal title="Deposit THX to Transfer Gateway" centered ref="modal-gateway-deposit">
-            <p>Use the transfer gateway to move your THX from the sidechain on to the main ethereum chain.</p>
+        <b-modal title="Deposit THX" centered ref="modal-gateway-deposit">
+
             <template v-if="!loading">
                 <input v-model="input.depositToGateway" type="number" class="form-control"  min="0" />
             </template>
@@ -174,12 +173,12 @@
             </template>
 
             <template slot="modal-footer">
-                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onDepositToGateway()">Deposit {{ input.depositToGateway }} THX </b-button>
+                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onDeposit()">Deposit {{ input.depositToGateway }} THX </b-button>
             </template>
         </b-modal>
 
-        <b-modal title="Withdraw THX to Transfer Gateway" centered ref="modal-gateway-withdraw">
-            <p>Use the transfer gateway to move your THX from the sidechain on to the main ethereum chain.</p>
+        <b-modal title="Withdraw THX" centered ref="modal-gateway-withdraw">
+
             <template v-if="!loading">
                 <input v-model="input.withdrawToGateway" type="number" class="form-control"  min="0" />
             </template>
@@ -191,12 +190,11 @@
             </template>
 
             <template slot="modal-footer">
-                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onWithdrawToGateway()">Withdraw {{ input.withdrawToGateway }} THX </b-button>
+                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onWithdraw()">Withdraw {{ input.withdrawToGateway }} THX </b-button>
             </template>
         </b-modal>
 
-        <b-modal title="Transfer tokens on sidechain" centered ref="modal-transfer">
-            <p>Transfer an amount of THX to another wallet on the sidechain. To send it to a wallet on the main network, use the transfer gateway.</p>
+        <b-modal title="Transfer THX on Extdev" centered ref="modal-transfer-coin-extdev">
 
             <template v-if="!loading">
                 <div class="form-group">
@@ -214,7 +212,51 @@
             </template>
 
             <template slot="modal-footer">
-                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onTransferTokens()">Transfer {{ input.transferTokens }} THX</b-button>
+                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onTransferExtdevCoin()">Transfer {{ input.transferTokens }} THX</b-button>
+            </template>
+        </b-modal>
+
+        <b-modal title="Transfer THX on Rinkeby" centered ref="modal-transfer-coin-rinkeby">
+
+            <template v-if="!loading">
+                <div class="form-group">
+                    <input v-model="input.transferRinkebyCoinAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000" />
+                </div>
+                <div class="form-group">
+                    <input v-model="input.transferRinkebyCoinAmount" type="number" class="form-control"  v-bind:max="$parent.$refs.header.balance.token" />
+                </div>
+            </template>
+
+            <template v-if="loading">
+                <div class="text-center">
+                    <b-spinner label="Loading..."></b-spinner>
+                </div>
+            </template>
+
+            <template slot="modal-footer">
+                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onTransferRinkebyCoin()">Transfer {{ input.transferRinkebyCoinAmount }} THX</b-button>
+            </template>
+        </b-modal>
+
+        <b-modal title="Transfer ETH" centered ref="modal-transfer-ether">
+
+            <template v-if="!loading">
+                <div class="form-group">
+                    <input v-model="input.transferEtherAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000" />
+                </div>
+                <div class="form-group">
+                    <input v-model="input.transferEtherAmount" type="number" class="form-control"  v-bind:max="$parent.$refs.header.balance.token" />
+                </div>
+            </template>
+
+            <template v-if="loading">
+                <div class="text-center">
+                    <b-spinner label="Loading..."></b-spinner>
+                </div>
+            </template>
+
+            <template slot="modal-footer">
+                <b-button size="sm" v-bind:class="{ disabled: loading }" class="btn btn-primary" @click="onTransferEther()">Transfer {{ input.transferEtherAmount }} ETH</b-button>
             </template>
         </b-modal>
 

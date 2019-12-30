@@ -1,8 +1,8 @@
 import { Vue } from 'vue-property-decorator';
 import { Profile } from './Profile';
 import { Network } from './Network';
+import BN from 'bn.js';
 
-const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
 
 export class Account extends Vue {

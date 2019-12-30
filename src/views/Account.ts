@@ -9,8 +9,8 @@ import Header from '../components/Header';
 import { Account } from '../models/Account';
 import { Network } from '../models/Network';
 import StateService from '@/services/StateService';
+import BN from 'bn.js';
 
-const BN = require('bn.js');
 const tokenMultiplier = new BN(10).pow(new BN(18));
 
 @Component({
@@ -24,7 +24,6 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
     },
 })
 export default class AccountDetail extends Vue {
-
     public loading: any = false;
     public isExtdevMinter: boolean = false;
     public isRinkebyMinter: boolean = false;
@@ -40,6 +39,10 @@ export default class AccountDetail extends Vue {
         transferTokens: 0,
         depositToGateway: 0,
         withdrawToGateway: 0,
+        transferRinkebyCoinAddress: '',
+        transferRinkebyCoinAmount: 0,
+        transferEtherAddress: '',
+        transferEtherAmount: 0,
     };
 
     private $account!: Account;
@@ -135,7 +138,7 @@ export default class AccountDetail extends Vue {
         (this.$refs['modal-connect'] as any).hide();
     }
 
-    public onDepositToGateway() {
+    public onDeposit() {
         this.loading = true;
 
         return this.$network.depositCoin(this.input.depositToGateway)
@@ -148,7 +151,7 @@ export default class AccountDetail extends Vue {
             });
     }
 
-    public onWithdrawToGateway() {
+    public onWithdraw() {
         this.loading = true;
 
         return this.$network.withdrawCoin(this.input.withdrawToGateway)
@@ -159,19 +162,46 @@ export default class AccountDetail extends Vue {
             });
     }
 
-    public onTransferTokens() {
+    public onTransferRinkebyCoin() {
+        const amount = new BN(this.input.transferRinkebyCoinAmount).mul(tokenMultiplier);
+
+        this.loading = true;
+        
+        return this.$network.transferRinkebyCoin(this.input.transferRinkebyCoinAddress, amount)
+            .then(() => {
+                this.loading = false;
+                this.input.transferRinkebyCoinAddress = '';
+                this.input.transferRinkebyCoinAmount = 0;
+                (this.$refs['modal-transfer-coin-rinkeby'] as any).hide();
+            });
+    }
+
+    public onTransferExtdevCoin() {
         const amount = new BN(this.input.transferTokens).mul(tokenMultiplier);
 
         this.loading = true;
 
-        return this.$network.transferCoin(this.input.transferTokensAddress, amount)
+        return this.$network.transferExtdevCoin(this.input.transferTokensAddress, amount)
             .then(() => {
                 this.loading = false;
-                this.input.withdrawToGateway = 0;
-                (this.$parent.$refs.header as Header).updateBalance();
-
                 this.input.transferTokens = 0;
-                (this.$refs['modal-transfer'] as any).hide();
+                this.input.transferTokensAddress = '';
+                (this.$refs['modal-transfer-coin-extdev'] as any).hide();
+            });
+    }
+
+
+    public onTransferEther() {
+        const amount = new BN(this.input.transferEtherAmount).mul(tokenMultiplier);
+
+        this.loading = true;
+
+        return this.$network.transferEther(this.input.transferEtherAddress, amount)
+            .then((tx) => {
+                this.loading = false;
+                this.input.transferEtherAmount = 0;
+                this.input.transferEtherAddress = '';
+                (this.$refs['modal-transfer-ether'] as any).hide();
             });
     }
 
@@ -199,7 +229,7 @@ export default class AccountDetail extends Vue {
 
         return this.$network.mintExtdevCoin(
             this.$network.extdev.address,
-            amount.toString(),
+            amount,
         )
             .then(() => {
                 this.input.mintForExtdevAccount = 0;
