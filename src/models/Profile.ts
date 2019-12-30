@@ -4,7 +4,7 @@ import 'firebase/database';
 import 'firebase/storage';
 import 'firebase/auth';
 
-export class ProfilePicture {
+export class ProfilePictureData {
     name: string;
     url: string;
 
@@ -23,7 +23,7 @@ export class Profile extends Vue {
     public lastName: string = '';
     public initials: string = '';
     public email: string = '';
-    public picture: ProfilePicture | null;
+    public picture: ProfilePictureData | null;
 
     constructor(
         uid: string,
@@ -48,7 +48,7 @@ export class Profile extends Vue {
                 .on('child_added', (s: any) => {
                     if (s.key === 'picture') {
                         console.log(s.val())
-                        Vue.set(this, 'picture', new ProfilePicture(s.val().name, s.val().url))
+                        Vue.set(this, 'picture', new ProfilePictureData(s.val().name, s.val().url))
                     }
                 });
 
@@ -57,7 +57,7 @@ export class Profile extends Vue {
                     console.log(s.key);
                     // debugger
                     if (s.key === 'picture') {
-                        Vue.set(this, 'picture', new ProfilePicture(s.val().name, s.val().url))
+                        Vue.set(this, 'picture', new ProfilePictureData(s.val().name, s.val().url))
                     }
                 });
 
@@ -66,7 +66,7 @@ export class Profile extends Vue {
                     console.log(s.key);
                     // debugger
                     if (s.key === 'picture') {
-                        Vue.delete(this, 'picture')
+                        Vue.set(this, 'picture', null)
                     }
                 });
         }
@@ -78,7 +78,7 @@ export class Profile extends Vue {
             .then(async (s: any) => {
                 const url = await s.ref.getDownloadURL();
 
-                this.picture = new ProfilePicture(name, url);
+                this.picture = new ProfilePictureData(name, url);
 
                 firebase.database().ref(`users/${this.uid}`)
                     .update({

@@ -4,10 +4,9 @@ import 'firebase/database';
 import 'firebase/storage';
 import { CryptoUtils, LocalAddress } from 'loom-js';
 import { BAlert, BButton, BModal, BSpinner } from 'bootstrap-vue';
-// import ProfilePicture from '../components/ProfilePicture.vue';
+import ProfilePicture from '../components/ProfilePicture.vue';
 import Header from '../components/Header';
 import { Account } from '../models/Account';
-import { ProfilePicture } from '../models/Profile';
 import { Network } from '../models/Network';
 import StateService from '@/services/StateService';
 
@@ -21,6 +20,7 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
         'b-button': BButton,
         'b-modal': BModal,
         'b-alert': BAlert,
+        'profile-picture': ProfilePicture,
     },
 })
 export default class AccountDetail extends Vue {
