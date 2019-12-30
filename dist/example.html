@@ -1,0 +1,109 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, maximum-scale=1.0">
+    <script>
+        function showReward() {
+            const elem = document.getElementById('popup-reward');
+            elem.classList.add('show');
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Exo+2:200,400,400i,700,700i,900,900i');
+
+        .toggle {
+            border-radius: 50%;
+            background-repeat: no-repeat;
+            background-color: black;
+            background-image: url('./pwa_icon.png');
+            background-size: contain;
+            width: 75px;
+            height: 75px;
+            border: 5px solid black;
+            right: 20px;
+            position: fixed;
+            bottom: 20px;
+            transform: scale(.95);
+            transition: .2s transform cubic-bezier(0.390, 0.575, 0.565, 1.000);
+        }
+
+        .toggle:hover,
+        .toggle:active {
+            transform: scale(1);
+        }
+
+        .toggle:focus {
+            outline: 0;
+        }
+
+        .popup {
+            font-family: 'Exo 2';
+            width: calc(100% - 40px);
+            max-width: 430px;
+            height: 207px;
+            position: fixed;
+            border: 0;
+            right: 20px;
+            bottom: 120px;
+            z-index: 999999;
+            border-radius: 3px;
+            box-shadow: 0 1px 30px 1px rgba(0,0,0,.2);
+            overflow: hidden;
+            user-select: none;
+            transform: translateX(120%);
+            transition: all .35s cubic-bezier(.215,.61,.355,1);
+        }
+
+        .badge {
+            font-family: 'Exo 2';
+            font-weight: bold;
+            font-size: .8rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 25px;
+            height: 25px;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            animation: bubble 2s infinite;
+            transition: .2s ease all;
+        }
+
+        .badge-danger {
+            background-color: red;
+            color: white;
+        }
+
+        @keyframes bubble {
+            0% {
+                transform: scale(0.9);
+            }
+
+            50% {
+                transform: scale(1);
+            }
+
+            100% {
+                transform: scale(0.9);
+            }
+        }
+
+        .badge.show {
+            opacity: 1;
+        }
+
+        .popup.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <h1>Software Integration Examples</h1>
+
+    <iframe class="popup" id="popup-reward" src="https://thx-client.firebaseapp.com/#/widget/0x7a88146E97E8A2F4b78E4BBDbeEbF9CF33CB4FCB/0"></iframe>
+
+    <button onclick="showReward()" class="toggle"><div class="badge badge-danger" id="popup-reward-badge">1</div></button>
+
+</body>
+</html>
