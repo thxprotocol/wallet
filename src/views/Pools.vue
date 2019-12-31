@@ -6,9 +6,9 @@
             <div class="alert alert-danger" v-if="error">
                 {{error}}
             </div>
-
-            <BCard
-                v-for="p in pools"
+            
+            <b-card
+                v-for="p in rewardPools"
                 footer-tag="footer"
                 header-tag="header"
                 tag="article"
@@ -16,12 +16,12 @@
 
                 <span slot="header" class="font-size-xl text-light">{{p.balance}} THX</span>
 
-                <BCardText>
+                <b-card-text>
                     <span v-if="p.outOfSync" class="badge badge-danger float-right">Out of sync</span>
                     <span v-if="!p.outOfSync" class="badge badge-success float-right">Up to date</span>
                     <strong>{{p.name}}</strong><br>
                     <small>{{p.address}}</small>
-                </BCardText>
+                </b-card-text>
 
                 <template slot="footer" class="">
                     <div class="text-right">
@@ -30,10 +30,10 @@
                     </div>
                 </template>
 
-            </BCard>
+            </b-card>
 
             <p v-if="loading" class="d-flex w-100 justify-content-center">
-                <BSpinner></BSpinner>
+                <b-spinner></b-spinner>
             </p>
 
             <button class="btn btn-primary btn-block" @click="showJoinPoolModal = true">

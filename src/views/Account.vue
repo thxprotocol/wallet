@@ -201,7 +201,7 @@
                     <input v-model="input.transferTokensAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000" />
                 </div>
                 <div class="form-group">
-                    <input v-model="input.transferTokens" type="number" class="form-control"  v-bind:max="$parent.$refs.header.balance.token" />
+                    <input v-model="input.transferTokens" type="number" class="form-control"  v-bind:max="$store.state.balance.token" />
                 </div>
             </template>
 
@@ -223,7 +223,7 @@
                     <input v-model="input.transferRinkebyCoinAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000" />
                 </div>
                 <div class="form-group">
-                    <input v-model="input.transferRinkebyCoinAmount" type="number" class="form-control"  v-bind:max="$parent.$refs.header.balance.token" />
+                    <input v-model="input.transferRinkebyCoinAmount" type="number" class="form-control"  v-bind:max="$store.state.balance.token" />
                 </div>
             </template>
 
@@ -245,7 +245,7 @@
                     <input v-model="input.transferEtherAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000" />
                 </div>
                 <div class="form-group">
-                    <input v-model="input.transferEtherAmount" type="number" class="form-control"  v-bind:max="$parent.$refs.header.balance.token" />
+                    <input v-model="input.transferEtherAmount" type="number" class="form-control"  v-bind:max="$store.state.balance.token" />
                 </div>
             </template>
 

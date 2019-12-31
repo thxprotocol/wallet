@@ -58,7 +58,5 @@ export default class Footer extends Vue {
         //
         // this.amountOfNewRewards = currentAmountOfRewards - prevAmountOfRewards;
     }
-    public async onRuleStateChange() {
-
-    }
+    // public async onRuleStateChange() {}
 }

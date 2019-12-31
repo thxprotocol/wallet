@@ -22,28 +22,42 @@ export class Account extends Vue {
     }
 
     public async getRinkebyCoinBalance() {
-        const address = this.$network.rinkeby.account.address;
-        const web3js = this.$network.rinkeby.web3js;
-        const balanceInWei = await this.$network.getRinkebyCoinBalance(web3js, address);
+        if (this.$network.rinkeby) {
+            const address = this.$network.rinkeby.account.address;
+            const web3js = this.$network.rinkeby.web3js;
+            const balanceInWei = await this.$network.getRinkebyCoinBalance(web3js, address);
 
-        return new BN(balanceInWei).div(tokenMultiplier)
+            return new BN(balanceInWei).div(tokenMultiplier)
+        }
+        else {
+            return new BN(0);
+        }
     }
 
     public async getExtdevCoinBalance() {
-        const address = this.$network.extdev.account;
-        const web3js = this.$network.extdev.web3js;
-        const balanceInWei = await this.$network.getExtdevCoinBalance(web3js, address);
+        if (this.$network.extdev) {
+            const address = this.$network.extdev.account;
+            const web3js = this.$network.extdev.web3js;
+            const balanceInWei = await this.$network.getExtdevCoinBalance(web3js, address);
 
-        return new BN(balanceInWei).div(tokenMultiplier)
-
+            return new BN(balanceInWei).div(tokenMultiplier)
+        }
+        else {
+            return new BN(0);
+        }
     }
 
     public async getEthBalance() {
-        const address = this.$network.rinkeby.account.address;
-        const balanceInWei = await this.$network.rinkeby.web3js.eth.getBalance(address);
-        const utils = this.$network.web3js.utils;
+        if (this.$network.rinkeby) {
+            const address = this.$network.rinkeby.account.address;
+            const balanceInWei = await this.$network.rinkeby.web3js.eth.getBalance(address);
+            const utils = this.$network.web3js.utils;
 
-        return Math.floor(utils.fromWei(balanceInWei) * 100000) / 100000;
+            return Math.floor(utils.fromWei(balanceInWei) * 100000) / 100000;
+        }
+        else {
+            return new BN(0);
+        }
     }
 
 }

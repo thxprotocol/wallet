@@ -16,8 +16,8 @@
     </button>
 
     <div class="account_balance">
-        <p><span class="font-size-large">{{balance.token}} THX</span></p>
-        <p><span>{{balance.tokenRinkeby}} THX</span> | <span>{{balance.eth}} ETH</span></p>
+        <p><span class="font-size-large">{{tokenBalance}} THX</span></p>
+        <p><span>{{tokenRinkebyBalance}} THX</span> | <span>{{ethRinkebyBalance}} ETH</span></p>
     </div>
 
 </header>

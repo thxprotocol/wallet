@@ -100,6 +100,9 @@ export default class AccountDetail extends Vue {
         const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKeyArray);
         const address = LocalAddress.fromPublicKey(publicKey).toString().toLowerCase();
         const walletRef = firebase.database().ref(`wallets/${address}`);
+
+        this.loading = true;
+
         const isDuplicate = await this.isDuplicateAddress(address);
 
         // If there is a connection remove the current wallet mapping before
@@ -135,6 +138,7 @@ export default class AccountDetail extends Vue {
         this.$state.rinkebyPrivateKey = this.input.rinkebyPrivateKey;
         this.$state.save();
 
+        this.loading = false;
         (this.$refs['modal-connect'] as any).hide();
     }
 
@@ -145,8 +149,6 @@ export default class AccountDetail extends Vue {
             .then(() => {
                 this.input.depositToGateway = 0;
                 this.loading = false;
-                (this.$parent.$refs.header as Header).updateBalance();
-
                 return (this.$refs['modal-gateway-deposit'] as any).hide();
             });
     }
@@ -166,7 +168,7 @@ export default class AccountDetail extends Vue {
         const amount = new BN(this.input.transferRinkebyCoinAmount).mul(tokenMultiplier);
 
         this.loading = true;
-        
+
         return this.$network.transferRinkebyCoin(this.input.transferRinkebyCoinAddress, amount)
             .then(() => {
                 this.loading = false;
@@ -255,10 +257,15 @@ export default class AccountDetail extends Vue {
         this.input.rinkebyPrivateKey = this.$state.rinkebyPrivateKey;
 
         if (this.$network.extdev && this.$network.extdev.account) {
-            this.isExtdevMinter = await this.$network.isExtdevMinter(this.$network.extdev.web3js, this.$network.extdev.account);
+            this.isExtdevMinter = await this.$network.isExtdevMinter(
+                this.$network.extdev.web3js, this.$network.extdev.account
+            );
         }
         if (this.$network.rinkeby && this.$network.rinkeby.account) {
-            this.isRinkebyMinter = await this.$network.isRinkebyMinter(this.$network.rinkeby.web3js, this.$network.rinkeby.account.address);
+            this.isRinkebyMinter = await this.$network.isRinkebyMinter(
+                this.$network.rinkeby.web3js,
+                this.$network.rinkeby.account.address
+            );
         }
     }
 

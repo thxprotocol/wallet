@@ -1,47 +1,56 @@
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import ProfilePicture from '../components/ProfilePicture.vue';
 import { Network } from '../models/Network';
 import { Account } from '../models/Account';
 import CoinService from '@/services/CoinService';
 import EventService from '@/services/EventService';
+import { mapGetters } from 'vuex';
+import store from '../store';
 
 @Component({
     name: 'Header',
     components: {
-        ProfilePicture,
+        'profile-picture': ProfilePicture,
     },
+    computed: {
+        ...mapGetters({
+            ethRinkebyBalance: 'ethRinkebyBalance',
+            tokenRinkebyBalance: 'tokenRinkebyBalance',
+            tokenBalance: 'tokenBalance',
+        })
+    }
 })
 export default class Header extends Vue {
     private $network!: Network;
     private $account!: Account;
     private $events!: EventService;
-    private coinService: CoinService = new CoinService();
+    private coinService!: CoinService;
 
-    public balance: any = {
-        eth: 0,
-        token: 0,
-        tokenRinkeby: 0,
-    };
+    public $store: any = store;
 
     public created() {
         this.updateBalance();
 
+        this.coinService = new CoinService();
         this.coinService.init();
-
-        this.$events.listen('event.ExtdevTransfer', async () => {
-            this.balance.token = await this.$account.getExtdevCoinBalance();
-        });
-
-        this.$events.listen('event.RinkebyTransfer', async () => {
-            this.balance.tokenRinkeby = await this.$account.getRinkebyCoinBalance();
-        });
     }
 
     public async updateBalance() {
-        if (this.$network.rinkeby && this.$network.extdev) {
-            this.balance.tokenRinkeby = await this.$account.getRinkebyCoinBalance();
-            this.balance.token = await this.$account.getExtdevCoinBalance();
-            this.balance.eth = await this.$account.getEthBalance();
+        if (this.$account) {
+            this.$store.commit('updateBalance', {
+                type: 'tokenRinkeby',
+                balance: await this.$account.getRinkebyCoinBalance(),
+            });
+
+            this.$store.commit('updateBalance', {
+                type: 'token',
+                balance: await this.$account.getExtdevCoinBalance(),
+            });
+
+            this.$store.commit('updateBalance', {
+                type: 'eth',
+                balance: await this.$account.getEthBalance(),
+            });
         }
     }
 

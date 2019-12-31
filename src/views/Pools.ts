@@ -1,73 +1,54 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import firebase from 'firebase/app';
 import 'firebase/database';
-import modal from '@/components/Modal.vue';
+import Modal from '@/components/Modal.vue';
 import { BCard, BCardText, BSpinner } from 'bootstrap-vue';
 import { Account } from '@/models/Account';
 import { Network } from '@/models/Network';
 import PoolService from '@/services/PoolService';
 import CoinService from '@/services/CoinService';
-import { RewardPool } from '@/models/RewardPool';
+import BN from 'bn.js';
+import { mapGetters } from 'vuex';
 
-const BN = require('bn.js');
 const coinMultiplier = new BN(10).pow(new BN(18));
 
 @Component({
     name: 'pools',
     components: {
-        modal,
-        BCard,
-        BCardText,
-        BSpinner,
+        'modal': Modal,
+        'b-card': BCard,
+        'b-card-text': BCardText,
+        'b-spinner': BSpinner,
     },
+    computed: {
+        ...mapGetters({
+            rewardPools: 'rewardPools',
+        })
+    }
 })
 export default class Pools extends Vue {
-
     public error: string = '';
     public loading: any = false;
-    public pools: any = {};
     public showJoinPoolModal: any = false;
     public input: any = {
         poolAddress: '',
     };
     private $account!: Account;
     private $network!: Network;
-    private poolService: PoolService = new PoolService();
-    private coinService: CoinService = new CoinService();
+    private poolService!: PoolService;
+    private coinService!: CoinService;
 
-    constructor() {
-        super();
+    created() {
+        this.coinService = new CoinService();
 
-        firebase.database().ref(`users/${this.$account.uid}/pools`)
-            .on('child_added', async (s: any) => {
-                this.poolService.getRewardPool(s.key)
-                    .then((pool: RewardPool) => {
-                        this.loading = false;
+        this.poolService = new PoolService();
+        this.poolService.init();
 
-                        Vue.set(this.pools, pool.address, pool);
-                    });
-            });
-
-        firebase.database().ref(`users/${this.$account.uid}/pools`)
-            .on('child_removed', (s: any) => {
-                Vue.delete(this.pools, s.key);
-            });
-    }
-
-    public mounted() {
         this.loading = true;
 
-        (this.poolService as any).getMyRewardPools()
-            .then(async (pools: any) => {
-                this.pools = pools;
+        this.poolService.getMyRewardPools(this.coinService)
+            .then(() => {
                 this.loading = false;
-
-                for (const a in pools) {
-                    const pool: RewardPool = pools[a];
-                    const balance = await this.coinService.getExtdevBalance(pool.address);
-
-                    pool.setBalance(balance);
-                }
             })
             .catch((err: string) => {
                 this.loading = false;
@@ -85,7 +66,7 @@ export default class Pools extends Vue {
                 this.showJoinPoolModal = false;
             })
             .catch((err: string) => {
-                console.error(err);
+                this.error = err;
             });
     }
 

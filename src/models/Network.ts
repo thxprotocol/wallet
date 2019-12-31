@@ -39,15 +39,15 @@ export class Network extends Vue {
     public web3js: any = new Web3();
 
     constructor(
-        extdevPrivateKey: string,
-        rinkebyPrivateKey: string,
+        extdevPrivateKey: string = '',
+        rinkebyPrivateKey: string = '',
     ) {
         super();
 
         this.loomPrivateKeyString = extdevPrivateKey;
         this.rinkebyPrivateKeyString = rinkebyPrivateKey;
 
-        if (extdevPrivateKey && rinkebyPrivateKey) {
+        if (extdevPrivateKey !== '' && rinkebyPrivateKey !== '') {
             this.extdev = this.loadExtdevAccount();
             this.rinkeby = this.loadRinkebyAccount();
 

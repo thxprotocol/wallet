@@ -7,7 +7,7 @@
             <p style="color: white;">A token of appreciation</p>
         </header>
 
-        <div class="region region-container">
+        <div class="region region-container" style="height: 100%;">
             <main class="region region-content">
 
                 <div class="text-center" v-if="loading">

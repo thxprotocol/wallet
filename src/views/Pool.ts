@@ -7,6 +7,7 @@ import { Network } from '@/models/Network';
 import PoolService from '@/services/PoolService';
 import { RewardPool } from '@/models/RewardPool';
 import CoinService from '@/services/CoinService';
+import { mapGetters } from 'vuex';
 
 const _ = require('lodash');
 const BN = require('bn.js');
@@ -27,37 +28,40 @@ const RuleState = ['Active', 'Disabled'];
         BListGroup,
         BListGroupItem,
     },
+    computed: {
+        ...mapGetters({
+            rewardPools: 'rewardPools',
+        })
+    }
 })
 export default class Pool extends Vue {
+    private $network!: Network;
 
-    get orderedStream() {
-        return _.orderBy(this.stream, 'timestamp').reverse();
-    }
     public error: string = '';
     public loading: boolean = false;
-    public poolService: PoolService = new PoolService();
+    public poolService!: PoolService;
     public coinService: CoinService = new CoinService();
-
     public stream: any[] = [];
     public isManager: boolean = false;
     public isMember: boolean = false;
-
     public pool: RewardPool | null = null;
-
     public input: any = {
         poolDeposit: 0,
         addMember: '',
         addManager: '',
     };
-
     public modal: any = {
         addMember: false,
         addManager: false,
         poolDeposit: false,
     };
-    private $network!: Network;
 
-    public created() {
+    get orderedStream() {
+        return _.orderBy(this.stream, 'timestamp').reverse();
+    }
+
+    created() {
+        this.poolService = new PoolService();
         this.poolService.getRewardPool(this.$route.params.id)
             .then(async (pool: RewardPool) => {
                 const balance = await this.coinService.getExtdevBalance(pool.address);
@@ -65,9 +69,6 @@ export default class Pool extends Vue {
                 pool.setBalance(balance);
 
                 this.pool = pool;
-
-                this.isManager = await pool.isManager(this.$network.extdev.account);
-                this.isMember = await pool.isMember(this.$network.extdev.account);
             });
 
 

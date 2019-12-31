@@ -9,8 +9,6 @@ import router from './router';
 import store from './store';
 import './registerServiceWorker';
 
-// import 'bootstrap/dist/css/bootstrap.css';
-// import 'bootstrap-vue/dist/bootstrap-vue.css';
 import './custom.scss';
 
 import { Account } from './models/Account';
@@ -48,6 +46,9 @@ firebase.auth()
             if (!state.extdevPrivateKey) {
                 console.warn('It looks like you misconfigured your extdev private key. Provide it through the accounts page.');
             }
+        }
+        else {
+            Vue.prototype.$network = new Network();
         }
 
         if (!app) {

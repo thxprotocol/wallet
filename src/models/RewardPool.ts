@@ -4,13 +4,23 @@ export class RewardRule {
 
 export class RewardPool {
     public address: string = '';
-
     public name: string = '';
     public balance: number = 0;
     public outOfSync: boolean = true;
 
     private contract: any;
     private owner: string = '';
+    private _events: string[] = [
+        'Deposited',
+        'ManagerAdded',
+        'ManagerRemoved',
+        'MemberAdded',
+        'MemberRemoved',
+        'RulePollCreated',
+        'RulePollFinished',
+        'RuleStateChanged',
+        'Withdrawn',
+    ];
 
     constructor(
         address: string,
@@ -25,6 +35,13 @@ export class RewardPool {
             .then((name: string) => {
                 this.name = name;
             });
+
+        for(const event of this._events) {
+            this.contract.events[event]()
+                .on('data', async (event: any) => {
+                    console.log(event);
+                });
+        }
     }
 
     public setBalance(amount: number) {
