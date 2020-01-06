@@ -3,16 +3,16 @@ import 'firebase/database';
 import { Vue } from 'vue-property-decorator';
 import { Network } from '@/models/Network';
 import { Account } from '@/models/Account';
-import { RewardPool } from '@/models/RewardPool';
+import { RewardPool, IRewardPools } from '@/models/RewardPool';
 const RewardPoolJSON = require('@/contracts/RewardPool.json');
 import store from '../store';
 import CoinService from './CoinService';
 
 export default class PoolService extends Vue {
+    public $store: any = store;
     private $account!: Account;
     private $network!: Network;
-
-    public $store: any = store;
+    private coinService: CoinService = new CoinService();
 
     public init() {
         firebase.database().ref(`users/${this.$account.uid}/pools`)
@@ -55,22 +55,23 @@ export default class PoolService extends Vue {
         return pool;
     }
 
-    public getMyRewardPools(coinService: CoinService) {
+    public getMyRewardPools() {
         return firebase.database().ref(`users/${this.$account.uid}/pools`)
             .once('value')
             .then(async (s: any) => {
                 const data: any = s.val();
+                let pools: any = {};
 
                 for (const address in data) {
                     const pool = await this.getRewardPool(address);
-                    const balance = await coinService.getExtdevBalance(pool.address);
+                    const balance = await this.coinService.getExtdevBalance(pool.address);
 
                     pool.setBalance(balance);
 
-                    this.$store.commit('addRewardPool', pool);
+                    pools[address] = pool;
                 }
-
-                return Promise.resolve();
+                console.log(pools);
+                return pools;
             });
     }
 

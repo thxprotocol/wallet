@@ -9,6 +9,7 @@ import PoolService from '@/services/PoolService';
 import CoinService from '@/services/CoinService';
 import BN from 'bn.js';
 import { mapGetters } from 'vuex';
+import { IRewardPools, RewardPool } from '@/models/RewardPool';
 
 const coinMultiplier = new BN(10).pow(new BN(18));
 
@@ -23,8 +24,8 @@ const coinMultiplier = new BN(10).pow(new BN(18));
     computed: {
         ...mapGetters({
             rewardPools: 'rewardPools',
-        })
-    }
+        }),
+    },
 })
 export default class Pools extends Vue {
     public error: string = '';
@@ -38,7 +39,7 @@ export default class Pools extends Vue {
     private poolService!: PoolService;
     private coinService!: CoinService;
 
-    created() {
+    public created() {
         this.coinService = new CoinService();
 
         this.poolService = new PoolService();
@@ -46,8 +47,17 @@ export default class Pools extends Vue {
 
         this.loading = true;
 
-        this.poolService.getMyRewardPools(this.coinService)
-            .then(() => {
+        this.poolService.getMyRewardPools()
+            .then(async (pools: RewardPool[]) => {
+
+                for (const pool of pools) {
+                    const balance = await this.coinService.getExtdevBalance(pool.address);
+
+                    pool.setBalance(balance);
+
+                    this.$store.commit('addRewardPool', pool);
+                }
+
                 this.loading = false;
             })
             .catch((err: string) => {

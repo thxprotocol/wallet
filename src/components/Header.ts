@@ -17,16 +17,16 @@ import store from '../store';
             ethRinkebyBalance: 'ethRinkebyBalance',
             tokenRinkebyBalance: 'tokenRinkebyBalance',
             tokenBalance: 'tokenBalance',
-        })
-    }
+        }),
+    },
 })
 export default class Header extends Vue {
+
+    public $store: any = store;
     private $network!: Network;
     private $account!: Account;
     private $events!: EventService;
     private coinService!: CoinService;
-
-    public $store: any = store;
 
     public created() {
         this.updateBalance();

@@ -1,1 +1,23 @@
-{"name":"THX","short_name":"THX","theme_color":"#FDE542","icons":[{"src":"/pwa_icon.png","type":"image/png","sizes":"192x192"},{"src":"/pwa_icon.png","type":"image/png","sizes":"512x512"},{"src":"/pwa_icon.png","type":"image/png","sizes":"254x254"}],"start_url":"/wallet/","display":"standalone","background_color":"#000000","orientation":"portrait","Scope":"/wallet/"}
+{
+    "name": "THX",
+    "short_name": "THX",
+    "theme_color": "#FDE542",
+    "icons": [{
+        "src": "/pwa_icon.png",
+        "type": "image/png",
+        "sizes": "192x192"
+    }, {
+        "src": "/pwa_icon.png",
+        "type": "image/png",
+        "sizes": "512x512"
+    }, {
+        "src": "/pwa_icon.png",
+        "type": "image/png",
+        "sizes": "254x254"
+    }],
+    "start_url": "/wallet/",
+    "display": "standalone",
+    "background_color": "#000000",
+    "orientation": "portrait",
+    "scope": "/wallet/"
+}

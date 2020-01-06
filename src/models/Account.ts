@@ -6,9 +6,9 @@ import BN from 'bn.js';
 const tokenMultiplier = new BN(10).pow(new BN(18));
 
 export class Account extends Vue {
-    private $network!: Network;
     public uid: string = '';
     public profile: Profile | null = null;
+    private $network!: Network;
 
     constructor(
         currentUser: firebase.User | any,
@@ -27,9 +27,8 @@ export class Account extends Vue {
             const web3js = this.$network.rinkeby.web3js;
             const balanceInWei = await this.$network.getRinkebyCoinBalance(web3js, address);
 
-            return new BN(balanceInWei).div(tokenMultiplier)
-        }
-        else {
+            return new BN(balanceInWei).div(tokenMultiplier);
+        } else {
             return new BN(0);
         }
     }
@@ -40,9 +39,8 @@ export class Account extends Vue {
             const web3js = this.$network.extdev.web3js;
             const balanceInWei = await this.$network.getExtdevCoinBalance(web3js, address);
 
-            return new BN(balanceInWei).div(tokenMultiplier)
-        }
-        else {
+            return new BN(balanceInWei).div(tokenMultiplier);
+        } else {
             return new BN(0);
         }
     }
@@ -54,8 +52,7 @@ export class Account extends Vue {
             const utils = this.$network.web3js.utils;
 
             return Math.floor(utils.fromWei(balanceInWei) * 100000) / 100000;
-        }
-        else {
+        } else {
             return new BN(0);
         }
     }

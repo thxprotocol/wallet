@@ -5,8 +5,8 @@ import 'firebase/storage';
 import 'firebase/auth';
 
 export class ProfilePictureData {
-    name: string;
-    url: string;
+    public name: string;
+    public url: string;
 
     constructor(
         name: string,
@@ -18,12 +18,12 @@ export class ProfilePictureData {
 }
 
 export class Profile extends Vue {
-    private uid: string;
     public firstName: string = '';
     public lastName: string = '';
     public initials: string = '';
     public email: string = '';
     public picture: ProfilePictureData | null;
+    private uid: string;
 
     constructor(
         uid: string,
@@ -47,21 +47,21 @@ export class Profile extends Vue {
             firebase.database().ref(`users/${this.uid}`)
                 .on('child_added', (s: any) => {
                     if (s.key === 'picture') {
-                        Vue.set(this, 'picture', new ProfilePictureData(s.val().name, s.val().url))
+                        Vue.set(this, 'picture', new ProfilePictureData(s.val().name, s.val().url));
                     }
                 });
 
             firebase.database().ref(`users/${this.uid}`)
                 .on('child_changed', (s: any) => {
                     if (s.key === 'picture') {
-                        Vue.set(this, 'picture', new ProfilePictureData(s.val().name, s.val().url))
+                        Vue.set(this, 'picture', new ProfilePictureData(s.val().name, s.val().url));
                     }
                 });
 
             firebase.database().ref(`users/${this.uid}`)
                 .on('child_removed', (s: any) => {
                     if (s.key === 'picture') {
-                        Vue.set(this, 'picture', null)
+                        Vue.set(this, 'picture', null);
                     }
                 });
         }

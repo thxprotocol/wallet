@@ -31,11 +31,14 @@ const RuleState = ['Active', 'Disabled'];
     computed: {
         ...mapGetters({
             rewardPools: 'rewardPools',
-        })
-    }
+        }),
+    },
 })
 export default class Pool extends Vue {
-    private $network!: Network;
+
+    get orderedStream() {
+        return _.orderBy(this.stream, 'timestamp').reverse();
+    }
 
     public error: string = '';
     public loading: boolean = false;
@@ -55,12 +58,9 @@ export default class Pool extends Vue {
         addManager: false,
         poolDeposit: false,
     };
+    private $network!: Network;
 
-    get orderedStream() {
-        return _.orderBy(this.stream, 'timestamp').reverse();
-    }
-
-    created() {
+    public created() {
         this.poolService = new PoolService();
         this.poolService.getRewardPool(this.$route.params.id)
             .then(async (pool: RewardPool) => {
@@ -193,18 +193,22 @@ export default class Pool extends Vue {
 
         this.loading = true;
 
-        // return this.contract.methods.deposit(tokenAmount.toString())
-        //     .send({ from: this.account.loom.address })
-        //     .then(async () => {
-        //         const token = await this.$network.getExtdevCoinContract(
-        //             this.$network.extdev.web3js,
-        //         );
-        //
-        //         this.pool.balance = new BN(await token.methods.balanceOf(this.pool.address).call()).div(tokenMultiplier);
-        //         this.input.poolDeposit = 0;
-        //         this.loading = false;
-        //
-        //         (this.$parent.$refs.header as any).updateBalance();
-        //     });
+        if (this.pool) {
+            return this.pool.contract.methods.deposit(tokenAmount.toString())
+                .send({ from: this.$network.extdev.account })
+                .then(async () => {
+                    if (this.pool) {
+                        const token = await this.$network.getExtdevCoinContract(
+                            this.$network.extdev.account,
+                        );
+                        const balanceInWei = await token.methods.balanceOf(this.pool.address).call();
+
+                        this.pool.balance = new BN(balanceInWei).div(tokenMultiplier);
+                        this.input.poolDeposit = 0;
+                        this.loading = false;
+                    }
+                });
+
+        }
     }
 }

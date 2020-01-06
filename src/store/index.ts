@@ -1,23 +1,23 @@
 import { Vue } from 'vue-property-decorator';
 import Vuex from 'vuex';
 import BN from 'bn.js';
-import { RewardPool } from '../models/RewardPool';
+import { IRewardPools, RewardPool } from '../models/RewardPool';
 
 Vue.use(Vuex);
 
 export interface State {
-  rewardPools: any;
+  rewardPools: IRewardPools;
   rewardRules: any[];
   rewards: any[];
-  transactions: any[],
-  accounts: any[],
-  profiles: any[],
-  networks: any[],
+  transactions: any[];
+  accounts: any[];
+  profiles: any[];
+  networks: any[];
   balance: {
       eth: BN;
       token: BN;
       tokenRinkeby: BN;
-  },
+  };
 }
 
 const state: State = {
@@ -58,7 +58,7 @@ const mutations = {
         Vue.set(state.rewardPools, pool.address, pool);
     },
     removeRewardPool: (state: any, address: string) => {
-        Vue.set(state.rewardPools, address, null);
+        Vue.delete(state.rewardPools, address);
     },
 };
 

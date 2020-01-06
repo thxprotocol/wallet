@@ -1,14 +1,11 @@
-export class RewardRule {
-
-}
-
 export class RewardPool {
     public address: string = '';
     public name: string = '';
     public balance: number = 0;
     public outOfSync: boolean = true;
 
-    private contract: any;
+    public contract: any;
+
     private owner: string = '';
     private _events: string[] = [
         'Deposited',
@@ -36,7 +33,7 @@ export class RewardPool {
                 this.name = name;
             });
 
-        for(const event of this._events) {
+        for (const event of this._events) {
             this.contract.events[event]()
                 .on('data', async (event: any) => {
                     console.log(event);
@@ -85,4 +82,15 @@ export class RewardPool {
             });
     }
 
+    public async withdrawelsOf(address: string) {
+        return await this.contract.methods.withdrawelOf(address)
+            .send({
+                from: this.owner,
+            });
+    }
+
+}
+
+export interface IRewardPools {
+    [address: string]: RewardPool;
 }

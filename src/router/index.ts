@@ -15,7 +15,17 @@ import App from '../App';
 
 Vue.use(VueRouter);
 
-const routes: any = [{
+const routes: any = [
+    {
+        path: '/',
+        component: Pools,
+        alias: '/pools',
+        meta: {
+            header: true,
+            footer: true,
+            requiresAuth: true,
+        },
+    }, {
         path: '/pools',
         name: 'pools',
         component: Pools,
@@ -37,7 +47,7 @@ const routes: any = [{
             requiresAuth: true,
         },
     }, {
-        path: '/',
+        path: '/wallet',
         name: 'wallet',
         component: Wallet,
         visible: true,

@@ -46,8 +46,7 @@ firebase.auth()
             if (!state.extdevPrivateKey) {
                 console.warn('It looks like you misconfigured your extdev private key. Provide it through the accounts page.');
             }
-        }
-        else {
+        } else {
             Vue.prototype.$network = new Network();
         }
 

@@ -3,12 +3,15 @@
     <main class="region region-content">
         <h2>Wallet</h2>
 
-        <div class="text-center" v-if="!orderedTokenTransfers.length">
+        <div class="text-center" v-if="!loading">
             <b-spinner label="Loading..."></b-spinner>
         </div>
-
+        {{orderedTokenTransfers}}
         <b-list-group v-if="orderedTokenTransfers">
-            <b-list-group-item v-bind:key="transfer.hash" v-for="transfer in orderedTokenTransfers" variant="transfer.variant">
+            <b-list-group-item
+                v-bind:key="transfer.hash"
+                v-for="transfer in orderedTokenTransfers"
+                variant="transfer.variant">
                 <div class="d-flex w-100 justify-content-between">
                     <strong>Transfer {{transfer.amount}} THX</strong>
                     <small>{{ transfer.timestamp | moment("MMMM Do YYYY HH:mm") }}</small>

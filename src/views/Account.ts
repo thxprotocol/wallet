@@ -258,13 +258,13 @@ export default class AccountDetail extends Vue {
 
         if (this.$network.extdev && this.$network.extdev.account) {
             this.isExtdevMinter = await this.$network.isExtdevMinter(
-                this.$network.extdev.web3js, this.$network.extdev.account
+                this.$network.extdev.web3js, this.$network.extdev.account,
             );
         }
         if (this.$network.rinkeby && this.$network.rinkeby.account) {
             this.isRinkebyMinter = await this.$network.isRinkebyMinter(
                 this.$network.rinkeby.web3js,
-                this.$network.rinkeby.account.address
+                this.$network.rinkeby.account.address,
             );
         }
     }
