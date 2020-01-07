@@ -1,103 +1,122 @@
 <template>
     <article class="region region-container">
-        <main class="region region-content">
-            <div class="region region-jumbotron" v-if="pool">
+        <main class="region region-content" v-if="pool">
+            <div class="region region-jumbotron" >
                 <strong class="font-size-xl">{{pool.balance}} THX</strong>
                 <p>{{ pool.name }}</p>
             </div>
 
             <div class="row">
                 <div class="col-12">
-                    <BTabs content-class="mt-4" justified>
+                    <b-tabs content-class="mt-4" justified>
                         <div class="alert alert-danger" v-if="error">
                             {{error}}
                         </div>
-                        <BTab title="Stream" active>
+                        <b-tab title="Stream" active>
 
-                            <div class="text-center" v-if="!orderedStream.length">
-                                <BSpinner label="Loading..."></BSpinner>
+                            <div class="text-center" v-if="loading">
+                                <b-spinner label="Loading..."></b-spinner>
                             </div>
 
-                            <BListGroup v-if="orderedStream">
-                                <BListGroupItem v-bind:key="transfer.key" v-for="transfer in orderedStream" variant="transfer.variant">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <strong v-bind:class="`text-${transfer.variant}`">{{transfer.title}}</strong>
-                                        <small>{{ transfer.timestamp | moment("MMMM Do YYYY HH:mm") }}</small>
-                                    </div>
-                                    <small class="mb-1">{{transfer.body}}</small>
-                                </BListGroupItem>
-                            </BListGroup>
+                            <b-list-group v-if="!loading">
+                                <component
+                                    v-for="(ev, key) in stream"
+                                    :key="key"
+                                    :ev="ev"
+                                    :is="ev.component"  />
+                            </b-list-group>
 
-                        </BTab>
+                        </b-tab>
 
-                        <BTab title="Rules">
+                        <b-tab title="Rules">
 
                             <!-- <Rules v-if="contract && account" v-bind:contract="contract" v-bind:account="account"></Rules> -->
 
-                        </BTab>
+                        </b-tab>
 
-                        <BTab title="Rewards">
+                        <b-tab title="Rewards">
 
                             <!-- <Rewards v-if="contract && account" v-bind:contract="contract" v-bind:account="account"></Rewards> -->
 
-                        </BTab>
+                        </b-tab>
 
-                        <BTab title="Actions">
+                        <b-tab title="Actions">
                             <ul class="list-bullets">
                                 <li v-if="isManager">
-                                    <button class="btn btn-link" @click="modal.addManager = true">Add Manager</button>
+                                    <button class="btn btn-link" @click="$refs.modalAddManager.show()">Add Manager</button>
                                 </li>
                                 <li v-if="isMember">
-                                    <button class="btn btn-link" @click="modal.addMember = true">Invite Member</button>
+                                    <button class="btn btn-link" @click="$refs.modalAddMember.show()">Invite Member</button>
                                 </li>
                                 <li>
-                                    <button class="btn btn-link" @click="modal.poolDeposit = true">Pool Deposit</button>
+                                    <button class="btn btn-link" @click="$refs.modalDeposit.show()">Pool Deposit</button>
                                 </li>
                             </ul>
-                        </BTab>
-                    </BTabs>
+                        </b-tab>
+                    </b-tabs>
                 </div>
             </div>
 
-            <Modal v-if="modal.addMember" @close="modal.addMember = false">
-                <h3 slot="header">Invite new member to the pool:</h3>
-                <div slot="body">
-                    <input v-if="!loading" v-model="input.addMember" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
-                    <p v-if="loading" class="d-flex w-100 justify-content-center">
-                        <BSpinner></BSpinner>
-                    </p>
-                </div>
-                <template slot="footer">
-                    <button @click="onAddMember()" v-bind:class="{ disabled: loading }" class="btn btn-primary">Add member</button>
+            <b-modal ref="modalAddMember" centered title="Invite a member for this reward pool">
+                <input v-if="!loading" v-model="input.addMember" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
+                <p v-if="loading" class="d-flex w-100 justify-content-center">
+                    <b-spinner></b-spinner>
+                </p>
+                <template v-slot:modal-footer="{ ok, cancel }">
+                    <button class="btn btn-link" @click="$refs.modalAddMember.hide()">
+                        Cancel
+                    </button>
+                    <button @click="addMember()" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                        Add Member
+                    </button>
                 </template>
-            </Modal>
+            </b-modal>
 
-            <Modal v-if="modal.addManager" @close="modal.addManager = false">
-                <h3 slot="header">Add a manager for this pool:</h3>
-                <div slot="body">
-                    <input v-if="!loading" v-model="input.addManager" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
-                    <p v-if="loading" class="d-flex w-100 justify-content-center">
-                        <BSpinner></BSpinner>
-                    </p>
-                </div>
-                <template slot="footer">
-                    <button @click="onAddManager()" v-bind:class="{ disabled: loading }" class="btn btn-primary">Add manager</button>
+            <b-modal ref="modalAddManager" centered title="Add a manager to the reward pool">
+                <input v-if="!loading" v-model="input.addManager" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
+                <p v-if="loading" class="d-flex w-100 justify-content-center">
+                    <b-spinner></b-spinner>
+                </p>
+                <template v-slot:modal-footer="{ ok, cancel }">
+                    <button class="btn btn-link" @click="$refs.modalAddManager.hide()">
+                        Cancel
+                    </button>
+                    <button @click="addManager()" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                        Add Manager
+                    </button>
                 </template>
-            </Modal>
+            </b-modal>
 
-            <Modal v-if="modal.poolDeposit" @close="modal.poolDeposit = false">
-                <h3 slot="header">Reward pool deposit:</h3>
-                <div slot="body">
-                    <p>Reward Pool balance: <strong>{{this.pool.balance}} THX</strong></p>
-                    <input v-if="!loading" v-model="input.poolDeposit" type="number" class="form-control" />
-                    <p v-if="loading" class="d-flex w-100 justify-content-center">
-                        <BSpinner></BSpinner>
-                    </p>
-                </div>
-                <template slot="footer">
-                    <button @click="onTransferToPool()" v-bind:class="{ disabled: loading }" class="btn btn-primary">Deposit {{ input.poolDeposit }} THX</button>
+            <b-modal ref="modalAddManager" centered title="Add a manager to the reward pool">
+                <input v-if="!loading" v-model="input.addManager" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
+                <p v-if="loading" class="d-flex w-100 justify-content-center">
+                    <b-spinner></b-spinner>
+                </p>
+                <template v-slot:modal-footer="{ ok, cancel }">
+                    <button class="btn btn-link" @click="$refs.modalAddManager.hide()">
+                        Cancel
+                    </button>
+                    <button @click="addManager()" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                        Add Manager
+                    </button>
                 </template>
-            </Modal>
+            </b-modal>
+
+            <b-modal ref="modalDeposit" centered title="Deposit THX to the reward pool">
+                <p>Reward Pool balance: <strong>{{this.pool.balance}} THX</strong></p>
+                <input v-if="!loading" v-model="input.poolDeposit" type="number" class="form-control" />
+                <p v-if="loading" class="d-flex w-100 justify-content-center">
+                    <b-spinner></b-spinner>
+                </p>
+                <template v-slot:modal-footer="{ ok, cancel }">
+                    <button class="btn btn-link" @click="$refs.modalDeposit.hide()">
+                        Cancel
+                    </button>
+                    <button @click="deposit()" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                        Deposit {{ input.poolDeposit }} THX
+                    </button>
+                </template>
+            </b-modal>
 
         </main>
     </article>

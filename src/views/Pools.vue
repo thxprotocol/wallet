@@ -6,7 +6,7 @@
             <div class="alert alert-danger" v-if="error">
                 {{error}}
             </div>
-            
+
             <b-card
                 v-for="p in rewardPools"
                 footer-tag="footer"
@@ -26,7 +26,7 @@
                 <template slot="footer" class="">
                     <div class="text-right">
                         <button class="btn btn-link card-link" @click="onLeavePool(p.address)">Leave pool</button>
-                        <button class="btn btn-link card-link" @click="openPool(p.address)">Open pool</button>
+                        <button class="btn btn-link card-link" @click="$router.replace(`/pools/${p.address}`)">Open pool</button>
                     </div>
                 </template>
 
@@ -36,38 +36,26 @@
                 <b-spinner></b-spinner>
             </p>
 
-            <button class="btn btn-primary btn-block" @click="showJoinPoolModal = true">
+            <button class="btn btn-primary btn-block" @click="$refs.modalJoinPool.show()">
                 Add Reward Pool
             </button>
 
-            <modal v-if="showJoinPoolModal" @close="showJoinPoolModal = false">
-                <h3 slot="header">Join Reward Pool:</h3>
-                <div slot="body">
-                    <input v-model="input.poolAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000" />
-                </div>
-                <template slot="footer">
-                    <button @click="onJoinRewardPool()" class="btn btn-primary">Join Pool</button>
+            <b-modal ref="modalJoinPool" centered title="Join a reward pool">
+                <p v-if="loading" class="d-flex w-100 justify-content-center">
+                    <b-spinner></b-spinner>
+                </p>
+                <input v-if="!loading" v-model="input.poolAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000" />
+                <template v-slot:modal-footer="{ ok, cancel }">
+                    <button class="btn btn-link" @click="$refs.modalDeposit.hide()">
+                        Cancel
+                    </button>
+                    <button @click="onJoinRewardPool()" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                        Join
+                    </button>
                 </template>
-            </modal>
+            </b-modal>
         </main>
     </article>
 </template>
 
 <script src="./Pools.ts" lang="ts"></script>
-
-<style>
-.card-pool .card-header {
-    background-color: #039be5;
-    height: 125px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-@media (min-width: 768px) {
-    .card-pool .card-header {
-        height: 200px;
-    }
-}
-
-</style>

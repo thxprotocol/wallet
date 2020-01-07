@@ -1,5 +1,4 @@
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import firebase from 'firebase/app';
+import { Component, Vue } from 'vue-property-decorator';
 
 import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';

@@ -1,13 +1,50 @@
+import EventService from '@/services/EventService';
+
+export class Transaction {
+    public amount: string;
+    public created: number;
+    public hash: string;
+    public variant: string
+
+    constructor(data: any) {
+        this.hash = data.hash;
+        this.amount = data.amount;
+        this.created = parseInt(data.created, 10);
+        this.variant = 'info';
+    }
+}
+
+export class Deposit extends Transaction {
+    public sender: string;
+    public component: string;
+
+    constructor(data: any) {
+        super(data);
+        this.sender = data.sender;
+        this.variant = 'danger';
+        this.component = 'deposit';
+    }
+}
+
+export class Withdrawel extends Transaction {
+    public receiver: string;
+    public component: string;
+
+    constructor(data: any) {
+        super(data);
+        this.receiver = data.receiver;
+        this.variant = 'success';
+        this.component = 'withdrawel';
+    }
+}
+
 export class RewardPool {
     public address: string = '';
     public name: string = '';
     public balance: number = 0;
     public outOfSync: boolean = true;
-
     public contract: any;
-
-    private owner: string = '';
-    private _events: string[] = [
+    public eventTypes: string[] = [
         'Deposited',
         'ManagerAdded',
         'ManagerRemoved',
@@ -18,6 +55,8 @@ export class RewardPool {
         'RuleStateChanged',
         'Withdrawn',
     ];
+    private owner: string = '';
+    private eventService: EventService = new EventService;
 
     constructor(
         address: string,
@@ -33,10 +72,10 @@ export class RewardPool {
                 this.name = name;
             });
 
-        for (const event of this._events) {
+        for (const event of this.eventTypes) {
             this.contract.events[event]()
-                .on('data', async (event: any) => {
-                    console.log(event);
+                .on('data', (e: any) => {
+                    this.eventService.dispatch(`event.${e.event}`, e.returnValues);
                 });
         }
     }
@@ -80,17 +119,56 @@ export class RewardPool {
             .send({
                 from: this.owner,
             });
+
+    }
+
+    public async depositsOf(address: string) {
+        const length = await this.contract.methods.countDeposits(address).call({
+            from: this.owner,
+        });
+        let deposits: Deposit[] = [];
+
+        for (let i = 0; i < length; i++) {
+            const d = await this.contract.methods.deposits(address, i)
+                .call({
+                    from: this.owner,
+                });
+            deposits.push(new Deposit(d));
+        }
+
+        return deposits;
     }
 
     public async withdrawelsOf(address: string) {
-        return await this.contract.methods.withdrawelOf(address)
-            .send({
-                from: this.owner,
-            });
+        const length = await this.contract.methods.countWithdrawels(address).call({
+            from: this.owner,
+        });
+        let withdrawels: Withdrawel[] = [];
+
+        for (let i = 0; i < length; i++) {
+            const w = await this.contract.methods.withdrawels(address, i)
+                .call({
+                    from: this.owner,
+                });
+            withdrawels.push(new Withdrawel(w));
+        }
+
+        return withdrawels;
     }
 
 }
 
 export interface IRewardPools {
     [address: string]: RewardPool;
+}
+
+export interface IRewardPool {
+    address: string;
+    name: string;
+    balance: number;
+    outOfSync: boolean;
+    contract: any;
+    owner: string;
+    eventService: EventService;
+    _events: string[];
 }

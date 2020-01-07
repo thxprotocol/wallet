@@ -4,7 +4,7 @@ import { Network } from '@/models/Network';
 import EventService from '@/services/EventService';
 import PoolService from '@/services/PoolService';
 import CoinService from '@/services/CoinService';
-import { IRewardPools, RewardPool } from '@/models/RewardPool';
+import { Deposit, Withdrawel, IRewardPools, RewardPool } from '@/models/RewardPool';
 import { mapGetters } from 'vuex';
 
 @Component({
@@ -21,128 +21,53 @@ import { mapGetters } from 'vuex';
     },
 })
 export default class Wallet extends Vue {
+    public error: string = '';
+    public $store: any;
+    public loading: boolean = false;
+    public events: any = new EventService();
+    public poolService!: PoolService;
+    public coinService!: CoinService;
 
-    get orderedTokenTransfers() {
+    private transactions: any[] = [];
+    private $network!: Network;
+
+    get sortedTransactions() {
         const arr: any[] = [];
-        for (const hash in this.tokenTransfers) {
-            arr.unshift(this.tokenTransfers[hash]);
+        for (const i in this.transactions) {
+            arr.unshift(this.transactions[i]);
         }
 
         return arr.reverse();
     }
 
-    public loading: boolean = false;
-    public events: any = new EventService();
-    public poolService!: PoolService;
-    public coinService!: CoinService;
-    public tokenTransfers: any[] = [];
-
-    private $network!: Network;
-    public $store: any;
-
     public async created() {
-        // const token = await this.$network.getExtdevCoinContract(
-        //     this.$network.extdev.web3js,
-        // );
-        // const fromBlock = await this.getCurrentBlockId();
-        // const offset = 10000;
-        // const address = this.$network.extdev.account;
-
-        // This could becoma a btch when the TX amount gets huge
-        // 1. Store my tx hash when doing a transfer
-        // 2. Crawl for tx addressed to me and cache tx hashes in db
-        // 3. Listen for new tx when app is active and store in db
-
         this.coinService = new CoinService();
-
         this.poolService = new PoolService();
-        this.poolService.init();
-
+        // Start listening for Deposited and Withdrawn events
+        // this.poolService.init();
         this.loading = true;
 
-        this.poolService.getMyRewardPools()
-            .then((pools: any) => {
-                this.loading = false;
+        try {
+            const pools = await this.poolService.getMyRewardPools();
 
-                for (const address in pools) {
-                    this.getDeposits(pools[address]);
-                }
-            })
-            .catch((err: string) => {
-                this.loading = false;
-                // alert(`Oops! Your Reward Pools could not be loaded. Did you provide your keys?`);
-            });
+            for (const address in pools) {
+                const deposits = await pools[address].depositsOf(this.$network.extdev.account);
+                const withdrawels = await pools[address].withdrawelsOf(this.$network.extdev.account);
 
-        // this.events.listen('event.Deposited', this.addDeposit);
-        // this.events.listen('event.Withdrawn', this.addWithdrawel);
-        //
-        // token.getPastEvents('Transfer', {
-        //     filter: { from: address },
-        //     fromBlock: (fromBlock - offset),
-        //     toBlock: 'latest',
-        // }, (error: string, events: any) => {
-        //     this.addMyTransfers(events);
-        // });
-        //
-        // token.getPastEvents('Transfer', {
-        //     filter: { to: address },
-        //     fromBlock: (fromBlock - offset),
-        //     toBlock: 'latest',
-        // }, (error: string, events: any) => {
-        //     this.addMyTransfers(events);
-        // });
-    }
+                deposits.map((d: Deposit) => {
+                    this.transactions.push(d);
+                });
 
-    public async getDeposits(pool: RewardPool) {
-        const address = this.$network.extdev.account;
-        const fromBlock = await this.getCurrentBlockId()-100;
+                withdrawels.map((w: Withdrawel) => {
+                    this.transactions.push(w);
+                });
+            }
 
-        pool.contract.getPastEvents('Deposited', {
-            filter: { from: address },
-            fromBlock: fromBlock,
-            toBlock: 'latest',
-        }, (error: string, events: any) => {
+            this.loading = false;
+        } catch (error) {
             console.error(error);
-            console.log(events);
-            debugger
-        });
-    }
-
-    public async getCurrentBlockId() {
-        return await this.$network.extdev.web3js.eth.getBlockNumber();
-    }
-
-    // public addMyTransfers(data: any) {
-    //     const utils = this.$network.extdev.web3js.utils;
-    //
-    //     for (const key in data) {
-    //         const hash = data[key].transactionHash;
-    //         const value = data[key].returnValues;
-    //         const from = (value.from) ? value.from.toLowerCase() : '';
-    //         const to = (value.to) ? value.to.toLowerCase() : '';
-    //         const amount = utils.fromWei(value.value, 'ether');
-    //         const timestamp = data[key].blockTime;
-    //
-    //         this._createTransfer(hash, from, to, amount, timestamp);
-    //     }
-    // }
-
-    public addTransfer(data: any) {
-        const utils = this.$network.extdev.web3js.utils;
-        const value = data.detail;
-        const hash  = (event as any).transactionHash;
-
-        const from = (value.from) ? value.from.toLowerCase() : '';
-        const to = (value.to) ? value.to.toLowerCase() : '';
-        const amount = utils.fromWei(value.value, 'ether');
-        const timestamp = (event as any).blockTime;
-
-        Vue.set(this.tokenTransfers, hash, {
-            hash,
-            from,
-            to,
-            amount: Number(amount),
-            timestamp,
-        });
+            this.loading = false;
+            this.error = `Oops! Your Reward Pools could not be loaded. Did you provide your keys?`;
+        }
     }
 }

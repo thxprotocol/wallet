@@ -53,10 +53,6 @@
           "type": "uint256"
         },
         {
-          "name": "id",
-          "type": "uint256"
-        },
-        {
           "name": "created",
           "type": "uint256"
         }
@@ -68,21 +64,20 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.5.8+commit.23d335f2\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":false,\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"agree\",\"type\":\"bool\"},{\"name\":\"proposedAmount\",\"type\":\"uint256\"}],\"name\":\"onRulePollFinish\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"agree\",\"type\":\"bool\"}],\"name\":\"onRewardPollFinish\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"beneficiary\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"},{\"name\":\"id\",\"type\":\"uint256\"},{\"name\":\"created\",\"type\":\"uint256\"}],\"name\":\"onWithdrawel\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"Fund callbacks used by polling contracts\",\"methods\":{\"onRewardPollFinish(uint256,bool)\":{\"details\":\"RewardPoll callback\",\"params\":{\"agree\":\"True if the rule should apply or change\",\"id\":\"The referenced reward\"}},\"onRulePollFinish(uint256,bool,uint256)\":{\"details\":\"RulePoll callback\",\"params\":{\"agree\":\"True if the rule should apply or change\",\"id\":\"The referenced rule\",\"proposedAmount\":\"The proposed reward size\"}},\"onWithdrawel(address,uint256,uint256,uint256)\":{\"details\":\"Withdrawel callback\",\"params\":{\"amount\":\"The amount the beneficiary will receive\",\"beneficiary\":\"The addres of the account receiving the reward\",\"created\":\"The timestamp of the moment the reward was claimed\",\"id\":\"The id of the reward that is processed\"}}},\"title\":\"IRewardPool\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol\":\"IRewardPool\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol\":{\"keccak256\":\"0x83cc8afe9318cc342ccd84a1cc46bab5baab87b1cb87406375fd5715ad5c66d1\",\"urls\":[\"bzzr://8b7c5cfcaeceeb91407b1bbe376426b5bdf9339e56a13df6d82fc88bb8b1cd21\"]}},\"version\":1}",
   "bytecode": "0x",
   "deployedBytecode": "0x",
   "sourceMap": "",
   "deployedSourceMap": "",
-  "source": "pragma solidity ^0.5.0;\n\n/**\n * @title IRewardPool\n * @dev Fund callbacks used by polling contracts\n */\ninterface IRewardPool {\n    /**\n     * @dev RulePoll callback\n     * @param id The referenced rule\n     * @param agree True if the rule should apply or change\n     * @param proposedAmount The proposed reward size\n     */\n    function onRulePollFinish(uint256 id, bool agree, uint256 proposedAmount) external;\n\n    /**\n     * @dev RewardPoll callback\n     * @param id The referenced reward\n     * @param agree True if the rule should apply or change\n     */\n    function onRewardPollFinish(uint256 id, bool agree) external;\n\n    /**\n     * @dev Withdrawel callback\n     * @param beneficiary The addres of the account receiving the reward\n     * @param amount The amount the beneficiary will receive\n     * @param id The id of the reward that is processed\n     * @param created The timestamp of the moment the reward was claimed\n     */\n    function onWithdrawel(address beneficiary, uint256 amount, uint256 id, uint256 created) external;\n}\n",
+  "source": "pragma solidity ^0.5.0;\n\n/**\n * @title IRewardPool\n * @dev Fund callbacks used by polling contracts\n */\ninterface IRewardPool {\n    /**\n     * @dev RulePoll callback\n     * @param id The referenced rule\n     * @param agree True if the rule should apply or change\n     * @param proposedAmount The proposed reward size\n     */\n    function onRulePollFinish(uint256 id, bool agree, uint256 proposedAmount) external;\n\n    /**\n     * @dev RewardPoll callback\n     * @param id The referenced reward\n     * @param agree True if the rule should apply or change\n     */\n    function onRewardPollFinish(uint256 id, bool agree) external;\n\n    /**\n     * @dev Withdrawel callback\n     * @param beneficiary The addres of the account receiving the reward\n     * @param amount The amount the beneficiary will receive\n     * @param created The timestamp of the moment the reward was claimed\n     */\n    function onWithdrawel(address beneficiary, uint256 amount, uint256 created) external;\n}\n",
   "sourcePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol",
   "ast": {
     "absolutePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol",
     "exportedSymbols": {
       "IRewardPool": [
-        29
+        27
       ]
     },
-    "id": 30,
+    "id": 28,
     "nodeType": "SourceUnit",
     "nodes": [
       {
@@ -102,9 +97,9 @@
         "contractKind": "interface",
         "documentation": "@title IRewardPool\n@dev Fund callbacks used by polling contracts",
         "fullyImplemented": false,
-        "id": 29,
+        "id": 27,
         "linearizedBaseContracts": [
-          29
+          27
         ],
         "name": "IRewardPool",
         "nodeType": "ContractDefinition",
@@ -209,7 +204,7 @@
               "parameters": [],
               "src": "411:0:0"
             },
-            "scope": 29,
+            "scope": 27,
             "src": "329:83:0",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -289,7 +284,7 @@
               "parameters": [],
               "src": "625:0:0"
             },
-            "scope": 29,
+            "scope": 27,
             "src": "565:61:0",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -297,15 +292,15 @@
           },
           {
             "body": null,
-            "documentation": "@dev Withdrawel callback\n@param beneficiary The addres of the account receiving the reward\n@param amount The amount the beneficiary will receive\n@param id The id of the reward that is processed\n@param created The timestamp of the moment the reward was claimed",
-            "id": 28,
+            "documentation": "@dev Withdrawel callback\n@param beneficiary The addres of the account receiving the reward\n@param amount The amount the beneficiary will receive\n@param created The timestamp of the moment the reward was claimed",
+            "id": 26,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "onWithdrawel",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 26,
+              "id": 24,
               "nodeType": "ParameterList",
               "parameters": [
                 {
@@ -313,8 +308,8 @@
                   "id": 19,
                   "name": "beneficiary",
                   "nodeType": "VariableDeclaration",
-                  "scope": 28,
-                  "src": "965:19:0",
+                  "scope": 26,
+                  "src": "909:19:0",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -325,7 +320,7 @@
                     "id": 18,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "965:7:0",
+                    "src": "909:7:0",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -340,8 +335,8 @@
                   "id": 21,
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 28,
-                  "src": "986:14:0",
+                  "scope": 26,
+                  "src": "930:14:0",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -352,7 +347,7 @@
                     "id": 20,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "986:7:0",
+                    "src": "930:7:0",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -364,10 +359,10 @@
                 {
                   "constant": false,
                   "id": 23,
-                  "name": "id",
+                  "name": "created",
                   "nodeType": "VariableDeclaration",
-                  "scope": 28,
-                  "src": "1002:10:0",
+                  "scope": 26,
+                  "src": "946:15:0",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -378,33 +373,7 @@
                     "id": 22,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1002:7:0",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 25,
-                  "name": "created",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 28,
-                  "src": "1014:15:0",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 24,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1014:7:0",
+                    "src": "946:7:0",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -414,35 +383,35 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "964:66:0"
+              "src": "908:54:0"
             },
             "returnParameters": {
-              "id": 27,
+              "id": 25,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1039:0:0"
+              "src": "971:0:0"
             },
-            "scope": 29,
-            "src": "943:97:0",
+            "scope": 27,
+            "src": "887:85:0",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 30,
-        "src": "104:938:0"
+        "scope": 28,
+        "src": "104:870:0"
       }
     ],
-    "src": "0:1043:0"
+    "src": "0:975:0"
   },
   "legacyAST": {
     "absolutePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol",
     "exportedSymbols": {
       "IRewardPool": [
-        29
+        27
       ]
     },
-    "id": 30,
+    "id": 28,
     "nodeType": "SourceUnit",
     "nodes": [
       {
@@ -462,9 +431,9 @@
         "contractKind": "interface",
         "documentation": "@title IRewardPool\n@dev Fund callbacks used by polling contracts",
         "fullyImplemented": false,
-        "id": 29,
+        "id": 27,
         "linearizedBaseContracts": [
-          29
+          27
         ],
         "name": "IRewardPool",
         "nodeType": "ContractDefinition",
@@ -569,7 +538,7 @@
               "parameters": [],
               "src": "411:0:0"
             },
-            "scope": 29,
+            "scope": 27,
             "src": "329:83:0",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -649,7 +618,7 @@
               "parameters": [],
               "src": "625:0:0"
             },
-            "scope": 29,
+            "scope": 27,
             "src": "565:61:0",
             "stateMutability": "nonpayable",
             "superFunction": null,
@@ -657,15 +626,15 @@
           },
           {
             "body": null,
-            "documentation": "@dev Withdrawel callback\n@param beneficiary The addres of the account receiving the reward\n@param amount The amount the beneficiary will receive\n@param id The id of the reward that is processed\n@param created The timestamp of the moment the reward was claimed",
-            "id": 28,
+            "documentation": "@dev Withdrawel callback\n@param beneficiary The addres of the account receiving the reward\n@param amount The amount the beneficiary will receive\n@param created The timestamp of the moment the reward was claimed",
+            "id": 26,
             "implemented": false,
             "kind": "function",
             "modifiers": [],
             "name": "onWithdrawel",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 26,
+              "id": 24,
               "nodeType": "ParameterList",
               "parameters": [
                 {
@@ -673,8 +642,8 @@
                   "id": 19,
                   "name": "beneficiary",
                   "nodeType": "VariableDeclaration",
-                  "scope": 28,
-                  "src": "965:19:0",
+                  "scope": 26,
+                  "src": "909:19:0",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -685,7 +654,7 @@
                     "id": 18,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "965:7:0",
+                    "src": "909:7:0",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -700,8 +669,8 @@
                   "id": 21,
                   "name": "amount",
                   "nodeType": "VariableDeclaration",
-                  "scope": 28,
-                  "src": "986:14:0",
+                  "scope": 26,
+                  "src": "930:14:0",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -712,7 +681,7 @@
                     "id": 20,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "986:7:0",
+                    "src": "930:7:0",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -724,10 +693,10 @@
                 {
                   "constant": false,
                   "id": 23,
-                  "name": "id",
+                  "name": "created",
                   "nodeType": "VariableDeclaration",
-                  "scope": 28,
-                  "src": "1002:10:0",
+                  "scope": 26,
+                  "src": "946:15:0",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -738,33 +707,7 @@
                     "id": 22,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
-                    "src": "1002:7:0",
-                    "typeDescriptions": {
-                      "typeIdentifier": "t_uint256",
-                      "typeString": "uint256"
-                    }
-                  },
-                  "value": null,
-                  "visibility": "internal"
-                },
-                {
-                  "constant": false,
-                  "id": 25,
-                  "name": "created",
-                  "nodeType": "VariableDeclaration",
-                  "scope": 28,
-                  "src": "1014:15:0",
-                  "stateVariable": false,
-                  "storageLocation": "default",
-                  "typeDescriptions": {
-                    "typeIdentifier": "t_uint256",
-                    "typeString": "uint256"
-                  },
-                  "typeName": {
-                    "id": 24,
-                    "name": "uint256",
-                    "nodeType": "ElementaryTypeName",
-                    "src": "1014:7:0",
+                    "src": "946:7:0",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
@@ -774,34 +717,34 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "964:66:0"
+              "src": "908:54:0"
             },
             "returnParameters": {
-              "id": 27,
+              "id": 25,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "1039:0:0"
+              "src": "971:0:0"
             },
-            "scope": 29,
-            "src": "943:97:0",
+            "scope": 27,
+            "src": "887:85:0",
             "stateMutability": "nonpayable",
             "superFunction": null,
             "visibility": "external"
           }
         ],
-        "scope": 30,
-        "src": "104:938:0"
+        "scope": 28,
+        "src": "104:870:0"
       }
     ],
-    "src": "0:1043:0"
+    "src": "0:975:0"
   },
   "compiler": {
     "name": "solc",
-    "version": "0.5.8+commit.23d335f2.Emscripten.clang"
+    "version": "0.5.0+commit.1d4f565a.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.0.12",
-  "updatedAt": "2019-10-23T10:02:37.690Z",
+  "schemaVersion": "3.0.1",
+  "updatedAt": "2020-01-06T13:05:10.030Z",
   "devdoc": {
     "details": "Fund callbacks used by polling contracts",
     "methods": {
@@ -820,13 +763,12 @@
           "proposedAmount": "The proposed reward size"
         }
       },
-      "onWithdrawel(address,uint256,uint256,uint256)": {
+      "onWithdrawel(address,uint256,uint256)": {
         "details": "Withdrawel callback",
         "params": {
           "amount": "The amount the beneficiary will receive",
           "beneficiary": "The addres of the account receiving the reward",
-          "created": "The timestamp of the moment the reward was claimed",
-          "id": "The id of the reward that is processed"
+          "created": "The timestamp of the moment the reward was claimed"
         }
       }
     },

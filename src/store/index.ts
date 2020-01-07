@@ -36,17 +36,17 @@ const state: State = {
 };
 
 const getters = {
-    tokenRinkebyBalance: (state: any) => {
-        return state.balance.tokenRinkeby;
+    tokenRinkebyBalance: (s: any) => {
+        return s.balance.tokenRinkeby;
     },
-    tokenBalance: (state: any) => {
-        return state.balance.token;
+    tokenBalance: (s: any) => {
+        return s.balance.token;
     },
-    ethRinkebyBalance: (state: any) => {
-        return state.balance.eth;
+    ethRinkebyBalance: (s: any) => {
+        return s.balance.eth;
     },
-    rewardPools: (state: any) => {
-        return state.rewardPools;
+    rewardPools: (s: any) => {
+        return s.rewardPools;
     },
 };
 

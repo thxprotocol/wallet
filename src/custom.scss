@@ -331,3 +331,17 @@ a,
         font-size: 2rem;
     }
 }
+
+.card-pool .card-header {
+    background-color: #039be5;
+    height: 125px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@media (min-width: 768px) {
+    .card-pool .card-header {
+        height: 200px;
+    }
+}

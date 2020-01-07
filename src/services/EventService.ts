@@ -26,11 +26,13 @@ export default class EventService extends Vue {
 
     public dispatch(e: string, data: any = null) {
         const event = new CustomEvent(e, { detail: data });
-        return window.dispatchEvent(event);
+        
+        window.dispatchEvent(event);
     }
 
     public remove(id: number) {
         window.removeEventListener(this.listeners[id].e, this.listeners[id].cb);
-        return delete this.listeners[id];
+
+        delete this.listeners[id];
     }
 }

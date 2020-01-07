@@ -438,19 +438,51 @@ export class Network extends Vue {
     }
 
     public async mintRinkebyCoin(receiver: string, amount: BN) {
+        const rinkeby = this.loadRinkebyAccount();
+        const contract = await this.getRinkebyCoinContract(rinkeby.web3js);
 
+        const tx = await contract.methods
+            .mint(receiver, amount.toString())
+            .send({
+                from: rinkeby.account.address,
+                gas: 350000,
+            });
     }
 
     public async mintExtdevCoin(receiver: string, amount: BN) {
+        const extdev = this.loadExtdevAccount();
+        const contract = await this.getExtdevCoinContract(extdev.web3js);
 
+        const tx = await contract.methods
+            .mint(receiver, amount.toString())
+            .send({
+                from: extdev.account,
+                gas: 350000,
+            });
     }
 
     public async addRinkebyMinter(address: string) {
+        const rinkeby = this.loadRinkebyAccount();
+        const contract = await this.getRinkebyCoinContract(rinkeby.web3js);
 
+        const tx = await contract.methods
+            .addMinter(address)
+            .send({
+                from: rinkeby.account,
+                gas: 350000,
+            });
     }
 
     public async addExtdevMinter(address: string) {
+        const extdev = this.loadExtdevAccount();
+        const contract = await this.getExtdevCoinContract(extdev.web3js);
 
+        const tx = await contract.methods
+            .addMinter(address)
+            .send({
+                from: extdev.account,
+                gas: 350000,
+            });
     }
 
     public async withdrawCoin(amount: string) {
