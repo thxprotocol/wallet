@@ -24,6 +24,10 @@ const tokenMultiplier = new BN(10).pow(new BN(18));
     },
 })
 export default class AccountDetail extends Vue {
+
+    get account() {
+        return this.$account;
+    }
     public loading: any = false;
     public isExtdevMinter: boolean = false;
     public isRinkebyMinter: boolean = false;
@@ -48,10 +52,6 @@ export default class AccountDetail extends Vue {
     private $account!: Account;
     private $network!: Network;
     private $state!: StateService;
-
-    get account() {
-        return this.$account;
-    }
 
     public isDuplicateAddress(address: string) {
         const walletRef = firebase.database().ref(`wallets/${address}`);
@@ -219,8 +219,7 @@ export default class AccountDetail extends Vue {
             .then(() => {
                 this.input.mintForAccount = 0;
                 this.loading = false;
-
-                return (this.$refs['modal-mint-rinkeby'] as any).hide();
+                (this.$refs['modal-mint-rinkeby'] as any).hide();
             });
     }
 
@@ -236,8 +235,7 @@ export default class AccountDetail extends Vue {
             .then(() => {
                 this.input.mintForExtdevAccount = 0;
                 this.loading = false;
-
-                return (this.$refs['modal-mint-extdev'] as any).hide();
+                (this.$refs['modal-mint-extdev'] as any).hide();
             });
     }
 
@@ -247,8 +245,7 @@ export default class AccountDetail extends Vue {
         return this.$network.addRinkebyMinter(this.input.newMinterAddress)
             .then(() => {
                 this.loading = false;
-
-                return (this.$refs['modal-add-minter'] as any).hide();
+                (this.$refs['modal-add-minter'] as any).hide();
             });
     }
 

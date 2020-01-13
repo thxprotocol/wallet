@@ -28,17 +28,17 @@ const coinMultiplier = new BN(10).pow(new BN(18));
     },
 })
 export default class Pools extends Vue {
+    public error: string = '';
+    public loading: any = true;
+    public input: any = {
+        poolAddress: '',
+    };
     private $account!: Account;
     private $network!: Network;
     private poolService!: PoolService;
     private coinService!: CoinService;
     private eventService!: EventService;
     private pools: IRewardPools = {};
-    public error: string = '';
-    public loading: any = true;
-    public input: any = {
-        poolAddress: '',
-    };
 
     public async created() {
         this.eventService = new EventService;
@@ -49,14 +49,14 @@ export default class Pools extends Vue {
 
         this.eventService.listen('event.Deposited', (data: any) => {
             console.log(data);
-            debugger
+            debugger;
             // You need the pool address here to be able to update
             // the balance of the correct pool
         });
 
         this.eventService.listen('event.Withdrawn', (data: any) => {
             console.log(data);
-            debugger
+            debugger;
             // You need the pool address here to be able to update
             // the balance of the correct pool
         });
@@ -78,11 +78,6 @@ export default class Pools extends Vue {
         }
     }
 
-    private async updateBalance(address: string) {
-        const balance = await this.coinService.getExtdevBalance(address);
-        this.pools[address].setBalance(balance);
-    }
-
     public onJoinRewardPool() {
         this.loading = true;
 
@@ -98,5 +93,10 @@ export default class Pools extends Vue {
 
     public onLeavePool(poolAddress: string) {
         return firebase.database().ref(`users/${this.$account.uid}/pools`).child(poolAddress).remove();
+    }
+
+    private async updateBalance(address: string) {
+        const balance = await this.coinService.getExtdevBalance(address);
+        this.pools[address].setBalance(balance);
     }
 }

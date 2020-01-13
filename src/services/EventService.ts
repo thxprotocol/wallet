@@ -26,7 +26,7 @@ export default class EventService extends Vue {
 
     public dispatch(e: string, data: any = null) {
         const event = new CustomEvent(e, { detail: data });
-        
+
         window.dispatchEvent(event);
     }
 

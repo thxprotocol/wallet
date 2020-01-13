@@ -4,7 +4,7 @@ import { Network } from '@/models/Network';
 import EventService from '@/services/EventService';
 import PoolService from '@/services/PoolService';
 import CoinService from '@/services/CoinService';
-import { Deposit, Withdrawel, IRewardPools, RewardPool } from '@/models/RewardPool';
+import { DepositEvent, WithdrawelEvent, IRewardPools, RewardPool } from '@/models/RewardPool';
 import { mapGetters } from 'vuex';
 
 @Component({
@@ -54,11 +54,11 @@ export default class Wallet extends Vue {
                 const deposits = await pools[address].depositsOf(this.$network.extdev.account);
                 const withdrawels = await pools[address].withdrawelsOf(this.$network.extdev.account);
 
-                deposits.map((d: Deposit) => {
+                deposits.map((d: DepositEvent) => {
                     this.transactions.push(d);
                 });
 
-                withdrawels.map((w: Withdrawel) => {
+                withdrawels.map((w: WithdrawelEvent) => {
                     this.transactions.push(w);
                 });
             }

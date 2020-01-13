@@ -397,7 +397,7 @@ export class Network extends Vue {
         const sendTx = await contract.methods
             .transfer(receiver, amount.toString())
             .send({
-                from: this.extdev.account
+                from: this.extdev.account,
             });
     }
 

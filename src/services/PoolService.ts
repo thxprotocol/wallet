@@ -3,13 +3,14 @@ import 'firebase/database';
 import { Vue } from 'vue-property-decorator';
 import { Network } from '@/models/Network';
 import { Account } from '@/models/Account';
-import { RewardPool, IRewardPools, Transaction, Deposit, Withdrawel } from '@/models/RewardPool';
+import { RewardPool, DepositEvent, WithdrawelEvent, RuleStateChangedEvent, RulePollCreatedEvent } from '@/models/RewardPool';
 import store from '../store';
 import BN from 'bn.js';
+import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 
 const _ = require('lodash');
-const InputDataDecoder = require('ethereum-input-data-decoder');
 const RewardPoolJSON = require('@/contracts/RewardPool.json');
+const RewardRulePollJSON = require('@/contracts/RulePoll.json');
 
 export default class PoolService extends Vue {
     public $store: any = store;
@@ -60,6 +61,14 @@ export default class PoolService extends Vue {
         );
     }
 
+    public async getRewardRulePollContract(address: string) {
+        return await this.$network.getExtdevContract(
+            this.$network.extdev.web3js,
+            RewardRulePollJSON.abi,
+            address,
+        );
+    }
+
     public async getRewardPool(address: string) {
         const nid = await this.$network.extdev.web3js.eth.net.getId();
         const hash = RewardPoolJSON.networks[nid].transactionHash;
@@ -75,9 +84,17 @@ export default class PoolService extends Vue {
         return pool;
     }
 
+    public async getRewardRule(id: number, pool: RewardPool) {
+        const data = await pool.contract.methods.rules(id).call({from: this.$network.extdev.account});
+        const snap = await firebase.database().ref(`pools/${pool.address}/rules/${id}`).once('value');
+        const meta = snap.val();
+
+        return new RewardRule(data, meta);
+    }
+
     public async getMyRewardPools() {
         const snap: any = await firebase.database().ref(`users/${this.$account.uid}/pools`).once('value');
-        let pools: any = {};
+        const pools: any = {};
 
         for (const address in snap.val()) {
             const pool = await this.getRewardPool(address);
@@ -97,14 +114,14 @@ export default class PoolService extends Vue {
     public async getRewardPoolEvents(pool: RewardPool) {
         const snap: any = await firebase.database().ref(`pools/${pool.address}/events`).once('value');
         const data = snap.val();
-        let events: any = [];
+        const events: any = [];
 
         for (const key in data) {
             if (data[key].hash) {
                 for (const type of pool.eventTypes) {
-                    let d = await this.getRewardPoolEventLogsFromHash(data[key].hash, type);
-                    if (d) {
-                        const model = this.getEventModel(type, d, data[key].hash);
+                    const logs = await this.getRewardPoolEventDataFromHash(data[key].hash, type);
+                    if (logs) {
+                        const model = this.getEventModel(type, logs, data[key].hash);
                         events.push(model);
                     }
                 }
@@ -116,45 +133,30 @@ export default class PoolService extends Vue {
         return events;
     }
 
-    private getEventModel(type: string, data: any, hash: string) {
-        if (type === 'Deposited') {
-            const deposit = new Deposit(data.logs);
-            deposit.hash = hash;
+    public async getRewardRules(pool: RewardPool) {
+        const length = await pool.contract.methods.countRules().call({ from: this.$network.extdev.account });
+        const rules: RewardRule[] = [];
 
-            return deposit;
-        }
-        if (type === 'Withdrawn') {
-            const withdrawel = new Withdrawel(data.logs);
-            withdrawel.hash = hash;
+        for (let i = 0; i < length; i++) {
+            const rule = await this.getRewardRule(i, pool);
 
-            return withdrawel;
+            if (rule.pollAddress !== '0x0000000000000000000000000000000000000000') {
+                rule.poll = await this.getRewardRulePoll(rule);
+            }
+
+            rules.push(rule);
         }
+        return rules;
     }
 
-    private async getRewardPoolEventLogsFromHash(hash: string, type: string) {
-        try {
-            const receipt = await this.$network.extdev.web3js.eth.getTransactionReceipt(hash);
-            const contract = await this.getRewardPoolContract(receipt.contractAddress);
-            const eventInterface = _.find(
-                contract._jsonInterface,
-                (o: any) => o.name === type && o.type === 'event',
-            );
-            const log = _.find(
-                receipt.logs,
-                (l: any) => l.topics.includes(eventInterface.signature)
-            );
-            if (log) {
-                const logs = await this.$network.extdev.web3js.eth.abi.decodeLog(
-                    eventInterface.inputs,
-                    log.data,
-                    log.topics.slice(1),
-                );
+    public async getRewardRulePoll(rule: RewardRule) {
+        const contract = await this.getRewardRulePollContract(rule.pollAddress);
 
-                return { type, logs };
-            }
-        } catch (err) {
-            return err;
-        }
+        return new RewardRulePoll(
+            rule.pollAddress,
+            contract,
+            this.$network.extdev.account,
+        );
     }
 
     public async addMember(address: string, pool: RewardPool) {
@@ -166,29 +168,113 @@ export default class PoolService extends Vue {
     }
 
     public async addDeposit(tokenAmount: BN, pool: RewardPool) {
-        try {
-            // Add the deposit event to firebase events array
-            // and return the firebase key in that array
-            const snap = await firebase.database().ref(`pools/${pool.address}/events`)
-                .push();
+        const snap = await firebase.database().ref(`pools/${pool.address}/events`)
+            .push();
 
+        try {
             await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
                 .set({
                     state: 0,
                 });
 
-            // If succesful add it to loom network
             const tx = await pool.contract.methods.deposit(tokenAmount.toString())
-                .send({ from: this.$network.extdev.account })
+                .send({ from: this.$network.extdev.account });
 
-            // Add tx hash to event in fb
             return await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
                 .update({
                     hash: tx.transactionHash,
                     state: 1,
                 });
         } catch (err) {
-            // If not succesful remove from firebase
+            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
+                .remove();
+            return err;
+        }
+    }
+
+    public async addRewardRule(rule: any, pool: RewardPool) {
+        const snap = await firebase.database().ref(`pools/${pool.address}/events`)
+            .push();
+
+        try {
+            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
+                .set({
+                    success: 0,
+                });
+
+            const tx = await pool.contract.methods.createRule(rule.slug.toString())
+                .send({ from: this.$network.extdev.account });
+            const id = tx.events.RuleStateChanged.returnValues.id;
+            const state = tx.events.RuleStateChanged.returnValues.state;
+
+            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
+                .update({
+                    hash: tx.transactionHash,
+                    success: 1,
+                });
+
+            return await firebase.database().ref(`pools/${pool.address}/rules/${id}`)
+                .set({
+                    title: rule.title,
+                    description: rule.description,
+                    state,
+                });
+
+        } catch (err) {
+            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
+                .remove();
+            return err;
+        }
+    }
+
+    private getEventModel(type: string, data: any, hash: string) {
+        if (type === 'Deposited') {
+            const deposit = new DepositEvent(data.logs);
+            deposit.hash = hash;
+
+            return deposit;
+        }
+        if (type === 'Withdrawn') {
+            const withdrawel = new WithdrawelEvent(data.logs);
+            withdrawel.hash = hash;
+
+            return withdrawel;
+        }
+        if (type === 'RuleStateChanged') {
+            const ruleStateChanged = new RuleStateChangedEvent(data.logs, data.blockTime);
+            ruleStateChanged.hash = hash;
+
+            return ruleStateChanged;
+        }
+        if (type === 'RuleStateChanged') {
+            const rulePollCreated = new RulePollCreatedEvent(data.logs, data.blockTime);
+            rulePollCreated.hash = hash;
+
+            return rulePollCreated;
+        }
+    }
+
+    private async getRewardPoolEventDataFromHash(hash: string, type: string) {
+        try {
+            const receipt = await this.$network.extdev.web3js.eth.getTransactionReceipt(hash);
+            const contract = await this.getRewardPoolContract(receipt.contractAddress);
+            const eventInterface = _.find(
+                contract._jsonInterface,
+                (o: any) => o.name === type && o.type === 'event',
+            );
+            const log = _.find(
+                receipt.logs,
+                (l: any) => l.topics.includes(eventInterface.signature),
+            );
+            if (log) {
+                const logs = await this.$network.extdev.web3js.eth.abi.decodeLog(
+                    eventInterface.inputs,
+                    log.data,
+                    log.topics.slice(1),
+                );
+                return { type, logs, blockTime: log.blockTime };
+            }
+        } catch (err) {
             return err;
         }
     }

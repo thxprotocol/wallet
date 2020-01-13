@@ -8,7 +8,6 @@ const BN = require('bn.js');
 const coinMultiplier = new BN(10).pow(new BN(18));
 
 export default class CoinService extends Vue {
-
     public $store: any = store;
     private $account!: Account;
     private $events!: EventService;

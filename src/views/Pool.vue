@@ -23,6 +23,7 @@
                                     v-for="(ev, key) in stream"
                                     :key="key"
                                     :ev="ev"
+                                    :pool="pool"
                                     :is="ev.component"  />
                             </b-list-group>
 
@@ -30,7 +31,16 @@
 
                         <b-tab title="Rules">
 
-                            <!-- <Rules v-if="contract && account" v-bind:contract="contract" v-bind:account="account"></Rules> -->
+                            <rule v-for="(rule, key) in rules"
+                                :key="key"
+                                :rule="rule"
+                                :pool="pool"
+                                :isManager="isManager"
+                                :isMember="isMember"></rule>
+
+                            <div class="d-flex w-100 justify-content-end">
+                                <button v-if="isManager" class="btn btn-primary" @click="$refs.modalCreateRule.show()">Add new rule</button>
+                            </div>
 
                         </b-tab>
 
@@ -56,6 +66,34 @@
                     </b-tabs>
                 </div>
             </div>
+
+            <b-modal ref="modalCreateRule" centered title="Suggest a reward rule">
+                <div class="" v-if="!loading">
+                    <div class="form-group">
+                        <label for="slug">Slug:</label>
+                        <input id="slug" v-model="input.rule.slug" type="text" class="form-control" placeholder="complete_profile"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="title">Title:</label>
+                        <input id="title" v-model="input.rule.title" type="text" class="form-control" placeholder="Complete your profile!"/>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea class="form-control"  width="100%" rows="3" id="description" v-model="input.rule.description" placeholder="When filling all fields of your public profile you will receive the reward."> </textarea>
+                    </div>
+                </div>
+                <p v-if="loading" class="d-flex w-100 justify-content-center">
+                    <b-spinner></b-spinner>
+                </p>
+                <template v-slot:modal-footer="{ ok, cancel }">
+                    <button class="btn btn-link" @click="$refs.modalCreateRule.hide()">
+                        Cancel
+                    </button>
+                    <button @click="addRewardRule(input.rule)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                        Suggest Rule
+                    </button>
+                </template>
+            </b-modal>
 
             <b-modal ref="modalAddMember" centered title="Invite a member for this reward pool">
                 <input v-if="!loading" v-model="input.addMember" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">

@@ -7,4 +7,4 @@
         <small class="mb-1">{{ev.sender}}</small>
     </b-list-group-item>
 </template>
-<script src="./Deposit.ts" lang="ts"></script>
+<script src="./DepositEvent.ts" lang="ts"></script>

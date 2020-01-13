@@ -1,20 +1,27 @@
 import EventService from '@/services/EventService';
+import BN from 'bn.js';
 
-export class Transaction {
+const RuleState = ['Active', 'Disabled'];
+
+export class TransactionEvent {
     public amount: string;
     public created: number;
     public hash: string;
-    public variant: string
+    public variant: string;
+    public component: string;
+    public blockTime: number;
 
     constructor(data: any) {
         this.hash = data.hash;
         this.amount = data.amount;
         this.created = parseInt(data.created, 10);
         this.variant = 'info';
+        this.component = '';
+        this.blockTime = 0;
     }
 }
 
-export class Deposit extends Transaction {
+export class DepositEvent extends TransactionEvent {
     public sender: string;
     public component: string;
 
@@ -22,19 +29,46 @@ export class Deposit extends Transaction {
         super(data);
         this.sender = data.sender;
         this.variant = 'danger';
-        this.component = 'deposit';
+        this.component = 'deposit-event';
     }
 }
 
-export class Withdrawel extends Transaction {
+export class WithdrawelEvent extends TransactionEvent {
     public receiver: string;
-    public component: string;
 
     constructor(data: any) {
         super(data);
         this.receiver = data.receiver;
         this.variant = 'success';
-        this.component = 'withdrawel';
+        this.component = 'withdrawel-event';
+    }
+}
+
+export class RuleStateChangedEvent extends TransactionEvent {
+    public rule: number;
+    public state: string;
+
+    constructor(data: any, blockTime: string) {
+        super(data);
+        this.rule = parseInt(data.id, 10);
+        this.state = RuleState[parseInt(data.state, 10)];
+        this.blockTime = parseInt(blockTime, 10);
+        this.variant = 'success';
+        this.component = 'rulestatechanged-event';
+    }
+}
+
+export class RulePollCreatedEvent extends TransactionEvent {
+    public rule: number;
+    public proposal: string;
+
+    constructor(data: any, blockTime: string) {
+        super(data);
+        this.rule = parseInt(data.id, 10);
+        this.proposal = RuleState[parseInt(data.proposedAmount, 10)];
+        this.blockTime = parseInt(blockTime, 10);
+        this.variant = 'success';
+        this.component = 'rulestatechanged-event';
     }
 }
 
@@ -126,14 +160,14 @@ export class RewardPool {
         const length = await this.contract.methods.countDeposits(address).call({
             from: this.owner,
         });
-        let deposits: Deposit[] = [];
+        const deposits: DepositEvent[] = [];
 
         for (let i = 0; i < length; i++) {
             const d = await this.contract.methods.deposits(address, i)
                 .call({
                     from: this.owner,
                 });
-            deposits.push(new Deposit(d));
+            deposits.push(new DepositEvent(d));
         }
 
         return deposits;
@@ -143,17 +177,24 @@ export class RewardPool {
         const length = await this.contract.methods.countWithdrawels(address).call({
             from: this.owner,
         });
-        let withdrawels: Withdrawel[] = [];
+        const withdrawels: WithdrawelEvent[] = [];
 
         for (let i = 0; i < length; i++) {
             const w = await this.contract.methods.withdrawels(address, i)
                 .call({
                     from: this.owner,
                 });
-            withdrawels.push(new Withdrawel(w));
+            withdrawels.push(new WithdrawelEvent(w));
         }
 
         return withdrawels;
+    }
+
+    public async startRulePoll(id: number, amount: BN) {
+        return await this.contract.methods.startRulePoll(id, amount.toString())
+            .send({
+                from: this.owner,
+            });
     }
 
 }
