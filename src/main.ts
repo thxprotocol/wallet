@@ -4,20 +4,15 @@ import VueMoment from 'vue-moment';
 import App from './App.vue';
 import firebase from 'firebase/app';
 import 'firebase/auth';
-
 import router from './router';
 import store from './store';
-import './registerServiceWorker';
-
-import './custom.scss';
-
 import { Account } from './models/Account';
 import { Network } from './models/Network';
-
 import StateService from './services/StateService';
 import EventService from './services/EventService';
-
-const config = require('./config.js');
+import config from './config.json';
+import './registerServiceWorker';
+import './custom.scss';
 
 Vue.config.productionTip = false;
 Vue.use(VueMoment);
@@ -26,7 +21,7 @@ let app: any;
 
 firebase.initializeApp(config.firebase);
 firebase.auth()
-    .onAuthStateChanged(function() {
+    .onAuthStateChanged(() => {
         const currentUser: firebase.User | any = firebase.auth().currentUser;
 
         if (currentUser) {

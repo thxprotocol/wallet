@@ -62,11 +62,11 @@
                     <h3>Poll period:</h3>
                     <div class="row">
                         <div class="col-12">
-                            <BProgress
+                            <b-progress
                                 variant="info"
-                                :value="((rule.poll.now - rule.poll.startTime) / (rule.poll.endTime - rule.poll.startTime)) * 100"
+                                :value="((now - rule.poll.startTime) / (rule.poll.endTime - rule.poll.startTime)) * 100"
                                 :max="100"
-                            ></BProgress>
+                            ></b-progress>
                         </div>
                         <div class="col-6">
                             {{rule.poll.startTime | moment("MMMM Do YYYY HH:mm") }}
@@ -79,10 +79,10 @@
                     <h3>Votes ({{rule.poll.totalVoted}})</h3>
                     <div class="row">
                         <div class="col-12">
-                            <BProgress show-progress :max="(rule.poll.yesCounter + rule.poll.noCounter)">
-                                <BProgressBar variant="success" :value="rule.poll.yesCounter"></BProgressBar>
-                                <BProgressBar variant="danger" :value="rule.poll.noCounter"></BProgressBar>
-                            </BProgress>
+                            <b-progress show-progress :max="(rule.poll.yesCounter + rule.poll.noCounter)">
+                                <b-progress-bar variant="success" :value="rule.poll.yesCounter"></b-progress-bar>
+                                <b-progress-bar variant="danger" :value="rule.poll.noCounter"></b-progress-bar>
+                            </b-progress>
                         </div>
                         <div class="col-6">
                             {{rule.poll.yesCounter}}
@@ -96,14 +96,21 @@
                     <strong>You are not a member of this pool and can not join the poll.</strong>
                 </div>
             </div>
+            <p v-if="rule.poll">
+                isMember: {{isMember}}<br>
+                now: {{now}}<br>
+                endTime: {{rule.poll.endTime}}<br>
+                startTime: {{rule.poll.startTime}}<br>
+                hasVoted: {{rule.poll.hasVoted}}<br>
+            </p>
 
             <template v-slot:modal-footer="{ ok, cancel }" v-if="rule.poll && isMember">
-                <div class="row" v-if="rule.poll.now > rule.poll.endTime">
+                <div class="row" v-if="now > rule.poll.endTime">
                     <div class="col-12">
-                        <button @click="finalizePoll()" :class="{ disabled: loading }" class="btn btn-primary btn-block">Finalize Poll</button>
+                        <button @click="tryToFinalize()" :class="{ disabled: loading }" class="btn btn-primary btn-block">Finalize Poll</button>
                     </div>
                 </div>
-                <div class="row" v-if="!rule.poll.hasVoted && rule.poll.now < rule.poll.endTime">
+                <div class="row" v-if="!rule.poll.hasVoted && now < rule.poll.endTime">
                     <div class="col-6">
                         <button :class="{ disabled: loading }" class="btn btn-primary btn-block" @click="vote(true)">Approve</button>
                     </div>
@@ -111,7 +118,7 @@
                         <button :class="{ disabled: loading }" class="btn btn-primary btn-block" @click="vote(false)">Reject</button>
                     </div>
                 </div>
-                <div class="row" v-if="rule.poll.hasVoted && rule.poll.now < rule.poll.endTime">
+                <div class="row" v-if="rule.poll.hasVoted && now < rule.poll.endTime">
                     <div class="col-12">
                         <button :class="{ disabled: loading }" class="btn btn-primary btn-block" @click="revokeVote()">Revoke</button>
                     </div>

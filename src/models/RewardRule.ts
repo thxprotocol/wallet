@@ -1,13 +1,13 @@
-const RuleState = ['Active', 'Disabled'];
+const RULE_STATE = ['Active', 'Disabled'];
 
 export class RewardRulePoll {
     public address: string;
     public contract: any;
     public owner: string;
 
+    public proposedAmount!: number;
     public startTime!: number;
     public endTime!: number;
-    public now!: number;
     public yesCounter!: number;
     public noCounter!: number;
 
@@ -20,11 +20,35 @@ export class RewardRulePoll {
         this.contract = contract;
         this.owner = owner;
 
-        this.contract.methods.endTime().call({ from: owner })
-            .then(this.startTime);
+        this.contract.methods.startTime()
+            .call({ from: owner })
+            .then((r: string) => {
+                this.startTime = parseInt(r, 10);
+            });
 
-        this.contract.methods.endTime().call({ from: owner })
-            .then(this.endTime);
+        this.contract.methods.endTime()
+            .call({ from: owner })
+            .then((r: string) => {
+                this.endTime = parseInt(r, 10);
+            });
+
+        this.contract.methods.yesCounter()
+            .call({ from: owner })
+            .then((r: string) => {
+                this.yesCounter = parseInt(r, 10);
+            });
+
+        this.contract.methods.noCounter()
+            .call({ from: owner })
+            .then((r: string) => {
+                this.noCounter = parseInt(r, 10);
+            });
+
+        this.contract.methods.proposedAmount()
+            .call({ from: owner })
+            .then((r: string) => {
+                this.proposedAmount = parseInt(r, 10);
+            });
     }
 }
 
@@ -41,7 +65,7 @@ export class RewardRule {
 
     constructor(data: any, meta: any) {
         this.id = parseInt(data.id, 10);
-        this.state = RuleState[parseInt(data.state, 10)];
+        this.state = RULE_STATE[parseInt(data.state, 10)];
         this.created = data.created;
         this.pollAddress = data.poll;
         this.amount = data.amount;

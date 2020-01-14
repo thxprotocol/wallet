@@ -3,7 +3,7 @@ import { Profile } from './Profile';
 import { Network } from './Network';
 import BN from 'bn.js';
 
-const tokenMultiplier = new BN(10).pow(new BN(18));
+const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export class Account extends Vue {
     public uid: string = '';
@@ -27,7 +27,7 @@ export class Account extends Vue {
             const web3js = this.$network.rinkeby.web3js;
             const balanceInWei = await this.$network.getRinkebyCoinBalance(web3js, address);
 
-            return new BN(balanceInWei).div(tokenMultiplier);
+            return new BN(balanceInWei).div(TOKEN_MULTIPLIER);
         } else {
             return new BN(0);
         }
@@ -39,7 +39,7 @@ export class Account extends Vue {
             const web3js = this.$network.extdev.web3js;
             const balanceInWei = await this.$network.getExtdevCoinBalance(web3js, address);
 
-            return new BN(balanceInWei).div(tokenMultiplier);
+            return new BN(balanceInWei).div(TOKEN_MULTIPLIER);
         } else {
             return new BN(0);
         }

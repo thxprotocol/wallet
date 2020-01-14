@@ -23,7 +23,7 @@ export default class Login extends Vue {
                 this.$router.replace('/');
             })
             .catch((err) => {
-                if (typeof err != 'undefined') {
+                if (typeof err !== 'undefined') {
                     // eslint-disable-next-line
                     console.error(err.code + ' ' + err.message);
                     alert('Error during authentication');

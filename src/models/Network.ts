@@ -12,24 +12,22 @@ import {
     soliditySha3,
 } from 'loom-js';
 import Web3 from 'web3';
-const Config = require('../config');
-const { OfflineWeb3Signer } = require('loom-js/dist/solidity-helpers');
-const { ethers } = require('ethers');
-import BN from 'bn.js';
-import { BigNumber } from 'ethers/utils';
-const MyRinkebyCoinJSON = require('../contracts/THXTokenRinkeby.json');
-const MyCoinJSON = require('../contracts/THXToken.json');
+import Config from '../config.json';
+import { OfflineWeb3Signer } from 'loom-js/dist/solidity-helpers';
+import MyRinkebyCoinJSON from '../contracts/THXTokenRinkeby.json';
+import MyCoinJSON from '../contracts/THXToken.json';
 const TransferGateway = Contracts.TransferGateway;
 const AddressMapper = Contracts.AddressMapper;
+import ethers from 'ethers';
+import BN from 'bn.js';
 
 // See https://loomx.io/developers/en/testnet-plasma.html#ethereum-integration
 // for the most up to date address.
-const rinkebyGatewayAddress = '0x9c67fD4eAF0497f9820A3FBf782f81D6b6dC4Baa';
-const extdevGatewayAddress = '0xE754d9518bF4a9C63476891eF9Aa7D91c8236a5d';
-const extdevChainId = 'extdev-plasma-us1';
+const RINKEBY_GATEWAY_ADDRESS = '0x9c67fD4eAF0497f9820A3FBf782f81D6b6dC4Baa';
+const EXTDEV_GATEWAY_ADDRESS = '0xE754d9518bF4a9C63476891eF9Aa7D91c8236a5d';
+const EXTDEV_CHAIN_ID = 'extdev-plasma-us1';
 const INFURA_API_KEY = Config.infura.key;
-
-const coinMultiplier = new BN(10).pow(new BN(18));
+const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export class Network extends Vue {
     public loomPrivateKeyString: string;
@@ -55,6 +53,13 @@ export class Network extends Vue {
         }
     }
 
+    public async now() {
+        return this.extdev.web3js.eth.getBlock('latest')
+            .then((block: any) => {
+                return block.timestamp;
+            });
+    }
+
     // Returns a promise that will be resolved with the signed withdrawal receipt that contains the
     // data that must be submitted to the Ethereum Gateway to withdraw ERC20 tokens.
     public async depositCoinToExtdevGateway({
@@ -73,7 +78,7 @@ export class Network extends Vue {
         const coinContract = await this.getExtdevCoinContract(web3js);
         try {
             await coinContract.methods
-                .approve(extdevGatewayAddress.toLowerCase(), amount.toString())
+                .approve(EXTDEV_GATEWAY_ADDRESS.toLowerCase(), amount.toString())
                 .send({
                     from: ownerExtdevAddress,
                 });
@@ -106,7 +111,7 @@ export class Network extends Vue {
         const tokenExtdevAddr = Address.fromString(`${client.chainId}:${tokenExtdevAddress}`);
         try {
             await gatewayContract.withdrawERC20Async(amount, tokenExtdevAddr, ownerRinkebyAddr);
-            console.log(`${amount.div(coinMultiplier).toString()} tokens deposited to DAppChain Gateway...`);
+            console.log(`${amount.div(TOKEN_MULTIPLIER).toString()} tokens deposited to DAppChain Gateway...`);
         } catch (err) {
             console.error('Withdraw failed while trying to deposit tokens to DAppChain Gateway.');
             throw err;
@@ -122,17 +127,17 @@ export class Network extends Vue {
         const gateway = await this.getRinkebyGatewayContract(web3js, ownerAccount);
 
         const gasEstimate = await contract.methods
-            .approve(rinkebyGatewayAddress, amount.toString())
+            .approve(RINKEBY_GATEWAY_ADDRESS, amount.toString())
             .estimateGas({
                 from: ownerAccount.address,
             });
 
-        if (gasEstimate == gas) {
+        if (gasEstimate === gas) {
             throw new Error('Not enough enough gas, send more.');
         }
 
         await contract.methods
-            .approve(rinkebyGatewayAddress, amount.toString())
+            .approve(RINKEBY_GATEWAY_ADDRESS, amount.toString())
             .send({
                 from: ownerAccount.address,
                 gas: gasEstimate,
@@ -192,7 +197,7 @@ export class Network extends Vue {
 
         return createEthereumGatewayAsync(
             version,
-            rinkebyGatewayAddress,
+            RINKEBY_GATEWAY_ADDRESS,
             new ethers.Wallet(web3Account.privateKey, new ethers.providers.Web3Provider(web3js.currentProvider)),
         );
     }
@@ -232,7 +237,7 @@ export class Network extends Vue {
         const privateKey = CryptoUtils.B64ToUint8Array(privateKeyStr);
         const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKey);
         const client = new Client(
-            extdevChainId,
+            EXTDEV_CHAIN_ID,
             'wss://extdev-plasma-us1.dappchains.com/websocket',
             'wss://extdev-plasma-us1.dappchains.com/queryws',
         );
@@ -338,7 +343,7 @@ export class Network extends Vue {
             web3js,
         } = this.loadRinkebyAccount();
         try {
-            const actualAmount = new BN(amount).mul(coinMultiplier);
+            const actualAmount = new BN(amount).mul(TOKEN_MULTIPLIER);
             const txHash = await this.depositCoinToRinkebyGateway(
                 web3js, actualAmount, account, 350000,
             );
@@ -489,7 +494,7 @@ export class Network extends Vue {
         try {
             const extdev = this.loadExtdevAccount();
             const rinkeby = this.loadRinkebyAccount();
-            const actualAmount = new BN(amount).mul(coinMultiplier);
+            const actualAmount = new BN(amount).mul(TOKEN_MULTIPLIER);
             const rinkebyNetworkId = await rinkeby.web3js.eth.net.getId();
             const extdevNetworkId = await extdev.web3js.eth.net.getId();
             const receipt = await this.depositCoinToExtdevGateway({
@@ -525,14 +530,16 @@ export class Network extends Vue {
             const receipt: any = await this.getPendingWithdrawalReceipt(extdev.client, extdev.account);
 
             if (receipt && receipt.tokenContract.toString() === myRinkebyCoinAddress.toString()) {
-                console.log(`Found pending withdrawal of ${receipt.tokenAmount.div(coinMultiplier).toString()} coins.`);
+                console.log(`Found pending withdrawal of ${receipt.tokenAmount.div(TOKEN_MULTIPLIER).toString()}
+                coins.`);
+
                 const txHash = await this.withdrawCoinFromRinkebyGateway({
                     web3js: rinkeby.web3js,
                     web3Account: rinkeby.account,
                     receipt,
                     gas: 350000,
                 });
-                console.log(`${receipt.tokenAmount.div(coinMultiplier).toString()} tokens withdrawn from Transfer Gateway.`);
+                console.log(`${receipt.tokenAmount.div(TOKEN_MULTIPLIER).toString()} tokens withdrawn from Transfer Gateway.`);
                 console.log(`Rinkeby tx hash: ${txHash}`);
             } else {
                 console.log('No pending withdrawels found!');

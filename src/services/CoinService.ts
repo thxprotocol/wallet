@@ -3,9 +3,9 @@ import { Network } from '@/models/Network';
 import { Account } from '@/models/Account';
 import EventService from './EventService';
 import store from '../store';
+import BN from 'bn.js';
 
-const BN = require('bn.js');
-const coinMultiplier = new BN(10).pow(new BN(18));
+const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export default class CoinService extends Vue {
     public $store: any = store;
@@ -72,13 +72,13 @@ export default class CoinService extends Vue {
         const contract: any = await this.$network.getExtdevCoinContract(this.$network.extdev.web3js);
         const balance = await contract.methods.balanceOf(address).call({ from: this.$network.extdev.account });
 
-        return new BN(balance).div(coinMultiplier);
+        return new BN(balance).div(TOKEN_MULTIPLIER);
     }
 
     public async getRinkebyBalance(address: string) {
         const contract: any = await this.$network.getRinkebyCoinContract(this.$network.extdev.web3js);
         const balance = await contract.methods.balanceOf(address).call({ from: this.$network.rinkeby.account });
 
-        return new BN(balance).div(coinMultiplier);
+        return new BN(balance).div(TOKEN_MULTIPLIER);
     }
 }

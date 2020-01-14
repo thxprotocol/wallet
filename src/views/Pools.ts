@@ -11,7 +11,7 @@ import { mapGetters } from 'vuex';
 import { IRewardPools, RewardPool } from '@/models/RewardPool';
 import EventService from '@/services/EventService';
 
-const coinMultiplier = new BN(10).pow(new BN(18));
+const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 @Component({
     name: 'pools',
@@ -41,7 +41,7 @@ export default class Pools extends Vue {
     private pools: IRewardPools = {};
 
     public async created() {
-        this.eventService = new EventService;
+        this.eventService = new EventService();
         this.coinService = new CoinService();
         this.poolService = new PoolService();
 
@@ -49,14 +49,12 @@ export default class Pools extends Vue {
 
         this.eventService.listen('event.Deposited', (data: any) => {
             console.log(data);
-            debugger;
             // You need the pool address here to be able to update
             // the balance of the correct pool
         });
 
         this.eventService.listen('event.Withdrawn', (data: any) => {
             console.log(data);
-            debugger;
             // You need the pool address here to be able to update
             // the balance of the correct pool
         });
@@ -65,10 +63,12 @@ export default class Pools extends Vue {
             const pools = await this.poolService.getMyRewardPools();
 
             for (const address in pools) {
-                const balance = await this.coinService.getExtdevBalance(address);
-                pools[address].setBalance(balance);
+                if (pools[address]) {
+                    const balance = await this.coinService.getExtdevBalance(address);
+                    pools[address].setBalance(balance);
 
-                this.$store.commit('addRewardPool', pools[address]);
+                    this.$store.commit('addRewardPool', pools[address]);
+                }
             }
 
             this.loading = false;

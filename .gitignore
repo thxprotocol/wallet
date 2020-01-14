@@ -4,7 +4,7 @@ node_modules
 /openzeppelin
 /build/contracts
 command
-/src/config.js
+/src/config.json
 .firebase
 
 # local env files

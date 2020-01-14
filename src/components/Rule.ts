@@ -1,63 +1,100 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import firebase from 'firebase/app';
-import 'firebase/database';
 import { BModal, BCard, BCardText, BSpinner, BProgress, BProgressBar } from 'bootstrap-vue';
 import { Network } from '@/models/Network';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import { RewardPool } from '@/models/RewardPool';
-import PoolDetail from '@/views/Pool';
+import PoolService from '@/services/PoolService';
+import BN from 'bn.js';
 
-const BN = require('bn.js');
-const tokenMultiplier = new BN(10).pow(new BN(18));
+const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 @Component({
     name: 'CRewardRule',
     components: {
         'b-modal': BModal,
-        BCard,
-        BCardText,
-        BSpinner,
-        BProgress,
-        BProgressBar,
+        'b-card': BCard,
+        'b-card-text': BCardText,
+        'b-spinner': BSpinner,
+        'b-progress': BProgress,
+        'b-progress-bar': BProgressBar,
     },
 })
 export default class CRewardRule extends Vue {
-    public $parent!: PoolDetail;
     public loading: boolean = false;
     public error: string = '';
+    public now: number = Math.floor(new Date().getTime() / 1000);
     public input: any = {
         poll: {
             proposal: 0,
         },
     };
     private $network!: Network;
+    private poolService: PoolService = new PoolService();
 
-    @Prop() public rule!: RewardRule;
-    @Prop() public pool!: RewardPool;
+    @Prop() private rule!: RewardRule;
+    @Prop() private pool!: RewardPool;
+    @Prop() private isMember!: boolean;
+    @Prop() private isManager!: boolean;
 
-    @Prop() public isMember!: boolean;
-    @Prop() public isManager!: boolean;
+    public async created() {
+        this.now = await this.$network.now();
+    }
 
+    public async startRulePoll() {
+        this.loading = true;
+        this.poolService.addRewardRulePoll(
+            this.rule,
+            this.pool,
+            new BN(this.input.poll.proposal).mul(TOKEN_MULTIPLIER),
+            )
+            .then(() => {
+                this.input.proposal = 0;
+                this.loading = false;
 
-    // public async vote(agree: boolean) {
-    //     this.loading = true;
-    //
-    //     return await this.contract.methods.voteForRule(this.poll.id, agree)
-    //         .send({from: this.account.loom.address })
-    //         .then(async (tx: any) => {
-    //             this.poll = await this.getRulePoll();
-    //
-    //             // eslint-disable-next-line
-    //             console.log(tx);
-    //         })
-    //         .catch(async (err: string) => {
-    //             this.alert.noVote = true;
-    //             this.loading = false;
-    //
-    //             // eslint-disable-next-line
-    //             console.error(err);
-    //         });
-    // }
+                (this.$refs.modalCreateRulePoll as BModal).hide();
+            })
+            .catch((err: string) => {
+                this.loading = false;
+                console.error(err);
+            });
+    }
+
+    public async vote(agree: boolean) {
+        this.loading = true;
+        this.poolService.voteForRule(
+            this.rule,
+            this.pool,
+            agree,
+            )
+            .then((poll: RewardRulePoll) => {
+                this.rule.poll = poll;
+                this.loading = false;
+            })
+            .catch((err: string) => {
+                this.error = err;
+                this.loading = false;
+            });
+    }
+
+    public async tryToFinalize() {
+        this.loading = true;
+
+        this.poolService.tryToFinalize(
+            this.rule,
+            this.pool,
+            )
+            .then((poll: RewardRulePoll) => {
+                this.rule.poll = poll;
+                this.loading = false;
+
+                (this.$refs.modalCreateRulePoll as BModal).hide();
+            })
+            .catch((err: string) => {
+                this.error = err;
+                this.loading = false;
+            });
+    }
+
     // public async revokeVote() {
     //     this.loading = true;
     //
@@ -76,54 +113,4 @@ export default class CRewardRule extends Vue {
     //             console.error(err);
     //         });
     // }
-    // public async finalizePoll() {
-    //     const rulePoll = await this.$network.getExtdevContract(
-    //         this.$network.extdev.web3js,
-    //         RulePoll,
-    //         this.rule.poll,
-    //     );
-    //
-    //     this.loading = true;
-    //
-    //     return await rulePoll.methods.tryToFinalize()
-    //         .send({ from: this.account.loom.address })
-    //         .then(async (tx: any) => {
-    //             this.loading = false;
-    //             this.modal.rulePoll = false;
-    //             this.rule.poll = '0x0000000000000000000000000000000000000000';
-    //
-    //             // eslint-disable-next-line
-    //             console.log(tx);
-    //         })
-    //         .then((err: string) => {
-    //             this.loading = false;
-    //             // eslint-disable-next-line
-    //             console.error(err);
-    //         });
-    // }
-
-    public async startRulePoll() {
-        this.loading = true;
-
-        return await this.pool.startRulePoll(
-                this.rule.id,
-                new BN(this.input.poll.proposal).mul(tokenMultiplier),
-            )
-            .then(async (tx: any) => {
-                this.input.proposal = 0;
-                this.loading = false;
-
-                (this.$refs.modalCreateRulePoll as BModal).hide();
-
-                // TODO Handle catching the RulePollCreated event in this tx.
-                // Store it in the firebase db
-                console.log(tx);
-                debugger;
-            })
-            .catch((err: string) => {
-                this.loading = false;
-                // eslint-disable-next-line
-                console.error(err);
-            });
-    }
 }

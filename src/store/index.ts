@@ -51,14 +51,14 @@ const getters = {
 };
 
 const mutations = {
-    updateBalance: (state: any, options: { type: string, balance: BN }) => {
-        state.balance[options.type] = options.balance;
+    updateBalance: (s: any, options: { type: string, balance: BN }) => {
+        s.balance[options.type] = options.balance;
     },
-    addRewardPool: (state: any, pool: RewardPool) => {
-        Vue.set(state.rewardPools, pool.address, pool);
+    addRewardPool: (s: any, pool: RewardPool) => {
+        Vue.set(s.rewardPools, pool.address, pool);
     },
-    removeRewardPool: (state: any, address: string) => {
-        Vue.delete(state.rewardPools, address);
+    removeRewardPool: (s: any, address: string) => {
+        Vue.delete(s.rewardPools, address);
     },
 };
 

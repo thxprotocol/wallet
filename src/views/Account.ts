@@ -11,7 +11,7 @@ import { Network } from '../models/Network';
 import StateService from '@/services/StateService';
 import BN from 'bn.js';
 
-const tokenMultiplier = new BN(10).pow(new BN(18));
+const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 @Component({
     name: 'AccountDetail',
@@ -165,7 +165,7 @@ export default class AccountDetail extends Vue {
     }
 
     public onTransferRinkebyCoin() {
-        const amount = new BN(this.input.transferRinkebyCoinAmount).mul(tokenMultiplier);
+        const amount = new BN(this.input.transferRinkebyCoinAmount).mul(TOKEN_MULTIPLIER);
 
         this.loading = true;
 
@@ -179,7 +179,7 @@ export default class AccountDetail extends Vue {
     }
 
     public onTransferExtdevCoin() {
-        const amount = new BN(this.input.transferTokens).mul(tokenMultiplier);
+        const amount = new BN(this.input.transferTokens).mul(TOKEN_MULTIPLIER);
 
         this.loading = true;
 
@@ -194,7 +194,7 @@ export default class AccountDetail extends Vue {
 
 
     public onTransferEther() {
-        const amount = new BN(this.input.transferEtherAmount).mul(tokenMultiplier);
+        const amount = new BN(this.input.transferEtherAmount).mul(TOKEN_MULTIPLIER);
 
         this.loading = true;
 
@@ -208,7 +208,7 @@ export default class AccountDetail extends Vue {
     }
 
     public onMintRinkebyCoin() {
-        const amount = new BN(this.input.mintForAccount).mul(tokenMultiplier);
+        const amount = new BN(this.input.mintForAccount).mul(TOKEN_MULTIPLIER);
 
         this.loading = true;
 
@@ -224,7 +224,7 @@ export default class AccountDetail extends Vue {
     }
 
     public onMintExtdevCoin() {
-        const amount = new BN(this.input.mintForLoomAccount).mul(tokenMultiplier);
+        const amount = new BN(this.input.mintForLoomAccount).mul(TOKEN_MULTIPLIER);
 
         this.loading = true;
 

@@ -48,7 +48,7 @@ export default class Register extends Vue {
                 this.$router.replace('/account');
             })
             .catch((err: string) => {
-                if (typeof err != 'undefined') {
+                if (typeof err !== 'undefined') {
                     alert(`Error: ${err}`);
                 }
                 this.loading = false;

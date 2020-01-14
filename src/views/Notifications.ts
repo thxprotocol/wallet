@@ -5,10 +5,9 @@ import ProfilePicture from '../components/ProfilePicture';
 import { BSpinner, BCard, BCardText, BProgress, BProgressBar } from 'bootstrap-vue';
 import { Account } from '@/models/Account';
 import { Network } from '@/models/Network';
+import REWARD_JSON from '../contracts/Reward.json';
 
-const RewardPool = require('../contracts/RewardPool.json');
-const Reward = require('../contracts/Reward.json');
-const RewardState = ['Pending', 'Approved', 'Rejected', 'Withdrawn'];
+const REWARD_STATE = ['Pending', 'Approved', 'Rejected', 'Withdrawn'];
 
 @Component({
     name: 'home',
@@ -61,59 +60,59 @@ export default class Notifications extends Vue {
     }
 
     public async formatReward(contract: any, pool: any) {
-        const token = await this.$network.getExtdevCoinContract(
-            this.$network.web3js,
-        );
-        const utils = this.$network.web3js.utils;
-        const address = this.$network.extdev.account.address;
-
-        const id = parseInt(await contract.methods.id().call());
-        const slug = await contract.methods.slug().call();
-        const dateTime = parseInt(await contract.methods.created().call());
-        const amount = utils.fromWei(await contract.methods.amount().call(), 'ether');
-        const state = RewardState[await contract.methods.state().call()];
-        const beneficiary = (await contract.methods.beneficiary().call()).toLowerCase();
-
-        const wallet = await firebase.database().ref('wallets').child(beneficiary).once('value');
-        const user = await firebase.database().ref(`users/${wallet.val().uid}`).once('value');
-
-        const rule = await firebase.database().ref(`pools/${pool._address}/rules/${slug}`).once('value');
-        const totalVoted = await contract.methods.totalVoted().call();
-        const yesCounter = await contract.methods.yesCounter().call();
-        const noCounter = await contract.methods.noCounter().call();
-        const startTime = await contract.methods.startTime().call();
-        const endTime = await contract.methods.endTime().call();
-        const now = (await this.$network.web3js.eth.getBlock('latest')).timestamp;
-        const diff = (endTime - now);
-
-        const vote = await contract.methods.votesByAddress(address).call();
-        const poolName = await pool.methods.name().call();
-        const balance = await token.methods.balanceOf(pool._address).call();
-
-        return {
-            id,
-            pool: {
-                address: pool._address,
-                name: poolName,
-                balance: utils.fromWei(balance, 'ether'),
-            },
-            user: user.val(),
-            rule: rule.val(),
-            slug,
-            amount,
-            state,
-            created: dateTime,
-            poll: {
-                now: parseInt(now),
-                diff,
-                totalVoted,
-                startTime: parseInt(startTime),
-                endTime: parseInt(endTime),
-                hasVoted: (parseInt(vote.time) > 0),
-                yesCounter: parseInt(utils.fromWei(yesCounter, 'ether')),
-                noCounter: parseInt(utils.fromWei(noCounter, 'ether')),
-            },
-        };
+        // const token = await this.$network.getExtdevCoinContract(
+        //     this.$network.web3js,
+        // );
+        // const utils = this.$network.web3js.utils;
+        // const address = this.$network.extdev.account.address;
+        //
+        // const id = parseInt(await contract.methods.id().call());
+        // const slug = await contract.methods.slug().call();
+        // const dateTime = parseInt(await contract.methods.created().call());
+        // const amount = utils.fromWei(await contract.methods.amount().call(), 'ether');
+        // const state = RewardState[await contract.methods.state().call()];
+        // const beneficiary = (await contract.methods.beneficiary().call()).toLowerCase();
+        //
+        // const wallet = await firebase.database().ref('wallets').child(beneficiary).once('value');
+        // const user = await firebase.database().ref(`users/${wallet.val().uid}`).once('value');
+        //
+        // const rule = await firebase.database().ref(`pools/${pool._address}/rules/${slug}`).once('value');
+        // const totalVoted = await contract.methods.totalVoted().call();
+        // const yesCounter = await contract.methods.yesCounter().call();
+        // const noCounter = await contract.methods.noCounter().call();
+        // const startTime = await contract.methods.startTime().call();
+        // const endTime = await contract.methods.endTime().call();
+        // const now = (await this.$network.web3js.eth.getBlock('latest')).timestamp;
+        // const diff = (endTime - now);
+        //
+        // const vote = await contract.methods.votesByAddress(address).call();
+        // const poolName = await pool.methods.name().call();
+        // const balance = await token.methods.balanceOf(pool._address).call();
+        //
+        // return {
+        //     id,
+        //     pool: {
+        //         address: pool._address,
+        //         name: poolName,
+        //         balance: utils.fromWei(balance, 'ether'),
+        //     },
+        //     user: user.val(),
+        //     rule: rule.val(),
+        //     slug,
+        //     amount,
+        //     state,
+        //     created: dateTime,
+        //     poll: {
+        //         now: parseInt(now),
+        //         diff,
+        //         totalVoted,
+        //         startTime: parseInt(startTime),
+        //         endTime: parseInt(endTime),
+        //         hasVoted: (parseInt(vote.time) > 0),
+        //         yesCounter: parseInt(utils.fromWei(yesCounter, 'ether')),
+        //         noCounter: parseInt(utils.fromWei(noCounter, 'ether')),
+        //     },
+        // };
     }
 
     public async finalizePoll(id: number, poolAddress: string) {

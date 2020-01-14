@@ -3,7 +3,7 @@ import { BListGroupItem } from 'bootstrap-vue';
 import BN from 'bn.js';
 import { WithdrawelEvent, RewardPool } from '@/models/RewardPool';
 
-const tokenMultiplier = new BN(10).pow(new BN(18));
+const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 @Component({
     name: 'deposit',
@@ -18,6 +18,6 @@ export default class Deposit extends Vue {
     private amount!: string;
 
     public created() {
-        this.amount = new BN(this.ev.amount).div(tokenMultiplier).toString();
+        this.amount = new BN(this.ev.amount).div(TOKEN_MULTIPLIER).toString();
     }
 }

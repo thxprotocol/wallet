@@ -31,6 +31,10 @@
 
                         <b-tab title="Rules">
 
+                            <div class="text-center" v-if="loading">
+                                <b-spinner label="Loading..."></b-spinner>
+                            </div>
+                            
                             <rule v-for="(rule, key) in rules"
                                 :key="key"
                                 :rule="rule"

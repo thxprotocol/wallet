@@ -5,19 +5,22 @@ import { RewardRule } from '@/models/RewardRule';
 import PoolService from '@/services/PoolService';
 
 @Component({
-    name: 'RuleStateChanged',
+    name: 'RulePollCreated',
     components: {
         'b-list-group-item': BListGroupItem,
     },
 })
-export default class RuleStateChanged extends Vue {
-    private rule: RewardRule | null = null;
-    private poolService: PoolService = new PoolService();
+export default class RuleStRulePollCreatedateChanged extends Vue {
 
     @Prop() public ev!: RuleStateChangedEvent;
     @Prop() public pool!: RewardPool;
+    private rule: RewardRule | null = null;
+    private poolService: PoolService = new PoolService();
 
     public async created() {
+        console.log(this.ev);
+        console.log(this.pool);
+
         this.rule = await this.poolService.getRewardRule(this.ev.rule, this.pool);
     }
 }

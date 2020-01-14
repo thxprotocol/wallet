@@ -6,6 +6,7 @@ import Reward from '../components/Reward.vue';
 import CDepositEvent from '@/components/events/DepositEvent.vue';
 import CWithdrawelEvent from '@/components/events/WithdrawelEvent.vue';
 import CRuleStateChanged from '@/components/events/RuleStateChangedEvent.vue';
+import CRulePollCreated from '@/components/events/RulePollCreatedEvent.vue';
 import { Network } from '@/models/Network';
 import { RewardPool, DepositEvent, WithdrawelEvent } from '@/models/RewardPool';
 import PoolService from '@/services/PoolService';
@@ -13,15 +14,16 @@ import CoinService from '@/services/CoinService';
 import EventService from '@/services/EventService';
 import BN from 'bn.js';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
+import _ from 'lodash';
 
-const _ = require('lodash');
-const tokenMultiplier = new BN(10).pow(new BN(18));
+const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 @Component({
     name: 'PoolDetail',
     components: {
         'rule': Rule,
         'reward': Reward,
+        'rulepollcreated-event': CRulePollCreated,
         'rulestatechanged-event': CRuleStateChanged,
         'withdrawel-event': CWithdrawelEvent,
         'deposit-event': CDepositEvent,
@@ -42,7 +44,7 @@ export default class PoolDetail extends Vue {
     get stream() {
         return _.orderBy(this.events, 'created').reverse();
     }
-    public eventService: EventService = new EventService;
+    public eventService: EventService = new EventService();
     public error: string = '';
     public loading: boolean = false;
     public poolService!: PoolService;
@@ -142,7 +144,7 @@ export default class PoolDetail extends Vue {
 
         if (this.pool) {
             this.poolService.addDeposit(
-                new BN(this.input.poolDeposit).mul(tokenMultiplier),
+                new BN(this.input.poolDeposit).mul(TOKEN_MULTIPLIER),
                 this.pool,
             )
                 .then(() => {
@@ -212,10 +214,7 @@ export default class PoolDetail extends Vue {
 
 
     public onRulePollCreated(data: any) {
-        // this.stream.push({
-        //     timestamp: parseInt(timestamp, 10),
-        //     title: `Rule #${data.id} poll: ${new BN(data.proposedAmount).div(tokenMultiplier)} THX`,
-        // });
+        console.log(data);
     }
 
     // public onRulePollFinished(data: any, timestamp: string) {
@@ -227,10 +226,7 @@ export default class PoolDetail extends Vue {
     // }
     //
     public onRuleStateChanged(data: any) {
-        // this.stream.push({
-        //     timestamp: parseInt(timestamp),
-        //     title: `Rule #${data.id} set to ${RuleState[data.state]}`,
-        // });
+        console.log(data);
     }
 
     private async updateBalance() {

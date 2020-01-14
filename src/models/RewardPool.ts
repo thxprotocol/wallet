@@ -1,7 +1,7 @@
 import EventService from '@/services/EventService';
 import BN from 'bn.js';
 
-const RuleState = ['Active', 'Disabled'];
+const RULE_STATE = ['Active', 'Disabled'];
 
 export class TransactionEvent {
     public amount: string;
@@ -51,7 +51,7 @@ export class RuleStateChangedEvent extends TransactionEvent {
     constructor(data: any, blockTime: string) {
         super(data);
         this.rule = parseInt(data.id, 10);
-        this.state = RuleState[parseInt(data.state, 10)];
+        this.state = RULE_STATE[parseInt(data.state, 10)];
         this.blockTime = parseInt(blockTime, 10);
         this.variant = 'success';
         this.component = 'rulestatechanged-event';
@@ -65,17 +65,17 @@ export class RulePollCreatedEvent extends TransactionEvent {
     constructor(data: any, blockTime: string) {
         super(data);
         this.rule = parseInt(data.id, 10);
-        this.proposal = RuleState[parseInt(data.proposedAmount, 10)];
+        this.proposal = RULE_STATE[parseInt(data.proposedAmount, 10)];
         this.blockTime = parseInt(blockTime, 10);
         this.variant = 'success';
-        this.component = 'rulestatechanged-event';
+        this.component = 'rulepollcreated-event';
     }
 }
 
 export class RewardPool {
     public address: string = '';
     public name: string = '';
-    public balance: number = 0;
+    public balance: BN = new BN(0);
     public outOfSync: boolean = true;
     public contract: any;
     public eventTypes: string[] = [
@@ -90,7 +90,7 @@ export class RewardPool {
         'Withdrawn',
     ];
     private owner: string = '';
-    private eventService: EventService = new EventService;
+    private eventService: EventService = new EventService();
 
     constructor(
         address: string,
@@ -114,7 +114,7 @@ export class RewardPool {
         }
     }
 
-    public setBalance(amount: number) {
+    public setBalance(amount: BN) {
         this.balance = amount;
     }
 

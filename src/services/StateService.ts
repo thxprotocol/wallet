@@ -19,7 +19,9 @@ export default class StateService extends Vue {
             const rows = JSON.parse(state);
 
             for (const row in rows) {
-                (this as any)[row] = rows[row];
+                if ((this as any)[row]) {
+                    (this as any)[row] = rows[row];
+                }
             }
         }
 

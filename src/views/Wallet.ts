@@ -34,7 +34,9 @@ export default class Wallet extends Vue {
     get sortedTransactions() {
         const arr: any[] = [];
         for (const i in this.transactions) {
-            arr.unshift(this.transactions[i]);
+            if (this.transactions[i]) {
+                arr.unshift(this.transactions[i]);
+            }
         }
 
         return arr.reverse();
@@ -43,24 +45,25 @@ export default class Wallet extends Vue {
     public async created() {
         this.coinService = new CoinService();
         this.poolService = new PoolService();
-        // Start listening for Deposited and Withdrawn events
-        // this.poolService.init();
+
         this.loading = true;
 
         try {
             const pools = await this.poolService.getMyRewardPools();
 
             for (const address in pools) {
-                const deposits = await pools[address].depositsOf(this.$network.extdev.account);
-                const withdrawels = await pools[address].withdrawelsOf(this.$network.extdev.account);
+                if (pools[address]) {
+                    const deposits = await pools[address].depositsOf(this.$network.extdev.account);
+                    const withdrawels = await pools[address].withdrawelsOf(this.$network.extdev.account);
 
-                deposits.map((d: DepositEvent) => {
-                    this.transactions.push(d);
-                });
+                    deposits.map((d: DepositEvent) => {
+                        this.transactions.push(d);
+                    });
 
-                withdrawels.map((w: WithdrawelEvent) => {
-                    this.transactions.push(w);
-                });
+                    withdrawels.map((w: WithdrawelEvent) => {
+                        this.transactions.push(w);
+                    });
+                }
             }
 
             this.loading = false;
