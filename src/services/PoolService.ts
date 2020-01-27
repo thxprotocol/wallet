@@ -1,9 +1,17 @@
+import axios from 'axios';
 import firebase from 'firebase/app';
 import 'firebase/database';
 import { Vue } from 'vue-property-decorator';
 import { Network } from '@/models/Network';
 import { Account } from '@/models/Account';
-import { RewardPool, DepositEvent, WithdrawelEvent, RuleStateChangedEvent, RulePollCreatedEvent } from '@/models/RewardPool';
+import {
+    RewardPool,
+    DepositEvent,
+    WithdrawelEvent,
+    RuleStateChangedEvent,
+    RulePollCreatedEvent,
+    RulePollFinishedEvent,
+} from '@/models/RewardPool';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import store from '../store';
 import REWARD_POOL_JSON from '@/contracts/RewardPool.json';
@@ -19,36 +27,16 @@ export default class PoolService extends Vue {
     public subscribeRewardPools() {
         firebase.database().ref(`users/${this.$account.uid}/pools`)
             .on('child_added', async (s: any) => {
-                this.getRewardPool(s.key)
-                    .then((pool: RewardPool) => {
-                        this.$store.commit('addRewardPool', pool);
-                    });
+                const pool = await this.getRewardPool(s.key);
+
+                this.$store.commit('addRewardPool', pool);
             });
 
         firebase.database().ref(`users/${this.$account.uid}/pools`)
-            .on('child_removed', (s: any) => {
-                this.getRewardPool(s.key)
-                    .then((pool: RewardPool) => {
-                        this.$store.commit('removeRewardPool', pool);
-                    });
-            });
-    }
+            .on('child_removed', async (s: any) => {
+                const pool = await this.getRewardPool(s.key);
 
-    public subscribeRewardPoolEvents() {
-        firebase.database().ref(`users/${this.$account.uid}/pools`)
-            .on('child_added', async (s: any) => {
-                this.getRewardPool(s.key)
-                    .then((pool: RewardPool) => {
-                        this.$store.commit('addRewardPool', pool);
-                    });
-            });
-
-        firebase.database().ref(`users/${this.$account.uid}/pools`)
-            .on('child_removed', (s: any) => {
-                this.getRewardPool(s.key)
-                    .then((pool: RewardPool) => {
-                        this.$store.commit('removeRewardPool', pool);
-                    });
+                this.$store.commit('removeRewardPool', pool);
             });
     }
 
@@ -127,7 +115,7 @@ export default class PoolService extends Vue {
                     }
                 }
             } else {
-                await firebase.database().ref(`pools/${pool.address}/events`).remove();
+                await firebase.database().ref(`pools/${pool.address}/events/${key}`).remove();
             }
         }
 
@@ -141,10 +129,6 @@ export default class PoolService extends Vue {
         for (let i = 0; i < length; i++) {
             const rule = await this.getRewardRule(i, pool);
 
-            if (rule.pollAddress !== '0x0000000000000000000000000000000000000000') {
-                rule.poll = await this.getRewardRulePoll(rule);
-            }
-
             rules.push(rule);
         }
         return rules;
@@ -152,12 +136,15 @@ export default class PoolService extends Vue {
 
     public async getRewardRulePoll(rule: RewardRule) {
         const contract = await this.getRewardRulePollContract(rule.pollAddress);
-
-        return new RewardRulePoll(
+        const poll = new RewardRulePoll(
             rule.pollAddress,
             contract,
             this.$network.extdev.account,
         );
+
+        await poll.update();
+
+        return poll;
     }
 
     public async addMember(address: string, pool: RewardPool) {
@@ -228,7 +215,7 @@ export default class PoolService extends Vue {
         }
     }
 
-    public async tryToFinalize(rule: RewardRule, pool: RewardPool) {
+    public async tryToFinalize(poll: RewardRulePoll, pool: RewardPool) {
         const snap = await firebase.database().ref(`pools/${pool.address}/events`)
             .push();
 
@@ -238,18 +225,14 @@ export default class PoolService extends Vue {
                     success: 0,
                 });
 
-            // START This part should be a callback in a more abstract method perhaps
-            const tx = await rule.poll.contract.methods.tryToFinalize()
+            const tx = await poll.contract.methods.tryToFinalize()
                 .send({ from: this.$network.extdev.account });
 
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
+            return await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
                 .update({
                     hash: tx.transactionHash,
                     success: 1,
                 });
-
-            return await this.getRewardRulePoll(rule);
-            // END
 
         } catch (err) {
             await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
@@ -269,7 +252,7 @@ export default class PoolService extends Vue {
                     success: 0,
                 });
 
-            const tx = await rule.poll.contract.methods.voteForRule(
+            const tx = await pool.contract.methods.voteForRule(
                     rule.id,
                     agree,
                 )
@@ -281,7 +264,7 @@ export default class PoolService extends Vue {
                     success: 1,
                 });
 
-            return await this.getRewardRulePoll(rule);
+            return await this.getRewardRule(rule.id, pool);
 
         } catch (err) {
             await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
@@ -291,7 +274,7 @@ export default class PoolService extends Vue {
         }
     }
 
-    public async addRewardRulePoll(rule: any, pool: RewardPool, proposal: BN) {
+    public async addRewardRulePoll(rule: any, pool: RewardPool, proposedAmount: BN) {
         const snap = await firebase.database().ref(`pools/${pool.address}/events`)
             .push();
 
@@ -303,15 +286,17 @@ export default class PoolService extends Vue {
 
             const tx = await pool.contract.methods.startRulePoll(
                     rule.id,
-                    proposal.toString(),
+                    proposedAmount.toString(),
                 )
                 .send({ from: this.$network.extdev.account });
 
-            return await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
+            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
                 .update({
                     hash: tx.transactionHash,
                     success: 1,
                 });
+
+            return tx;
 
         } catch (err) {
             await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
@@ -323,13 +308,13 @@ export default class PoolService extends Vue {
 
     private getEventModel(type: string, data: any, hash: string) {
         if (type === 'Deposited') {
-            const deposit = new DepositEvent(data.logs);
+            const deposit = new DepositEvent(data.logs, data.blockTime);
             deposit.hash = hash;
 
             return deposit;
         }
         if (type === 'Withdrawn') {
-            const withdrawel = new WithdrawelEvent(data.logs);
+            const withdrawel = new WithdrawelEvent(data.logs, data.blockTime);
             withdrawel.hash = hash;
 
             return withdrawel;
@@ -345,6 +330,12 @@ export default class PoolService extends Vue {
             rulePollCreated.hash = hash;
 
             return rulePollCreated;
+        }
+        if (type === 'RulePollFinished') {
+            const rulePollFinished = new RulePollFinishedEvent(data.logs, data.blockTime);
+            rulePollFinished.hash = hash;
+
+            return rulePollFinished;
         }
     }
 

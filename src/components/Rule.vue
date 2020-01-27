@@ -43,20 +43,22 @@
 
         <!-- Make this a component -->
         <b-modal ref="modalRulePoll" centered title="Running Rule Proposal">
-            <div v-if="loading" class="text-center">
+
+            <div class="alert alert-danger" v-if="error">
+                {{error}}
+            </div>
+
+            <div v-if="poll && poll.loading" class="text-center">
                 <b-spinner label="Loading..."></b-spinner>
             </div>
-            <div v-if="!loading">
 
-                <div class="alert alert-danger" v-if="error">
-                    {{error}}
-                </div>
+            <div v-if="poll && !poll.loading">
 
-                <div v-if="rule.poll">
+                <div>
                     <h3>{{rule.title}}</h3>
                     <p><i>{{rule.description}}</i></p>
                     <p>
-                        Proposal: <del><strong>{{rule.amount}} THX</strong></del> > <strong>{{rule.poll.proposedAmount}} THX</strong>
+                        Proposal: <del><strong>{{rule.amount}} THX</strong></del> > <strong>{{poll.proposedAmount}} THX</strong>
                     </p>
                     <hr class="dotted">
                     <h3>Poll period:</h3>
@@ -64,31 +66,31 @@
                         <div class="col-12">
                             <b-progress
                                 variant="info"
-                                :value="((now - rule.poll.startTime) / (rule.poll.endTime - rule.poll.startTime)) * 100"
+                                :value="((now - poll.startTime) / (poll.endTime - poll.startTime)) * 100"
                                 :max="100"
                             ></b-progress>
                         </div>
                         <div class="col-6">
-                            {{rule.poll.startTime | moment("MMMM Do YYYY HH:mm") }}
+                            {{poll.startTime | moment("MMMM Do YYYY HH:mm") }}
                         </div>
                         <div class="col-6 text-right">
-                            {{rule.poll.endTime | moment("MMMM Do YYYY HH:mm") }}
+                            {{poll.endTime | moment("MMMM Do YYYY HH:mm") }}
                         </div>
                     </div>
                     <hr class="dotted">
-                    <h3>Votes ({{rule.poll.totalVoted}})</h3>
+                    <h3>Votes ({{poll.totalVoted}})</h3>
                     <div class="row">
                         <div class="col-12">
-                            <b-progress show-progress :max="(rule.poll.yesCounter + rule.poll.noCounter)">
-                                <b-progress-bar variant="success" :value="rule.poll.yesCounter"></b-progress-bar>
-                                <b-progress-bar variant="danger" :value="rule.poll.noCounter"></b-progress-bar>
+                            <b-progress show-progress :max="(poll.yesCounter + poll.noCounter)">
+                                <b-progress-bar variant="success" :value="poll.yesCounter"></b-progress-bar>
+                                <b-progress-bar variant="danger" :value="poll.noCounter"></b-progress-bar>
                             </b-progress>
                         </div>
                         <div class="col-6">
-                            {{rule.poll.yesCounter}}
+                            {{poll.yesCounter}}
                         </div>
                         <div class="col-6 text-right">
-                            {{rule.poll.noCounter}}
+                            {{poll.noCounter}}
                         </div>
                     </div>
                 </div>
@@ -96,33 +98,26 @@
                     <strong>You are not a member of this pool and can not join the poll.</strong>
                 </div>
             </div>
-            <p v-if="rule.poll">
-                isMember: {{isMember}}<br>
-                now: {{now}}<br>
-                endTime: {{rule.poll.endTime}}<br>
-                startTime: {{rule.poll.startTime}}<br>
-                hasVoted: {{rule.poll.hasVoted}}<br>
-            </p>
 
-            <template v-slot:modal-footer="{ ok, cancel }" v-if="rule.poll && isMember">
-                <div class="row" v-if="now > rule.poll.endTime">
-                    <div class="col-12">
-                        <button @click="tryToFinalize()" :class="{ disabled: loading }" class="btn btn-primary btn-block">Finalize Poll</button>
-                    </div>
-                </div>
-                <div class="row" v-if="!rule.poll.hasVoted && now < rule.poll.endTime">
-                    <div class="col-6">
-                        <button :class="{ disabled: loading }" class="btn btn-primary btn-block" @click="vote(true)">Approve</button>
-                    </div>
-                    <div class="col-6">
-                        <button :class="{ disabled: loading }" class="btn btn-primary btn-block" @click="vote(false)">Reject</button>
-                    </div>
-                </div>
-                <div class="row" v-if="rule.poll.hasVoted && now < rule.poll.endTime">
-                    <div class="col-12">
-                        <button :class="{ disabled: loading }" class="btn btn-primary btn-block" @click="revokeVote()">Revoke</button>
-                    </div>
-                </div>
+            <template v-slot:modal-footer="{ ok, cancel }" v-if="poll && !poll.loading && isMember">
+                <template v-if="now > poll.endTime">
+                    <button @click="tryToFinalize()" :class="{ disabled: loading }" class="btn btn-primary">
+                        Finalize Poll
+                    </button>
+                </template>
+                <template v-if="!poll.hasVoted && now < poll.endTime">
+                    <button @click="vote(true)" :class="{ disabled: loading }" class="btn btn-primary">
+                        Approve
+                    </button>
+                    <button @click="vote(false)" :class="{ disabled: loading }" class="btn btn-primary">
+                        Reject
+                    </button>
+                </template>
+                <template v-if="poll.hasVoted && now < poll.endTime">
+                    <button @click="revokeVote()" :class="{ disabled: loading }" class="btn btn-primary">
+                        Revoke
+                    </button>
+                </template>
             </template>
         </b-modal>
 

@@ -8,10 +8,14 @@
 
             <div class="row">
                 <div class="col-12">
+
+                    <router-view></router-view>
+
                     <b-tabs content-class="mt-4" justified>
                         <div class="alert alert-danger" v-if="error">
                             {{error}}
                         </div>
+
                         <b-tab title="Stream" active>
 
                             <div class="text-center" v-if="loading">
@@ -24,7 +28,7 @@
                                     :key="key"
                                     :ev="ev"
                                     :pool="pool"
-                                    :is="ev.component"  />
+                                    :is="ev.component" />
                             </b-list-group>
 
                         </b-tab>
@@ -34,13 +38,13 @@
                             <div class="text-center" v-if="loading">
                                 <b-spinner label="Loading..."></b-spinner>
                             </div>
-                            
+
                             <rule v-for="(rule, key) in rules"
                                 :key="key"
                                 :rule="rule"
                                 :pool="pool"
                                 :isManager="isManager"
-                                :isMember="isMember"></rule>
+                                :isMember="isMember" />
 
                             <div class="d-flex w-100 justify-content-end">
                                 <button v-if="isManager" class="btn btn-primary" @click="$refs.modalCreateRule.show()">Add new rule</button>
@@ -110,21 +114,6 @@
                     </button>
                     <button @click="addMember()" v-bind:class="{ disabled: loading }" class="btn btn-primary">
                         Add Member
-                    </button>
-                </template>
-            </b-modal>
-
-            <b-modal ref="modalAddManager" centered title="Add a manager to the reward pool">
-                <input v-if="!loading" v-model="input.addManager" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
-                <p v-if="loading" class="d-flex w-100 justify-content-center">
-                    <b-spinner></b-spinner>
-                </p>
-                <template v-slot:modal-footer="{ ok, cancel }">
-                    <button class="btn btn-link" @click="$refs.modalAddManager.hide()">
-                        Cancel
-                    </button>
-                    <button @click="addManager()" v-bind:class="{ disabled: loading }" class="btn btn-primary">
-                        Add Manager
                     </button>
                 </template>
             </b-modal>

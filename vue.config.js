@@ -1,11 +1,11 @@
 const webpack = require('webpack');
 
 module.exports = {
-    publicPath: process.env.NODE_ENV === 'production' ? '/wallet/' : '/',
+    publicPath: '/',
     devServer: {
         https: true
     },
-    outputDir: "./dist/wallet/",
+    outputDir: "./dist/",
     configureWebpack: {
         plugins: [
             new webpack.DefinePlugin({

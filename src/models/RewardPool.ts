@@ -2,44 +2,40 @@ import EventService from '@/services/EventService';
 import BN from 'bn.js';
 
 const RULE_STATE = ['Active', 'Disabled'];
+const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export class TransactionEvent {
-    public amount: string;
-    public created: number;
     public hash: string;
-    public variant: string;
     public component: string;
     public blockTime: number;
 
-    constructor(data: any) {
+    constructor(data: any, blockTime: string) {
         this.hash = data.hash;
-        this.amount = data.amount;
-        this.created = parseInt(data.created, 10);
-        this.variant = 'info';
         this.component = '';
-        this.blockTime = 0;
+        this.blockTime = parseInt(blockTime, 10);
     }
 }
 
 export class DepositEvent extends TransactionEvent {
     public sender: string;
-    public component: string;
+    public amount: string;
 
-    constructor(data: any) {
-        super(data);
+    constructor(data: any, blockTime: string) {
+        super(data, blockTime);
+        this.amount = data.amount;
         this.sender = data.sender;
-        this.variant = 'danger';
         this.component = 'deposit-event';
     }
 }
 
 export class WithdrawelEvent extends TransactionEvent {
     public receiver: string;
+    public amount: string;
 
-    constructor(data: any) {
-        super(data);
+    constructor(data: any, blockTime: string) {
+        super(data, blockTime);
+        this.amount = data.amount;
         this.receiver = data.receiver;
-        this.variant = 'success';
         this.component = 'withdrawel-event';
     }
 }
@@ -49,26 +45,36 @@ export class RuleStateChangedEvent extends TransactionEvent {
     public state: string;
 
     constructor(data: any, blockTime: string) {
-        super(data);
+        super(data, blockTime);
         this.rule = parseInt(data.id, 10);
         this.state = RULE_STATE[parseInt(data.state, 10)];
-        this.blockTime = parseInt(blockTime, 10);
-        this.variant = 'success';
         this.component = 'rulestatechanged-event';
     }
 }
 
 export class RulePollCreatedEvent extends TransactionEvent {
     public rule: number;
-    public proposal: string;
+    public proposedAmount: BN;
 
     constructor(data: any, blockTime: string) {
-        super(data);
+        super(data, blockTime);
         this.rule = parseInt(data.id, 10);
-        this.proposal = RULE_STATE[parseInt(data.proposedAmount, 10)];
+        this.proposedAmount = new BN(data.proposedAmount).div(TOKEN_MULTIPLIER);
         this.blockTime = parseInt(blockTime, 10);
-        this.variant = 'success';
         this.component = 'rulepollcreated-event';
+    }
+}
+
+export class RulePollFinishedEvent extends TransactionEvent {
+    public rule: number;
+    public approved: boolean;
+
+    constructor(data: any, blockTime: string) {
+        super(data, blockTime);
+        this.rule = parseInt(data.id, 10);
+        this.approved = data.approved;
+        this.blockTime = parseInt(blockTime, 10);
+        this.component = 'rulepollfinished-event';
     }
 }
 
@@ -79,15 +85,15 @@ export class RewardPool {
     public outOfSync: boolean = true;
     public contract: any;
     public eventTypes: string[] = [
-        'Deposited',
+        'Deposited', //
         'ManagerAdded',
         'ManagerRemoved',
         'MemberAdded',
         'MemberRemoved',
-        'RulePollCreated',
-        'RulePollFinished',
-        'RuleStateChanged',
-        'Withdrawn',
+        'RulePollCreated', //
+        'RulePollFinished', //
+        'RuleStateChanged', //
+        'Withdrawn', //
     ];
     private owner: string = '';
     private eventService: EventService = new EventService();
@@ -167,7 +173,8 @@ export class RewardPool {
                 .call({
                     from: this.owner,
                 });
-            deposits.push(new DepositEvent(d));
+            // TODO Should not be of event type
+            deposits.push(new DepositEvent(d, '0'));
         }
 
         return deposits;
@@ -184,19 +191,12 @@ export class RewardPool {
                 .call({
                     from: this.owner,
                 });
-            withdrawels.push(new WithdrawelEvent(w));
+            // TODO Should not be of event type
+            withdrawels.push(new WithdrawelEvent(w, '0'));
         }
 
         return withdrawels;
     }
-
-    public async startRulePoll(id: number, amount: BN) {
-        return await this.contract.methods.startRulePoll(id, amount.toString())
-            .send({
-                from: this.owner,
-            });
-    }
-
 }
 
 export interface IRewardPools {

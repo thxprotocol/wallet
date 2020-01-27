@@ -1,15 +1,22 @@
+import BN from 'bn.js';
+
 const RULE_STATE = ['Active', 'Disabled'];
+const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export class RewardRulePoll {
     public address: string;
     public contract: any;
     public owner: string;
 
-    public proposedAmount!: number;
+    public proposedAmount!: BN;
     public startTime!: number;
     public endTime!: number;
     public yesCounter!: number;
     public noCounter!: number;
+    public hasVoted!: boolean;
+    public totalVoted!: number;
+    public vote!: Vote;
+    public loading: boolean = true;
 
     constructor(
         address: string,
@@ -19,36 +26,41 @@ export class RewardRulePoll {
         this.address = address;
         this.contract = contract;
         this.owner = owner;
+    }
 
-        this.contract.methods.startTime()
-            .call({ from: owner })
-            .then((r: string) => {
-                this.startTime = parseInt(r, 10);
-            });
+    public async update() {
+        this.loading = true;
 
-        this.contract.methods.endTime()
-            .call({ from: owner })
-            .then((r: string) => {
-                this.endTime = parseInt(r, 10);
-            });
+        const startTime = await this.contract.methods.startTime().call({ from: this.owner });
+        const endTime = await this.contract.methods.endTime().call({ from: this.owner });
+        const proposedAmount = await this.contract.methods.proposedAmount().call({ from: this.owner });
+        const yesCounter = await this.contract.methods.yesCounter().call({ from: this.owner });
+        const noCounter = await this.contract.methods.noCounter().call({ from: this.owner });
+        const totalVoted = await this.contract.methods.totalVoted().call({ from: this.owner });
+        const voteByAddress = await this.contract.methods.votesByAddress(this.owner).call({ from: this.owner });
 
-        this.contract.methods.yesCounter()
-            .call({ from: owner })
-            .then((r: string) => {
-                this.yesCounter = parseInt(r, 10);
-            });
+        this.startTime = parseInt(startTime, 10);
+        this.endTime = parseInt(endTime, 10);
+        this.proposedAmount = new BN(proposedAmount).div(TOKEN_MULTIPLIER);
+        this.yesCounter = parseInt(yesCounter, 10);
+        this.noCounter = parseInt(noCounter, 10);
+        this.totalVoted = parseInt(totalVoted, 10);
+        this.vote = new Vote(voteByAddress);
+        this.hasVoted = (this.vote.time !== 0);
 
-        this.contract.methods.noCounter()
-            .call({ from: owner })
-            .then((r: string) => {
-                this.noCounter = parseInt(r, 10);
-            });
+        this.loading = false;
+    }
+}
 
-        this.contract.methods.proposedAmount()
-            .call({ from: owner })
-            .then((r: string) => {
-                this.proposedAmount = parseInt(r, 10);
-            });
+export class Vote {
+    public time!: number;
+    public weight!: number;
+    public agree!: boolean;
+
+    constructor(data: any) {
+        this.time = parseInt(data.time, 10);
+        this.weight = parseInt(data.weight, 10);
+        this.agree = data.agree;
     }
 }
 
@@ -56,8 +68,7 @@ export class RewardRule {
     public id: number;
     public state: string;
     public created: string;
-    public amount: number;
-    public poll!: RewardRulePoll;
+    public amount: BN;
     public pollAddress: string;
 
     public title: string = '';
@@ -68,7 +79,7 @@ export class RewardRule {
         this.state = RULE_STATE[parseInt(data.state, 10)];
         this.created = data.created;
         this.pollAddress = data.poll;
-        this.amount = data.amount;
+        this.amount = new BN(data.amount).div(TOKEN_MULTIPLIER);
 
         if (meta) {
             this.title = meta.title;

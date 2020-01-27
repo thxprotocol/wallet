@@ -28,6 +28,8 @@ export default class CRewardRule extends Vue {
             proposal: 0,
         },
     };
+    public poll: RewardRulePoll | null = null;
+
     private $network!: Network;
     private poolService: PoolService = new PoolService();
 
@@ -38,6 +40,10 @@ export default class CRewardRule extends Vue {
 
     public async created() {
         this.now = await this.$network.now();
+
+        if (this.rule.pollAddress !== '0x0000000000000000000000000000000000000000') {
+            this.poll = await this.poolService.getRewardRulePoll(this.rule);
+        }
     }
 
     public async startRulePoll() {
@@ -47,15 +53,20 @@ export default class CRewardRule extends Vue {
             this.pool,
             new BN(this.input.poll.proposal).mul(TOKEN_MULTIPLIER),
             )
-            .then(() => {
+            .then(async (tx: any) => {
                 this.input.proposal = 0;
                 this.loading = false;
+                this.poll = await this.poolService.getRewardRulePoll(this.rule);
 
-                (this.$refs.modalCreateRulePoll as BModal).hide();
+                debugger;
+
+                (this.$parent.$refs.modalCreateRulePoll as BModal).hide();
+
             })
             .catch((err: string) => {
-                this.loading = false;
                 console.error(err);
+                this.error = err;
+                this.loading = false;
             });
     }
 
@@ -66,11 +77,12 @@ export default class CRewardRule extends Vue {
             this.pool,
             agree,
             )
-            .then((poll: RewardRulePoll) => {
-                this.rule.poll = poll;
+            .then(async (tx: any) => {
+                this.poll = await this.poolService.getRewardRulePoll(this.rule);
                 this.loading = false;
             })
             .catch((err: string) => {
+                console.error(err);
                 this.error = err;
                 this.loading = false;
             });
@@ -79,20 +91,23 @@ export default class CRewardRule extends Vue {
     public async tryToFinalize() {
         this.loading = true;
 
-        this.poolService.tryToFinalize(
-            this.rule,
-            this.pool,
-            )
-            .then((poll: RewardRulePoll) => {
-                this.rule.poll = poll;
-                this.loading = false;
+        if (this.poll) {
+            this.poolService.tryToFinalize(
+                this.poll,
+                this.pool,
+                )
+                .then(async (tx: any) => {
+                    this.loading = false;
+                    this.poll = await this.poolService.getRewardRulePoll(this.rule);
 
-                (this.$refs.modalCreateRulePoll as BModal).hide();
-            })
-            .catch((err: string) => {
-                this.error = err;
-                this.loading = false;
-            });
+                    (this.$refs.modalRulePoll as BModal).hide();
+                })
+                .catch((err: string) => {
+                    console.error(err);
+                    this.error = err;
+                    this.loading = false;
+                });
+        }
     }
 
     // public async revokeVote() {

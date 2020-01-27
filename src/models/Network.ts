@@ -18,7 +18,7 @@ import MyRinkebyCoinJSON from '../contracts/THXTokenRinkeby.json';
 import MyCoinJSON from '../contracts/THXToken.json';
 const TransferGateway = Contracts.TransferGateway;
 const AddressMapper = Contracts.AddressMapper;
-import ethers from 'ethers';
+import { ethers } from 'ethers';
 import BN from 'bn.js';
 
 // See https://loomx.io/developers/en/testnet-plasma.html#ethereum-integration

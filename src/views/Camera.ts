@@ -82,7 +82,6 @@ export default class Camera extends Vue {
         //             // eslint-disable-next-line
         //             console.log(tx);
         //         });
-        }
+        // }
     }
-
 }

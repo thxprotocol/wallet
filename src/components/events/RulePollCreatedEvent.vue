@@ -1,7 +1,7 @@
 <template>
     <b-list-group-item v-if="rule">
         <div class="d-flex w-100 justify-content-between">
-            <span>Rule Poll Created</strong></span>
+            <span>Rule Poll Created: <strong>{{ ev.proposedAmount ? ev.proposedAmount : 0 }} THX</strong></span>
             <small>{{ ev.blockTime | moment("MMMM Do YYYY HH:mm") }}</small>
         </div>
         <small class="mb-1">

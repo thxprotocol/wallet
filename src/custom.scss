@@ -284,6 +284,10 @@ a,
     }
 }
 
+.tab-pane:focus {
+    outline: 0;
+}
+
 .close {
     font-family: Arial;
 }

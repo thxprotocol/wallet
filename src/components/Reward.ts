@@ -23,10 +23,6 @@ export default class Reward extends Vue {
         };
     private $network!: Network;
 
-    public mounted() {
-
-    }
-
     public async withdraw() {
         this.loading = true;
 
