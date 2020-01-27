@@ -1,5 +1,6 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BModal, BCard, BCardText, BSpinner, BProgress, BProgressBar } from 'bootstrap-vue';
+import PoolDetail from '@/views/Pool.vue';
 import { Network } from '@/models/Network';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import { RewardPool } from '@/models/RewardPool';
@@ -38,12 +39,14 @@ export default class CRewardRule extends Vue {
     @Prop() private isMember!: boolean;
     @Prop() private isManager!: boolean;
 
-    public async created() {
-        this.now = await this.$network.now();
+    public created() {
+        this.updateRulePoll();
+    }
 
-        if (this.rule.pollAddress !== '0x0000000000000000000000000000000000000000') {
-            this.poll = await this.poolService.getRewardRulePoll(this.rule);
-        }
+    public async viewRunningPoll() {
+        (this.$refs.modalRulePoll as BModal).show();
+
+        this.updateRulePoll();
     }
 
     public async startRulePoll() {
@@ -56,51 +59,64 @@ export default class CRewardRule extends Vue {
             .then(async (tx: any) => {
                 this.input.proposal = 0;
                 this.loading = false;
-                this.poll = await this.poolService.getRewardRulePoll(this.rule);
-
-                debugger;
-
-                (this.$parent.$refs.modalCreateRulePoll as BModal).hide();
-
+                this.updateRulePoll();
+                (this.$refs.modalCreateRulePoll as BModal).hide();
             })
             .catch((err: string) => {
                 console.error(err);
                 this.error = err;
-                this.loading = false;
             });
     }
 
     public async vote(agree: boolean) {
-        this.loading = true;
-        this.poolService.voteForRule(
-            this.rule,
-            this.pool,
-            agree,
-            )
-            .then(async (tx: any) => {
-                this.poll = await this.poolService.getRewardRulePoll(this.rule);
-                this.loading = false;
-            })
-            .catch((err: string) => {
-                console.error(err);
-                this.error = err;
-                this.loading = false;
-            });
+        if (this.poll) {
+            this.poll.loading = true;
+            this.poolService.voteForRule(
+                this.rule,
+                this.pool,
+                agree,
+                )
+                .then(async (tx: any) => {
+                    this.updateRulePoll();
+                })
+                .catch((err: string) => {
+                    console.error(err);
+                    this.error = err;
+                    if (this.poll) {
+                        this.poll.loading = false;
+                    }
+                });
+        }
+    }
+
+    public async revokeVote() {
+        if (this.poll) {
+            this.poll.loading = true;
+            this.poolService.revokeVoteForRule(
+                this.rule,
+                this.pool,
+                )
+                .then(async (tx: any) => {
+                    this.updateRulePoll();
+                })
+                .catch((err: string) => {
+                    console.error(err);
+                    this.error = err;
+                });
+        }
     }
 
     public async tryToFinalize() {
         this.loading = true;
-
         if (this.poll) {
             this.poolService.tryToFinalize(
                 this.poll,
                 this.pool,
                 )
                 .then(async (tx: any) => {
-                    this.loading = false;
-                    this.poll = await this.poolService.getRewardRulePoll(this.rule);
-
+                    this.updateRulePoll();
                     (this.$refs.modalRulePoll as BModal).hide();
+                    this.loading = false;
                 })
                 .catch((err: string) => {
                     console.error(err);
@@ -110,22 +126,10 @@ export default class CRewardRule extends Vue {
         }
     }
 
-    // public async revokeVote() {
-    //     this.loading = true;
-    //
-    //     return await this.contract.methods.revokeVoteForRule(this.poll.id)
-    //         .send({from: this.account.loom.address })
-    //         .then(async (tx: any) => {
-    //             this.poll = await this.getRulePoll();
-    //
-    //             // eslint-disable-next-line
-    //             console.log(tx);
-    //         })
-    //         .catch(async (err: string) => {
-    //             this.alert.noVote = true;
-    //             this.loading = false;
-    //             // eslint-disable-next-line
-    //             console.error(err);
-    //         });
-    // }
+    private async updateRulePoll() {
+        if (this.rule.pollAddress) {
+            this.now = await this.$network.now();
+            this.poll = await this.poolService.getRewardRulePoll(this.rule);
+        }
+    }
 }

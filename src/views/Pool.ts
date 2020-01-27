@@ -1,3 +1,5 @@
+import firebase from 'firebase/app';
+import 'firebase/database';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { BSpinner, BTab, BTabs, BListGroup, BModal } from 'bootstrap-vue';
@@ -49,16 +51,12 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
     },
 })
 export default class PoolDetail extends Vue {
-
-    get stream() {
-        return _.orderBy(this.events, 'created').reverse();
-    }
     public eventService: EventService = new EventService();
     public error: string = '';
     public loading: boolean = false;
     public poolService!: PoolService;
     public coinService: CoinService = new CoinService();
-    public events: any[] = [];
+    public events: any = [];
     public isManager: boolean = false;
     public isMember: boolean = false;
     public pool: RewardPool | null = null;
@@ -77,6 +75,11 @@ export default class PoolDetail extends Vue {
     private rewardRule: RewardRule | null = null;
     private rewardRulePoll: RewardRulePoll | null = null;
 
+    get stream() {
+        return _.orderBy(this.events, 'blockTime', 'desc');
+        // return this.events;
+    }
+
     public created() {
         this.loading = true;
         this.poolService = new PoolService();
@@ -90,9 +93,9 @@ export default class PoolDetail extends Vue {
                 this.isMember = await this.pool.isMember(this.$network.extdev.account);
                 this.isManager = await this.pool.isManager(this.$network.extdev.account);
 
-                this.events = await this.poolService.getRewardPoolEvents(this.pool);
-
                 this.loading = false;
+
+                this.getRewardPoolEvents(this.pool);
             })
             .then(async () => {
                 if (this.pool) {
@@ -105,6 +108,28 @@ export default class PoolDetail extends Vue {
         this.eventService.listen('event.RuleStateChanged', (event: any) => this.onRuleStateChanged(event.detail));
         this.eventService.listen('event.RulePollCreated', (event: any) => this.onRulePollCreated(event.detail));
         this.eventService.listen('event.RulePollFinished', (event: any) => this.onRulePollFinished(event.detail));
+    }
+
+    public async getRewardPoolEvents(pool: RewardPool) {
+        firebase.database().ref(`pools/${pool.address}/events`)
+            .limitToLast(10)
+            .on('child_added', async (snap: any) => {
+                const data = snap.val();
+
+                if (data.hash) {
+                    for (const type of pool.eventTypes) {
+                        const logs = await this.poolService.getRewardPoolEventDataFromHash(data.hash, type);
+
+                        if (logs) {
+                            const model = this.poolService.getEventModel(type, logs, data.hash);
+
+                            this.events.push(model);
+                        }
+                    }
+                } else {
+                    await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`).remove();
+                }
+            });
     }
 
     public addMember() {
@@ -216,11 +241,10 @@ export default class PoolDetail extends Vue {
     private async updateRule(data: any) {
         if (this.rules) {
             const rule = this.rules.find((r: RewardRule) => {
-                return (r.id === data.id);
+                return (r.id === parseInt(data.id, 10));
             });
             if (rule && this.pool) {
                 const index = this.rules.indexOf(rule);
-
                 this.rules[index] = await this.poolService.getRewardRule(rule.id, this.pool);
             }
         }

@@ -18,11 +18,7 @@
 
                         <b-tab title="Stream" active>
 
-                            <div class="text-center" v-if="loading">
-                                <b-spinner label="Loading..."></b-spinner>
-                            </div>
-
-                            <b-list-group v-if="!loading">
+                            <b-list-group>
                                 <component
                                     v-for="(ev, key) in stream"
                                     :key="key"
@@ -34,10 +30,6 @@
                         </b-tab>
 
                         <b-tab title="Rules">
-
-                            <div class="text-center" v-if="loading">
-                                <b-spinner label="Loading..."></b-spinner>
-                            </div>
 
                             <rule v-for="(rule, key) in rules"
                                 :key="key"

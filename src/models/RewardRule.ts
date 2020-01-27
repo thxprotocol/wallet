@@ -3,18 +3,41 @@ import BN from 'bn.js';
 const RULE_STATE = ['Active', 'Disabled'];
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
+export class RewardRule {
+    public id: number;
+    public state: string;
+    public created: string;
+    public amount: BN;
+    public pollAddress: string;
+
+    public title: string = '';
+    public description: string = '';
+
+    constructor(data: any, meta: any) {
+        this.id = parseInt(data.id, 10);
+        this.state = RULE_STATE[parseInt(data.state, 10)];
+        this.created = data.created;
+        this.pollAddress = data.poll;
+        this.amount = new BN(data.amount).div(TOKEN_MULTIPLIER);
+
+        if (meta) {
+            this.title = meta.title;
+            this.description = meta.description;
+        }
+    }
+}
+
 export class RewardRulePoll {
     public address: string;
     public contract: any;
     public owner: string;
-
     public proposedAmount!: BN;
     public startTime!: number;
     public endTime!: number;
     public yesCounter!: number;
     public noCounter!: number;
-    public hasVoted!: boolean;
     public totalVoted!: number;
+    public hasVoted!: boolean;
     public vote!: Vote;
     public loading: boolean = true;
 
@@ -42,8 +65,8 @@ export class RewardRulePoll {
         this.startTime = parseInt(startTime, 10);
         this.endTime = parseInt(endTime, 10);
         this.proposedAmount = new BN(proposedAmount).div(TOKEN_MULTIPLIER);
-        this.yesCounter = parseInt(yesCounter, 10);
-        this.noCounter = parseInt(noCounter, 10);
+        this.yesCounter = parseInt(new BN(yesCounter).div(TOKEN_MULTIPLIER).toString(), 10);
+        this.noCounter = parseInt(new BN(noCounter).div(TOKEN_MULTIPLIER).toString(), 10);
         this.totalVoted = parseInt(totalVoted, 10);
         this.vote = new Vote(voteByAddress);
         this.hasVoted = (this.vote.time !== 0);
@@ -61,29 +84,5 @@ export class Vote {
         this.time = parseInt(data.time, 10);
         this.weight = parseInt(data.weight, 10);
         this.agree = data.agree;
-    }
-}
-
-export class RewardRule {
-    public id: number;
-    public state: string;
-    public created: string;
-    public amount: BN;
-    public pollAddress: string;
-
-    public title: string = '';
-    public description: string = '';
-
-    constructor(data: any, meta: any) {
-        this.id = parseInt(data.id, 10);
-        this.state = RULE_STATE[parseInt(data.state, 10)];
-        this.created = data.created;
-        this.pollAddress = data.poll;
-        this.amount = new BN(data.amount).div(TOKEN_MULTIPLIER);
-
-        if (meta) {
-            this.title = meta.title;
-            this.description = meta.description;
-        }
     }
 }

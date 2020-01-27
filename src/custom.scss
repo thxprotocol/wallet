@@ -142,7 +142,8 @@ a,
     background-color: white;
     padding: 1rem;
     width: calc(100% - 4rem);
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
     height: 100%;
     box-shadow: 0 -10px 15px rgba(0, 0, 0, .2);
 }

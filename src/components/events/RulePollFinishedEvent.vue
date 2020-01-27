@@ -1,7 +1,7 @@
 <template>
     <b-list-group-item v-if="rule">
         <div class="d-flex w-100 justify-content-between">
-            <span>Rule Poll Finished: <strong>{{ ev.approved }}</strong></span>
+            <span>Rule Poll Finished: <strong>{{ ev.approved ? 'Approved' : 'Rejected'}}</strong></span>
             <small>{{ ev.blockTime | moment("MMMM Do YYYY HH:mm") }}</small>
         </div>
         <small class="mb-1">
