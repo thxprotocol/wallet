@@ -29,7 +29,6 @@ export default class Notifications extends Vue {
     private $network!: Network;
     private $account!: Account;
 
-
     public async created() {
         firebase.database().ref(`users/${this.$account.uid}/pools`).once('value').then(async (s) => {
             const pools = s.val();

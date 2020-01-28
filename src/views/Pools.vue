@@ -8,7 +8,8 @@
             </div>
 
             <b-card
-                v-for="p in rewardPools"
+                v-for="(p, key) in rewardPools"
+                :key="key"
                 footer-tag="footer"
                 header-tag="header"
                 tag="article"

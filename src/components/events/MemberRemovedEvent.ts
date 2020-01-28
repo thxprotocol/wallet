@@ -12,8 +12,6 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
     },
 })
 export default class MemberRemoved extends Vue {
-
     @Prop() public ev!: DepositEvent;
     @Prop() public pool!: RewardPool;
-    
 }
