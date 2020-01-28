@@ -1,7 +1,7 @@
 <template>
     <b-list-group-item>
         <div class="d-flex w-100 justify-content-between">
-            <strong>Withdrawel: {{amount}} THX</strong>
+            <span>Withdrawel: <strong>{{ev.amount}} THX</strong></span>
             <small>{{ ev.blockTime | moment("MMMM Do YYYY HH:mm") }}</small>
         </div>
         <small class="mb-1">{{ev.receiver}}</small>

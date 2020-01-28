@@ -6,6 +6,7 @@ import PoolService from '@/services/PoolService';
 import CoinService from '@/services/CoinService';
 import { DepositEvent, WithdrawelEvent, IRewardPools, RewardPool } from '@/models/RewardPool';
 import { mapGetters } from 'vuex';
+import _ from 'lodash';
 
 @Component({
     name: 'wallet',
@@ -32,14 +33,7 @@ export default class Wallet extends Vue {
     private $network!: Network;
 
     get sortedTransactions() {
-        const arr: any[] = [];
-        for (const i in this.transactions) {
-            if (this.transactions[i]) {
-                arr.unshift(this.transactions[i]);
-            }
-        }
-
-        return arr.reverse();
+        return _.sortBy(this.transactions, 'blockTime', 'asc');
     }
 
     public async created() {
@@ -47,22 +41,25 @@ export default class Wallet extends Vue {
         this.poolService = new PoolService();
 
         this.loading = true;
+        this.transactions = [];
 
         try {
             const pools = await this.poolService.getMyRewardPools();
 
             for (const address in pools) {
                 if (pools[address]) {
-                    const deposits = await pools[address].depositsOf(this.$network.extdev.account);
-                    const withdrawels = await pools[address].withdrawelsOf(this.$network.extdev.account);
+                    const dLength = await pools[address].countDeposits(this.$network.extdev.account);
+                    const wLength = await pools[address].countWithdrawels(this.$network.extdev.account);
 
-                    deposits.map((d: DepositEvent) => {
-                        this.transactions.push(d);
-                    });
+                    for (let i = 0; i < dLength; i++) {
+                        const d = await pools[address].depositOf(this.$network.extdev.account, i);
+                        this.transactions.push(new DepositEvent(d, '0'));
+                    }
 
-                    withdrawels.map((w: WithdrawelEvent) => {
-                        this.transactions.push(w);
-                    });
+                    for (let i = 0; i < wLength; i++) {
+                        const d = await pools[address].withdrawelOf(this.$network.extdev.account, i);
+                        this.transactions.push(new WithdrawelEvent(d, '0'));
+                    }
                 }
             }
 
@@ -70,7 +67,6 @@ export default class Wallet extends Vue {
         } catch (error) {
             console.error(error);
             this.loading = false;
-            this.error = `Oops! Your Reward Pools could not be loaded. Did you provide your keys?`;
         }
     }
 }

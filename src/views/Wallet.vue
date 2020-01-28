@@ -15,7 +15,7 @@
                 :variant="tx.variant">
                 <div class="d-flex w-100 justify-content-between">
                     <strong>Transfer {{tx.amount}} THX</strong>
-                    <small>{{ tx.created | moment("MMMM Do YYYY HH:mm") }}</small>
+                    <small>{{ tx.blockTime | moment("MMMM Do YYYY HH:mm") }}</small>
                 </div>
                 <small class="mb-1" v-if="tx.sender">From: {{tx.sender}}</small><br>
                 <small class="mb-1" v-if="tx.receiver">To: {{tx.receiver}}</small>

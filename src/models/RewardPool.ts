@@ -23,7 +23,7 @@ export class DepositEvent extends TransactionEvent {
     constructor(data: any, blockTime: string) {
         super(data, blockTime);
 
-        this.amount = data.amount;
+        this.amount = new BN(data.amount).div(TOKEN_MULTIPLIER).toString();
         this.sender = data.sender;
         this.component = 'deposit-event';
     }
@@ -36,7 +36,7 @@ export class WithdrawelEvent extends TransactionEvent {
     constructor(data: any, blockTime: string) {
         super(data, blockTime);
 
-        this.amount = data.amount;
+        this.amount = new BN(data.amount).div(TOKEN_MULTIPLIER).toString();
         this.receiver = data.receiver;
         this.component = 'withdrawel-event';
     }
@@ -185,40 +185,30 @@ export class RewardPool {
 
     }
 
-    public async depositsOf(address: string) {
-        const length = await this.contract.methods.countDeposits(address).call({
+    public async countDeposits(address: string) {
+        return await this.contract.methods.countDeposits(address).call({
             from: this.owner,
         });
-        const deposits: DepositEvent[] = [];
-
-        for (let i = 0; i < length; i++) {
-            const d = await this.contract.methods.deposits(address, i)
-                .call({
-                    from: this.owner,
-                });
-            // TODO Should not be of event type
-            deposits.push(new DepositEvent(d, '0'));
-        }
-
-        return deposits;
     }
 
-    public async withdrawelsOf(address: string) {
-        const length = await this.contract.methods.countWithdrawels(address).call({
+    public async countWithdrawels(address: string) {
+        return await this.contract.methods.countDeposits(address).call({
             from: this.owner,
         });
-        const withdrawels: WithdrawelEvent[] = [];
+    }
 
-        for (let i = 0; i < length; i++) {
-            const w = await this.contract.methods.withdrawels(address, i)
-                .call({
-                    from: this.owner,
-                });
-            // TODO Should not be of event type
-            withdrawels.push(new WithdrawelEvent(w, '0'));
-        }
+    public async depositOf(address: string, index: number) {
+        return await this.contract.methods.deposits(address, index)
+            .call({
+                from: this.owner,
+            });
+    }
 
-        return withdrawels;
+    public async withdrawelOf(address: string, index: number) {
+        return await this.contract.methods.withdrawels(address, index)
+            .call({
+                from: this.owner,
+            });
     }
 }
 

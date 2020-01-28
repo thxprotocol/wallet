@@ -12,12 +12,6 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
     },
 })
 export default class Deposit extends Vue {
-
     @Prop() public ev!: DepositEvent;
     @Prop() public pool!: RewardPool;
-    private amount!: string;
-
-    public created() {
-        this.amount = new BN(this.ev.amount).div(TOKEN_MULTIPLIER).toString();
-    }
 }
