@@ -10,6 +10,8 @@ import {
     RuleStateChangedEvent,
     RulePollCreatedEvent,
     RulePollFinishedEvent,
+    MemberAddedEvent,
+    MemberRemovedEvent,
 } from '@/models/RewardPool';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import store from '../store';
@@ -125,224 +127,74 @@ export default class PoolService extends Vue {
     }
 
     public async addMember(address: string, pool: RewardPool) {
-        return;
+        return await this.callPoolMethod(pool.contract.methods.addMember(address), pool);
     }
 
     public async addManager(address: string, pool: RewardPool) {
-        return;
+        return await this.callPoolMethod(pool.contract.methods.addManager(address), pool);
     }
 
     public async addDeposit(tokenAmount: BN, pool: RewardPool) {
-        const snap = await firebase.database().ref(`pools/${pool.address}/events`)
-            .push();
-
-        try {
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .set({
-                    state: 0,
-                });
-
-            const tx = await pool.contract.methods.deposit(tokenAmount.toString())
-                .send({ from: this.$network.extdev.account });
-
-            return await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .update({
-                    hash: tx.transactionHash,
-                    state: 1,
-                });
-        } catch (err) {
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .remove();
-            return err;
-        }
-    }
-
-    public async addRewardRule(rule: any, pool: RewardPool) {
-        const snap = await firebase.database().ref(`pools/${pool.address}/events`)
-            .push();
-
-        try {
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .set({
-                    success: 0,
-                });
-
-            const tx = await pool.contract.methods.createRule(rule.slug.toString())
-                .send({ from: this.$network.extdev.account });
-            const id = tx.events.RuleStateChanged.returnValues.id;
-            const state = tx.events.RuleStateChanged.returnValues.state;
-
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .update({
-                    hash: tx.transactionHash,
-                    success: 1,
-                });
-
-            return await firebase.database().ref(`pools/${pool.address}/rules/${id}`)
-                .set({
-                    title: rule.title,
-                    description: rule.description,
-                    state,
-                });
-
-        } catch (err) {
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .remove();
-            return err;
-        }
+        return await this.callPoolMethod(pool.contract.methods.deposit(tokenAmount.toString()), pool);
     }
 
     public async tryToFinalize(poll: RewardRulePoll, pool: RewardPool) {
-        const snap = await firebase.database().ref(`pools/${pool.address}/events`)
-            .push();
-
-        try {
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .set({
-                    success: 0,
-                });
-
-            const tx = await poll.contract.methods.tryToFinalize()
-                .send({ from: this.$network.extdev.account });
-
-            return await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .update({
-                    hash: tx.transactionHash,
-                    success: 1,
-                });
-
-        } catch (err) {
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .remove();
-
-            return err;
-        }
+        return await this.callPoolMethod(poll.contract.methods.tryToFinalize(), pool);
     }
 
     public async revokeVoteForRule(rule: RewardRule, pool: RewardPool) {
-        const snap = await firebase.database().ref(`pools/${pool.address}/events`)
-            .push();
-
-        try {
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .set({
-                    success: 0,
-                });
-
-            const tx = await pool.contract.methods.revokeVoteForRule(rule.id)
-                .send({ from: this.$network.extdev.account });
-
-            return await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .update({
-                    hash: tx.transactionHash,
-                    success: 1,
-                });
-
-        } catch (err) {
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .remove();
-
-            return err;
-        }
+        return await this.callPoolMethod(pool.contract.methods.revokeVoteForRule(rule.id), pool);
     }
 
     public async voteForRule(rule: RewardRule, pool: RewardPool, agree: boolean) {
-        const snap = await firebase.database().ref(`pools/${pool.address}/events`)
-            .push();
-
-        try {
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .set({
-                    success: 0,
-                });
-
-            const tx = await pool.contract.methods.voteForRule(
-                    rule.id,
-                    agree,
-                )
-                .send({ from: this.$network.extdev.account });
-
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .update({
-                    hash: tx.transactionHash,
-                    success: 1,
-                });
-
-            return await this.getRewardRule(rule.id, pool);
-
-        } catch (err) {
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .remove();
-
-            return err;
-        }
+        return await this.callPoolMethod(pool.contract.methods.voteForRule(rule.id, agree), pool);
     }
 
     public async addRewardRulePoll(rule: any, pool: RewardPool, proposedAmount: BN) {
-        const snap = await firebase.database().ref(`pools/${pool.address}/events`)
-            .push();
+        return await this.callPoolMethod(pool.contract.methods.startRulePoll(rule.id, proposedAmount.toString()), pool);
+    }
 
-        try {
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .set({
-                    success: 0,
-                });
+    public async addRewardRule(rule: any, pool: RewardPool) {
+        const tx = await this.callPoolMethod(pool.contract.methods.eateRule(rule.slug.toString()), pool);
+        const id = tx.events.RuleStateChanged.returnValues.id;
+        const state = tx.events.RuleStateChanged.returnValues.state;
 
-            const tx = await pool.contract.methods.startRulePoll(
-                    rule.id,
-                    proposedAmount.toString(),
-                )
-                .send({ from: this.$network.extdev.account });
-
-            console.log(tx);
-
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .update({
-                    hash: tx.transactionHash,
-                    success: 1,
-                });
-
-            return tx;
-
-        } catch (err) {
-            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
-                .remove();
-
-            return err;
-        }
+        return await firebase.database().ref(`pools/${pool.address}/rules/${id}`)
+            .set({
+                title: rule.title,
+                description: rule.description,
+                state,
+            });
     }
 
     public getEventModel(type: string, data: any, hash: string) {
-        if (type === 'Deposited') {
-            const deposit = new DepositEvent(data.logs, data.blockTime);
-            deposit.hash = hash;
+        let eventModel: any = {};
 
-            return deposit;
+        if (type === 'MemberAdded') {
+            eventModel = new MemberAddedEvent(data.logs, data.blockTime);
+        }
+        if (type === 'MemberRemoved') {
+            eventModel = new MemberRemovedEvent(data.logs, data.blockTime);
+        }
+        if (type === 'Deposited') {
+            eventModel = new DepositEvent(data.logs, data.blockTime);
         }
         if (type === 'Withdrawn') {
-            const withdrawel = new WithdrawelEvent(data.logs, data.blockTime);
-            withdrawel.hash = hash;
-
-            return withdrawel;
+            eventModel = new WithdrawelEvent(data.logs, data.blockTime);
         }
         if (type === 'RuleStateChanged') {
-            const ruleStateChanged = new RuleStateChangedEvent(data.logs, data.blockTime);
-            ruleStateChanged.hash = hash;
-
-            return ruleStateChanged;
+            eventModel = new RuleStateChangedEvent(data.logs, data.blockTime);
         }
         if (type === 'RulePollCreated') {
-            const rulePollCreated = new RulePollCreatedEvent(data.logs, data.blockTime);
-            rulePollCreated.hash = hash;
-
-            return rulePollCreated;
+            eventModel = new RulePollCreatedEvent(data.logs, data.blockTime);
         }
         if (type === 'RulePollFinished') {
-            const rulePollFinished = new RulePollFinishedEvent(data.logs, data.blockTime);
-            rulePollFinished.hash = hash;
-
-            return rulePollFinished;
+            eventModel = new RulePollFinishedEvent(data.logs, data.blockTime);
         }
+
+        eventModel.hash = hash;
+
+        return eventModel;
     }
 
     public async getRewardPoolEventDataFromHash(hash: string, type: string) {
@@ -366,6 +218,30 @@ export default class PoolService extends Vue {
                 return { type, logs, blockTime: log.blockTime };
             }
         } catch (err) {
+            return err;
+        }
+    }
+
+    private async callPoolMethod(method: any, pool: RewardPool) {
+        const snap = await firebase.database().ref(`pools/${pool.address}/events`)
+            .push();
+
+        try {
+            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
+                .set({
+                    state: 0,
+                });
+
+            const tx = await method.send({ from: this.$network.extdev.account });
+
+            return await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
+                .update({
+                    hash: tx.transactionHash,
+                    state: 1,
+                });
+        } catch (err) {
+            await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`)
+                .remove();
             return err;
         }
     }

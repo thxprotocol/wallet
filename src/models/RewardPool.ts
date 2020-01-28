@@ -22,6 +22,7 @@ export class DepositEvent extends TransactionEvent {
 
     constructor(data: any, blockTime: string) {
         super(data, blockTime);
+
         this.amount = data.amount;
         this.sender = data.sender;
         this.component = 'deposit-event';
@@ -34,6 +35,7 @@ export class WithdrawelEvent extends TransactionEvent {
 
     constructor(data: any, blockTime: string) {
         super(data, blockTime);
+
         this.amount = data.amount;
         this.receiver = data.receiver;
         this.component = 'withdrawel-event';
@@ -46,6 +48,7 @@ export class RuleStateChangedEvent extends TransactionEvent {
 
     constructor(data: any, blockTime: string) {
         super(data, blockTime);
+
         this.rule = parseInt(data.id, 10);
         this.state = RULE_STATE[parseInt(data.state, 10)];
         this.component = 'rulestatechanged-event';
@@ -58,9 +61,9 @@ export class RulePollCreatedEvent extends TransactionEvent {
 
     constructor(data: any, blockTime: string) {
         super(data, blockTime);
+
         this.rule = parseInt(data.id, 10);
         this.proposedAmount = new BN(data.proposedAmount).div(TOKEN_MULTIPLIER);
-        this.blockTime = parseInt(blockTime, 10);
         this.component = 'rulepollcreated-event';
     }
 }
@@ -71,10 +74,30 @@ export class RulePollFinishedEvent extends TransactionEvent {
 
     constructor(data: any, blockTime: string) {
         super(data, blockTime);
+
         this.rule = parseInt(data.id, 10);
         this.approved = data.approved;
-        this.blockTime = parseInt(blockTime, 10);
         this.component = 'rulepollfinished-event';
+    }
+}
+
+export class MemberAddedEvent extends TransactionEvent {
+    public account: string;
+
+    constructor(data: any, blockTime: string) {
+        super(data, blockTime);
+        this.account = data.account;
+        this.component = 'memberadded-event';
+    }
+}
+
+export class MemberRemovedEvent extends TransactionEvent {
+    public account: string;
+
+    constructor(data: any, blockTime: string) {
+        super(data, blockTime);
+        this.account = data.account;
+        this.component = 'memberremoved-event';
     }
 }
 
@@ -88,8 +111,8 @@ export class RewardPool {
         'Deposited', //
         'ManagerAdded',
         'ManagerRemoved',
-        'MemberAdded',
-        'MemberRemoved',
+        'MemberAdded', //
+        'MemberRemoved', //
         'RulePollCreated', //
         'RulePollFinished', //
         'RuleStateChanged', //

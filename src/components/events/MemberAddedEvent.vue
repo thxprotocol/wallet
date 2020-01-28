@@ -1,10 +1,10 @@
 <template>
     <b-list-group-item>
         <div class="d-flex w-100 justify-content-between">
-            <strong>Deposit: {{amount}} THX</strong>
+            <strong>Member Added</strong>
             <small>{{ ev.blockTime | moment("MMMM Do YYYY HH:mm") }}</small>
         </div>
-        <small class="mb-1">{{ev.sender}}</small>
+        <small class="mb-1">{{ev.account}}</small>
     </b-list-group-item>
 </template>
-<script src="./DepositEvent.ts" lang="ts"></script>
+<script src="./MemberAddedEvent.ts" lang="ts"></script>

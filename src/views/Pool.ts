@@ -10,6 +10,7 @@ import CWithdrawelEvent from '@/components/events/WithdrawelEvent.vue';
 import CRuleStateChanged from '@/components/events/RuleStateChangedEvent.vue';
 import CRulePollCreated from '@/components/events/RulePollCreatedEvent.vue';
 import CRulePollFinished from '@/components/events/RulePollFinishedEvent.vue';
+import CMemberAddedEvent from '@/components/events/MemberAddedEvent.vue';
 import { Network } from '@/models/Network';
 import {
     RewardPool,
@@ -36,6 +37,7 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
         'rulepollcreated-event': CRulePollCreated,
         'rulepollfinished-event': CRulePollFinished,
         'rulestatechanged-event': CRuleStateChanged,
+        'memberadded-event': CMemberAddedEvent,
         'withdrawel-event': CWithdrawelEvent,
         'deposit-event': CDepositEvent,
         'b-list-group': BListGroup,
@@ -77,7 +79,6 @@ export default class PoolDetail extends Vue {
 
     get stream() {
         return _.orderBy(this.events, 'blockTime', 'desc');
-        // return this.events;
     }
 
     public created() {
@@ -138,6 +139,7 @@ export default class PoolDetail extends Vue {
         if (this.pool) {
             this.poolService.addMember(this.input.addMember, this.pool)
                 .then(() => {
+                    (this.$refs.modalAddMember as BModal).hide();
                     this.input.addMember = '';
                     this.loading = false;
                 })
@@ -154,6 +156,7 @@ export default class PoolDetail extends Vue {
         if (this.pool) {
             this.poolService.addManager(this.input.addManager, this.pool)
                 .then(() => {
+                    (this.$refs.modalAddManager as BModal).hide();
                     this.input.addManager = '';
                     this.loading = false;
                 })

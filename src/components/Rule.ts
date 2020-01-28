@@ -40,7 +40,7 @@ export default class CRewardRule extends Vue {
     @Prop() private isManager!: boolean;
 
     public created() {
-        this.updateRulePoll();
+        // this.updateRulePoll();
     }
 
     public async viewRunningPoll() {
@@ -127,7 +127,7 @@ export default class CRewardRule extends Vue {
     }
 
     private async updateRulePoll() {
-        if (this.rule.pollAddress) {
+        if (this.rule.pollAddress !== '0x0000000000000000000000000000000000000000') {
             this.now = await this.$network.now();
             this.poll = await this.poolService.getRewardRulePoll(this.rule);
         }
