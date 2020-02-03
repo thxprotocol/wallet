@@ -19,7 +19,7 @@
                             <strong>{{ reward.amount}} THX</strong>
                             for rule
                             <span class="badge badge-primary ml-1">
-                                #{{ reward.id }}
+                                #{{ reward.rule }}
                             </span>
                         </span>
                     </div>
