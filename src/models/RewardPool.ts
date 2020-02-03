@@ -101,6 +101,26 @@ export class MemberRemovedEvent extends TransactionEvent {
     }
 }
 
+export class ManagerAddedEvent extends TransactionEvent {
+    public account: string;
+
+    constructor(data: any, blockTime: string) {
+        super(data, blockTime);
+        this.account = data.account;
+        this.component = 'manageradded-event';
+    }
+}
+
+export class ManagerRemovedEvent extends TransactionEvent {
+    public account: string;
+
+    constructor(data: any, blockTime: string) {
+        super(data, blockTime);
+        this.account = data.account;
+        this.component = 'managerremoved-event';
+    }
+}
+
 export class RewardPool {
     public address: string = '';
     public name: string = '';

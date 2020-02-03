@@ -1,27 +1,42 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import ProfilePicture from '../components/ProfilePicture';
-import { BProgress, BListGroupItem } from 'bootstrap-vue';
+import { BProgress, BSpinner, BCardText, BCard, BModal, BProgressBar } from 'bootstrap-vue';
 import { Network } from '@/models/Network';
+import PoolService from '@/services/PoolService';
+import { Reward } from '@/models/Reward';
+import { RewardPool } from '@/models/RewardPool';
 
 @Component({
-    name: 'Reward',
+    name: 'CReward',
     components: {
-        BProgress,
-        BListGroupItem,
-        ProfilePicture,
+        'b-modal': BModal,
+        'b-card': BCard,
+        'b-card-text': BCardText,
+        'b-spinner': BSpinner,
+        'b-progress': BProgress,
+        'b-progress-bar': BProgressBar,
     },
 })
-export default class Reward extends Vue {
+export default class CReward extends Vue {
     public loading: boolean = false;
+    public error: string = '';
+    public now: number = Math.floor(new Date().getTime() / 1000);
+    public input: any = {
+        poll: {
+            proposal: 0,
+        },
+    };
 
-    @Prop() public reward: any = null;
-    @Prop() public contract: any = null;
-    @Prop() public account: any = {
-            loom: {
-                address: '',
-            },
-        };
     private $network!: Network;
+    private poolService: PoolService = new PoolService();
+
+    @Prop() private reward!: Reward;
+    @Prop() private pool!: RewardPool;
+    @Prop() private isMember!: boolean;
+    @Prop() private isManager!: boolean;
+
+    public created() {
+        this.reward.update();
+    }
 
     public async withdraw() {
         this.loading = true;

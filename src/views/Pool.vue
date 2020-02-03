@@ -46,7 +46,12 @@
 
                         <b-tab title="Rewards">
 
-                            <!-- <Rewards v-if="contract && account" v-bind:contract="contract" v-bind:account="account"></Rewards> -->
+                            <reward v-for="(reward, key) in rewards"
+                                :key="key"
+                                :reward="reward"
+                                :pool="pool"
+                                :isManager="isManager"
+                                :isMember="isMember" />
 
                         </b-tab>
 

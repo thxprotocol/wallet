@@ -1,7 +1,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import PoolService from '@/services/PoolService';
 import { RewardPool } from '@/models/RewardPool';
-import firebase from 'firebase';
+import firebase from 'firebase/app';
 
 const QRCode = (window as any).QRCode;
 

@@ -14,7 +14,10 @@ import {
     MemberRemovedEvent,
 } from '@/models/RewardPool';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
+import { Reward } from '@/models/Reward';
+
 import store from '../store';
+import REWARD_JSON from '@/contracts/Reward.json';
 import REWARD_POOL_JSON from '@/contracts/RewardPool.json';
 import REWARD_RULE_POLL_JSON from '@/contracts/RulePoll.json';
 import BN from 'bn.js';
@@ -53,6 +56,14 @@ export default class PoolService extends Vue {
         return await this.$network.getExtdevContract(
             this.$network.extdev.web3js,
             REWARD_RULE_POLL_JSON.abi,
+            address,
+        );
+    }
+
+    public async getRewardContract(address: string) {
+        return await this.$network.getExtdevContract(
+            this.$network.extdev.web3js,
+            REWARD_JSON.abi,
             address,
         );
     }
@@ -111,6 +122,17 @@ export default class PoolService extends Vue {
             rules.push(rule);
         }
         return rules;
+    }
+
+    public async getReward(id: number, pool: RewardPool) {
+        const address = await pool.contract.methods.rewards(id).call({from: this.$network.extdev.account});
+        const contract = await this.getRewardContract(address);
+
+        return new Reward(
+            address,
+            contract,
+            this.$network.extdev.account,
+        );
     }
 
     public async getRewardRulePoll(rule: RewardRule) {

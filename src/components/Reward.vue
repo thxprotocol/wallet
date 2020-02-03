@@ -1,38 +1,62 @@
 <template>
-    <article>
-        <BListGroupItem>
-            <div class="d-flex w-100 align-items-center">
-                <div>
-                    <ProfilePicture class="mr-3" size="sm" :uid="reward.user.uid"></ProfilePicture>
-                </div>
-                <div style="flex: 1;">
-                    <span><strong>{{reward.user.firstName}}</strong> claimed <strong>{{ reward.amount}} THX</strong> as a reward for the rule <strong>{{ reward.slug }}</strong>.</span>
-                </div>
-                <div>
-                    <span :class="`badge badge-${reward.state == 'Approved' ? 'success' : reward.state == 'Rejected' ? 'danger' : 'info'} float-right`">{{reward.state}}</span>
-                </div>
+    <b-card tag="article"
+        footer-tag="footer"
+        header-tag="header"
+        class="mb-2" v-if="!reward.loading">
+
+        <template slot="header">
+            <span v-if="reward.state === 'Approved'" class="badge badge-success float-right">
+                {{ reward.state }}
+            </span>
+            <span v-if="reward.state === 'Rejected' " class="badge badge-danger float-right">
+                {{ reward.state }}
+            </span>
+
+            <div class="badge badge-info">
+                #{{ reward.id }}
             </div>
-            <div class="row mb-2 mt-4">
-                <div class="col-12">
-                    <BProgress
-                        variant="info"
-                        :value="((reward.now - reward.startTime) / (reward.endTime - reward.startTime)) * 100"
-                        :max="100"
-                    ></BProgress>
-                </div>
-                <div class="col-6">
-                    <small>{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
-                </div>
-                <div class="col-6 text-right">
-                    <small>{{reward.endTime | moment("MMMM Do YYYY HH:mm") }}</small>
-                </div>
+            <span><strong> {{ reward.beneficiary }}</strong> claims <strong>{{ reward.amount}} THX.</strong></span>
+        </template>
+        <hr class="dotted">
+        <h3>Poll period:</h3>
+        <div class="row">
+            <div class="col-12">
+                <b-progress
+                    variant="info"
+                    :value="((now - reward.startTime) / (reward.endTime - reward.startTime)) * 100"
+                    :max="100"
+                ></b-progress>
             </div>
-            <div class="d-flex w-100 justify-content-end">
-                <button v-if="reward.beneficiary === account.loom.address && reward.now > reward.endTime && reward.state === 'Pending'" class="btn btn-primary btn-block mt-1" @click="finalizePoll()">Finalize Poll</button>
-                <button v-if="reward.beneficiary === account.loom.address && reward.now > reward.endTime && reward.state === 'Approved'" class="btn btn-primary btn-block mt-1" @click="withdraw()">Withdraw {{reward.amount}} THX</button>
+            <div class="col-6">
+                {{reward.startTime | moment("MMMM Do YYYY HH:mm") }}
             </div>
-        </BListGroupItem>
-    </article>
+            <div class="col-6 text-right">
+                {{reward.endTime | moment("MMMM Do YYYY HH:mm") }}
+            </div>
+        </div>
+
+        <template slot="footer" v-if="isManager">
+            <template v-if="!reward.hasVoted && now < reward.endTime">
+                <button @click="vote(true)" :class="{ disabled: reward.loading }" class="btn btn-primary">
+                    Approve
+                </button>
+                <button @click="vote(false)" :class="{ disabled: reward.loading }" class="btn btn-primary">
+                    Reject
+                </button>
+            </template>
+            <template v-if="reward.hasVoted && now < reward.endTime">
+                <button @click="revokeVote()" :class="{ disabled: reward.loading }" class="btn btn-primary">
+                    Revoke
+                </button>
+            </template>
+            <template v-if="now > reward.endTime">
+                <button @click="tryToFinalize()" :class="{ disabled: loading }" class="btn btn-primary">
+                    Finalize Poll
+                </button>
+            </template>
+        </template>
+
+    </b-card>
 </template>
 
 <script src="./Reward.ts" lang="ts"></script>

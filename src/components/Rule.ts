@@ -40,7 +40,7 @@ export default class CRewardRule extends Vue {
     @Prop() private isManager!: boolean;
 
     public created() {
-        // this.updateRulePoll();
+        this.updateRulePoll();
     }
 
     public async viewRunningPoll() {

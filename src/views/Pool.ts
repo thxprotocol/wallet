@@ -3,8 +3,8 @@ import 'firebase/database';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { BSpinner, BTab, BTabs, BListGroup, BModal } from 'bootstrap-vue';
-import Rule from '../components/Rule.vue';
-import Reward from '../components/Reward.vue';
+import CRewardRule from '../components/Rule.vue';
+import CReward from '../components/Reward.vue';
 import CDepositEvent from '@/components/events/DepositEvent.vue';
 import CWithdrawelEvent from '@/components/events/WithdrawelEvent.vue';
 import CRuleStateChanged from '@/components/events/RuleStateChangedEvent.vue';
@@ -19,12 +19,19 @@ import {
     RulePollCreatedEvent,
     RulePollFinishedEvent,
     RuleStateChangedEvent,
+    MemberAddedEvent,
+    MemberRemovedEvent,
+    ManagerAddedEvent,
+    ManagerRemovedEvent,
+    // RewardPollCreatedEvent,
+    // RewardPollFinishedEvent
 } from '@/models/RewardPool';
 import PoolService from '@/services/PoolService';
 import CoinService from '@/services/CoinService';
 import EventService from '@/services/EventService';
 import BN from 'bn.js';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
+import { Reward } from '@/models/Reward';
 import _ from 'lodash';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
@@ -32,8 +39,8 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 @Component({
     name: 'PoolDetail',
     components: {
-        'rule': Rule,
-        'reward': Reward,
+        'rule': CRewardRule,
+        'reward': CReward,
         'rulepollcreated-event': CRulePollCreated,
         'rulepollfinished-event': CRulePollFinished,
         'rulestatechanged-event': CRuleStateChanged,
@@ -63,6 +70,7 @@ export default class PoolDetail extends Vue {
     public isMember: boolean = false;
     public pool: RewardPool | null = null;
     public rules: RewardRule[] | null = null;
+    public rewards: Reward[] = [];
     public input: any = {
         poolDeposit: 0,
         addMember: '',
@@ -97,6 +105,8 @@ export default class PoolDetail extends Vue {
                 this.loading = false;
 
                 this.getRewardPoolEvents(this.pool);
+                this.getRewards(this.pool);
+
             })
             .then(async () => {
                 if (this.pool) {
@@ -108,7 +118,10 @@ export default class PoolDetail extends Vue {
         this.eventService.listen('event.Withdrawn', (event: any) => this.onWithdrawn(event.detail));
         this.eventService.listen('event.RuleStateChanged', (event: any) => this.onRuleStateChanged(event.detail));
         this.eventService.listen('event.RulePollCreated', (event: any) => this.onRulePollCreated(event.detail));
-        this.eventService.listen('event.RulePollFinished', (event: any) => this.onRulePollFinished(event.detail));
+        this.eventService.listen('event.MemberAdded', (event: any) => this.onMemberAdded(event.detail));
+        this.eventService.listen('event.MemberRemoved', (event: any) => this.onMemberRemoved(event.detail));
+        this.eventService.listen('event.ManagerAdded', (event: any) => this.onManagerAdded(event.detail));
+        this.eventService.listen('event.ManagerRemoved', (event: any) => this.onManagerRemoved(event.detail));
     }
 
     public async getRewardPoolEvents(pool: RewardPool) {
@@ -131,6 +144,16 @@ export default class PoolDetail extends Vue {
                     await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`).remove();
                 }
             });
+    }
+
+    public async getRewards(pool: RewardPool) {
+        const length = await pool.contract.methods.countRewards().call({ from: this.$network.extdev.account });
+
+        for (let i = 0; i < length; i++) {
+            const r = await this.poolService.getReward(i, pool);
+
+            this.rewards.push(r);
+        }
     }
 
     public addMember() {
@@ -241,6 +264,48 @@ export default class PoolDetail extends Vue {
         this.updateRule(data);
     }
 
+    private onManagerAdded(data: any) {
+        const r = new ManagerAddedEvent(data, data.blockTime);
+        this.events.push(r);
+
+        this.updateRule(data);
+    }
+
+    private onManagerRemoved(data: any) {
+        const r = new ManagerRemovedEvent(data, data.blockTime);
+        this.events.push(r);
+
+        this.updateRule(data);
+    }
+
+    private onMemberAdded(data: any) {
+        const r = new MemberAddedEvent(data, data.blockTime);
+        this.events.push(r);
+
+        this.updateRule(data);
+    }
+
+    private onMemberRemoved(data: any) {
+        const r = new MemberRemovedEvent(data, data.blockTime);
+        this.events.push(r);
+
+        this.updateRule(data);
+    }
+
+    // private onRewardPollCreated(data: any) {
+    //     const r = new RewardPollCreatedEvent(data, data.blockTime);
+    //     this.events.push(r);
+    //
+    //     this.updateRule(data);
+    // }
+    //
+    // private onRewardPollFinished(data: any) {
+    //     const r = new RewardPollFinishedEvent(data, data.blockTime);
+    //     this.events.push(r);
+    //
+    //     this.updateRule(data);
+    // }
+
     private async updateRule(data: any) {
         if (this.rules) {
             const rule = this.rules.find((r: RewardRule) => {
@@ -260,34 +325,4 @@ export default class PoolDetail extends Vue {
             this.pool.setBalance(balance);
         }
     }
-
-    // public onManagerAdded(data: any, timestamp: string) {
-    //     this.stream.push({
-    //         timestamp: parseInt(timestamp),
-    //         title: `New manager promotion`,
-    //         body: `${data.account}`,
-    //     });
-    // }
-
-    // public onMemberAdded(data: any, timestamp: string) {
-    //     this.stream.push({
-    //         timestamp: parseInt(timestamp),
-    //         title: `New member added`,
-    //         body: `${data.account}`,
-    //     });
-    // }
-
-    // onRewardPollCreated(data: any, timestamp: string) {
-    //     this.stream.push({
-    //         timestamp: parseInt(timestamp),
-    //         title: `Reward poll started`,
-    //     });
-    // }
-
-    // onRewardPollFinished(data, timestamp) {
-    //     this.stream.push({
-    //         timestamp: parseInt(timestamp),
-    //         title: `Reward poll finished`,
-    //     });
-    // }
 }
