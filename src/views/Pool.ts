@@ -99,7 +99,7 @@ export default class PoolDetail extends Vue {
     }
 
     get sortedRewards() {
-        return _.orderBy(this.rewards, 'created', 'desc');
+        return _.orderBy(this.rewards, 'id', 'desc');
     }
 
     public created() {

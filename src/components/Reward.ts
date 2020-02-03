@@ -39,14 +39,14 @@ export default class CReward extends Vue {
     }
 
     get canWithdraw() {
-        return this.reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account;
+        return this.reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account.toLowerCase();
     }
 
     public withdraw() {
         this.reward.loading = true;
         this.poolService.withdraw(this.reward, this.pool)
             .then((tx: any) => {
-                this.reward.loading = false;
+                this.reward.update();
             })
             .catch((err: string) => {
                 this.error = err;
@@ -57,7 +57,7 @@ export default class CReward extends Vue {
         this.reward.loading = true;
         this.poolService.voteForReward(this.reward, this.pool, agree)
             .then((tx: any) => {
-                this.reward.loading = false;
+                this.reward.update();
             })
             .catch((err: string) => {
                 this.error = err;
@@ -68,7 +68,7 @@ export default class CReward extends Vue {
         this.reward.loading = true;
         this.poolService.revokeVoteForReward(this.reward, this.pool)
             .then((tx: any) => {
-                this.reward.loading = false;
+                this.reward.update();
             })
             .catch((err: string) => {
                 this.error = err;
@@ -79,7 +79,7 @@ export default class CReward extends Vue {
         this.reward.loading = true;
         this.poolService.tryToFinalizeRewardPoll(this.reward, this.pool)
             .then((tx: any) => {
-                this.reward.loading = false;
+                this.reward.update();
             })
             .catch((err: string) => {
                 this.error = err;

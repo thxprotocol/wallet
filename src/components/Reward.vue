@@ -4,17 +4,15 @@
         header-tag="header"
         class="mb-2">
 
-        <template v-if="reward.loading">
-            Loading...
-        </template>
+        <div v-if="reward.loading" class="d-flex w-100 justify-content-center">
+            <b-spinner></b-spinner>
+        </div>
+
         <template v-else>
             <template slot="header">
                 <div class="d-flex align-items-center justify-content-between">
-
                     <div class="d-flex align-items-center justify-content-between">
-
                         <profile-picture :uid="reward.beneficiary.uid" size="xs" class="mr-2" />
-
                         <span>
                             <strong> {{ reward.beneficiary.firstName }} {{ reward.beneficiary.lastName }}</strong>
                             claims
@@ -58,9 +56,8 @@
                 </div>
             </div>
 
-            <template slot="footer" v-if="isManager">
-                <template v-if="!reward.hasVoted && now < reward.endTime">
-                <div class="row">
+            <template slot="footer">
+                <div class="row" v-if="isManager && !reward.hasVoted && now < reward.endTime">
                     <div class="col-md-6">
                         <button @click="vote(true)" :class="{ disabled: reward.loading }" class="btn btn-success btn-block">
                             Approve
@@ -72,13 +69,12 @@
                         </button>
                     </div>
                 </div>
-                </template>
-                <template v-if="reward.hasVoted && now < reward.endTime">
+                <template v-if="isManager && reward.hasVoted && now < reward.endTime">
                     <button @click="revokeVote()" :class="{ disabled: reward.loading }" class="btn btn-primary btn-block">
                         Revoke
                     </button>
                 </template>
-                <template v-if="reward.finalized && canWithdraw">
+                <template v-if="reward.finalized && canWithdraw && reward.state === 'Approved'">
                     <button @click="withdraw()" :class="{ disabled: reward.loading }" class="btn btn-success btn-block">
                         Withdraw
                     </button>

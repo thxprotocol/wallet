@@ -105,7 +105,7 @@ const routes: any = [
         meta: {
             header: false,
             footer: false,
-            requiresAuth: false,
+            requiresAuth: true,
         },
     },
 ];
