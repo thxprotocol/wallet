@@ -75,10 +75,6 @@
             <b-modal ref="modalCreateRule" centered title="Suggest a reward rule">
                 <div class="" v-if="!loading">
                     <div class="form-group">
-                        <label for="slug">Slug:</label>
-                        <input id="slug" v-model="input.rule.slug" type="text" class="form-control" placeholder="complete_profile"/>
-                    </div>
-                    <div class="form-group">
                         <label for="title">Title:</label>
                         <input id="title" v-model="input.rule.title" type="text" class="form-control" placeholder="Complete your profile!"/>
                     </div>

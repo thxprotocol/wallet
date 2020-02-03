@@ -86,7 +86,6 @@ export default class PoolDetail extends Vue {
         addMember: '',
         addManager: '',
         rule: {
-            slug: '',
             title: '',
             description: '',
         },
@@ -230,11 +229,10 @@ export default class PoolDetail extends Vue {
     public addRewardRule(rule: any) {
         this.loading = true;
 
-        if (this.pool && rule.slug) {
+        if (this.pool) {
             this.poolService.addRewardRule(rule, this.pool)
                 .then(() => {
                     (this.$refs.modalCreateRule as BModal).hide();
-                    this.input.rule.slug = '';
                     this.input.rule.title = '';
                     this.input.rule.description = '';
                     this.loading = false;

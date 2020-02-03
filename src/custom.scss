@@ -168,12 +168,23 @@ a,
 }
 
 .btn-primary {
+    background-color: black;
+    color: $yellow;
+
+    &:hover,
+    &:focus,
+    &:active:focus {
+        background-color: $yellow !important;
+        color: black !important;
+    }
+}
+
+.btn-success,
+.btn-primary {
     font-family: 'Exo 2';
     border: 0;
     border-radius: 30px;
     line-height: 1;
-    background-color: black;
-    color: $yellow;
     font-weight: bold;
     min-height: 40px;
     text-transform: uppercase;
@@ -193,13 +204,6 @@ a,
     &.btn-inverse {
         background-color: $yellow;
         color: black;
-    }
-
-    &:hover,
-    &:focus,
-    &:active:focus {
-        background-color: $yellow !important;
-        color: black !important;
     }
 
     &:focus,

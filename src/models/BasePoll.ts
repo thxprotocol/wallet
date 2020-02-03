@@ -13,6 +13,7 @@ export class BasePoll {
     public hasVoted!: boolean;
     public vote!: Vote;
     public loading: boolean = true;
+    public finalized!: boolean;
 
     constructor(
         address: string,
@@ -31,10 +32,11 @@ export class BasePoll {
         const noCounter = await this.contract.methods.noCounter().call({ from: this.owner });
         const totalVoted = await this.contract.methods.totalVoted().call({ from: this.owner });
         const voteByAddress = await this.contract.methods.votesByAddress(this.owner).call({ from: this.owner });
+        const finalized = await this.contract.methods.finalized().call({ from: this.owner });
 
         this.startTime = parseInt(startTime, 10);
         this.endTime = parseInt(endTime, 10);
-
+        this.finalized = finalized;
         this.yesCounter = parseInt(new BN(yesCounter).div(TOKEN_MULTIPLIER).toString(), 10);
         this.noCounter = parseInt(new BN(noCounter).div(TOKEN_MULTIPLIER).toString(), 10);
         this.totalVoted = parseInt(totalVoted, 10);

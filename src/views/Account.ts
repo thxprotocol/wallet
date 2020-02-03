@@ -273,20 +273,16 @@ export default class AccountDetail extends Vue {
 
     private copyClipboard(value: string) {
         const input = document.createElement('input');
-        const d: any = document;
 
-        input.id = 'clippy';
-        input.type = 'type';
-        input.value = value;
-        input.style.position = 'absolute';
-        input.style.left = '-999999px';
-        input.style.width = '0px';
-        input.style.height = '0px';
+        input.setAttribute('id', 'clippy');
+        input.setAttribute('type', 'text');
+        input.setAttribute('value', value);
+        input.setAttribute('style', 'display: block; opacity: 0;');
 
-        d.getElementById('app').appendChild(input);
-        d.getElementById('clippy').select();
-        d.execCommand('copy');
-        d.getElementById('clippy').remove();
+        (document as any).getElementById('app').appendChild(input);
+        (document as any).getElementById('clippy').select();
+        (document as any).execCommand('copy');
+        (document as any).getElementById('clippy').remove();
 
         this.clipboard = value;
     }

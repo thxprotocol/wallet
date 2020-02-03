@@ -4,6 +4,7 @@ import { Network } from '@/models/Network';
 import { Reward } from '@/models/Reward';
 import { RewardPool } from '@/models/RewardPool';
 import ProfilePicture from '@/components/ProfilePicture.vue';
+import PoolService from '@/services/PoolService';
 
 @Component({
     name: 'CReward',
@@ -26,6 +27,7 @@ export default class CReward extends Vue {
             proposal: 0,
         },
     };
+    private poolService: PoolService = new PoolService();
     private $network!: Network;
 
     @Prop() private reward!: Reward;
@@ -36,34 +38,51 @@ export default class CReward extends Vue {
         this.reward.update();
     }
 
-    public async withdraw() {
-        this.loading = true;
+    get canWithdraw() {
+        return this.reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account;
+    }
 
-        return await this.reward.contract.methods.withdraw()
-            .send({ from: this.$network.extdev.account.address })
-            .then(async (tx: any) => {
-                this.loading = false;
+    public withdraw() {
+        this.reward.loading = true;
+        this.poolService.withdraw(this.reward, this.pool)
+            .then((tx: any) => {
+                this.reward.loading = false;
             })
             .catch((err: string) => {
-                this.loading = false;
+                this.error = err;
             });
     }
 
-    public async tryToFinalize() {
-        this.loading = true;
-
-        return await this.reward.contract.methods.tryToFinalize()
-            .send({ from: this.$network.extdev.account.address })
-            .then(async (tx: any) => {
-                this.loading = false;
-                this.reward.state = await this.reward.contract.methods.state().call();
-                // eslint-disable-next-line
-                console.log(tx);
+    public vote(agree: boolean) {
+        this.reward.loading = true;
+        this.poolService.voteForReward(this.reward, this.pool, agree)
+            .then((tx: any) => {
+                this.reward.loading = false;
             })
             .catch((err: string) => {
-                this.loading = false;
-                // eslint-disable-next-line
-                console.error(err);
+                this.error = err;
+            });
+    }
+
+    public revokeVote() {
+        this.reward.loading = true;
+        this.poolService.revokeVoteForReward(this.reward, this.pool)
+            .then((tx: any) => {
+                this.reward.loading = false;
+            })
+            .catch((err: string) => {
+                this.error = err;
+            });
+    }
+
+    public tryToFinalize() {
+        this.reward.loading = true;
+        this.poolService.tryToFinalizeRewardPoll(this.reward, this.pool)
+            .then((tx: any) => {
+                this.reward.loading = false;
+            })
+            .catch((err: string) => {
+                this.error = err;
             });
     }
 }

@@ -2,7 +2,7 @@ import BN from 'bn.js';
 import { BasePoll } from './BasePoll';
 import UserService from '@/services/UserService';
 
-const REWARD_STATE = ['Approved', 'Rejected'];
+const REWARD_STATE = ['Pending', 'Approved', 'Rejected', 'Withdrawn'];
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export class Reward extends BasePoll {
@@ -11,6 +11,7 @@ export class Reward extends BasePoll {
     public state!: string;
     public created!: number;
     public amount!: BN;
+    public beneficiaryAddress!: string;
     public beneficiary!: string;
     private userService: UserService = new UserService();
 
@@ -43,10 +44,12 @@ export class Reward extends BasePoll {
         this.created = parseInt(created, 10);
         this.state = REWARD_STATE[parseInt(state, 10)];
         this.amount = new BN(amount).div(TOKEN_MULTIPLIER);
+        this.beneficiaryAddress = beneficiary;
         this.beneficiary = await this.userService.getMemberByAddress(beneficiary);
 
         await this.updateBasePoll();
 
         this.loading = false;
     }
+
 }
