@@ -44,26 +44,10 @@ export default class PoolService extends Vue {
             });
     }
 
-    public async getRewardPoolContract(address: string) {
+    public async getContract(address: string, abi: any) {
         return await this.$network.getExtdevContract(
             this.$network.extdev.web3js,
-            REWARD_POOL_JSON.abi,
-            address,
-        );
-    }
-
-    public async getRewardRulePollContract(address: string) {
-        return await this.$network.getExtdevContract(
-            this.$network.extdev.web3js,
-            REWARD_RULE_POLL_JSON.abi,
-            address,
-        );
-    }
-
-    public async getRewardContract(address: string) {
-        return await this.$network.getExtdevContract(
-            this.$network.extdev.web3js,
-            REWARD_JSON.abi,
+            abi,
             address,
         );
     }
@@ -74,7 +58,7 @@ export default class PoolService extends Vue {
         const receipt = await this.$network.extdev.web3js.eth.getTransactionReceipt(hash);
         const pool = new RewardPool(
             address,
-            await this.getRewardPoolContract(address),
+            await this.getContract(address, REWARD_POOL_JSON.abi),
             this.$network.extdev.account,
         );
 
@@ -126,7 +110,7 @@ export default class PoolService extends Vue {
 
     public async getReward(id: number, pool: RewardPool) {
         const address = await pool.contract.methods.rewards(id).call({from: this.$network.extdev.account});
-        const contract = await this.getRewardContract(address);
+        const contract = await this.getContract(address, REWARD_JSON.abi);
 
         return new Reward(
             address,
@@ -136,7 +120,7 @@ export default class PoolService extends Vue {
     }
 
     public async getRewardRulePoll(rule: RewardRule) {
-        const contract = await this.getRewardRulePollContract(rule.pollAddress);
+        const contract = await this.getContract(rule.pollAddress, REWARD_RULE_POLL_JSON.abi);
         const poll = new RewardRulePoll(
             rule.pollAddress,
             contract,
@@ -177,7 +161,7 @@ export default class PoolService extends Vue {
     }
 
     public async addRewardRule(rule: any, pool: RewardPool) {
-        const tx = await this.callPoolMethod(pool.contract.methods.eateRule(rule.slug.toString()), pool);
+        const tx = await this.callPoolMethod(pool.contract.methods.createRule(), pool);
         const id = tx.events.RuleStateChanged.returnValues.id;
         const state = tx.events.RuleStateChanged.returnValues.state;
 
@@ -222,7 +206,7 @@ export default class PoolService extends Vue {
     public async getRewardPoolEventDataFromHash(hash: string, type: string) {
         try {
             const receipt = await this.$network.extdev.web3js.eth.getTransactionReceipt(hash);
-            const contract = await this.getRewardPoolContract(receipt.contractAddress);
+            const contract = await this.getContract(receipt.contractAddress, REWARD_POOL_JSON.abi);
             const eventInterface = _.find(
                 contract._jsonInterface,
                 (o: any) => o.name === type && o.type === 'event',

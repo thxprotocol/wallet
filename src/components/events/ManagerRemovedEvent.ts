@@ -1,14 +1,14 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BListGroupItem } from 'bootstrap-vue';
-import { MemberAddedEvent, RewardPool } from '@/models/RewardPool';
+import { ManagerRemovedEvent, RewardPool } from '@/models/RewardPool';
 
 @Component({
-    name: 'memberadded',
+    name: 'managerremoved',
     components: {
         'b-list-group-item': BListGroupItem,
     },
 })
-export default class MemberAdded extends Vue {
-    @Prop() public ev!: MemberAddedEvent;
+export default class ManagerRemoved extends Vue {
+    @Prop() public ev!: ManagerRemovedEvent;
     @Prop() public pool!: RewardPool;
 }

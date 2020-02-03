@@ -46,7 +46,7 @@
 
                         <b-tab title="Rewards">
 
-                            <reward v-for="(reward, key) in rewards"
+                            <reward v-for="(reward, key) in sortedRewards"
                                 :key="key"
                                 :reward="reward"
                                 :pool="pool"

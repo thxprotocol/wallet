@@ -17,13 +17,21 @@
                     <span v-if="rule.state === 'Disabled' " class="badge badge-danger float-right">
                         {{ rule.state }}
                     </span>
-                    <strong>{{ rule.title }}</strong><br>
-                    <small>#{{ rule.id }}</small>
+
+                    <span class="badge badge-primary mr-1">#{{ rule.id }}</span>
+                    <strong>{{ rule.amount }} THX</strong>
+
                 </template>
 
                 <b-card-text>
+
+                    <div class="alert alert-warning" v-if="rule.pollAddress !== '0x0000000000000000000000000000000000000000' && poll && !poll.loading">
+                        Proposal: <del>{{rule.amount}} THX</del> &#x2192; <strong>{{poll.proposedAmount}} THX</strong>
+                    </div>
+
+                    <p><strong>{{ rule.title }}</strong></p>
                     <p>{{ rule.description }}</p>
-                    <strong>Reward: {{ rule.amount }} THX</strong>
+
                 </b-card-text>
 
                 <template slot="footer">

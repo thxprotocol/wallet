@@ -81,6 +81,31 @@ export class RulePollFinishedEvent extends TransactionEvent {
     }
 }
 
+
+export class RewardPollCreatedEvent extends TransactionEvent {
+    public id: number;
+
+    constructor(data: any, blockTime: string) {
+        super(data, blockTime);
+
+        this.id = parseInt(data.id, 10);
+        this.component = 'rewardpollcreated-event';
+    }
+}
+
+export class RewardPollFinishedEvent extends TransactionEvent {
+    public id: number;
+    public approved: boolean;
+
+    constructor(data: any, blockTime: string) {
+        super(data, blockTime);
+
+        this.id = parseInt(data.id, 10);
+        this.approved = data.approved;
+        this.component = 'rewardpollfinished-event';
+    }
+}
+
 export class MemberAddedEvent extends TransactionEvent {
     public account: string;
 

@@ -47,18 +47,6 @@ export default class Pools extends Vue {
 
         this.poolService.subscribeRewardPools();
 
-        this.eventService.listen('event.Deposited', (data: any) => {
-            console.log(data);
-            // You need the pool address here to be able to update
-            // the balance of the correct pool
-        });
-
-        this.eventService.listen('event.Withdrawn', (data: any) => {
-            console.log(data);
-            // You need the pool address here to be able to update
-            // the balance of the correct pool
-        });
-
         try {
             const pools = await this.poolService.getMyRewardPools();
 
@@ -91,8 +79,20 @@ export default class Pools extends Vue {
             });
     }
 
-    public onLeavePool(poolAddress: string) {
-        return firebase.database().ref(`users/${this.$account.uid}/pools`).child(poolAddress).remove();
+    public async onLeavePool(poolAddress: string) {
+        this.loading = true;
+
+        firebase.database().ref(`users/${this.$account.uid}/pools`).child(poolAddress)
+            .remove()
+            .then(() => {
+                this.$store.commit('removeRewardPool', poolAddress);
+
+                this.loading = false;
+            })
+            .catch((err: string) => {
+                this.loading = false;
+                this.error = err;
+            });
     }
 
     private async updateBalance(address: string) {

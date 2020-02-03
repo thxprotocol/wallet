@@ -12,5 +12,4 @@
     </div>
 </template>
 
-
 <script src="./ProfilePicture.ts" lang="ts"></script>

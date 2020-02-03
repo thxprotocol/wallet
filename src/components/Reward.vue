@@ -5,17 +5,30 @@
         class="mb-2" v-if="!reward.loading">
 
         <template slot="header">
-            <span v-if="reward.state === 'Approved'" class="badge badge-success float-right">
-                {{ reward.state }}
-            </span>
-            <span v-if="reward.state === 'Rejected' " class="badge badge-danger float-right">
-                {{ reward.state }}
-            </span>
+            <div class="d-flex align-items-center justify-content-between">
 
-            <div class="badge badge-info">
-                #{{ reward.id }}
+                <div class="d-flex align-items-center justify-content-between">
+
+                    <profile-picture :uid="reward.beneficiary.uid" size="xs" class="mr-2" />
+
+                    <span>
+                        <strong> {{ reward.beneficiary.firstName }} {{ reward.beneficiary.lastName }}</strong>
+                        claims
+                        <strong>{{ reward.amount}} THX</strong>
+                        for rule
+                        <span class="badge badge-primary ml-1">
+                            #{{ reward.id }}
+                        </span>
+                    </span>
+                </div>
+                <span v-if="reward.state === 'Approved'" class="badge badge-success">
+                    {{ reward.state }}
+                </span>
+                <span v-if="reward.state === 'Rejected' " class="badge badge-danger">
+                    {{ reward.state }}
+                </span>
             </div>
-            <span><strong> {{ reward.beneficiary }}</strong> claims <strong>{{ reward.amount}} THX.</strong></span>
+
         </template>
         <hr class="dotted">
         <h3>Poll period:</h3>
@@ -50,7 +63,7 @@
                 </button>
             </template>
             <template v-if="now > reward.endTime">
-                <button @click="tryToFinalize()" :class="{ disabled: loading }" class="btn btn-primary">
+                <button @click="tryToFinalize()" :class="{ disabled: loading }" class="btn btn-primary btn-block">
                     Finalize Poll
                 </button>
             </template>

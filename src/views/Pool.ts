@@ -7,10 +7,15 @@ import CRewardRule from '../components/Rule.vue';
 import CReward from '../components/Reward.vue';
 import CDepositEvent from '@/components/events/DepositEvent.vue';
 import CWithdrawelEvent from '@/components/events/WithdrawelEvent.vue';
-import CRuleStateChanged from '@/components/events/RuleStateChangedEvent.vue';
-import CRulePollCreated from '@/components/events/RulePollCreatedEvent.vue';
-import CRulePollFinished from '@/components/events/RulePollFinishedEvent.vue';
+import CRuleStateChangedEvent from '@/components/events/RuleStateChangedEvent.vue';
+import CRulePollCreatedEvent from '@/components/events/RulePollCreatedEvent.vue';
+import CRulePollFinishedEvent from '@/components/events/RulePollFinishedEvent.vue';
+import CRewardPollCreatedEvent from '@/components/events/RewardPollCreatedEvent.vue';
+import CRewardPollFinishedEvent from '@/components/events/RewardPollFinishedEvent.vue';
 import CMemberAddedEvent from '@/components/events/MemberAddedEvent.vue';
+import CMemberRemovedEvent from '@/components/events/MemberRemovedEvent.vue';
+import CManagerAddedEvent from '@/components/events/ManagerAddedEvent.vue';
+import CManagerRemovedEvent from '@/components/events/ManagerRemovedEvent.vue';
 import { Network } from '@/models/Network';
 import {
     RewardPool,
@@ -23,8 +28,8 @@ import {
     MemberRemovedEvent,
     ManagerAddedEvent,
     ManagerRemovedEvent,
-    // RewardPollCreatedEvent,
-    // RewardPollFinishedEvent
+    RewardPollCreatedEvent,
+    RewardPollFinishedEvent,
 } from '@/models/RewardPool';
 import PoolService from '@/services/PoolService';
 import CoinService from '@/services/CoinService';
@@ -41,10 +46,15 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
     components: {
         'rule': CRewardRule,
         'reward': CReward,
-        'rulepollcreated-event': CRulePollCreated,
-        'rulepollfinished-event': CRulePollFinished,
-        'rulestatechanged-event': CRuleStateChanged,
+        'rewardpollcreated-event': CRewardPollCreatedEvent,
+        'rewardpollfinished-event': CRewardPollFinishedEvent,
+        'rulepollcreated-event': CRulePollCreatedEvent,
+        'rulepollfinished-event': CRulePollFinishedEvent,
+        'rulestatechanged-event': CRuleStateChangedEvent,
         'memberadded-event': CMemberAddedEvent,
+        'memberremoved-event': CMemberRemovedEvent,
+        'manageradded-event': CManagerAddedEvent,
+        'managerremoved-event': CManagerRemovedEvent,
         'withdrawel-event': CWithdrawelEvent,
         'deposit-event': CDepositEvent,
         'b-list-group': BListGroup,
@@ -89,6 +99,10 @@ export default class PoolDetail extends Vue {
         return _.orderBy(this.events, 'blockTime', 'desc');
     }
 
+    get sortedRewards() {
+        return _.orderBy(this.rewards, 'created', 'desc');
+    }
+
     public created() {
         this.loading = true;
         this.poolService = new PoolService();
@@ -118,6 +132,9 @@ export default class PoolDetail extends Vue {
         this.eventService.listen('event.Withdrawn', (event: any) => this.onWithdrawn(event.detail));
         this.eventService.listen('event.RuleStateChanged', (event: any) => this.onRuleStateChanged(event.detail));
         this.eventService.listen('event.RulePollCreated', (event: any) => this.onRulePollCreated(event.detail));
+        this.eventService.listen('event.RulePollFinished', (event: any) => this.onRulePollFinished(event.detail));
+        this.eventService.listen('event.RewardPollCreated', (event: any) => this.onRewardPollCreated(event.detail));
+        this.eventService.listen('event.RewardPollFinished', (event: any) => this.onRewardPollFinished(event.detail));
         this.eventService.listen('event.MemberAdded', (event: any) => this.onMemberAdded(event.detail));
         this.eventService.listen('event.MemberRemoved', (event: any) => this.onMemberRemoved(event.detail));
         this.eventService.listen('event.ManagerAdded', (event: any) => this.onManagerAdded(event.detail));
@@ -149,7 +166,7 @@ export default class PoolDetail extends Vue {
     public async getRewards(pool: RewardPool) {
         const length = await pool.contract.methods.countRewards().call({ from: this.$network.extdev.account });
 
-        for (let i = 0; i < length; i++) {
+        for (let i = parseInt(length, 10) - 1; i >= 0; i--) {
             const r = await this.poolService.getReward(i, pool);
 
             this.rewards.push(r);
@@ -292,19 +309,19 @@ export default class PoolDetail extends Vue {
         this.updateRule(data);
     }
 
-    // private onRewardPollCreated(data: any) {
-    //     const r = new RewardPollCreatedEvent(data, data.blockTime);
-    //     this.events.push(r);
-    //
-    //     this.updateRule(data);
-    // }
-    //
-    // private onRewardPollFinished(data: any) {
-    //     const r = new RewardPollFinishedEvent(data, data.blockTime);
-    //     this.events.push(r);
-    //
-    //     this.updateRule(data);
-    // }
+    private onRewardPollCreated(data: any) {
+        const r = new RewardPollCreatedEvent(data, data.blockTime);
+        this.events.push(r);
+
+        this.updateRule(data);
+    }
+
+    private onRewardPollFinished(data: any) {
+        const r = new RewardPollFinishedEvent(data, data.blockTime);
+        this.events.push(r);
+
+        this.updateRule(data);
+    }
 
     private async updateRule(data: any) {
         if (this.rules) {

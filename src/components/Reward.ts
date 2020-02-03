@@ -1,9 +1,9 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BProgress, BSpinner, BCardText, BCard, BModal, BProgressBar } from 'bootstrap-vue';
 import { Network } from '@/models/Network';
-import PoolService from '@/services/PoolService';
 import { Reward } from '@/models/Reward';
 import { RewardPool } from '@/models/RewardPool';
+import ProfilePicture from '@/components/ProfilePicture.vue';
 
 @Component({
     name: 'CReward',
@@ -14,6 +14,7 @@ import { RewardPool } from '@/models/RewardPool';
         'b-spinner': BSpinner,
         'b-progress': BProgress,
         'b-progress-bar': BProgressBar,
+        'profile-picture': ProfilePicture,
     },
 })
 export default class CReward extends Vue {
@@ -25,13 +26,10 @@ export default class CReward extends Vue {
             proposal: 0,
         },
     };
-
     private $network!: Network;
-    private poolService: PoolService = new PoolService();
 
     @Prop() private reward!: Reward;
     @Prop() private pool!: RewardPool;
-    @Prop() private isMember!: boolean;
     @Prop() private isManager!: boolean;
 
     public created() {
@@ -45,16 +43,13 @@ export default class CReward extends Vue {
             .send({ from: this.$network.extdev.account.address })
             .then(async (tx: any) => {
                 this.loading = false;
-                // eslint-disable-next-line
-                console.log(tx);
             })
             .catch((err: string) => {
                 this.loading = false;
-                // eslint-disable-next-line
-                console.error(err);
             });
     }
-    public async finalizePoll() {
+
+    public async tryToFinalize() {
         this.loading = true;
 
         return await this.reward.contract.methods.tryToFinalize()
