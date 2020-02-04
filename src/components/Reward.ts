@@ -33,6 +33,7 @@ export default class CReward extends Vue {
     @Prop() private reward!: Reward;
     @Prop() private pool!: RewardPool;
     @Prop() private isManager!: boolean;
+    @Prop() private isMember!: boolean;
 
     public created() {
         this.reward.update();

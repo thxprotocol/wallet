@@ -12,6 +12,8 @@ import {
     RulePollFinishedEvent,
     MemberAddedEvent,
     MemberRemovedEvent,
+    RewardPollCreatedEvent,
+    RewardPollFinishedEvent,
 } from '@/models/RewardPool';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import { Reward } from '@/models/Reward';
@@ -193,27 +195,32 @@ export default class PoolService extends Vue {
         let eventModel: any = {};
 
         if (type === 'MemberAdded') {
-            eventModel = new MemberAddedEvent(data.logs, data.blockTime);
+            eventModel = new MemberAddedEvent(data, data.blockTime);
         }
         if (type === 'MemberRemoved') {
-            eventModel = new MemberRemovedEvent(data.logs, data.blockTime);
+            eventModel = new MemberRemovedEvent(data, data.blockTime);
         }
         if (type === 'Deposited') {
-            eventModel = new DepositEvent(data.logs, data.blockTime);
+            eventModel = new DepositEvent(data, data.blockTime);
         }
         if (type === 'Withdrawn') {
-            eventModel = new WithdrawelEvent(data.logs, data.blockTime);
+            eventModel = new WithdrawelEvent(data, data.blockTime);
         }
         if (type === 'RuleStateChanged') {
-            eventModel = new RuleStateChangedEvent(data.logs, data.blockTime);
+            eventModel = new RuleStateChangedEvent(data, data.blockTime);
         }
         if (type === 'RulePollCreated') {
-            eventModel = new RulePollCreatedEvent(data.logs, data.blockTime);
+            eventModel = new RulePollCreatedEvent(data, data.blockTime);
         }
         if (type === 'RulePollFinished') {
-            eventModel = new RulePollFinishedEvent(data.logs, data.blockTime);
+            eventModel = new RulePollFinishedEvent(data, data.blockTime);
         }
-
+        if (type === 'RewardPollCreated') {
+            eventModel = new RewardPollCreatedEvent(data, data.blockTime);
+        }
+        if (type === 'RewardPollFinished') {
+            eventModel = new RewardPollFinishedEvent(data, data.blockTime);
+        }
         eventModel.hash = hash;
 
         return eventModel;
@@ -221,6 +228,7 @@ export default class PoolService extends Vue {
 
     public async getRewardPoolEventDataFromHash(hash: string, type: string) {
         try {
+            const tx = await this.$network.extdev.web3js.eth.getTransaction(hash);
             const receipt = await this.$network.extdev.web3js.eth.getTransactionReceipt(hash);
             const contract = await this.getContract(receipt.contractAddress, REWARD_POOL_JSON.abi);
             const eventInterface = _.find(
@@ -232,12 +240,13 @@ export default class PoolService extends Vue {
                 (l: any) => l.topics.includes(eventInterface.signature),
             );
             if (log) {
-                const logs = await this.$network.extdev.web3js.eth.abi.decodeLog(
+                const event = await this.$network.extdev.web3js.eth.abi.decodeLog(
                     eventInterface.inputs,
                     log.data,
                     log.topics.slice(1),
                 );
-                return { type, logs, blockTime: log.blockTime };
+
+                return { type, event, blockTime: log.blockTime, from: tx.from };
             }
         } catch (err) {
             return err;

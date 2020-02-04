@@ -126,23 +126,45 @@ export default class PoolDetail extends Vue {
                     this.rules = await this.poolService.getRewardRules(this.pool);
                 }
             });
-
-        this.eventService.listen('event.Deposited', (event: any) => this.onDeposited(event.detail));
-        this.eventService.listen('event.Withdrawn', (event: any) => this.onWithdrawn(event.detail));
-        this.eventService.listen('event.RuleStateChanged', (event: any) => this.onRuleStateChanged(event.detail));
-        this.eventService.listen('event.RulePollCreated', (event: any) => this.onRulePollCreated(event.detail));
-        this.eventService.listen('event.RulePollFinished', (event: any) => this.onRulePollFinished(event.detail));
-        this.eventService.listen('event.RewardPollCreated', (event: any) => this.onRewardPollCreated(event.detail));
-        this.eventService.listen('event.RewardPollFinished', (event: any) => this.onRewardPollFinished(event.detail));
-        this.eventService.listen('event.MemberAdded', (event: any) => this.onMemberAdded(event.detail));
-        this.eventService.listen('event.MemberRemoved', (event: any) => this.onMemberRemoved(event.detail));
-        this.eventService.listen('event.ManagerAdded', (event: any) => this.onManagerAdded(event.detail));
-        this.eventService.listen('event.ManagerRemoved', (event: any) => this.onManagerRemoved(event.detail));
+        //
+        // this.eventService.listen('event.Deposited', (event: any) => this.onDeposited({
+        //     event: event.detail,
+        // }));
+        // this.eventService.listen('event.Withdrawn', (event: any) => this.onWithdrawn({
+        //     event: event.detail,
+        // }));
+        // this.eventService.listen('event.RuleStateChanged', (event: any) => this.onRuleStateChanged({
+        //     event: event.detail,
+        // }));
+        // this.eventService.listen('event.RulePollCreated', (event: any) => this.onRulePollCreated({
+        //     event: event.detail,
+        // }));
+        // this.eventService.listen('event.RulePollFinished', (event: any) => this.onRulePollFinished({
+        //     event: event.detail,
+        // }));
+        // this.eventService.listen('event.RewardPollCreated', (event: any) => this.onRewardPollCreated({
+        //     event: event.detail,
+        // }));
+        // this.eventService.listen('event.RewardPollFinished', (event: any) => this.onRewardPollFinished({
+        //     event: event.detail,
+        // }));
+        // this.eventService.listen('event.MemberAdded', (event: any) => this.onMemberAdded({
+        //     event: event.detail,
+        // }));
+        // this.eventService.listen('event.MemberRemoved', (event: any) => this.onMemberRemoved({
+        //     event: event.detail,
+        // }));
+        // this.eventService.listen('event.ManagerAdded', (event: any) => this.onManagerAdded({
+        //     event: event.detail,
+        // }));
+        // this.eventService.listen('event.ManagerRemoved', (event: any) => this.onManagerRemoved({
+        //     event: event.detail,
+        // }));
     }
 
     public async getRewardPoolEvents(pool: RewardPool) {
         firebase.database().ref(`pools/${pool.address}/events`)
-            .limitToLast(10)
+            .limitToLast(15)
             .on('child_added', async (snap: any) => {
                 const data = snap.val();
 

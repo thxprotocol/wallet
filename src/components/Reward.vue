@@ -74,16 +74,18 @@
                         Revoke
                     </button>
                 </template>
-                <template v-if="reward.finalized && canWithdraw && reward.state === 'Approved'">
-                    <button @click="withdraw()" :class="{ disabled: reward.loading }" class="btn btn-success btn-block">
-                        Withdraw
-                    </button>
-                </template>
                 <template v-if="now > reward.endTime && !reward.finalized">
                     <button @click="tryToFinalize()" :class="{ disabled: loading }" class="btn btn-primary btn-block">
                         Finalize Poll
                     </button>
                 </template>
+
+                <template v-if="reward.finalized && canWithdraw && reward.state === 'Approved'">
+                    <button @click="withdraw()" :class="{ disabled: reward.loading }" class="btn btn-success btn-block">
+                        Withdraw
+                    </button>
+                </template>
+                
             </template>
         </template>
     </b-card>

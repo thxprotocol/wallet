@@ -354,3 +354,14 @@ a,
         height: 200px;
     }
 }
+
+.router-link-active {
+    background: $gray-200;
+}
+
+.list-item-text-overflow {
+    max-width: 200px;
+    text-overflow: ellipsis;
+    display: block;
+    overflow: hidden;
+}

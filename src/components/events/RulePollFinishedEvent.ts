@@ -3,11 +3,13 @@ import { BListGroupItem } from 'bootstrap-vue';
 import { RulePollFinishedEvent, RewardPool } from '@/models/RewardPool';
 import { RewardRule } from '@/models/RewardRule';
 import PoolService from '@/services/PoolService';
+import ProfilePicture from '@/components/ProfilePicture.vue';
 
 @Component({
     name: 'RulePollFinished',
     components: {
         'b-list-group-item': BListGroupItem,
+        'profile-picture': ProfilePicture,
     },
 })
 export default class RulePollFinished extends Vue {

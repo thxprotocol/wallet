@@ -4218,12 +4218,12 @@
         }
       },
       "links": {},
-      "address": "0xc9336f22Da60B27044c6724eB1586A068785F51a",
-      "transactionHash": "0xb488d64c6377c29bf983f6566ff69bd398b1d1c501118a028da6c63931763d55"
+      "address": "0x1FFC00E0257C981aae15Db08a399a8Ad8993c792",
+      "transactionHash": "0x16aed30edcf4cb58f6719f7e29d363bd07ac2d6b9df2efaf72de7a9a18ca49ce"
     }
   },
   "schemaVersion": "3.0.1",
-  "updatedAt": "2020-02-03T15:05:21.225Z",
+  "updatedAt": "2020-02-04T09:00:36.420Z",
   "devdoc": {
     "methods": {
       "allowance(address,address)": {

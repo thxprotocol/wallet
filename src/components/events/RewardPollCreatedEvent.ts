@@ -4,11 +4,13 @@ import { RewardPollCreatedEvent, RewardPool } from '@/models/RewardPool';
 import { RewardRule } from '@/models/RewardRule';
 import PoolService from '@/services/PoolService';
 import { Reward } from '@/models/Reward';
+import ProfilePicture from '@/components/ProfilePicture.vue';
 
 @Component({
     name: 'rewardpollcreated-event',
     components: {
         'b-list-group-item': BListGroupItem,
+        'profile-picture': ProfilePicture,
     },
 })
 export default class RewardPollCreated extends Vue {

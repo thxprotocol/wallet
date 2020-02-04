@@ -1,10 +1,17 @@
 <template>
-    <b-list-group-item>
-        <div class="d-flex w-100 justify-content-between">
-            <strong>Member Added</strong>
-            <small>{{ ev.blockTime | moment("MMMM Do YYYY HH:mm") }}</small>
+    <b-list-group-item class="d-flex justify-content-between align-items-center p-2">
+        <profile-picture class="mr-2" v-if="ev.from" :uid="ev.from.uid" size="sm"/>
+        <div class="border-left flex-grow-1 pl-3">
+            <div class="d-flex w-100">
+                <strong class="flex-grow-1">
+                    Member Added
+                </strong>
+                <small class="mb-1">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
+            </div>
+            <span class="text-muted list-item-text-overflow">
+                {{ev.account}}
+            </span>
         </div>
-        <small class="mb-1">{{ev.account}}</small>
     </b-list-group-item>
 </template>
 <script src="./MemberAddedEvent.ts" lang="ts"></script>
