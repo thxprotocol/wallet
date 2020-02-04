@@ -241,6 +241,12 @@ export class RewardPool {
 
     }
 
+    public async countRewards() {
+        return await this.contract.methods.countRewards().call({
+            from: this.owner,
+        });
+    }
+
     public async countDeposits(address: string) {
         return await this.contract.methods.countDeposits(address).call({
             from: this.owner,

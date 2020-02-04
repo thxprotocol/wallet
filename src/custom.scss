@@ -179,6 +179,8 @@ a,
     }
 }
 
+.btn-danger,
+.btn-secondary,
 .btn-success,
 .btn-primary {
     font-family: 'Exo 2';
@@ -199,16 +201,12 @@ a,
         opacity: .6;
         cursor: not-allowed;
         pointer-events: none;
+        background-color: $gray-400;
     }
 
     &.btn-inverse {
         background-color: $yellow;
         color: black;
-    }
-
-    &:focus,
-    &:active:focus {
-        box-shadow: 0 0 0 0.2rem rgba(253, 229, 66, 0.5) !important;
     }
 }
 

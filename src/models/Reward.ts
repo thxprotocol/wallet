@@ -52,4 +52,14 @@ export class Reward extends BasePoll {
         this.loading = false;
     }
 
+    public async getState() {
+        const state = await this.contract.methods.state().call({ from: this.owner });
+        return REWARD_STATE[parseInt(state, 10)];
+    }
+
+    public async getHasVoted() {
+        const vote: any = await this.contract.methods.votesByAddress(this.owner).call({ from: this.owner });
+        return parseInt(vote.time, 10) ? true : false;
+    }
+
 }

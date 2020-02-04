@@ -9,8 +9,6 @@
             <div class="row">
                 <div class="col-12">
 
-                    <router-view></router-view>
-
                     <b-tabs content-class="mt-4" justified>
                         <div class="alert alert-danger" v-if="error">
                             {{error}}
@@ -38,9 +36,7 @@
                                 :isManager="isManager"
                                 :isMember="isMember" />
 
-                            <div class="d-flex w-100 justify-content-end">
-                                <button v-if="isManager" class="btn btn-primary" @click="$refs.modalCreateRule.show()">Add new rule</button>
-                            </div>
+                            <button v-if="isManager" class="btn btn-primary btn-block" @click="$refs.modalCreateRule.show()">Add new rule</button>
 
                         </b-tab>
 

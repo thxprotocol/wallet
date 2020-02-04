@@ -7,17 +7,16 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 export class RewardRule {
     public id: number;
     public state: string;
-    public created: string;
+    public created: number;
     public amount: BN;
     public pollAddress: string;
-
     public title: string = '';
     public description: string = '';
 
     constructor(data: any, meta: any) {
         this.id = parseInt(data.id, 10);
         this.state = RULE_STATE[parseInt(data.state, 10)];
-        this.created = data.created;
+        this.created = parseInt(data.created, 10);
         this.pollAddress = data.poll;
         this.amount = new BN(data.amount).div(TOKEN_MULTIPLIER);
 
@@ -25,6 +24,10 @@ export class RewardRule {
             this.title = meta.title;
             this.description = meta.description;
         }
+    }
+
+    public get hasPollAddress() {
+        return this.pollAddress !== '0x0000000000000000000000000000000000000000';
     }
 }
 

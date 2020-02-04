@@ -1,6 +1,5 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BModal, BCard, BCardText, BSpinner, BProgress, BProgressBar } from 'bootstrap-vue';
-import PoolDetail from '@/views/Pool.vue';
 import { Network } from '@/models/Network';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import { RewardPool } from '@/models/RewardPool';
@@ -30,7 +29,6 @@ export default class CRewardRule extends Vue {
         },
     };
     public poll: RewardRulePoll | null = null;
-
     private $network!: Network;
     private poolService: PoolService = new PoolService();
 
@@ -39,14 +37,16 @@ export default class CRewardRule extends Vue {
     @Prop() private isMember!: boolean;
     @Prop() private isManager!: boolean;
 
-    public created() {
-        this.updateRulePoll();
+    public async created() {
+        this.poll = await this.poolService.getRewardRulePoll(this.rule);
+        this.update();
     }
 
-    public async viewRunningPoll() {
-        (this.$refs.modalRulePoll as BModal).show();
-
-        this.updateRulePoll();
+    public async update() {
+        if (this.poll) {
+            this.poll.update();
+        }
+        this.now = await this.$network.now();
     }
 
     public async startRulePoll() {
@@ -57,9 +57,13 @@ export default class CRewardRule extends Vue {
             new BN(this.input.poll.proposal).mul(TOKEN_MULTIPLIER),
             )
             .then(async (tx: any) => {
-                this.input.proposal = 0;
+                const rule: RewardRule = await this.poolService.getRewardRule(this.rule.id, this.pool);
+
+                this.rule.pollAddress = rule.pollAddress;
+                this.poll = await this.poolService.getRewardRulePoll(rule);
                 this.loading = false;
-                this.updateRulePoll();
+                this.input.proposal = 0;
+
                 (this.$refs.modalCreateRulePoll as BModal).hide();
             })
             .catch((err: string) => {
@@ -77,11 +81,13 @@ export default class CRewardRule extends Vue {
                 agree,
                 )
                 .then(async (tx: any) => {
-                    this.updateRulePoll();
+                    if (this.poll) {
+                        this.poll.update();
+                    }
                 })
                 .catch((err: string) => {
-                    console.error(err);
                     this.error = err;
+
                     if (this.poll) {
                         this.poll.loading = false;
                     }
@@ -97,7 +103,9 @@ export default class CRewardRule extends Vue {
                 this.pool,
                 )
                 .then(async (tx: any) => {
-                    this.updateRulePoll();
+                    if (this.poll) {
+                        this.poll.update();
+                    }
                 })
                 .catch((err: string) => {
                     console.error(err);
@@ -114,8 +122,8 @@ export default class CRewardRule extends Vue {
                 this.pool,
                 )
                 .then(async (tx: any) => {
-                    this.updateRulePoll();
-                    (this.$refs.modalRulePoll as BModal).hide();
+                    this.rule.pollAddress = '0x0000000000000000000000000000000000000000';
+                    this.poll = null;
                     this.loading = false;
                 })
                 .catch((err: string) => {
@@ -123,13 +131,6 @@ export default class CRewardRule extends Vue {
                     this.error = err;
                     this.loading = false;
                 });
-        }
-    }
-
-    private async updateRulePoll() {
-        if (this.rule.pollAddress !== '0x0000000000000000000000000000000000000000') {
-            this.now = await this.$network.now();
-            this.poll = await this.poolService.getRewardRulePoll(this.rule);
         }
     }
 }

@@ -36,7 +36,12 @@ export default class CReward extends Vue {
     @Prop() private isMember!: boolean;
 
     public created() {
+        this.update();
+    }
+
+    public async update() {
         this.reward.update();
+        this.now = await this.$network.now();
     }
 
     get canWithdraw() {
@@ -47,7 +52,7 @@ export default class CReward extends Vue {
         this.reward.loading = true;
         this.poolService.withdraw(this.reward, this.pool)
             .then((tx: any) => {
-                this.reward.update();
+                this.update();
             })
             .catch((err: string) => {
                 this.error = err;
@@ -58,7 +63,7 @@ export default class CReward extends Vue {
         this.reward.loading = true;
         this.poolService.voteForReward(this.reward, this.pool, agree)
             .then((tx: any) => {
-                this.reward.update();
+                this.update();
             })
             .catch((err: string) => {
                 this.error = err;
@@ -69,7 +74,7 @@ export default class CReward extends Vue {
         this.reward.loading = true;
         this.poolService.revokeVoteForReward(this.reward, this.pool)
             .then((tx: any) => {
-                this.reward.update();
+                this.update();
             })
             .catch((err: string) => {
                 this.error = err;
@@ -80,7 +85,7 @@ export default class CReward extends Vue {
         this.reward.loading = true;
         this.poolService.tryToFinalizeRewardPoll(this.reward, this.pool)
             .then((tx: any) => {
-                this.reward.update();
+                this.update();
             })
             .catch((err: string) => {
                 this.error = err;

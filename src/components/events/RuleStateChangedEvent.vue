@@ -5,6 +5,7 @@
             <div class="d-flex w-100">
                 <strong class="flex-grow-1">
                     Rule State Changed
+                    <small class="badge badge-primary ml-1">#{{ev.rule}}</small>
                     <small v-if="ev.state == 'Disabled'" class="badge badge-danger ml-1">
                         {{ev.state}}
                     </small>
@@ -14,8 +15,8 @@
                 </strong>
                 <small class="mb-1">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
             </div>
-            <span v-if="rule && rule.title" class="text-muted list-item-text-overflow">
-                #{{ rule.id }} {{rule.title}}
+            <span v-if="rule && rule.title" class="text-muted">
+                Earn <strong>{{rule.amount}} THX</strong> for <i>{{rule.title}}</i>
             </span>
         </div>
     </b-list-group-item>

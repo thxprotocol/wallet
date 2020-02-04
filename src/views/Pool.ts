@@ -99,7 +99,7 @@ export default class PoolDetail extends Vue {
     }
 
     get sortedRewards() {
-        return _.orderBy(this.rewards, 'id', 'desc');
+        return _.orderBy(this.rewards, 'startTime', 'desc');
     }
 
     public created() {
@@ -126,40 +126,6 @@ export default class PoolDetail extends Vue {
                     this.rules = await this.poolService.getRewardRules(this.pool);
                 }
             });
-        //
-        // this.eventService.listen('event.Deposited', (event: any) => this.onDeposited({
-        //     event: event.detail,
-        // }));
-        // this.eventService.listen('event.Withdrawn', (event: any) => this.onWithdrawn({
-        //     event: event.detail,
-        // }));
-        // this.eventService.listen('event.RuleStateChanged', (event: any) => this.onRuleStateChanged({
-        //     event: event.detail,
-        // }));
-        // this.eventService.listen('event.RulePollCreated', (event: any) => this.onRulePollCreated({
-        //     event: event.detail,
-        // }));
-        // this.eventService.listen('event.RulePollFinished', (event: any) => this.onRulePollFinished({
-        //     event: event.detail,
-        // }));
-        // this.eventService.listen('event.RewardPollCreated', (event: any) => this.onRewardPollCreated({
-        //     event: event.detail,
-        // }));
-        // this.eventService.listen('event.RewardPollFinished', (event: any) => this.onRewardPollFinished({
-        //     event: event.detail,
-        // }));
-        // this.eventService.listen('event.MemberAdded', (event: any) => this.onMemberAdded({
-        //     event: event.detail,
-        // }));
-        // this.eventService.listen('event.MemberRemoved', (event: any) => this.onMemberRemoved({
-        //     event: event.detail,
-        // }));
-        // this.eventService.listen('event.ManagerAdded', (event: any) => this.onManagerAdded({
-        //     event: event.detail,
-        // }));
-        // this.eventService.listen('event.ManagerRemoved', (event: any) => this.onManagerRemoved({
-        //     event: event.detail,
-        // }));
     }
 
     public async getRewardPoolEvents(pool: RewardPool) {

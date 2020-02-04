@@ -47,7 +47,7 @@
                 </p>
                 <input v-if="!loading" v-model="input.poolAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000" />
                 <template v-slot:modal-footer="{ ok, cancel }">
-                    <button class="btn btn-link" @click="$refs.modalDeposit.hide()">
+                    <button class="btn btn-link" @click="$refs.modalJoinPool.hide()">
                         Cancel
                     </button>
                     <button @click="onJoinRewardPool()" v-bind:class="{ disabled: loading }" class="btn btn-primary">
