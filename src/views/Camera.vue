@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <qrcode-stream v-if="!rule" class="ui-video" @init="init" @decode="decode" :track="repaint"></qrcode-stream>
+        <qrcode-stream v-if="!rule" class="ui-video" @init="init" @decode="onDecode" :track="repaint"></qrcode-stream>
 
         <template v-if="!loading && !rule">
             <div class="ui-camera">
@@ -37,12 +37,12 @@
                 <span></span>
                 <span></span>
             </div>
-
-            <div class="ui-file">
-                <qrcode-capture @decode="decode"></qrcode-capture>
-                <small>Upload QR code image if the camera does not work on your device.</small>
-            </div>
         </template>
+
+        <div class="ui-file">
+            <qrcode-capture @decode="onDecode"></qrcode-capture>
+            <small>Upload QR code image if the camera does not work on your device.</small>
+        </div>
 
     </article>
 </template>

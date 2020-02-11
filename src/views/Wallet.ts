@@ -4,7 +4,8 @@ import { Network } from '@/models/Network';
 import EventService from '@/services/EventService';
 import PoolService from '@/services/PoolService';
 import CoinService from '@/services/CoinService';
-import { DepositEvent, WithdrawelEvent, IRewardPools, RewardPool } from '@/models/RewardPool';
+import { IRewardPools, RewardPool } from '@/models/RewardPool';
+import { DepositEvent, WithdrawelEvent } from '@/models/RewardPoolEvents';
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
 

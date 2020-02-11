@@ -4,8 +4,7 @@
         <div class="border-left flex-grow-1 pl-3" v-if="rule">
             <div class="d-flex w-100">
                 <span class="flex-grow-1">
-                    Rule Poll: <strong>{{rule.title}}</strong>
-                    <span class="badge badge-primary ml-1">#{{rule.id}}</span>
+                    <strong>{{rule.title}}</strong>
                     <span v-if="ev.approved" class="badge badge-success ml-1">
                         Approved
                     </span>
@@ -13,9 +12,9 @@
                         Rejected
                     </span>
                 </span>
-                <small class="mb-1">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
+                <small class="flex-shrink-0">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
             </div>
-            <div v-if="ev.approved" class="alert alert-success m-0">
+            <div v-if="ev.approved" class="text-muted">
                 Rule changed to <strong>{{ rule.amount }} THX</strong>.
             </div>
         </div>

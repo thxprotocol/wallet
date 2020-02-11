@@ -1,6 +1,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BListGroupItem } from 'bootstrap-vue';
-import { ManagerAddedEvent, RewardPool } from '@/models/RewardPool';
+import { RewardPool } from '@/models/RewardPool';
+import { ManagerAddedEvent } from '@/models/RewardPoolEvents';
 import ProfilePicture from '@/components/ProfilePicture.vue';
 
 @Component({

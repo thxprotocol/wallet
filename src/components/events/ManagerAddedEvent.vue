@@ -6,7 +6,7 @@
                 <strong class="flex-grow-1">
                     Manager Added
                 </strong>
-                <small class="mb-1">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
+                <small class="flex-shrink-0">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
             </div>
             <span class="text-muted list-item-text-overflow">
                 {{ev.account}}

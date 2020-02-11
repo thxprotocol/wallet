@@ -1,5 +1,5 @@
 <template>
-    <div :class="`account-picture account-picture-${size} bg-yellow`">
+    <div :class="`flex-shrink-0 account-picture account-picture-${size} bg-yellow`">
         <img v-if="picture"
             :src="picture.url"
             :alt="picture.name"

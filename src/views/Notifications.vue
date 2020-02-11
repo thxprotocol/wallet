@@ -2,7 +2,7 @@
 <article class="region region-container overflow p-3">
 
     <div
-        class="pb-2"
+        class="pb-2 w-100"
         v-for="(ev, key) in events">
 
         <rule
@@ -15,7 +15,7 @@
 
         <reward
             :key="key"
-            v-if="ev.reward"
+            v-if="ev.reward && ev.reward.state === 'Pending' && isManager"
             :reward="ev.reward"
             :pool="ev.pool"
             :isManager="isManager"

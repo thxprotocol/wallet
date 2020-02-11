@@ -4,7 +4,6 @@ import { Vue } from 'vue-property-decorator';
 import { Network } from '@/models/Network';
 import { Account } from '@/models/Account';
 import {
-    RewardPool,
     DepositEvent,
     WithdrawelEvent,
     RuleStateChangedEvent,
@@ -14,7 +13,8 @@ import {
     MemberRemovedEvent,
     RewardPollCreatedEvent,
     RewardPollFinishedEvent,
-} from '@/models/RewardPool';
+} from '@/models/RewardPoolEvents';
+import { RewardPool } from '@/models/RewardPool';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import { Reward } from '@/models/Reward';
 

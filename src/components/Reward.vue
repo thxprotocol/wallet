@@ -5,43 +5,40 @@
             footer-tag="footer"
             header-tag="header">
 
-            <div v-if="reward.loading" class="d-flex w-100 justify-content-center">
-                <b-spinner variant="primary" ></b-spinner>
-            </div>
-            <template v-else>
-                <template slot="header">
+            <template slot="header" v-if="!reward.loading">
+                <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <profile-picture :uid="reward.beneficiary.uid" size="xs" class="mr-2" />
-                            <span>
-                                <strong> {{ reward.beneficiary.firstName }} {{ reward.beneficiary.lastName }}</strong>
-                                claims
-                                <strong>{{ reward.amount}} THX</strong>
-                                for rule
-                                <span class="badge badge-primary ml-1 mr-1">
-                                    #{{ reward.rule }}
-                                </span>
-                                <span v-if="reward.state === 'Approved'" class="badge badge-success">
-                                    {{ reward.state }}
-                                </span>
-                                <span v-if="reward.state === 'Rejected' " class="badge badge-danger">
-                                    {{ reward.state }}
-                                </span>
-                                <span v-if="reward.state === 'Withdrawn' " class="badge badge-warning">
-                                    {{ reward.state }}
-                                </span>
-                                <span v-if="reward.state === 'Pending' " class="badge badge-info">
-                                    {{ reward.state }}
-                                </span>
-
+                        <profile-picture :uid="reward.beneficiary.uid" size="xs" class="mr-2" />
+                        <span>
+                            <strong> {{ reward.beneficiary.firstName }} {{ reward.beneficiary.lastName }}</strong>
+                            claims
+                            <strong>{{ reward.amount}} THX</strong>
+                            for rule
+                            <span class="badge badge-primary ml-1 mr-1">
+                                #{{ reward.rule }}
                             </span>
-                        </div>
+                            <span v-if="reward.state === 'Approved'" class="badge badge-success">
+                                {{ reward.state }}
+                            </span>
+                            <span v-if="reward.state === 'Rejected' " class="badge badge-danger">
+                                {{ reward.state }}
+                            </span>
+                            <span v-if="reward.state === 'Withdrawn' " class="badge badge-warning">
+                                {{ reward.state }}
+                            </span>
+                            <span v-if="reward.state === 'Pending' " class="badge badge-info">
+                                {{ reward.state }}
+                            </span>
 
-                        <small>{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                        </span>
                     </div>
 
-                </template>
+                    <small>{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                </div>
 
+            </template>
+
+            <template v-if="!reward.loading">
                 <h3>Votes ({{reward.totalVoted}}):</h3>
                 <div class="row">
                     <div class="col-12">
@@ -72,43 +69,48 @@
                         <small>{{reward.noCounter}}</small>
                     </div>
                 </div>
-                <template slot="footer">
-                    <button v-if="!reward.finalized" class="btn btn-link btn-block mb-3" @click="update()">
-                        <span v-if="!reward.loading">Update poll results</span>
-                        <span v-else>Loading...</span>
-                    </button>
-                    <template v-if="isManager">
-                        <div class="row" v-if="now < reward.endTime">
-                            <div class="col-md-6" v-if="!reward.hasVoted">
-                                <button @click="vote(true)" :class="{ disabled: reward.loading }" class="btn btn-success btn-block">
-                                    Approve
-                                </button>
-                            </div>
-                            <div class="col-md-6" v-if="!reward.hasVoted">
-                                <button @click="vote(false)" :class="{ disabled: reward.loading }" class="btn btn-danger btn-block">
-                                    Reject
-                                </button>
-                            </div>
-                            <div class="col-md-12" v-if="reward.hasVoted">
-                                <button @click="revokeVote()" :class="{ disabled: reward.loading }" class="btn btn-primary btn-block">
-                                    Revoke
-                                </button>
-                            </div>
-                        </div>
-                        <template v-if="!reward.finalized && now > reward.endTime">
-                            <button @click="tryToFinalize()" :class="{ disabled: loading }" class="btn btn-link btn-block">
-                                Finalize Poll
+            </template>
+
+            <button class="btn btn-link btn-block" @click="update()">
+                <span v-if="!reward.loading">Update poll results</span>
+                <div v-else class="d-flex w-100 justify-content-center">
+                    <b-spinner variant="dark" ></b-spinner>
+                </div>
+            </button>
+
+            <template slot="footer">
+
+                <template v-if="isManager">
+                    <div class="row" v-if="now < reward.endTime">
+                        <div class="col-md-6" v-if="!reward.hasVoted">
+                            <button @click="vote(true)" :class="{ disabled: reward.loading }" class="btn btn-success btn-block mb-2">
+                                Approve
                             </button>
-                        </template>
-                    </template>
-                    <template v-if="reward.finalized && canWithdraw && reward.state === 'Approved'">
-                        <button @click="withdraw()" :class="{ disabled: reward.loading }" class="btn btn-success btn-block">
-                            Withdraw
+                        </div>
+                        <div class="col-md-6" v-if="!reward.hasVoted">
+                            <button @click="vote(false)" :class="{ disabled: reward.loading }" class="btn btn-danger btn-block">
+                                Reject
+                            </button>
+                        </div>
+                        <div class="col-md-12" v-if="reward.hasVoted">
+                            <button @click="revokeVote()" :class="{ disabled: reward.loading }" class="btn btn-primary btn-block">
+                                Revoke
+                            </button>
+                        </div>
+                    </div>
+                    <template v-if="!reward.finalized && now > reward.endTime">
+                        <button @click="tryToFinalize()" :class="{ disabled: loading }" class="btn btn-link btn-block">
+                            Finalize Poll
                         </button>
                     </template>
                 </template>
-
+                <template v-if="reward.finalized && canWithdraw && reward.state === 'Approved'">
+                    <button @click="withdraw()" :class="{ disabled: reward.loading }" class="btn btn-success btn-block">
+                        Withdraw
+                    </button>
+                </template>
             </template>
+
         </b-card>
     </div>
 </template>

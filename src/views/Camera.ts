@@ -30,7 +30,8 @@ export default class Camera extends Vue {
         return;
     }
 
-    private async decode(decodedString: string) {
+    private async onDecode(decodedString: string) {
+        console.log(decodedString);
         if (decodedString.length > 0) {
             this.data = JSON.parse(decodedString);
             this.error = '';
@@ -102,4 +103,3 @@ export default class Camera extends Vue {
     }
 
 }
-

@@ -17,20 +17,8 @@ import CMemberRemovedEvent from '@/components/events/MemberRemovedEvent.vue';
 import CManagerAddedEvent from '@/components/events/ManagerAddedEvent.vue';
 import CManagerRemovedEvent from '@/components/events/ManagerRemovedEvent.vue';
 import { Network } from '@/models/Network';
-import {
-    RewardPool,
-    DepositEvent,
-    WithdrawelEvent,
-    RulePollCreatedEvent,
-    RulePollFinishedEvent,
-    RuleStateChangedEvent,
-    MemberAddedEvent,
-    MemberRemovedEvent,
-    ManagerAddedEvent,
-    ManagerRemovedEvent,
-    RewardPollCreatedEvent,
-    RewardPollFinishedEvent,
-} from '@/models/RewardPool';
+import { Account } from '@/models/Account';
+import { RewardPool } from '@/models/RewardPool';
 import PoolService from '@/services/PoolService';
 import CoinService from '@/services/CoinService';
 import EventService from '@/services/EventService';
@@ -90,6 +78,7 @@ export default class PoolDetail extends Vue {
             description: '',
         },
     };
+    private $account!: Account;
     private $network!: Network;
     private rewardRule: RewardRule | null = null;
     private rewardRulePoll: RewardRulePoll | null = null;
@@ -99,7 +88,12 @@ export default class PoolDetail extends Vue {
     }
 
     get sortedRewards() {
-        return _.orderBy(this.rewards, 'startTime', 'desc');
+        return _.orderBy(this.rewards.filter((reward: Reward) => {
+            const isMyReward = (reward.beneficiaryAddress)
+                ? reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account
+                : false;
+            return (reward.state === 'Pending') || ((reward.state === 'Approved') && isMyReward) || ((reward.state === 'Withdrawn') && isMyReward);
+        }), 'startTime', 'asc');
     }
 
     public created() {
@@ -112,18 +106,19 @@ export default class PoolDetail extends Vue {
                 this.pool = pool;
                 this.pool.setBalance(balance);
 
-                this.isMember = await this.pool.isMember(this.$network.extdev.account);
-                this.isManager = await this.pool.isManager(this.$network.extdev.account);
+                await this.checkMember();
+                await this.checkManager();
 
                 this.loading = false;
 
                 this.getRewardPoolEvents(this.pool);
                 this.getRewards(this.pool);
+                this.getRewardRules();
 
-            })
-            .then(async () => {
-                if (this.pool) {
-                    this.rules = await this.poolService.getRewardRules(this.pool);
+                for (const eventType of this.pool.eventTypes) {
+                    this.eventService.listen(`event.${eventType}`, (event: any) => {
+                        (this as any)[`on${eventType}`](event.detail);
+                    });
                 }
             });
     }
@@ -148,6 +143,12 @@ export default class PoolDetail extends Vue {
                     await firebase.database().ref(`pools/${pool.address}/events/${snap.key}`).remove();
                 }
             });
+    }
+
+    public async getRewardRules() {
+        if (this.pool) {
+            this.rules = await this.poolService.getRewardRules(this.pool);
+        }
     }
 
     public async getRewards(pool: RewardPool) {
@@ -204,6 +205,7 @@ export default class PoolDetail extends Vue {
             )
                 .then(() => {
                     (this.$refs.modalDeposit as BModal).hide();
+                    this.$account.getExtdevCoinBalance();
                     this.input.poolDeposit = 0;
                     this.loading = false;
                 })
@@ -233,80 +235,74 @@ export default class PoolDetail extends Vue {
     }
 
     private onDeposited(data: any) {
-        const r = new DepositEvent(data, data.blockTime);
-        this.events.push(r);
-
         this.updateBalance();
     }
 
     private onWithdrawn(data: any) {
-        const r = new WithdrawelEvent(data, data.blockTime);
-        this.events.push(r);
-
         this.updateBalance();
     }
 
     private onRulePollCreated(data: any) {
-        const r = new RulePollCreatedEvent(data, data.blockTime);
-        this.events.push(r);
-
         this.updateRule(data);
     }
 
     private onRulePollFinished(data: any) {
-        const r = new RulePollFinishedEvent(data, data.blockTime);
-        this.events.push(r);
-
         this.updateRule(data);
     }
 
     private onRuleStateChanged(data: any) {
-        const r = new RuleStateChangedEvent(data, data.blockTime);
-        this.events.push(r);
-
         this.updateRule(data);
     }
 
     private onManagerAdded(data: any) {
-        const r = new ManagerAddedEvent(data, data.blockTime);
-        this.events.push(r);
-
-        this.updateRule(data);
+        this.checkManager();
     }
 
     private onManagerRemoved(data: any) {
-        const r = new ManagerRemovedEvent(data, data.blockTime);
-        this.events.push(r);
-
-        this.updateRule(data);
+        this.checkManager();
     }
 
     private onMemberAdded(data: any) {
-        const r = new MemberAddedEvent(data, data.blockTime);
-        this.events.push(r);
-
-        this.updateRule(data);
+        this.checkMember();
     }
 
-    private onMemberRemoved(data: any) {
-        const r = new MemberRemovedEvent(data, data.blockTime);
-        this.events.push(r);
 
-        this.updateRule(data);
+    private onMemberRemoved(data: any) {
+        this.checkMember();
     }
 
     private onRewardPollCreated(data: any) {
-        const r = new RewardPollCreatedEvent(data, data.blockTime);
-        this.events.push(r);
-
-        this.updateRule(data);
+        if (this.pool) {
+            this.getRewards(this.pool);
+        }
     }
 
     private onRewardPollFinished(data: any) {
-        const r = new RewardPollFinishedEvent(data, data.blockTime);
-        this.events.push(r);
+        this.updateReward(data);
+    }
 
-        this.updateRule(data);
+    private async checkMember() {
+        if (this.pool) {
+            this.isMember = await this.pool.isMember(this.$network.extdev.account);
+        }
+    }
+
+    private async checkManager() {
+        if (this.pool) {
+            this.isManager = await this.pool.isManager(this.$network.extdev.account);
+        }
+    }
+
+    private async updateReward(data: any) {
+        if (this.rewards) {
+            const reward = this.rewards.find((r: Reward) => {
+                return (r.id === parseInt(data.reward, 10));
+            });
+            if (reward && this.pool) {
+                const index = this.rewards.indexOf(reward);
+                this.rewards[index] = await this.poolService.getReward(reward.id, this.pool);
+            }
+        }
     }
 
     private async updateRule(data: any) {

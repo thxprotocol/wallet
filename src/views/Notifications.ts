@@ -63,7 +63,7 @@ export default class Notifications extends Vue {
         const rules = await this.poolService.getRewardRules(pool);
 
         for (const rule of rules) {
-            if (rule.pollAddress !== '0x0000000000000000000000000000000000000000') {
+            if (rule.hasPollAddress) {
                 this.polls.push({
                     rule,
                     pool,

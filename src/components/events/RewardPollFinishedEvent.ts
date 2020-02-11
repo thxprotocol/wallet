@@ -1,13 +1,14 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BListGroupItem } from 'bootstrap-vue';
-import { RewardPollFinishedEvent, RewardPool } from '@/models/RewardPool';
+import { RewardPool } from '@/models/RewardPool';
+import { RewardPollFinishedEvent } from '@/models/RewardPoolEvents';
 import { RewardRule } from '@/models/RewardRule';
 import PoolService from '@/services/PoolService';
 import { Reward } from '@/models/Reward';
 import ProfilePicture from '@/components/ProfilePicture.vue';
 
 @Component({
-    name: 'RulePollFinished',
+    name: 'rewardpollfinished-event',
     components: {
         'b-list-group-item': BListGroupItem,
         'profile-picture': ProfilePicture,
@@ -23,6 +24,5 @@ export default class RewardPollFinished extends Vue {
 
     public async created() {
         this.reward = await this.poolService.getReward(this.ev.id, this.pool);
-        this.rule = await this.poolService.getRewardRule(this.reward.rule, this.pool);
     }
 }

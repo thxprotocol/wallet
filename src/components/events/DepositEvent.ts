@@ -1,7 +1,8 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BListGroupItem } from 'bootstrap-vue';
 import BN from 'bn.js';
-import { DepositEvent, RewardPool } from '@/models/RewardPool';
+import { RewardPool } from '@/models/RewardPool';
+import { DepositEvent } from '@/models/RewardPoolEvents';
 import ProfilePicture from '@/components/ProfilePicture.vue';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
