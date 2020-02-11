@@ -31,7 +31,6 @@ export default class Camera extends Vue {
     }
 
     private async onDecode(decodedString: string) {
-        console.log(decodedString);
         if (decodedString.length > 0) {
             this.data = JSON.parse(decodedString);
             this.error = '';

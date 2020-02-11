@@ -40,7 +40,7 @@
         </template>
 
         <div class="ui-file">
-            <qrcode-capture @decode="onDecode"></qrcode-capture>
+            <qrcode-capture :capture="false" :multiple="false" @decode="onDecode"></qrcode-capture>
             <small>Upload QR code image if the camera does not work on your device.</small>
         </div>
 

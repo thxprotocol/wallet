@@ -32,7 +32,6 @@
 
                         </span>
                     </div>
-
                     <small>{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
                 </div>
 
@@ -79,7 +78,6 @@
             </button>
 
             <template slot="footer">
-
                 <template v-if="isManager">
                     <div class="row" v-if="now < reward.endTime">
                         <div class="col-md-6" v-if="!reward.hasVoted">
@@ -93,8 +91,8 @@
                             </button>
                         </div>
                         <div class="col-md-12" v-if="reward.hasVoted">
-                            <button @click="revokeVote()" :class="{ disabled: reward.loading }" class="btn btn-primary btn-block">
-                                Revoke
+                            <button @click="revokeVote()" :class="{ disabled: reward.loading }" class="btn btn-link btn-block">
+                                Revoke your vote
                             </button>
                         </div>
                     </div>

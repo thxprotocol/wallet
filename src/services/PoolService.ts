@@ -163,7 +163,7 @@ export default class PoolService extends Vue {
     }
 
     public async revokeVoteForReward(reward: Reward, pool: RewardPool) {
-        return await this.callPoolMethod(reward.contract.methods.revokeVote(reward.id), pool);
+        return await this.callPoolMethod(reward.contract.methods.revokeVote(reward.beneficiaryAddress), pool);
     }
 
     public async voteForReward(reward: Reward, pool: RewardPool, agree: boolean) {

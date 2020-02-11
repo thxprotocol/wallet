@@ -88,12 +88,13 @@ export default class PoolDetail extends Vue {
     }
 
     get sortedRewards() {
-        return _.orderBy(this.rewards.filter((reward: Reward) => {
+        const filtered = this.rewards.filter((reward: Reward) => {
             const isMyReward = (reward.beneficiaryAddress)
                 ? reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account
                 : false;
             return (reward.state === 'Pending') || ((reward.state === 'Approved') && isMyReward) || ((reward.state === 'Withdrawn') && isMyReward);
-        }), 'startTime', 'asc');
+        });
+        return _.orderBy(filtered, 'startTime', 'desc');
     }
 
     public created() {
