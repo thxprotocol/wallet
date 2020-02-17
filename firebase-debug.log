@@ -1,0 +1,16 @@
+[debug] [2020-02-17T14:24:41.044Z] ----------------------------------------------------------------------
+[debug] [2020-02-17T14:24:41.045Z] Command:       /usr/local/bin/node /usr/local/bin/firebase deploy --only hosting:thx-wallet-prod
+[debug] [2020-02-17T14:24:41.045Z] CLI Version:   7.13.0
+[debug] [2020-02-17T14:24:41.045Z] Platform:      darwin
+[debug] [2020-02-17T14:24:41.045Z] Node Version:  v12.16.0
+[debug] [2020-02-17T14:24:41.046Z] Time:          Mon Feb 17 2020 15:24:41 GMT+0100 (Central European Standard Time)
+[debug] [2020-02-17T14:24:41.046Z] ----------------------------------------------------------------------
+[debug] [2020-02-17T14:24:41.046Z] 
+[debug] [2020-02-17T14:24:41.052Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2020-02-17T14:24:41.052Z] > authorizing via signed-in user
+[debug] [2020-02-17T14:24:41.052Z] [iam] checking project thx-wallet-prod for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2020-02-17T14:24:41.053Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/thx-wallet-prod:testIamPermissions  
+
+[debug] [2020-02-17T14:24:41.811Z] <<< HTTP RESPONSE 200
+[debug] [2020-02-17T14:24:41.813Z] >>> HTTP REQUEST GET https://firebase.googleapis.com/v1beta1/projects/thx-wallet-prod  
+ 

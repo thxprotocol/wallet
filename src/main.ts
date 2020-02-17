@@ -19,7 +19,7 @@ Vue.use(VueMoment);
 
 let app: any;
 
-firebase.initializeApp(config.firebase);
+firebase.initializeApp(config.firebase[(process.env.NODE_ENV as any)]);
 firebase.auth()
     .onAuthStateChanged(() => {
         const currentUser: firebase.User | any = firebase.auth().currentUser;
