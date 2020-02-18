@@ -1,11 +1,10 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import firebase from 'firebase/app';
-import 'firebase/database';
 import { BSpinner, BAlert } from 'bootstrap-vue';
 import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 import PoolService from '@/services/PoolService';
 import { RewardPool } from '@/models/RewardPool';
 import { RewardRule } from '@/models/RewardRule';
+import ClaimService from '../services/ClaimService';
 
 @Component({
     name: 'Camera',
@@ -25,6 +24,7 @@ export default class Camera extends Vue {
     private success: string = '';
     private error: string = '';
     private poolService: PoolService = new PoolService();
+    private claimService: ClaimService = new ClaimService();
 
     private repaint() {
         return;
@@ -45,36 +45,19 @@ export default class Camera extends Vue {
         }
     }
 
-    private async claim() {
-        if (this.rule) {
-            try {
-                const snap = await firebase.database().ref(`pools/${this.pool.address}/rewards/${this.data.key}`).once('value');
-
-                if (!snap.val()) {
-                    throw({
-                        message: `Your QR Code is invalid. Try a now one.`,
-                    });
-                }
-
-                if (!snap.val().hash) {
-                    const tx = await this.pool.createReward(this.rule.id);
-
-                    firebase.database().ref(`pools/${this.pool.address}/rewards/${this.data.key}`).update({
-                        hash: tx.transactionHash,
-                    });
-
-                    this.success = `Claimed ${this.rule.amount} THX from ${this.pool.name} for <i>${this.rule.title}.</i>`;
-                    this.rule = null;
-                } else {
-                    throw({
-                        message: `You have already claimed your reward.`,
-                    });
-                }
-
-            } catch (err) {
-                console.error(err);
-                this.error = err.message;
-            }
+    private claim() {
+        if (this.rule && this.pool) {
+            this.claimService.claim(this.data, this.rule, this.pool)
+                .then(() => {
+                    if (this.rule && this.pool) {
+                        this.success = `Claimed ${this.rule.amount} THX from ${this.pool.name} for <i>${this.rule.title}.</i>`;
+                    }
+                })
+                .catch((err: any) => {
+                    if (err) {
+                        this.error = err.message;
+                    }
+                });
         }
     }
 

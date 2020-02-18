@@ -73,7 +73,7 @@ export class Network extends Vue {
         timeout,
     }: any) {
         const ownerExtdevAddr = Address.fromString(`${client.chainId}:${ownerExtdevAddress}`);
-        const gatewayContract = await TransferGateway.createAsync(client, ownerExtdevAddr);
+        const gatewayContract: any = await TransferGateway.createAsync(client, ownerExtdevAddr);
 
         const coinContract = await this.getExtdevCoinContract(web3js);
         try {
@@ -236,7 +236,7 @@ export class Network extends Vue {
         const privateKeyStr = this.loomPrivateKeyString;
         const privateKey = CryptoUtils.B64ToUint8Array(privateKeyStr);
         const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKey);
-        const client = new Client(
+        const client: any = new Client(
             EXTDEV_CHAIN_ID,
             'wss://extdev-plasma-us1.dappchains.com/websocket',
             'wss://extdev-plasma-us1.dappchains.com/queryws',
@@ -245,7 +245,8 @@ export class Network extends Vue {
             new NonceTxMiddleware(publicKey, client),
             new SignedTxMiddleware(privateKey),
         ];
-        client.on('error', (msg) => {
+
+        client.on('error', (msg: any) => {
             console.error('PlasmaChain connection error', msg);
         });
 
@@ -265,7 +266,7 @@ export class Network extends Vue {
         rinkebyTxHash,
     }: any) {
         const ownerExtdevAddr = Address.fromString(`${client.chainId}:${ownerExtdevAddress}`);
-        const gatewayContract = await TransferGateway.createAsync(client, ownerExtdevAddr);
+        const gatewayContract: any = await TransferGateway.createAsync(client, ownerExtdevAddr);
         const foreignContract = Address.fromString(`eth:${tokenRinkebyAddress}`);
         const localContract = Address.fromString(`${client.chainId}:${tokenExtdevAddress}`);
 

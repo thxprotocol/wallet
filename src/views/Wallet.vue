@@ -17,8 +17,8 @@
                     <strong>Transfer {{tx.amount}} THX</strong>
                     <small>{{ tx.blockTime | moment("MMMM Do YYYY HH:mm") }}</small>
                 </div>
-                <small class="mb-1" v-if="tx.sender">From: {{tx.sender}}</small><br>
-                <small class="mb-1" v-if="tx.receiver">To: {{tx.receiver}}</small>
+                <small class="mb-1 text-muted" v-if="tx.sender">From: {{tx.sender}}</small><br>
+                <small class="mb-1 text-muted" v-if="tx.receiver">To: {{tx.receiver}}</small>
             </b-list-group-item>
         </b-list-group>
 

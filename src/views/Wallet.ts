@@ -54,12 +54,12 @@ export default class Wallet extends Vue {
 
                     for (let i = 0; i < dLength; i++) {
                         const d = await pools[address].depositOf(this.$network.extdev.account, i);
-                        this.transactions.push(new DepositEvent(d, '0'));
+                        this.transactions.push(new DepositEvent({event: d}, '0'));
                     }
 
                     for (let i = 0; i < wLength; i++) {
                         const d = await pools[address].withdrawelOf(this.$network.extdev.account, i);
-                        this.transactions.push(new WithdrawelEvent(d, '0'));
+                        this.transactions.push(new WithdrawelEvent({event: d}, '0'));
                     }
                 }
             }
