@@ -3,11 +3,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, maximum-scale=1.0">
 </head>
 <body>
-    <h1>THX Claim Integration Example</h1>
-    <button onclick="THX.claim()">
-        Claim Reward
-    </button>
+<h1>THX Claim Integration Example</h1>
+<button onclick="THX.claim()">Claim Reward</button>
 
-    <script src="https://localhost:8080/loader.js"></script>
+<pre>
+curl https://thx-wallet-dev.firebaseio.com/pools/0xE7FA4ca3257F852a96de1543fb8B9f802C7be933/rewards.json \
+    -X POST \
+    -d '{"key": "0"}'
+</pre>
+Res: {"name": "-M0O62V-xH0Cznmv6dsC"}
+
+<pre>
+curl https://us-central1-thx-wallet-dev.cloudfunctions.net/webhook \
+    -X POST \
+    -H "Content-Type:application/json" \
+    -d '{"key":"-M0O62V-xH0Cznmv6dsC", "pool":"0xE7FA4ca3257F852a96de1543fb8B9f802C7be933", "rule":"0"}'
+</pre>
+
+<script src="https://localhost:8080/loader.js"></script>
 </body>
 </html>

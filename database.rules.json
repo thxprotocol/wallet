@@ -2,5 +2,13 @@
     "rules": {
         ".read": "auth != null",
         ".write": "auth != null",
+      	"pools": {
+            "$pool": {
+                "rewards": {
+                  ".read": true,
+                  ".write": true
+                }
+            }
+        }
     }
 }

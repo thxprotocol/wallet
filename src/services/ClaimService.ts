@@ -30,15 +30,16 @@ export default class CoinService extends Vue {
 
                     firebase.database().ref(`pools/${pool.address}/rewards/${data.key}`).update({
                         hash: tx.transactionHash,
+                        pool: pool.address,
+                        rule: rule.id,
                     });
-
-                    return;
                 } else {
                     throw({
                         message: `You have already claimed your reward.`,
                     });
                 }
 
+                return;
             } catch (err) {
                 return err;
             }
