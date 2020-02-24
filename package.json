@@ -8,7 +8,7 @@
         "build": "vue-cli-service build --mode development; firebase use thx-wallet-dev;",
         "build:dev": "vue-cli-service build --mode development",
         "build:prod": "vue-cli-service build --mode production",
-        "deploy:webhook": "firebase deploy --only functions:webhook",
+        "deploy:api": "firebase deploy --only functions:api",
         "deploy:prod": "NETWORK=extdev vue-cli-service build --mode production; firebase use thx-wallet-prod; firebase deploy --only hosting:thx-wallet-prod",
         "deploy:dev": "NETWORK=extdev vue-cli-service build --mode development; firebase use thx-wallet-dev; firebase deploy --only hosting:thx-wallet-dev",
         "deploy": "truffle deploy --network loom_dapp_chain",

@@ -1,6 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
 import { Vue } from 'vue-property-decorator';
+import { Account } from '@/models/Account';
 
 export default class UserService extends Vue {
 
@@ -14,5 +15,12 @@ export default class UserService extends Vue {
 
             return member;
         }
+    }
+
+    public async connectSlack(account: Account, slack: string) {
+        await firebase.database().ref(`users/${account.uid}`)
+            .update({
+                slack,
+            });
     }
 }

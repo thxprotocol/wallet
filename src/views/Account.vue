@@ -10,14 +10,14 @@
 
         <div class="card mb-3">
             <div class="card-body" v-if="$account.profile">
-                <span v-if="!$account.profile.picture" class="float-left mr-3">
+                <span v-if="!$account.profile.picture" class="float-right ml-3">
                     <label class="text-center">
-                        <div class="account-picture account-picture-lg bg-yellow">
+                        <div class="account-picture account-picture-sm bg-yellow">
                             <span>
                                 {{ $account.profile.initials}}
                             </span>
                         </div><br>
-                        <span class="btn btn-link">Upload image</span>
+                        <span class="btn btn-link">Change</span>
                         <input type="file" @change="onFileChange" class="d-none">
                     </label>
                 </span>
@@ -37,6 +37,11 @@
 
                 <h3>UID:</h3>
                 <p>{{$account.uid}}</p>
+
+                <template v-if="$account.profile.slack">
+                    <h3>Slack:</h3>
+                    {{$account.profile.slack}}
+                </template>
             </div>
             <div class="card-footer">
                 <button class="btn btn-link btn-block" @click="showModal('modal-connect')">Connect Accounts</button>

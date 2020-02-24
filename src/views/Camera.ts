@@ -4,7 +4,10 @@ import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 import PoolService from '@/services/PoolService';
 import { RewardPool } from '@/models/RewardPool';
 import { RewardRule } from '@/models/RewardRule';
-import ClaimService from '../services/ClaimService';
+import ClaimService from '@/services/ClaimService';
+import UserService from '@/services/UserService';
+import { Account } from '@/models/Account';
+import { VueRouter } from 'vue-router/types/router';
 
 @Component({
     name: 'Camera',
@@ -16,14 +19,17 @@ import ClaimService from '../services/ClaimService';
     },
 })
 export default class Camera extends Vue {
+    public $account!: Account;
     public loading: boolean = true;
     public hasStream: boolean = false;
+    public $router!: VueRouter;
+    private slack: string = '';
     private data!: any;
     private pool!: RewardPool;
     private rule: RewardRule | null = null;
-    private success: string = '';
     private error: string = '';
     private poolService: PoolService = new PoolService();
+    private userService: UserService = new UserService();
     private claimService: ClaimService = new ClaimService();
 
     private repaint() {
@@ -34,14 +40,34 @@ export default class Camera extends Vue {
         if (decodedString.length > 0) {
             this.data = JSON.parse(decodedString);
             this.error = '';
-            this.success = `A connection to the Reward Pool is being established...`;
 
             try {
-                this.pool = await this.poolService.getRewardPool(this.data.pool);
-                this.rule = await this.poolService.getRewardRule(this.data.rule, this.pool);
+                if (this.data.pool && this.data.rule) {
+                    this.pool = await this.poolService.getRewardPool(this.data.pool);
+                    this.rule = await this.poolService.getRewardRule(this.data.rule, this.pool);
+                }
+                if (this.data.slack) {
+                    this.pool = await this.poolService.getRewardPool(this.data.pool);
+                    this.slack = this.data.slack;
+                }
             } catch (err) {
-                this.error = `An error occured while connecting to the pool.`;
+                this.error = `An error occured while decoding your QR code.`;
             }
+        }
+    }
+
+    private connect() {
+        if (this.pool && this.$account) {
+            this.userService.connectSlack(this.$account, this.data.slack)
+                .then(() => {
+                    this.$router.push(`/account`);
+                })
+                .catch((err: any) => {
+                    if (err) {
+                        this.error = err.message;
+                    }
+                });
+
         }
     }
 
@@ -49,9 +75,7 @@ export default class Camera extends Vue {
         if (this.rule && this.pool) {
             this.claimService.claim(this.data, this.rule, this.pool)
                 .then(() => {
-                    if (this.rule && this.pool) {
-                        this.success = `Claimed ${this.rule.amount} THX from ${this.pool.name} for <i>${this.rule.title}.</i>`;
-                    }
+                    this.$router.push(`/pools/${this.pool.address}`);
                 })
                 .catch((err: any) => {
                     if (err) {

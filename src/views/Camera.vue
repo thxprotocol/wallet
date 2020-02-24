@@ -1,21 +1,16 @@
 <template>
     <article class="region region-container">
 
-         <div class="alert alert-danger alert-fixed" v-if="error">
-             <button type="button" aria-label="Close" class="close" @click="error=''">×</button>
-             <span v-html="error"></span>
-         </div>
-
-         <div class="alert alert-success alert-fixed" v-if="success">
-             <button type="button" aria-label="Close" class="close" @click="success=''">×</button>
-             <span v-html="success"></span>
-         </div>
+        <div class="alert alert-danger alert-fixed" v-if="error">
+            <button type="button" aria-label="Close" class="close" @click="error=''">×</button>
+            <span v-html="error"></span>
+        </div>
 
         <div v-if="loading" class="d-flex w-100 h-100 align-items-center justify-content-center">
             <b-spinner></b-spinner>
         </div>
 
-        <div v-if="rule" class="d-flex w-100 h-100 align-items-center justify-content-center bg-yellow">
+        <div v-if="rule && pool" class="d-flex w-100 h-100 align-items-center justify-content-center bg-yellow">
             <div class="text-center">
                 <h1>
                     You are rewarded
@@ -28,21 +23,33 @@
             </div>
         </div>
 
+        <div v-if="slack && pool" class="d-flex w-100 h-100 align-items-center justify-content-center bg-yellow">
+            <div class="text-center">
+                <h1>
+                    Connect your account!
+                </h1>
+                <p class="lead">with Slack ID <strong>{{$account.profile.slack}}</strong></p>
+                <button class="btn btn-primary btn-block btn-lg mt-4" @click="connect()">
+                    Connect Account
+                </button>
+            </div>
+        </div>
+
         <qrcode-stream v-if="!rule" class="ui-video" @init="init" @decode="onDecode" :track="repaint"></qrcode-stream>
 
-        <template v-if="!loading && !rule">
+        <template v-if="!loading && !rule && !slack">
             <div class="ui-camera">
                 <span></span>
                 <span></span>
                 <span></span>
                 <span></span>
             </div>
-        </template>
 
-        <div class="ui-file">
-            <qrcode-capture :capture="false" :multiple="false" @decode="onDecode"></qrcode-capture>
-            <small>Upload QR code image if the camera does not work on your device.</small>
-        </div>
+            <div class="ui-file">
+                <qrcode-capture :capture="false" :multiple="false" @decode="onDecode"></qrcode-capture>
+                <small>Upload QR code image if the camera does not work on your device.</small>
+            </div>
+        </template>
 
     </article>
 </template>
@@ -137,7 +144,7 @@
         small {
             margin-top: 1rem;
             display: block;
-            color: white;
+            color: black;
         }
 
         input[type="file"] {
@@ -145,7 +152,7 @@
             border-radius: 35px;
             padding: 1rem;
             font-size: 1rem;
-            font-family: "Ubuntu";
+            font-family: Arial;
             margin: auto;
             display: block;
 

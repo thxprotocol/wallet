@@ -23,6 +23,7 @@ export class Profile extends Vue {
     public initials: string = '';
     public email: string = '';
     public picture: ProfilePictureData | null;
+    public slack: string = '';
     private uid: string;
 
     constructor(
@@ -42,12 +43,17 @@ export class Profile extends Vue {
                     this.initials = s.val().firstName.charAt(0) + s.val().lastName.charAt(0);
                     this.picture = s.val().picture;
                     this.email = s.val().email;
+                    this.slack = s.val().slack;
                 });
 
             firebase.database().ref(`users/${this.uid}`)
                 .on('child_added', (s: any) => {
                     if (s.key === 'picture') {
                         Vue.set(this, 'picture', new ProfilePictureData(s.val().name, s.val().url));
+                    }
+
+                    if (s.key === 'slack') {
+                        Vue.set(this, 'slack', s.val());
                     }
                 });
 
@@ -56,12 +62,18 @@ export class Profile extends Vue {
                     if (s.key === 'picture') {
                         Vue.set(this, 'picture', new ProfilePictureData(s.val().name, s.val().url));
                     }
+                    if (s.key === 'slack') {
+                        Vue.set(this, 'slack', s.val());
+                    }
                 });
 
             firebase.database().ref(`users/${this.uid}`)
                 .on('child_removed', (s: any) => {
                     if (s.key === 'picture') {
                         Vue.set(this, 'picture', null);
+                    }
+                    if (s.key === 'slack') {
+                        Vue.set(this, 'slack', null);
                     }
                 });
         }
