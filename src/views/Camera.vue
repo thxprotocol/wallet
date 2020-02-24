@@ -28,7 +28,7 @@
                 <h1>
                     Connect your account!
                 </h1>
-                <p class="lead">with Slack ID <strong>{{$account.profile.slack}}</strong></p>
+                <p class="lead">with Slack ID <strong>{{slack}}</strong></p>
                 <button class="btn btn-primary btn-block btn-lg mt-4" @click="connect()">
                     Connect Account
                 </button>
