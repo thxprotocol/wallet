@@ -67,16 +67,24 @@ export default class Pools extends Vue {
     }
 
     public onJoinRewardPool() {
+        const utils: any = this.$network.web3js.utils;
+        const address: string = this.input.poolAddress;
+
         this.loading = true;
 
-        this.poolService.joinRewardPool(this.input.poolAddress)
-            .then(() => {
-                this.loading = false;
-            })
-            .catch((err: string) => {
-                this.loading = false;
-                this.error = err;
-            });
+        if (utils.isAddress(address)) {
+            this.poolService.joinRewardPool(address)
+                .then(() => {
+                    this.loading = false;
+                    (this.$refs.modalJoinPool as BModal).hide();
+                })
+                .catch((err: string) => {
+                    this.loading = false;
+                    this.error = err;
+                });
+        } else {
+            this.loading = false;
+        }
     }
 
     public async onLeavePool(poolAddress: string) {

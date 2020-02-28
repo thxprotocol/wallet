@@ -9,6 +9,7 @@
         "build:dev": "vue-cli-service build --mode development",
         "build:prod": "vue-cli-service build --mode production",
         "deploy:api": "firebase deploy --only functions:api",
+        "deploy:slack": "firebase deploy --only functions:slack",
         "deploy:prod": "NETWORK=extdev vue-cli-service build --mode production; firebase use thx-wallet-prod; firebase deploy --only hosting:thx-wallet-prod",
         "deploy:dev": "NETWORK=extdev vue-cli-service build --mode development; firebase use thx-wallet-dev; firebase deploy --only hosting:thx-wallet-dev",
         "deploy": "truffle deploy --network loom_dapp_chain",
