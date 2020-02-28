@@ -1,12 +1,16 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-// import axios from 'axios';
+import axios from 'axios';
+// import { CryptoUtils, LoomProvider, Client } from 'loom-js';
 
 const express = require('express');
 const cors = require('cors');
 const qrcode = require('qrcode');
+// const Web3 = require('web3');
 
 const app = express();
+const REWARD_POOL_JSON = require('./contracts/RewardPool.json');
+// const EXTDEV_CHAIN_ID = 'extdev-plasma-us1';
 const POOL_ADDRESS = "0xE7FA4ca3257F852a96de1543fb8B9f802C7be933";
 const API_ROOT = 'https://us-central1-thx-wallet-dev.cloudfunctions.net/api';
 const APP_ROOT = 'https://thx-wallet-dev.firebaseapp.com';
@@ -21,6 +25,18 @@ function QRBuffer(qrBase64: string) {
         return;
     }
 }
+
+// async function ExtdevContract(abi: any, address: string, loomPrivateKey: string) {
+//     const privateKey = CryptoUtils.B64ToUint8Array(loomPrivateKey);
+//     const client: any = new Client(
+//         EXTDEV_CHAIN_ID,
+//         'wss://extdev-plasma-us1.dappchains.com/websocket',
+//         'wss://extdev-plasma-us1.dappchains.com/queryws',
+//     );
+//     const web3 = new Web3(new LoomProvider(client, privateKey));
+//
+//     return new web3.eth.Contract(abi, address);
+// }
 
 admin.initializeApp(functions.config().firebase);
 
@@ -146,23 +162,21 @@ app.post('/reward', (req: any, res: any) => {
             ]
         };
 
-        res.send(message);
-
-        // axios({
-        //         method: 'POST',
-        //         url: 'https://slack.com/api/chat.postMessage',
-        //         headers: {
-        //             'Authorization': 'Bearer xoxb-874849905696-951441147569-jiqzfWErHKgPlDvBNzE40Jwh',
-        //             'Content-Type': 'application/json;charset=utf-8',
-        //         },
-        //         data: {}
-        //     })
-        //     .then((r: any) => {
-        //         res.send('*Your reward has been sent!* 🏆');
-        //     })
-        //     .catch((e: any) => {
-        //         res.send(e);
-        //     });
+        axios({
+                method: 'POST',
+                url: 'https://slack.com/api/chat.postMessage',
+                headers: {
+                    'Authorization': 'Bearer xoxb-874849905696-951441147569-jiqzfWErHKgPlDvBNzE40Jwh',
+                    'Content-Type': 'application/json;charset=utf-8',
+                },
+                data: message,
+            })
+            .then((r: any) => {
+                res.send('*Your reward has been sent!* 🏆');
+            })
+            .catch((e: any) => {
+                res.send(e);
+            });
 
     } else {
         res.send('Make sure to mention a pool member. \n Example: `/reward @chuck`')
@@ -171,17 +185,38 @@ app.post('/reward', (req: any, res: any) => {
 
 app.post('/rules', async (req: any, res: any) => {
     const query = req.body.text.split(' ');
+    // const PRIVATE_KEY_ARRAY = CryptoUtils.generatePrivateKey();
+    // const privatekey = CryptoUtils.Uint8ArrayToB64(PRIVATE_KEY_ARRAY);
+    // console.log(PRIVATE_KEY_ARRAY);
+    // console.log(REWARD_POOL_JSON)
+    // console.log(REWARD_POOL_JSON.abi)
+    // console.log(POOL_ADDRESS)
+    console.log(REWARD_POOL_JSON.contractName)
+
+    // const poolContract = await ExtdevContract(
+    //     REWARD_POOL_JSON.abi,
+    //     POOL_ADDRESS,
+    //     privatekey,
+    // );
+
+    // console.log(poolContract.methods.name);
 
     if (query[0] === 'list') {
         const snap = await admin.database().ref(`/pools/${POOL_ADDRESS}/rules`).once('value');
 
         if (snap.val()) {
-            const blocks = snap.val().map((rule: any, id: number) => {
+            const blocks = snap.val().map(async (rule: any, id: number) => {
+                // const r = await poolContract.methods.rules(0).call();
+                // const amount = new Web3().utils.fromWei(r.amount, 'ether');
+                //
+                // console.log(r);
+                // console.log(amount);
+
                 return {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
-                        "text": `*#${id} ${rule.title}* \n ${rule.description}`
+                        "text": "#" + id + " " + rule.title + " *" + 0 + " THX*"
                     }
                 };
             });

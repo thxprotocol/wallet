@@ -19,7 +19,9 @@
         "express": "^4.17.1",
         "firebase-admin": "^8.9.2",
         "firebase-functions": "^3.3.0",
-        "qrcode": "1.x"
+        "loom-js": "^1.55.0",
+        "qrcode": "1.x",
+        "web3": "^1.2.1"
     },
     "devDependencies": {
         "tslint": "^5.12.0",
