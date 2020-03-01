@@ -79,12 +79,17 @@ export default class PoolService extends Vue {
 
     public async getMyRewardPools() {
         const snap: any = await firebase.database().ref(`users/${this.$account.uid}/pools`).once('value');
+        const utils: any = this.$network.web3js.utils;
         const pools: any = {};
 
         for (const address in snap.val()) {
             if (snap.val()[address]) {
-                const pool = await this.getRewardPool(address);
-                pools[address] = pool;
+                if (utils.isAddress(address)) {
+                    const pool = await this.getRewardPool(address);
+                    if (pool) {
+                        pools[address] = pool;
+                    }
+                }
             }
         }
 

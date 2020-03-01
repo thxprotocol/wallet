@@ -17,27 +17,35 @@ export default class CoinService extends Vue {
     public async claim(data: any, rule: RewardRule, pool: RewardPool) {
         if (rule) {
             try {
-                const snap = await firebase.database().ref(`pools/${pool.address}/rewards/${data.key}`).once('value');
+// const snap = await firebase.database().ref(`pools/${pool.address}/rewards/${data.key}`).once('value');
+//
+// if (!snap.val()) {
+//     throw({
+//         message: `Your QR Code is invalid. Try a new one.`,
+//     });
+// }
+//
+// if (!snap.val().hash) {
+//     const tx = await pool.createReward(rule.id);
+//
+//     firebase.database().ref(`pools/${pool.address}/rewards/${data.key}`).update({
+//         hash: tx.transactionHash,
+//         pool: pool.address,
+//         rule: rule.id,
+//     });
+// } else {
+//     throw({
+//         message: `You have already claimed your reward.`,
+//     });
+// }
 
-                if (!snap.val()) {
-                    throw({
-                        message: `Your QR Code is invalid. Try a new one.`,
-                    });
-                }
+                const tx = await pool.createReward(rule.id);
 
-                if (!snap.val().hash) {
-                    const tx = await pool.createReward(rule.id);
-
-                    firebase.database().ref(`pools/${pool.address}/rewards/${data.key}`).update({
-                        hash: tx.transactionHash,
-                        pool: pool.address,
-                        rule: rule.id,
-                    });
-                } else {
-                    throw({
-                        message: `You have already claimed your reward.`,
-                    });
-                }
+                firebase.database().ref(`pools/${pool.address}/rewards/${data.key}`).update({
+                    hash: tx.transactionHash,
+                    pool: pool.address,
+                    rule: rule.id,
+                });
 
                 return;
             } catch (err) {

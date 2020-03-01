@@ -73,8 +73,10 @@ export default class Camera extends Vue {
 
     private claim() {
         if (this.rule && this.pool) {
+            this.loading = true;
             this.claimService.claim(this.data, this.rule, this.pool)
                 .then(() => {
+                    this.loading = false;
                     this.$router.push(`/pools/${this.pool.address}`);
                 })
                 .catch((err: any) => {

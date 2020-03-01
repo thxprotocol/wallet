@@ -37,45 +37,47 @@
 
             </template>
 
-            <template v-if="!reward.loading">
-                <h3>Votes ({{reward.totalVoted}}):</h3>
-                <div class="row">
-                    <div class="col-12">
-                        <b-progress
-                            variant="info"
-                            :value="((now - reward.startTime) / (reward.endTime - reward.startTime)) * 100"
-                            :max="100"
-                        ></b-progress>
+            <template v-if="now < reward.endTime">
+                <template v-if="!reward.loading">
+                    <h3>Votes ({{reward.totalVoted}}):</h3>
+                    <div class="row">
+                        <div class="col-12">
+                            <b-progress
+                                variant="info"
+                                :value="((now - reward.startTime) / (reward.endTime - reward.startTime)) * 100"
+                                :max="100"
+                            ></b-progress>
+                        </div>
+                        <div class="col-6">
+                            <small>{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                        </div>
+                        <div class="col-6 text-right">
+                            <small>{{reward.endTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                        </div>
                     </div>
-                    <div class="col-6">
-                        <small>{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <b-progress show-progress :max="(reward.yesCounter + reward.noCounter)">
+                                <b-progress-bar variant="success" :value="reward.yesCounter"></b-progress-bar>
+                                <b-progress-bar variant="danger" :value="reward.noCounter"></b-progress-bar>
+                            </b-progress>
+                        </div>
+                        <div class="col-6">
+                            <small>{{reward.yesCounter}}</small>
+                        </div>
+                        <div class="col-6 text-right">
+                            <small>{{reward.noCounter}}</small>
+                        </div>
                     </div>
-                    <div class="col-6 text-right">
-                        <small>{{reward.endTime | moment("MMMM Do YYYY HH:mm") }}</small>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <div class="col-12">
-                        <b-progress show-progress :max="(reward.yesCounter + reward.noCounter)">
-                            <b-progress-bar variant="success" :value="reward.yesCounter"></b-progress-bar>
-                            <b-progress-bar variant="danger" :value="reward.noCounter"></b-progress-bar>
-                        </b-progress>
-                    </div>
-                    <div class="col-6">
-                        <small>{{reward.yesCounter}}</small>
-                    </div>
-                    <div class="col-6 text-right">
-                        <small>{{reward.noCounter}}</small>
-                    </div>
-                </div>
-            </template>
+                </template>
 
-            <button class="btn btn-link btn-block" @click="update()">
-                <span v-if="!reward.loading">Update poll results</span>
-                <div v-else class="d-flex w-100 justify-content-center">
-                    <b-spinner variant="dark" ></b-spinner>
-                </div>
-            </button>
+                <button class="btn btn-link btn-block" @click="update()">
+                    <span v-if="!reward.loading">Update poll results</span>
+                    <div v-else class="d-flex w-100 justify-content-center">
+                        <b-spinner variant="dark" ></b-spinner>
+                    </div>
+                </button>
+            </template>
 
             <template slot="footer">
                 <template v-if="isManager">
