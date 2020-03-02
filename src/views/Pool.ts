@@ -24,7 +24,7 @@ import CoinService from '@/services/CoinService';
 import EventService from '@/services/EventService';
 import BN from 'bn.js';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
-import { Reward } from '@/models/Reward';
+import { Reward, IRewards } from '@/models/Reward';
 import _ from 'lodash';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
@@ -68,7 +68,7 @@ export default class PoolDetail extends Vue {
     public isMember: boolean = false;
     public pool: RewardPool | null = null;
     public rules: RewardRule[] | null = null;
-    public rewards: Reward[] = [];
+    public rewards: IRewards = {};
     public input: any = {
         poolDeposit: 0,
         addMember: '',
@@ -88,12 +88,14 @@ export default class PoolDetail extends Vue {
     }
 
     get sortedRewards() {
-        const filtered = this.rewards.filter((reward: Reward) => {
+        const filtered = _.filter(this.rewards, (reward: Reward) => {
             const isMyReward = (reward.beneficiaryAddress)
-                ? reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account
-                : false;
-            return (reward.state === 'Pending') || ((reward.state === 'Approved') && isMyReward) || ((reward.state === 'Withdrawn') && isMyReward);
+               ? reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account
+               : false;
+            return (reward.state === 'Pending') && isMyReward ||
+                (reward.state === 'Approved') && isMyReward;
         });
+
         return _.orderBy(filtered, 'startTime', 'desc');
     }
 
@@ -116,12 +118,18 @@ export default class PoolDetail extends Vue {
                 this.getRewards(this.pool);
                 this.getRewardRules();
 
+                this.eventService.destroy();
+
                 for (const eventType of this.pool.eventTypes) {
                     this.eventService.listen(`event.${eventType}`, (event: any) => {
                         (this as any)[`on${eventType}`](event.detail);
                     });
                 }
             });
+    }
+
+    public beforeDestroy() {
+        this.eventService.destroy();
     }
 
     public async getRewardPoolEvents(pool: RewardPool) {
@@ -157,8 +165,7 @@ export default class PoolDetail extends Vue {
 
         for (let i = parseInt(length, 10) - 1; i >= 0; i--) {
             const r = await this.poolService.getReward(i, pool);
-
-            this.rewards.push(r);
+            Vue.set(this.rewards, i, r);
         }
     }
 
@@ -272,9 +279,10 @@ export default class PoolDetail extends Vue {
         this.checkMember();
     }
 
-    private onRewardPollCreated(data: any) {
+    private async onRewardPollCreated(data: any) {
         if (this.pool) {
-            this.getRewards(this.pool);
+            const r = await this.poolService.getReward(data.reward, this.pool);
+            Vue.set(this.rewards, data.reward, r);
         }
     }
 
@@ -295,14 +303,9 @@ export default class PoolDetail extends Vue {
     }
 
     private async updateReward(data: any) {
-        if (this.rewards) {
-            const reward = this.rewards.find((r: Reward) => {
-                return (r.id === parseInt(data.reward, 10));
-            });
-            if (reward && this.pool) {
-                const index = this.rewards.indexOf(reward);
-                this.rewards[index] = await this.poolService.getReward(reward.id, this.pool);
-            }
+        if (this.pool && this.rewards) {
+            const r = await this.poolService.getReward(data.reward, this.pool);
+            Vue.set(this.rewards, r.id, r);
         }
     }
 

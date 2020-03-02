@@ -1,7 +1,7 @@
 <template>
 <article class="region region-container">
     <main class="region region-content">
-        <h2>Wallet</h2>
+        <h2>My Pool Transfers</h2>
         <div class="alert alert-danger" v-if="error">
             {{error}}
         </div>
@@ -14,11 +14,9 @@
                 :key="key"
                 :variant="tx.variant">
                 <div class="d-flex w-100 justify-content-between">
-                    <strong>Transfer {{tx.amount}} THX</strong>
-                    <small>{{ tx.blockTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                    <strong>{{tx.sender ? 'Deposit ' : 'Withdraw '}}{{tx.amount}} THX</strong>
+                    <small>{{ tx.created | moment("MMMM Do YYYY HH:mm") }}</small>
                 </div>
-                <small class="mb-1 text-muted" v-if="tx.sender">From: {{tx.sender}}</small><br>
-                <small class="mb-1 text-muted" v-if="tx.receiver">To: {{tx.receiver}}</small>
             </b-list-group-item>
         </b-list-group>
 

@@ -1,5 +1,6 @@
 import EventService from '@/services/EventService';
 import BN from 'bn.js';
+const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export interface IRewardPools {
     [address: string]: RewardPool;
@@ -14,6 +15,34 @@ export interface IRewardPool {
     owner: string;
     eventService: EventService;
     _events: string[];
+}
+
+class Transaction {
+    public amount: string;
+    public created: number;
+
+    constructor(data: any) {
+        this.amount = new BN(data.amount).div(TOKEN_MULTIPLIER).toString();
+        this.created = parseInt(data.created, 10);
+    }
+}
+
+export class Deposit extends Transaction {
+    public sender: string;
+
+    constructor(data: any) {
+        super(data);
+        this.sender = data.sender;
+    }
+}
+
+export class Withdrawel extends Transaction {
+    public receiver: string;
+
+    constructor(data: any) {
+        super(data);
+        this.receiver = data.receiver;
+    }
 }
 
 export class RewardPool {

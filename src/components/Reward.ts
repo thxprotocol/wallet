@@ -20,6 +20,7 @@ import PoolService from '@/services/PoolService';
 })
 export default class CReward extends Vue {
     public loading: boolean = false;
+    public disabled: boolean = false;
     public error: string = '';
     public now: number = Math.floor(new Date().getTime() / 1000);
     public input: any = {
@@ -35,32 +36,37 @@ export default class CReward extends Vue {
     @Prop() private isManager!: boolean;
     @Prop() private isMember!: boolean;
 
-    public created() {
+    public mounted() {
+        this.loading = true;
         this.update();
+        this.loading = false;
     }
 
     public async update() {
-        this.reward.update();
+        this.disabled = true;
+        await this.reward.update();
         this.now = await this.$network.now();
+        this.disabled = false;
     }
 
     get canWithdraw() {
         return this.reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account.toLowerCase();
     }
 
-    public withdraw() {
-        this.reward.loading = true;
-        this.poolService.withdraw(this.reward, this.pool)
-            .then((tx: any) => {
-                this.update();
-            })
-            .catch((err: string) => {
-                this.error = err;
-            });
+    public async withdraw() {
+        this.disabled = true;
+        try {
+            await this.poolService.tryToFinalizeRewardPoll(this.reward, this.pool);
+            await this.poolService.withdraw(this.reward, this.pool);
+
+            this.update();
+        } catch (err) {
+            this.error = err;
+        }
     }
 
     public vote(agree: boolean) {
-        this.reward.loading = true;
+        this.disabled = true;
         this.poolService.voteForReward(this.reward, this.pool, agree)
             .then((tx: any) => {
                 this.update();
@@ -71,7 +77,7 @@ export default class CReward extends Vue {
     }
 
     public revokeVote() {
-        this.reward.loading = true;
+        this.disabled = true;
         this.poolService.revokeVoteForReward(this.reward, this.pool)
             .then((tx: any) => {
                 this.update();
@@ -82,7 +88,7 @@ export default class CReward extends Vue {
     }
 
     public tryToFinalize() {
-        this.reward.loading = true;
+        this.disabled = true;
         this.poolService.tryToFinalizeRewardPoll(this.reward, this.pool)
             .then((tx: any) => {
                 this.update();

@@ -20,8 +20,8 @@ export default class EventService extends Vue {
         const listener: EventListener = new EventListener(e, callback);
         const id = this.listeners.push(listener);
 
+        window.removeEventListener(listener.e, listener.cb);
         window.addEventListener(listener.e, listener.cb);
-        return id - 1;
     }
 
     public dispatch(e: string, data: any = null) {
@@ -33,6 +33,14 @@ export default class EventService extends Vue {
     public remove(id: number) {
         window.removeEventListener(this.listeners[id].e, this.listeners[id].cb);
 
-        delete this.listeners[id];
+        this.listeners.splice(id, 1);
+    }
+
+    public destroy() {
+        for (const id in this.listeners) {
+            if (this.listeners[id]) {
+                window.removeEventListener(this.listeners[id].e, this.listeners[id].cb);
+            }
+        }
     }
 }

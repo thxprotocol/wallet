@@ -213,6 +213,13 @@ a,
     }
 }
 
+.disabled {
+    opacity: .6;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+}
+
 .link-settings {
     position: absolute;
     right: 1rem;

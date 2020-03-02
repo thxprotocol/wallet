@@ -5,6 +5,10 @@ import UserService from '@/services/UserService';
 const REWARD_STATE = ['Pending', 'Approved', 'Rejected', 'Withdrawn'];
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
+export interface IRewards {
+    [id: string]: Reward;
+}
+
 export class Reward extends BasePoll {
     public id!: number;
     public rule!: number;

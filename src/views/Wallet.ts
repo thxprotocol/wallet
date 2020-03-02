@@ -4,8 +4,7 @@ import { Network } from '@/models/Network';
 import EventService from '@/services/EventService';
 import PoolService from '@/services/PoolService';
 import CoinService from '@/services/CoinService';
-import { IRewardPools, RewardPool } from '@/models/RewardPool';
-import { DepositEvent, WithdrawelEvent } from '@/models/RewardPoolEvents';
+import { Deposit, Withdrawel } from '@/models/RewardPool';
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
 
@@ -34,7 +33,7 @@ export default class Wallet extends Vue {
     private $network!: Network;
 
     get sortedTransactions() {
-        return _.sortBy(this.transactions, 'blockTime', 'asc');
+        return _.orderBy(this.transactions, 'created', 'desc');
     }
 
     public async created() {
@@ -54,12 +53,12 @@ export default class Wallet extends Vue {
 
                     for (let i = 0; i < dLength; i++) {
                         const d = await pools[address].depositOf(this.$network.extdev.account, i);
-                        this.transactions.push(new DepositEvent({event: d}, '0'));
+                        this.transactions.push(new Deposit(d));
                     }
 
                     for (let i = 0; i < wLength; i++) {
-                        const d = await pools[address].withdrawelOf(this.$network.extdev.account, i);
-                        this.transactions.push(new WithdrawelEvent({event: d}, '0'));
+                        const w = await pools[address].withdrawelOf(this.$network.extdev.account, i);
+                        this.transactions.push(new Withdrawel(w));
                     }
                 }
             }

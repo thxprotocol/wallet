@@ -284,7 +284,7 @@ slack.post('/rules', async (req: any, res: any) => {
                         "type": "section",
                         "text": {
                             "type": "mrkdwn",
-                            "text": "#" + rule.id + " " + rule.title + " *" + utils.fromWei(rule.amount, 'ether') + " THX*"
+                            "text": utils.fromWei(rule.amount, 'ether') + " THX* - `#" + rule.id + "` " + rule.title + " *"
                         }
                     });
                 }
