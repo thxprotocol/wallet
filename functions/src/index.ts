@@ -1,7 +1,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import axios from 'axios';
-import { CryptoUtils, LoomProvider, Client } from 'loom-js';
+import { LocalAddress, CryptoUtils, LoomProvider, Client } from 'loom-js';
 
 const express = require('express');
 const cors = require('cors');
@@ -16,6 +16,7 @@ const API_ROOT = 'https://us-central1-thx-wallet-dev.cloudfunctions.net/api';
 const APP_ROOT = 'https://thx-wallet-dev.firebaseapp.com';
 const REWARD_POOL_JSON = require('./contracts/RewardPool.json');
 const EXTDEV_CHAIN_ID = 'extdev-plasma-us1';
+const PRIVATE_KEY_ARRAY = CryptoUtils.generatePrivateKey();
 
 function QRBuffer(qrBase64: string) {
     const regex = /^data:.+\/(.+);base64,(.*)$/;
@@ -28,14 +29,14 @@ function QRBuffer(qrBase64: string) {
     }
 }
 
-async function ExtdevContract(abi: any, address: string, loomPrivateKey: string) {
-    const privateKey = CryptoUtils.B64ToUint8Array(loomPrivateKey);
+async function ExtdevContract(abi: any, address: string) {
     const client: any = new Client(
         EXTDEV_CHAIN_ID,
         'wss://extdev-plasma-us1.dappchains.com/websocket',
         'wss://extdev-plasma-us1.dappchains.com/queryws',
     );
-    const web3 = new Web3(new LoomProvider(client, privateKey));
+    const provider = new LoomProvider(client, PRIVATE_KEY_ARRAY);
+    const web3 = new Web3(provider);
 
     return new web3.eth.Contract(abi, address);
 }
@@ -48,6 +49,7 @@ async function RewardRule(id: number) {
             id: id,
             title: r.title,
             description: r.description,
+            amount: 0,
         }
         : null;
 }
@@ -75,16 +77,27 @@ api.get('/rules/:id', async (req: any, res: any) => {
 });
 
 api.get('/rules', async (req: any, res: any) => {
-    const snap = await admin.database().ref(`/pools/${POOL_ADDRESS}/rules`).once('value');
+    const poolContract = await ExtdevContract(
+        REWARD_POOL_JSON.abi,
+        POOL_ADDRESS,
+    );
+    const publicKey = CryptoUtils.publicKeyFromPrivateKey(PRIVATE_KEY_ARRAY);
+    const address = LocalAddress.fromPublicKey(publicKey).toString();
+    const length = parseInt(await poolContract.methods.countRules().call({ from: address }), 10);
 
-    if (snap.val()) {
-        const rules = snap.val().map((rule: any, id: number) => {
-            return {
-                id: id,
-                title: rule.title,
-                description: rule.description,
-            };
-        });
+    if (length > 0) {
+        const rules: any[] = [];
+
+        for (let id = 0; id < length; id++) {
+            const rule = await RewardRule(id);
+            const r = await poolContract.methods.rules(id).call({ from: address });
+
+            if (rule) {
+                rule.amount = r.amount;
+                rules.push(rule);
+            }
+        }
+
         res.writeHead(200, {
             'Content-Type': 'application/json',
         });
@@ -246,41 +259,36 @@ slack.post('/reward', (req: any, res: any) => {
 
 slack.post('/rules', async (req: any, res: any) => {
     const query = req.body.text.split(' ');
-    const PRIVATE_KEY_ARRAY = CryptoUtils.generatePrivateKey();
-    const privatekey = CryptoUtils.Uint8ArrayToB64(PRIVATE_KEY_ARRAY);
-    // console.log(PRIVATE_KEY_ARRAY);
-    // console.log(REWARD_POOL_JSON)
-    // console.log(REWARD_POOL_JSON.abi)
-    // console.log(POOL_ADDRESS)
-    // console.log(REWARD_POOL_JSON.contractName)
-
-    const poolContract = await ExtdevContract(
-        REWARD_POOL_JSON.abi,
-        POOL_ADDRESS,
-        privatekey,
-    );
-
-    console.log(poolContract.methods.name);
 
     if (query[0] === 'list') {
-        const snap = await admin.database().ref(`/pools/${POOL_ADDRESS}/rules`).once('value');
+        const poolContract = await ExtdevContract(
+            REWARD_POOL_JSON.abi,
+            POOL_ADDRESS,
+        );
+        const publicKey = CryptoUtils.publicKeyFromPrivateKey(PRIVATE_KEY_ARRAY);
+        const address = LocalAddress.fromPublicKey(publicKey).toString();
+        const length = parseInt(await poolContract.methods.countRules().call({ from: address }), 10);
+        const utils = new Web3().utils;
 
-        if (snap.val()) {
-            const blocks = snap.val().map(async (rule: any, id: number) => {
-                const r = await poolContract.methods.rules(0).call();
-                const amount = new Web3().utils.fromWei(r.amount, 'ether');
+        if (length > 0) {
+            const blocks: any[] = [];
 
-                console.log(r);
-                console.log(amount);
+            for (let id = 0; id < length; id++) {
+                const rule = await RewardRule(id);
+                const r = await poolContract.methods.rules(id).call({ from: address });
 
-                return {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "#" + id + " " + rule.title + " *" + 0 + " THX*"
-                    }
-                };
-            });
+                if (rule) {
+                    rule.amount = r.amount;
+
+                    blocks.push({
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "#" + rule.id + " " + rule.title + " *" + utils.fromWei(rule.amount, 'ether') + " THX*"
+                        }
+                    });
+                }
+            }
 
             return res.send({
                 "text": `Pool *${POOL_ADDRESS}* has ${blocks.length} rules available.`,
