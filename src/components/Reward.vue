@@ -1,6 +1,7 @@
 <template>
     <div class="mb-2 w-100">
         <b-card
+            :no-body="!showDetails"
             tag="article"
             footer-tag="footer"
             header-tag="header" v-if="!loading" >
@@ -8,29 +9,34 @@
             <template slot="header">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center justify-content-between">
-                        <profile-picture :uid="reward.beneficiary.uid" size="xs" class="mr-2" v-if="reward.beneficiary" />
-                        <span class="flex-grow-1" v-if="reward.beneficiary">
-                            <strong> {{ reward.beneficiary.firstName }} {{ reward.beneficiary.lastName }}</strong>
-                            claims
-                            <strong>{{ reward.amount}} THX</strong>
-                            for rule <strong class="mr-1">#{{ reward.rule }}</strong>
-                            <span v-if="reward.state === 'Approved'" class="badge badge-success">
-                                {{ reward.state }}
-                            </span>
-                            <span v-if="reward.state === 'Rejected' " class="badge badge-danger">
-                                {{ reward.state }}
-                            </span>
-                            <span v-if="reward.state === 'Withdrawn' " class="badge badge-warning">
-                                {{ reward.state }}
-                            </span>
-                            <span v-if="reward.state === 'Pending' " class="badge badge-info">
-                                {{ reward.state }}
-                            </span>
-                        </span>
+                        <profile-picture :uid="reward.beneficiary.uid" size="xs" class="mr-3" v-if="reward.beneficiary" />
+                        <div class="flex-grow-1" v-if="reward.beneficiary">
+                            <div style="line-height: 1">
+                                <strong> {{ reward.beneficiary.firstName }} {{ reward.beneficiary.lastName }}</strong>
+                                claims
+                                <strong>{{ reward.amount}} THX</strong>
+                                for rule <strong class="mr-1">#{{ reward.rule }}</strong>
+                                <span v-if="reward.state === 'Approved'" class="badge badge-success">
+                                    {{ reward.state }}
+                                </span>
+                                <span v-if="reward.state === 'Rejected' " class="badge badge-danger">
+                                    {{ reward.state }}
+                                </span>
+                                <span v-if="reward.state === 'Withdrawn' " class="badge badge-warning">
+                                    {{ reward.state }}
+                                </span>
+                                <span v-if="reward.state === 'Pending' " class="badge badge-info">
+                                    {{ reward.state }}
+                                </span>
+                            </div>
+                            <small>{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                        </div>
                     </div>
-                    <div>
-                        <small>{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
-                        <button class="btn pt-0 pb-0 btn-link btn-sm ml-2" @click="update()" v-if="!disabled">
+                    <div class="text-right">
+                        <button class="btn btn-link btn-sm ml-1" @click="showDetails = !showDetails">
+                            {{showDetails ? 'Hide' : 'Show'}} poll
+                        </button>
+                        <button v-if="now < reward.endTime" class="btn btn-link btn-sm ml-1" @click="update()">
                             Update
                         </button>
                     </div>
@@ -38,7 +44,7 @@
 
             </template>
 
-            <div :class="`${now > reward.endTime ? 'disabled' : ''}`">
+            <div :class="{disabled: now > reward.endTime}" v-if="showDetails">
                 <h3>Votes ({{reward.totalVoted}}):</h3>
                 <div class="row">
                     <div class="col-12">
@@ -67,13 +73,13 @@
 
             <template slot="footer">
                 <button
-                    v-if="now > reward.endTime && canWithdraw && reward.state === 'Approved'"
+                    v-if="now > reward.endTime && canWithdraw"
                     @click="withdraw()"
                     :class="{ disabled: disabled }"
                     class="btn btn-success btn-block">
                     Withdraw
                 </button>
-                <template v-if="now > reward.endTime && !reward.finalized">
+                <template v-if="now > reward.endTime && !canWithdraw && !reward.finalized">
                     <button @click="tryToFinalize()" :class="{ disabled: disabled }" class="btn btn-link btn-block">
                         Finalize Poll
                     </button>

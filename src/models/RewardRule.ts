@@ -4,6 +4,10 @@ import { BasePoll } from './BasePoll';
 const RULE_STATE = ['Active', 'Disabled'];
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
+export interface IRewardRules {
+    [id: string]: RewardRule;
+}
+
 export class RewardRule {
     public id: number;
     public state: string;

@@ -1,5 +1,9 @@
 <template>
-<article class="region region-container overflow p-3">
+<article class="region region-container overflow p-3 d-block">
+
+    <div class="alert alert-warning" v-if="events.length === 0">
+        Currently found {{events.length}} events.
+    </div>
 
     <div
         class="pb-2 w-100"

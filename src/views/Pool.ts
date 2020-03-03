@@ -80,20 +80,30 @@ export default class PoolDetail extends Vue {
     };
     private $account!: Account;
     private $network!: Network;
-    private rewardRule: RewardRule | null = null;
-    private rewardRulePoll: RewardRulePoll | null = null;
 
     get stream() {
         return _.orderBy(this.events, 'blockTime', 'desc');
     }
 
-    get sortedRewards() {
+    get claimableRewards() {
         const filtered = _.filter(this.rewards, (reward: Reward) => {
-            const isMyReward = (reward.beneficiaryAddress)
-               ? reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account
-               : false;
+            const isMyReward = reward.beneficiaryAddress
+                ? reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account
+                : false;
             return (reward.state === 'Pending') && isMyReward ||
                 (reward.state === 'Approved') && isMyReward;
+        });
+
+        return _.orderBy(filtered, 'startTime', 'desc');
+    }
+
+    get archivedRewards() {
+        const filtered = _.filter(this.rewards, (reward: Reward) => {
+            const isMyReward = reward.beneficiaryAddress
+                ? reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account
+                : false;
+            return (reward.state === 'Rejected') && isMyReward ||
+                (reward.state === 'Withdrawn') && isMyReward;
         });
 
         return _.orderBy(filtered, 'startTime', 'desc');
@@ -165,6 +175,7 @@ export default class PoolDetail extends Vue {
 
         for (let i = parseInt(length, 10) - 1; i >= 0; i--) {
             const r = await this.poolService.getReward(i, pool);
+
             Vue.set(this.rewards, i, r);
         }
     }
@@ -274,16 +285,12 @@ export default class PoolDetail extends Vue {
         this.checkMember();
     }
 
-
     private onMemberRemoved(data: any) {
         this.checkMember();
     }
 
     private async onRewardPollCreated(data: any) {
-        if (this.pool) {
-            const r = await this.poolService.getReward(data.reward, this.pool);
-            Vue.set(this.rewards, data.reward, r);
-        }
+        this.updateReward(data);
     }
 
     private onRewardPollFinished(data: any) {
@@ -305,6 +312,7 @@ export default class PoolDetail extends Vue {
     private async updateReward(data: any) {
         if (this.pool && this.rewards) {
             const r = await this.poolService.getReward(data.reward, this.pool);
+            await r.update();
             Vue.set(this.rewards, r.id, r);
         }
     }

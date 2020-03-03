@@ -28,6 +28,7 @@ export default class CReward extends Vue {
             proposal: 0,
         },
     };
+    private showDetails: boolean = false;
     private poolService: PoolService = new PoolService();
     private $network!: Network;
 
@@ -39,6 +40,7 @@ export default class CReward extends Vue {
     public mounted() {
         this.loading = true;
         this.update();
+        this.showDetails = (this.reward.state === 'Pending' || this.reward.state === 'Approved');
         this.loading = false;
     }
 
@@ -50,7 +52,9 @@ export default class CReward extends Vue {
     }
 
     get canWithdraw() {
-        return this.reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account.toLowerCase();
+        return (this.reward.yesCounter > this.reward.noCounter) &&
+            (this.reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account.toLowerCase()) &&
+            (this.reward.state === 'Pending' || this.reward.state === 'Approved');
     }
 
     public async withdraw() {

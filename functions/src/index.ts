@@ -8,15 +8,26 @@ const cors = require('cors');
 const qrcode = require('qrcode');
 const Web3 = require('web3');
 
-const slack = express();
-const api = express();
-
 const POOL_ADDRESS = "0xE7FA4ca3257F852a96de1543fb8B9f802C7be933";
 const API_ROOT = 'https://us-central1-thx-wallet-dev.cloudfunctions.net/api';
 const APP_ROOT = 'https://thx-wallet-dev.firebaseapp.com';
 const REWARD_POOL_JSON = require('./contracts/RewardPool.json');
 const EXTDEV_CHAIN_ID = 'extdev-plasma-us1';
 const PRIVATE_KEY_ARRAY = CryptoUtils.generatePrivateKey();
+const PUBLIC_KEY = CryptoUtils.publicKeyFromPrivateKey(PRIVATE_KEY_ARRAY);
+const API_ADDRESS = LocalAddress.fromPublicKey(PUBLIC_KEY).toString();
+const client: any = new Client(
+    EXTDEV_CHAIN_ID,
+    'wss://extdev-plasma-us1.dappchains.com/websocket',
+    'wss://extdev-plasma-us1.dappchains.com/queryws',
+);
+const provider = new LoomProvider(client, PRIVATE_KEY_ARRAY);
+const web3 = new Web3(provider);
+const POOL_CONTRACT = new web3.eth.Contract(REWARD_POOL_JSON.abi, POOL_ADDRESS);
+const utils = new Web3().utils;
+
+const slack = express();
+const api = express();
 
 function QRBuffer(qrBase64: string) {
     const regex = /^data:.+\/(.+);base64,(.*)$/;
@@ -27,18 +38,6 @@ function QRBuffer(qrBase64: string) {
     } else {
         return;
     }
-}
-
-async function ExtdevContract(abi: any, address: string) {
-    const client: any = new Client(
-        EXTDEV_CHAIN_ID,
-        'wss://extdev-plasma-us1.dappchains.com/websocket',
-        'wss://extdev-plasma-us1.dappchains.com/queryws',
-    );
-    const provider = new LoomProvider(client, PRIVATE_KEY_ARRAY);
-    const web3 = new Web3(provider);
-
-    return new web3.eth.Contract(abi, address);
 }
 
 async function RewardRule(id: number) {
@@ -52,6 +51,27 @@ async function RewardRule(id: number) {
             amount: 0,
         }
         : null;
+}
+
+async function getRewardRuleBlocks(length: number) {
+    const blocks: any[] = [];
+    for (let id = 0; id < length; id++) {
+        const rule = await RewardRule(id);
+        const r = await POOL_CONTRACT.methods.rules(id).call({ from: API_ADDRESS });
+
+        if (rule) {
+            rule.amount = r.amount;
+
+            blocks.push({
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "`#" + rule.id + "` *" + utils.fromWei(rule.amount, 'ether') + " THX* - " + rule.title
+                }
+            });
+        }
+    }
+    return blocks;
 }
 
 admin.initializeApp(functions.config().firebase);
@@ -77,20 +97,14 @@ api.get('/rules/:id', async (req: any, res: any) => {
 });
 
 api.get('/rules', async (req: any, res: any) => {
-    const poolContract = await ExtdevContract(
-        REWARD_POOL_JSON.abi,
-        POOL_ADDRESS,
-    );
-    const publicKey = CryptoUtils.publicKeyFromPrivateKey(PRIVATE_KEY_ARRAY);
-    const address = LocalAddress.fromPublicKey(publicKey).toString();
-    const length = parseInt(await poolContract.methods.countRules().call({ from: address }), 10);
+    const length = parseInt(await POOL_CONTRACT.methods.countRules().call({ from: API_ADDRESS }), 10);
 
     if (length > 0) {
         const rules: any[] = [];
 
         for (let id = 0; id < length; id++) {
             const rule = await RewardRule(id);
-            const r = await poolContract.methods.rules(id).call({ from: address });
+            const r = await POOL_CONTRACT.methods.rules(id).call({ from: API_ADDRESS });
 
             if (rule) {
                 rule.amount = r.amount;
@@ -142,8 +156,8 @@ exports.api = functions.https.onRequest(api);
 
 
 
-
 slack.use(cors({ origin: true }));
+
 slack.post('/connect', (req: any, res: any) => {
     const imageUrl = API_ROOT + `/qr/connect/${POOL_ADDRESS}/${req.body.user_id}`;
     const message = {
@@ -174,16 +188,18 @@ slack.post('/connect', (req: any, res: any) => {
             }
         ]
     };
-
+    res.send(`_THXBot is busy processing your request..._`);
     res.send(message);
 })
 
 slack.post('/reward', (req: any, res: any) => {
     const query = req.body.text.split(' ');
 
+    res.send(`_THXBot is busy processing your request..._`);
+
     if (query[0].startsWith('<@')) {
         const channel = query[0].split('@')[1].split('|')[0];
-        const rule = 0;
+        const rule = query[1];
         const message = {
             "as_user": true,
             "channel": channel,
@@ -245,11 +261,8 @@ slack.post('/reward', (req: any, res: any) => {
                 },
                 data: message,
             })
-            .then((r: any) => {
-                res.send('*Your reward has been sent!* 🏆');
-            })
             .catch((e: any) => {
-                res.send(e);
+                console.error(e);
             });
 
     } else {
@@ -260,54 +273,48 @@ slack.post('/reward', (req: any, res: any) => {
 slack.post('/rules', async (req: any, res: any) => {
     const query = req.body.text.split(' ');
 
+    res.send(`_THXBot is busy processing your request..._`);
+
     if (query[0] === 'list') {
-        const poolContract = await ExtdevContract(
-            REWARD_POOL_JSON.abi,
-            POOL_ADDRESS,
-        );
-        const publicKey = CryptoUtils.publicKeyFromPrivateKey(PRIVATE_KEY_ARRAY);
-        const address = LocalAddress.fromPublicKey(publicKey).toString();
-        const length = parseInt(await poolContract.methods.countRules().call({ from: address }), 10);
-        const utils = new Web3().utils;
+        const length = parseInt(await POOL_CONTRACT.methods.countRules().call({ from: API_ADDRESS }), 10);
+        const poolName = await POOL_CONTRACT.methods.name().call({ from: API_ADDRESS });
+        const sendMessage = (url: string, message: any) => {
+            axios({
+                    method: 'POST',
+                    url: url,
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8',
+                    },
+                    data: message,
+                })
+                .catch((e: any) => {
+                    console.error(e);
+                });
+        }
 
         if (length > 0) {
-            const blocks: any[] = [];
-
-            for (let id = 0; id < length; id++) {
-                const rule = await RewardRule(id);
-                const r = await poolContract.methods.rules(id).call({ from: address });
-
-                if (rule) {
-                    rule.amount = r.amount;
-
-                    blocks.push({
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": utils.fromWei(rule.amount, 'ether') + " THX* - `#" + rule.id + "` " + rule.title + " *"
-                        }
-                    });
-                }
-            }
-
-            return res.send({
-                "text": `Pool *${POOL_ADDRESS}* has ${blocks.length} rules available.`,
+            const blocks: any[] = await getRewardRuleBlocks(length);
+            const message = {
+                "text": `*${poolName}* has ${blocks.length} reward rules available:`,
                 "attachments": [
                     {
                         "blocks": blocks,
                     }
                 ]
-            });
+            };
+
+            sendMessage(req.body.response_url, message);
         } else {
-            return res.send({
-                "text": `Pool *${POOL_ADDRESS}* has no rules available.`
-            });
+            const message = {
+                "text": `Pool *${poolName}* has no rules available.`
+            };
+
+            sendMessage(req.body.response_url, message);
         }
     }
     else {
         res.send('Send a query with your command. \n Example: `/rules list`')
     }
-
 });
 
 exports.slack = functions.https.onRequest(slack);

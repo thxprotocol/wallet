@@ -42,8 +42,15 @@
 
                         <b-tab title="Rewards">
 
-                            <reward v-for="(reward, key) in sortedRewards"
-                                :key="key"
+                            <reward v-for="reward in claimableRewards"
+                                :key="reward.id"
+                                :reward="reward"
+                                :pool="pool"
+                                :isManager="isManager"
+                                :isMember="isMember" />
+                            <hr v-if="claimableRewards.length"/>
+                            <reward v-for="reward in archivedRewards"
+                                :key="reward.id"
                                 :reward="reward"
                                 :pool="pool"
                                 :isManager="isManager"
@@ -52,14 +59,14 @@
                         </b-tab>
 
                         <b-tab title="Actions">
-                            <ul class="list-bullets">
-                                <li v-if="isManager">
+                            <ul class="list list-group">
+                                <li v-if="isManager" class="list-group-item">
                                     <button class="btn btn-link" @click="$refs.modalAddManager.show()">Add Manager</button>
                                 </li>
-                                <li v-if="isMember">
+                                <li v-if="isMember" class="list-group-item">
                                     <button class="btn btn-link" @click="$refs.modalAddMember.show()">Invite Member</button>
                                 </li>
-                                <li>
+                                <li class="list-group-item">
                                     <button class="btn btn-link" @click="$refs.modalDeposit.show()">Pool Deposit</button>
                                 </li>
                             </ul>
