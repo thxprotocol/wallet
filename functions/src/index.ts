@@ -21,6 +21,10 @@ const client: any = new Client(
     'wss://extdev-plasma-us1.dappchains.com/websocket',
     'wss://extdev-plasma-us1.dappchains.com/queryws',
 );
+const SLACK_ERROR = {
+    "response_type": "ephemeral",
+    "text": "Sorry, that didn't work. Please try again.",
+};
 const provider = new LoomProvider(client, PRIVATE_KEY_ARRAY);
 const web3 = new Web3(provider);
 const POOL_CONTRACT = new web3.eth.Contract(REWARD_POOL_JSON.abi, POOL_ADDRESS);
@@ -54,7 +58,7 @@ async function RewardRule(id: number) {
 }
 
 async function getRewardRuleBlocks(length: number) {
-    const blocks: any[] = [];
+    const blocks: string[] = [];
     for (let id = 0; id < length; id++) {
         const rule = await RewardRule(id);
         const r = await POOL_CONTRACT.methods.rules(id).call({ from: API_ADDRESS });
@@ -62,13 +66,7 @@ async function getRewardRuleBlocks(length: number) {
         if (rule) {
             rule.amount = r.amount;
 
-            blocks.push({
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": "`#" + rule.id + "` *" + utils.fromWei(rule.amount, 'ether') + " THX* - " + rule.title
-                }
-            });
+            blocks.push("\n• `#" + rule.id + "` *" + utils.fromWei(rule.amount, 'ether') + " THX* - " + rule.title);
         }
     }
     return blocks;
@@ -121,7 +119,7 @@ api.get('/rules', async (req: any, res: any) => {
             'Content-Type': 'application/json',
         });
         res.end({
-            "message": `Pool ${POOL_ADDRESS} has no rules available.`
+            "message": `Pool *${POOL_ADDRESS}* has no rules available.`
         });
     }
 });
@@ -289,19 +287,18 @@ slack.post('/rules', async (req: any, res: any) => {
                 })
                 .catch((e: any) => {
                     console.error(e);
+                    res.send(SLACK_ERROR)
                 });
         }
 
         if (length > 0) {
-            const blocks: any[] = await getRewardRuleBlocks(length);
+            const blocks: string[] = await getRewardRuleBlocks(length);
             const message = {
-                "text": `*${poolName}* has ${blocks.length} reward rules available:`,
-                "attachments": [
-                    {
-                        "blocks": blocks,
-                    }
-                ]
+                "text": `*${poolName}* has ${blocks.length} reward rules available: `,
             };
+            for (const b of blocks) {
+                message.text += b;
+            }
 
             sendMessage(req.body.response_url, message);
         } else {
