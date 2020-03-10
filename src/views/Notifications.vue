@@ -8,7 +8,7 @@
     <div
         class="pb-2 w-100"
         v-for="(ev, key) in events">
-
+        {{ev.state}}
         <rule
             :key="key"
             v-if="ev.rule"
@@ -16,7 +16,7 @@
             :pool="ev.pool" />
 
         <reward
-            v-if="ev.reward && ev.reward.state === 'Pending' && isManager"
+            v-if="ev.reward && ev.reward.state === 'Pending'"
             :key="key"
             :reward="ev.reward"
             :pool="ev.pool" />
