@@ -1,4 +1,4 @@
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth';
@@ -7,7 +7,7 @@ import { BSpinner } from 'bootstrap-vue';
 @Component({
     name: 'register',
     components: {
-        BSpinner,
+        'b-spinner': BSpinner,
     },
 })
 export default class Register extends Vue {

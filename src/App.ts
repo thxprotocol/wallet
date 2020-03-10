@@ -1,16 +1,12 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
 import { Component, Vue } from 'vue-property-decorator';
-
 import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
-
 import CoinService from './services/CoinService';
 import PoolService from './services/PoolService';
 import EventService from './services/EventService';
-
 import { Account } from '@/models/Account';
-
 import store from './store';
 import NetworkService from './services/NetworkService';
 
@@ -25,26 +21,50 @@ export default class App extends Vue {
     public $store: any = store;
     public $events!: EventService;
 
-    private $account!: Account;
+    private currentUser: firebase.User | any;
     private $network!: NetworkService;
     private poolService: PoolService = new PoolService();
     private coinService: CoinService = new CoinService();
 
     public created() {
-        this.coinService.init();
+        this.currentUser = firebase.auth().currentUser;
 
-        this.getBalances();
-        this.getMyRewardPools();
+        if (this.currentUser) {
+            this.coinService.init();
 
-        firebase.database().ref(`users/${this.$account.uid}/pools`)
-            .on('child_added', (s: any) => {
-                this.addRewardPool(s.key);
-            });
+            this.getBalances();
+            this.getMyRewardPools();
+            this.getAccount(this.currentUser.uid);
 
-        firebase.database().ref(`users/${this.$account.uid}/pools`)
-            .on('child_removed', (s: any) => {
-                this.removeRewardPool(s.key);
-            });
+            firebase.database().ref(`users/${this.currentUser.uid}/pools`)
+                .on('child_added', (s: any) => {
+                    this.addRewardPool(s.key);
+                });
+
+            firebase.database().ref(`users/${this.currentUser.uid}/pools`)
+                .on('child_removed', (s: any) => {
+                    this.removeRewardPool(s.key);
+                });
+
+            firebase.database().ref(`users/${this.currentUser.uid}`)
+                .on('child_added', (s: any) => {
+                    this.$store.commit('updateAccount', { prop: s.key, val: s.val() });
+                });
+
+            firebase.database().ref(`users/${this.currentUser.uid}`)
+                .on('child_changed', (s: any) => {
+                    this.$store.commit('updateAccount', { prop: s.key, val: s.val() });
+                });
+
+            firebase.database().ref(`users/${this.currentUser.uid}`)
+                .on('child_removed', (s: any) => {
+                    this.$store.commit('updateAccount', { prop: s.key, val: null });
+                });
+        }
+    }
+
+    private getAccount(uid: string) {
+        this.$store.commit('addAccount', new Account(uid));
     }
 
     private async getBalances() {
@@ -58,7 +78,7 @@ export default class App extends Vue {
     }
 
     private async getMyRewardPools() {
-        const snap: any = await firebase.database().ref(`users/${this.$account.uid}/pools`).once('value');
+        const snap: any = await firebase.database().ref(`users/${this.currentUser.uid}/pools`).once('value');
         const utils: any = this.$network.web3js.utils;
         const pools: any = {};
 

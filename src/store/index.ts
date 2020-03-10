@@ -1,30 +1,24 @@
-import { Vue } from 'vue-property-decorator';
 import Vuex from 'vuex';
-import BN from 'bn.js';
+import { Vue } from 'vue-property-decorator';
+import { Account } from '@/models/Account';
 import { IRewardPools, RewardPool } from '../models/RewardPool';
-import { IRewards, Reward } from '../models/Reward';
-import { IRewardRules } from '@/models/RewardRule';
+import BN from 'bn.js';
 
 Vue.use(Vuex);
 
 export interface State {
-    rewardPools: IRewardPools;  // Index by address
-    rewardRules: IRewardRules; // Index by pool and ID
-    rewards: IRewards; // Index by address
-    transactions: any[];  // Index by tx hash
-    balance: any;
-    // balance: {
-    //     eth: BN,
-    //     token: BN,
-    //     tokenRinkeby: BN,
-    // }
+    account: Account | null;
+    rewardPools: IRewardPools;
+    balance: {
+        eth: BN,
+        token: BN,
+        tokenRinkeby: BN,
+    };
 }
 
 const state: State = {
+    account: null,
     rewardPools: {},
-    rewardRules: {},
-    rewards: {},
-    transactions: [],
     balance: {
         eth: new BN(0),
         token: new BN(0),
@@ -42,20 +36,17 @@ const getters = {
     ethRinkebyBalance: (store: State) => {
         return store.balance.eth;
     },
+    account: (store: State) => {
+        return store.account;
+    },
     rewardPools: (store: State) => {
         return store.rewardPools;
-    },
-    rewardRules: (store: State) => {
-        return store.rewardRules;
-    },
-    rewards: (store: State) => {
-        return store.rewards;
     },
 };
 
 const mutations = {
     updateBalance: (store: State, options: { type: string, balance: BN }) => {
-        store.balance[options.type] = options.balance;
+        (store.balance as any)[options.type] = options.balance;
     },
     addRewardPool: (store: State, pool: RewardPool) => {
         Vue.set(store.rewardPools, pool.address, pool);
@@ -63,17 +54,13 @@ const mutations = {
     removeRewardPool: (store: State, address: string) => {
         Vue.delete(store.rewardPools, address);
     },
-    addRewardToPool: (store: State, data: { reward: Reward, pool: RewardPool}) => {
-        Vue.set(store.rewardPools[data.pool.address].rewards, data.reward.address, data.reward);
+    addAccount: (store: State, account: Account) => {
+        Vue.set(store, 'account', account);
     },
-    updateReward: (store: State, address: string) => {
-        Vue.delete(store.rewards, address);
-    },
-    addRewardRule: (store: State, rewardRule: Reward) => {
-        Vue.set(store.rewardRules, rewardRule.id, rewardRule);
-    },
-    updateRewardRule: (store: State, id: number) => {
-        Vue.delete(store.rewardRules, id);
+    updateAccount: (store: State, options: { prop: string, val: any }) => {
+        if (store.account) {
+            Vue.set(store.account, options.prop, options.val);
+        }
     },
 };
 

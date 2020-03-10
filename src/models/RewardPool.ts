@@ -1,5 +1,6 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
+import NetworkService from '@/services/NetworkService';
 import CoinService from '@/services/CoinService';
 import EventService from '@/services/EventService';
 import {
@@ -14,13 +15,12 @@ import {
     RewardPollFinishedEvent,
     RewardPoolEvents,
 } from '@/models/RewardPoolEvents';
-import { IRewards, Reward } from './Reward';
-import { IRewardRules, RewardRule, RewardRulePoll } from './RewardRule';
+import { IRewards, Reward } from '@/models/Reward';
+import { IRewardRules, RewardRule, RewardRulePoll } from '@/models/RewardRule';
+import _ from 'lodash';
 import BN from 'bn.js';
-import NetworkService from '@/services/NetworkService';
 import REWARD_JSON from '@/contracts/Reward.json';
 import REWARD_RULE_POLL_JSON from '@/contracts/RulePoll.json';
-import _ from 'lodash';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 

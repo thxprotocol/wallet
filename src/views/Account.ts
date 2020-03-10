@@ -1,13 +1,13 @@
 import { Component, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/storage';
 import { CryptoUtils, LocalAddress } from 'loom-js';
 import { BAlert, BButton, BModal, BSpinner } from 'bootstrap-vue';
-import ProfilePicture from '../components/ProfilePicture.vue';
-import Header from '../components/Header';
-import { Account } from '../models/Account';
-import NetworkService from '../services/NetworkService';
+import ProfilePicture from '@/components/ProfilePicture.vue';
+import { Account } from '@/models/Account';
+import NetworkService from '@/services/NetworkService';
 import StateService from '@/services/StateService';
 import BN from 'bn.js';
 
@@ -22,12 +22,13 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
         'b-alert': BAlert,
         'profile-picture': ProfilePicture,
     },
+    computed: {
+        ...mapGetters({
+            account: 'account',
+        }),
+    },
 })
 export default class AccountDetail extends Vue {
-
-    get account() {
-        return this.$account;
-    }
     public loading: any = false;
     public isExtdevMinter: boolean = false;
     public isRinkebyMinter: boolean = false;
@@ -48,31 +49,45 @@ export default class AccountDetail extends Vue {
         transferEtherAddress: '',
         transferEtherAmount: 0,
     };
-
-    private $account!: Account;
+    private account!: Account;
     private $network!: NetworkService;
     private $state!: StateService;
 
-    public isDuplicateAddress(address: string) {
-        const walletRef = firebase.database().ref(`wallets/${address}`);
+    public async created() {
+        this.input.extdevPrivateKey = this.$state.extdevPrivateKey;
+        this.input.rinkebyPrivateKey = this.$state.rinkebyPrivateKey;
 
-        return walletRef.once('value').then((s) => {
-            return s.exists() && s.val().uid !== this.$account.uid;
-        });
+        if (this.$network.extdev && this.$network.extdev.account) {
+            this.isExtdevMinter = await this.$network.isExtdevMinter(
+                this.$network.extdev.web3js, this.$network.extdev.account,
+            );
+        }
+        if (this.$network.rinkeby && this.$network.rinkeby.account) {
+            this.isRinkebyMinter = await this.$network.isRinkebyMinter(
+                this.$network.rinkeby.web3js,
+                this.$network.rinkeby.account.address,
+            );
+        }
+    }
+
+    public async isDuplicateAddress(address: string) {
+        const s = await firebase.database().ref(`wallets/${address}`).once('value');
+
+        return s.exists() && (s.val().uid !== this.account.uid);
     }
 
     public onFileChange(e: any) {
-        const name = `${this.$account.uid}.jpg`;
+        const name = `${this.account.uid}.jpg`;
         const files = e.target.files || e.dataTransfer.files;
 
-        if (this.$account.profile) {
-            this.$account.profile.setPicture(name, files);
+        if (this.account) {
+            this.account.setPicture(name, files);
         }
     }
 
     public async removeImage() {
-        if (this.$account.profile) {
-            this.$account.profile.removePicture();
+        if (this.account) {
+            this.account.removePicture();
         }
     }
 
@@ -114,7 +129,7 @@ export default class AccountDetail extends Vue {
 
         if (!isDuplicate) {
 
-            walletRef.child('uid').set(this.$account.uid);
+            walletRef.child('uid').set(this.account.uid);
 
             await this.$network.mapAccounts(this.input.rinkebyPrivateKey, this.input.extdevPrivateKey);
 
@@ -247,23 +262,6 @@ export default class AccountDetail extends Vue {
                 this.loading = false;
                 (this.$refs['modal-add-minter'] as any).hide();
             });
-    }
-
-    private async created() {
-        this.input.extdevPrivateKey = this.$state.extdevPrivateKey;
-        this.input.rinkebyPrivateKey = this.$state.rinkebyPrivateKey;
-
-        if (this.$network.extdev && this.$network.extdev.account) {
-            this.isExtdevMinter = await this.$network.isExtdevMinter(
-                this.$network.extdev.web3js, this.$network.extdev.account,
-            );
-        }
-        if (this.$network.rinkeby && this.$network.rinkeby.account) {
-            this.isRinkebyMinter = await this.$network.isRinkebyMinter(
-                this.$network.rinkeby.web3js,
-                this.$network.rinkeby.account.address,
-            );
-        }
     }
 
     private showModal(id: string) {

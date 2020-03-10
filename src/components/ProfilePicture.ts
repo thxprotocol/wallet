@@ -1,5 +1,5 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { ProfilePictureData } from '../models/Profile';
+import { ProfilePictureData } from '@/models/Account';
 import firebase from 'firebase/app';
 import 'firebase/database';
 

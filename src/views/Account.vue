@@ -2,29 +2,29 @@
 <article class="region region-container">
     <main class="region region-content">
 
-        <h2>{{$account.profile.firstName}} {{$account.profile.lastName}}</h2>
+        <h2>{{account.firstName}} {{account.lastName}}</h2>
 
         <b-alert v-if="alert" show :variant="alert.variant ? alert.variant : 'info'">
           {{ alert.text }}
         </b-alert>
 
         <div class="card mb-3">
-            <div class="card-body" v-if="$account.profile">
-                <span v-if="!$account.profile.picture" class="float-right ml-3">
+            <div class="card-body" v-if="account">
+                <span v-if="!account.picture" class="float-right ml-3">
                     <label class="text-center">
                         <div class="account-picture account-picture-sm bg-yellow">
                             <span>
-                                {{ $account.profile.initials}}
+                                {{ account.initials}}
                             </span>
                         </div><br>
                         <span class="btn btn-link">Change</span>
                         <input type="file" @change="onFileChange" class="d-none">
                     </label>
                 </span>
-                <span v-if="$account.profile.picture" class="float-right ml-3 text-center">
+                <span v-if="account.picture" class="float-right ml-3 text-center">
                     <div class="account-picture account-picture-sm bg-yellow">
-                        <img :src="$account.profile.picture.url"
-                            :alt="$account.profile.picture.name"
+                        <img :src="account.picture.url"
+                            :alt="account.picture.name"
                             width="100%"
                             height="100%"
                             class="rounded-circle" />
@@ -33,14 +33,14 @@
                 </span>
 
                 <h3>E-mail:</h3>
-                <p>{{$account.profile.email}}</p>
+                <p>{{account.email}}</p>
 
                 <h3>UID:</h3>
-                <p>{{$account.uid}}</p>
+                <p>{{account.uid}}</p>
 
-                <template v-if="$account.profile.slack">
+                <template v-if="account.slack">
                     <h3>Slack:</h3>
-                    {{$account.profile.slack}}
+                    {{account.slack}}
                 </template>
             </div>
             <div class="card-footer">

@@ -6,9 +6,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import router from './router';
 import store from './store';
-import { Account } from './models/Account';
 import StateService from './services/StateService';
-import EventService from './services/EventService';
 import NetworkService from './services/NetworkService';
 import config from './config.json';
 import './registerServiceWorker';
@@ -28,7 +26,6 @@ firebase.auth()
             const state: StateService = new StateService(currentUser.uid);
 
             Vue.prototype.$state = state;
-            Vue.prototype.$account = new Account(currentUser);
             Vue.prototype.$network = new NetworkService(
                 state.extdevPrivateKey,
                 state.rinkebyPrivateKey,

@@ -1,16 +1,15 @@
 <template>
 <header class="region region-header">
-
-    <button @click="goToAccount()" class="link-settings" v-if="$account && $account.profile">
+    <button @click="goToAccount()" class="link-settings" v-if="account">
         <div class="account-picture account-picture-sm bg-yellow">
-            <img v-if="$account.profile.picture"
-                :src="$account.profile.picture.url"
-                :alt="$account.profile.picture.name"
+            <img v-if="account.picture"
+                :src="account.picture.url"
+                :alt="account.picture.name"
                 width="100%"
                 height="100%"
                 class="rounded-circle" />
-            <span v-if="!$account.profile.picture && $account.profile.initials">
-                {{ $account.profile.initials}}
+            <span v-if="!account.picture && account.initials">
+                {{ account.initials}}
             </span>
         </div>
     </button>

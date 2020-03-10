@@ -1,7 +1,7 @@
 <template>
     <main class="d-flex h-100 w-100 text-white align-items-center justify-content-center" style="background: black;">
 
-        <BSpinner v-if="loading" label="Loading..."></BSpinner>
+        <b-spinner v-if="loading" label="Loading..."></b-spinner>
 
         <form v-if="!loading" class="form" v-on:submit.prevent="login">
             <div class="form-group d-flex justify-content-center">
