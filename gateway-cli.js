@@ -417,7 +417,7 @@ async function withdrawTokenFromRinkebyGateway({ web3js, web3Account, receipt, g
 function loadRinkebyAccount() {
   const privateKey = fs.readFileSync(path.join(__dirname, './rinkeby_private_key'), 'utf-8')
   const web3js = new Web3(`https://rinkeby.infura.io/v3/${INFURA_API_KEY}`)
-  const ownerAccount = web3js.eth.accounts.privateKeyToAccount('0x' + privateKey)
+  const ownerAccount = web3js.eth.accounts.privateKeyToAccount(privateKey)
   web3js.eth.accounts.wallet.add(ownerAccount)
   return { account: ownerAccount, web3js }
 }

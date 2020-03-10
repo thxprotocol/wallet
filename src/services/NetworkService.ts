@@ -1,4 +1,3 @@
-import { Vue } from 'vue-property-decorator';
 import {
     Client,
     NonceTxMiddleware,
@@ -29,7 +28,7 @@ const EXTDEV_CHAIN_ID = 'extdev-plasma-us1';
 const INFURA_API_KEY = Config.infura.key;
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
-export class Network extends Vue {
+export default class NetworkService {
     public loomPrivateKeyString: string;
     public rinkebyPrivateKeyString: string;
     public extdev: any;
@@ -40,8 +39,6 @@ export class Network extends Vue {
         extdevPrivateKey: string = '',
         rinkebyPrivateKey: string = '',
     ) {
-        super();
-
         this.loomPrivateKeyString = extdevPrivateKey;
         this.rinkebyPrivateKeyString = rinkebyPrivateKey;
 
@@ -75,7 +72,7 @@ export class Network extends Vue {
         const ownerExtdevAddr = Address.fromString(`${client.chainId}:${ownerExtdevAddress}`);
         const gatewayContract: any = await TransferGateway.createAsync(client, ownerExtdevAddr);
 
-        const coinContract = await this.getExtdevCoinContract(web3js);
+        const coinContract = await this.getExtdevCoinContract();
         try {
             await coinContract.methods
                 .approve(EXTDEV_GATEWAY_ADDRESS.toLowerCase(), amount.toString())
@@ -121,10 +118,10 @@ export class Network extends Vue {
         return gatewayContract.withdrawalReceiptAsync(ownerExtdevAddr);
     }
 
-    public async depositCoinToRinkebyGateway(web3js: string, amount: BN, ownerAccount: any, gas: number) {
-        const contract = await this.getRinkebyCoinContract(web3js);
-        const contractAddress = await this.getRinkebyCoinContractAddress(web3js);
-        const gateway = await this.getRinkebyGatewayContract(web3js, ownerAccount);
+    public async depositCoinToRinkebyGateway(amount: BN, ownerAccount: any, gas: number) {
+        const contract = await this.getRinkebyCoinContract();
+        const contractAddress = await this.getRinkebyCoinContractAddress();
+        const gateway = await this.getRinkebyGatewayContract(ownerAccount);
 
         const gasEstimate = await contract.methods
             .approve(RINKEBY_GATEWAY_ADDRESS, amount.toString())
@@ -149,37 +146,36 @@ export class Network extends Vue {
         return tx.hash;
     }
 
-    public async getRinkebyCoinContract(web3js: any) {
-        const networkId = await web3js.eth.net.getId();
-        return new web3js.eth.Contract(
+    public async getRinkebyCoinContract() {
+        const networkId = await this.rinkeby.web3js.eth.net.getId();
+        return new this.rinkeby.web3js.eth.Contract(
             MyRinkebyCoinJSON.abi,
             MyRinkebyCoinJSON.networks[networkId].address,
         );
     }
 
-    public async getExtdevCoinContract(web3js: any) {
-        const networkId = await web3js.eth.net.getId();
-        return new web3js.eth.Contract(
+    public async getExtdevCoinContract() {
+        const networkId = await this.extdev.web3js.eth.net.getId();
+        return new this.extdev.web3js.eth.Contract(
             MyCoinJSON.abi,
             MyCoinJSON.networks[networkId].address,
         );
     }
 
-    public async getExtdevContract(web3js: any, contractAbi: any, contractAddr: string) {
-        const networkId = await web3js.eth.net.getId();
-        return new web3js.eth.Contract(
+    public async getExtdevContract(contractAbi: any, contractAddr: string) {
+        return new this.extdev.web3js.eth.Contract(
             contractAbi,
             contractAddr,
         );
     }
 
-    public async getRinkebyCoinContractAddress(web3js: any) {
-        const networkId = await web3js.eth.net.getId();
+    public async getRinkebyCoinContractAddress() {
+        const networkId = await this.rinkeby.web3js.eth.net.getId();
         return MyRinkebyCoinJSON.networks[networkId].address;
     }
 
-    public async getRinkebyGatewayContract(web3js: any, web3Account: any) {
-        const networkId = await web3js.eth.net.getId();
+    public async getRinkebyGatewayContract(web3Account: any) {
+        const networkId = await this.rinkeby.web3js.eth.net.getId();
 
         let version: any;
         switch (networkId) {
@@ -198,7 +194,10 @@ export class Network extends Vue {
         return createEthereumGatewayAsync(
             version,
             RINKEBY_GATEWAY_ADDRESS,
-            new ethers.Wallet(web3Account.privateKey, new ethers.providers.Web3Provider(web3js.currentProvider)),
+            new ethers.Wallet(
+                web3Account.privateKey,
+                new ethers.providers.Web3Provider(this.rinkeby.web3js.currentProvider),
+            ),
         );
     }
 
@@ -208,7 +207,7 @@ export class Network extends Vue {
         receipt,
         gas,
     }: any) {
-        const gatewayContract = await this.getRinkebyGatewayContract(web3js, web3Account);
+        const gatewayContract = await this.getRinkebyGatewayContract(web3Account);
         const tx = await gatewayContract.withdrawAsync(receipt, {
             gasLimit: gas,
         });
@@ -346,7 +345,7 @@ export class Network extends Vue {
         try {
             const actualAmount = new BN(amount).mul(TOKEN_MULTIPLIER);
             const txHash = await this.depositCoinToRinkebyGateway(
-                web3js, actualAmount, account, 350000,
+                actualAmount, account, 350000,
             );
             console.log(`${amount} tokens deposited to Transfer Gateway.`);
             console.log(`Rinkeby tx hash: ${txHash}`);
@@ -356,7 +355,7 @@ export class Network extends Vue {
     }
 
     public async getRinkebyCoinBalance(web3js: any, accountAddress: string) {
-        const contract = await this.getRinkebyCoinContract(web3js);
+        const contract = await this.getRinkebyCoinContract();
         const balance = await contract.methods
             .balanceOf(accountAddress)
             .call();
@@ -364,7 +363,7 @@ export class Network extends Vue {
     }
 
     public async getExtdevCoinBalance(web3js: any, accountAddress: string) {
-        const contract = await this.getExtdevCoinContract(web3js);
+        const contract = await this.getExtdevCoinContract();
         const addr = accountAddress.toLowerCase();
         const balance = await contract.methods
             .balanceOf(addr)
@@ -375,7 +374,7 @@ export class Network extends Vue {
     }
 
     public async isExtdevMinter(web3js: any, accountAddress: string) {
-        const contract = await this.getExtdevCoinContract(web3js);
+        const contract = await this.getExtdevCoinContract();
         const addr = accountAddress.toLowerCase();
         const isMinter = await contract.methods
             .isMinter(addr)
@@ -386,7 +385,7 @@ export class Network extends Vue {
     }
 
     public async isRinkebyMinter(web3js: any, accountAddress: string) {
-        const contract = await this.getRinkebyCoinContract(web3js);
+        const contract = await this.getRinkebyCoinContract();
         const isMinter = await contract.methods
             .isMinter(accountAddress)
             .call();
@@ -394,7 +393,7 @@ export class Network extends Vue {
     }
 
     public async transferExtdevCoin(receiver: string, amount: BN) {
-        const contract = await this.getExtdevCoinContract(this.extdev.web3js);
+        const contract = await this.getExtdevCoinContract();
         const approvedTx = await contract.methods
             .approve(receiver, amount.toString())
             .send({
@@ -409,7 +408,7 @@ export class Network extends Vue {
 
     public async transferRinkebyCoin(receiver: string, amount: BN) {
         const rinkeby = this.loadRinkebyAccount();
-        const contract = await this.getRinkebyCoinContract(rinkeby.web3js);
+        const contract = await this.getRinkebyCoinContract();
 
         const approvedTx = await contract.methods
             .approve(receiver, amount.toString())
@@ -445,7 +444,7 @@ export class Network extends Vue {
 
     public async mintRinkebyCoin(receiver: string, amount: BN) {
         const rinkeby = this.loadRinkebyAccount();
-        const contract = await this.getRinkebyCoinContract(rinkeby.web3js);
+        const contract = await this.getRinkebyCoinContract();
 
         const tx = await contract.methods
             .mint(receiver, amount.toString())
@@ -457,7 +456,7 @@ export class Network extends Vue {
 
     public async mintExtdevCoin(receiver: string, amount: BN) {
         const extdev = this.loadExtdevAccount();
-        const contract = await this.getExtdevCoinContract(extdev.web3js);
+        const contract = await this.getExtdevCoinContract();
 
         const tx = await contract.methods
             .mint(receiver, amount.toString())
@@ -469,7 +468,7 @@ export class Network extends Vue {
 
     public async addRinkebyMinter(address: string) {
         const rinkeby = this.loadRinkebyAccount();
-        const contract = await this.getRinkebyCoinContract(rinkeby.web3js);
+        const contract = await this.getRinkebyCoinContract();
 
         const tx = await contract.methods
             .addMinter(address)
@@ -481,7 +480,7 @@ export class Network extends Vue {
 
     public async addExtdevMinter(address: string) {
         const extdev = this.loadExtdevAccount();
-        const contract = await this.getExtdevCoinContract(extdev.web3js);
+        const contract = await this.getExtdevCoinContract();
 
         const tx = await contract.methods
             .addMinter(address)

@@ -15,7 +15,6 @@
                         </div>
 
                         <b-tab title="Stream" active>
-
                             <b-list-group>
                                 <component
                                     v-for="(ev, key) in stream"
@@ -24,46 +23,37 @@
                                     :pool="pool"
                                     :is="ev.component" />
                             </b-list-group>
-
                         </b-tab>
 
                         <b-tab title="Rules">
 
-                            <rule v-for="(rule, key) in rules"
+                            <rule v-for="(rule, key) in pool.rewardRules"
                                 :key="key"
                                 :rule="rule"
-                                :pool="pool"
-                                :isManager="isManager"
-                                :isMember="isMember" />
+                                :pool="pool" />
 
-                            <button v-if="isManager" class="btn btn-primary btn-block" @click="$refs.modalCreateRule.show()">Add new rule</button>
+                            <button v-if="pool.isManager" class="btn btn-primary btn-block" @click="$refs.modalCreateRule.show()">Add new rule</button>
 
                         </b-tab>
 
                         <b-tab title="Rewards">
-
-                            <reward v-for="reward in claimableRewards"
-                                :key="reward.id"
+                            <reward v-for="reward in pool.claimableRewards"
+                                :key="reward.address"
                                 :reward="reward"
-                                :pool="pool"
-                                :isManager="isManager"
-                                :isMember="isMember" />
-                            <hr v-if="claimableRewards.length"/>
-                            <reward v-for="reward in archivedRewards"
-                                :key="reward.id"
+                                :pool="pool" />
+                            <hr />
+                            <reward v-for="reward in pool.archivedRewards"
+                                :key="reward.address"
                                 :reward="reward"
-                                :pool="pool"
-                                :isManager="isManager"
-                                :isMember="isMember" />
-
+                                :pool="pool" />
                         </b-tab>
 
                         <b-tab title="Actions">
                             <ul class="list list-group">
-                                <li v-if="isManager" class="list-group-item">
+                                <li v-if="pool.isManager" class="list-group-item">
                                     <button class="btn btn-link" @click="$refs.modalAddManager.show()">Add Manager</button>
                                 </li>
-                                <li v-if="isMember" class="list-group-item">
+                                <li v-if="pool.isMember" class="list-group-item">
                                     <button class="btn btn-link" @click="$refs.modalAddMember.show()">Invite Member</button>
                                 </li>
                                 <li class="list-group-item">
@@ -100,7 +90,7 @@
             </b-modal>
 
             <b-modal ref="modalAddMember" centered title="Invite a member for this reward pool">
-                <input v-if="!loading" v-model="input.addMember" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
+                <input v-if="!loading" v-model="input.memberAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
                 <p v-if="loading" class="d-flex w-100 justify-content-center">
                     <b-spinner></b-spinner>
                 </p>
@@ -108,14 +98,29 @@
                     <button class="btn btn-link" @click="$refs.modalAddMember.hide()">
                         Cancel
                     </button>
-                    <button @click="addMember()" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                    <button @click="updateRole(input.memberAddress, 'Member', true)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
                         Add Member
                     </button>
                 </template>
             </b-modal>
 
+            <b-modal ref="modalRemoveManager" centered title="Remove a member from this reward pool">
+                <input v-if="!loading" v-model="input.memberAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
+                <p v-if="loading" class="d-flex w-100 justify-content-center">
+                    <b-spinner></b-spinner>
+                </p>
+                <template v-slot:modal-footer="{ ok, cancel }">
+                    <button class="btn btn-link" @click="$refs.modalRemoveManager.hide()">
+                        Cancel
+                    </button>
+                    <button @click="updateRole(input.memberAddress, 'Member', false)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                        Remove Member
+                    </button>
+                </template>
+            </b-modal>
+
             <b-modal ref="modalAddManager" centered title="Add a manager to the reward pool">
-                <input v-if="!loading" v-model="input.addManager" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
+                <input v-if="!loading" v-model="input.managerAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
                 <p v-if="loading" class="d-flex w-100 justify-content-center">
                     <b-spinner></b-spinner>
                 </p>
@@ -123,7 +128,22 @@
                     <button class="btn btn-link" @click="$refs.modalAddManager.hide()">
                         Cancel
                     </button>
-                    <button @click="addManager()" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                    <button @click="updateRole(input.managerAddress, 'Manager', true)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                        Add Manager
+                    </button>
+                </template>
+            </b-modal>
+
+            <b-modal ref="modalRemoveManager" centered title="Remove a manager from the reward pool">
+                <input v-if="!loading" v-model="input.managerAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
+                <p v-if="loading" class="d-flex w-100 justify-content-center">
+                    <b-spinner></b-spinner>
+                </p>
+                <template v-slot:modal-footer="{ ok, cancel }">
+                    <button class="btn btn-link" @click="$refs.modalRemoveManager.hide()">
+                        Cancel
+                    </button>
+                    <button @click="updateRole(input.managerAddress, 'Manager', false)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
                         Add Manager
                     </button>
                 </template>

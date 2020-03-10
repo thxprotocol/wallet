@@ -8,7 +8,7 @@ const cors = require('cors');
 const qrcode = require('qrcode');
 const Web3 = require('web3');
 
-const POOL_ADDRESS = "0xE7FA4ca3257F852a96de1543fb8B9f802C7be933";
+const POOL_ADDRESS = "0xbce2653Fe5C7366A03a747110F885f02dabb1E9F";
 const API_ROOT = 'https://us-central1-thx-wallet-dev.cloudfunctions.net/api';
 const APP_ROOT = 'https://thx-wallet-dev.firebaseapp.com';
 const REWARD_POOL_JSON = require('./contracts/RewardPool.json');
@@ -73,6 +73,166 @@ async function getRewardRuleBlocks(length: number) {
 }
 
 admin.initializeApp(functions.config().firebase);
+
+slack.use(cors({ origin: true }));
+
+slack.post('/connect', (req: any, res: any) => {
+    const imageUrl = API_ROOT + `/qr/connect/${POOL_ADDRESS}/${req.body.user_id}`;
+    const message = {
+        "as_user": true,
+        "attachments": [
+            {
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": "*Connect your THX wallet!*"
+                        }
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": `Scan the QR code with your authorized THX wallet. \n Verify that you connect with Slack ID: *${req.body.user_id}*`
+                        },
+                        "accessory": {
+                            "type": "image",
+                            "image_url": imageUrl,
+                            "alt_text": "qr code for connecting your account"
+                        }
+                    }
+                ]
+            }
+        ]
+    };
+    res.send(message);
+})
+
+slack.post('/reward', (req: any, res: any) => {
+    const query = req.body.text.split(' ');
+
+    res.send({
+        message: 'THXBot is handling your request'
+    });
+
+    if (query[0].startsWith('<@')) {
+        const channel = query[0].split('@')[1].split('|')[0];
+        const rule = query[1];
+        const message = {
+            "as_user": true,
+            "channel": channel,
+            "attachments": [
+                {
+                    "blocks": [
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": ":moneybag: *Congratulations! You have received a reward.* \n Scan the QR code with your authorized THX wallet and claim this reward. \n *You don't have a wallet?*:scream: No harm done, register a fresh one!"
+                            },
+                            "accessory": {
+                                "type": "image",
+                                "image_url": API_ROOT + `/qr/claim/${POOL_ADDRESS}/${rule}`,
+                                "alt_text": "qr code for reward verification"
+                            }
+                        },
+                        {
+                            "type": "actions",
+                            "elements": [
+                                {
+                                    "type": "button",
+                                    "url": APP_ROOT + "/register",
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "Register Wallet"
+                                    }
+                                },
+                                {
+                                    "type": "button",
+                                    "url": APP_ROOT + `/claim/${POOL_ADDRESS}/${rule}`,
+                                    "text": {
+                                        "type": "plain_text",
+                                        "text": "Claim on this device"
+                                    },
+                                    "style": "primary"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        axios({
+                method: 'POST',
+                url: 'https://slack.com/api/chat.postMessage',
+                headers: {
+                    'Authorization': 'Bearer xoxb-874849905696-951441147569-jiqzfWErHKgPlDvBNzE40Jwh',
+                    'Content-Type': 'application/json;charset=utf-8',
+                },
+                data: message,
+            })
+            .catch((e: any) => {
+                console.error(e);
+            });
+
+    } else {
+        res.send('Make sure to mention a pool member. \n Example: `/reward @Chuck 1` when you want to reward Chuck with reward rule 1.')
+    }
+});
+
+slack.post('/rules', async (req: any, res: any) => {
+    const query = req.body.text.split(' ');
+
+    res.send({
+        message: 'THXBot is handling your request'
+    });
+
+    if (query[0] === 'list') {
+        const length = parseInt(await POOL_CONTRACT.methods.countRules().call({ from: API_ADDRESS }), 10);
+        const poolName = await POOL_CONTRACT.methods.name().call({ from: API_ADDRESS });
+        const sendMessage = (url: string, message: any) => {
+            axios({
+                    method: 'POST',
+                    url: url,
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8',
+                    },
+                    data: message,
+                })
+                .catch((e: any) => {
+                    console.error(e);
+                    res.send(SLACK_ERROR)
+                });
+        }
+
+        if (length > 0) {
+            const blocks: string[] = await getRewardRuleBlocks(length);
+            const message = {
+                "text": `*${poolName}* has ${blocks.length} reward rules available: `,
+            };
+            for (const b of blocks) {
+                message.text += b;
+            }
+
+            sendMessage(req.body.response_url, message);
+        } else {
+            const message = {
+                "text": `Pool *${poolName}* has no rules available.`
+            };
+
+            sendMessage(req.body.response_url, message);
+        }
+    }
+    else {
+        res.send('Send a query with your command. \n Example: `/rules list`')
+    }
+});
+
+exports.slack = functions.https.onRequest(slack);
+
+
 
 api.use(cors({ origin: true }));
 
@@ -151,167 +311,3 @@ api.get('/qr/claim/:pool/:rule', async (req: any, res: any) => {
 });
 
 exports.api = functions.https.onRequest(api);
-
-
-
-slack.use(cors({ origin: true }));
-
-slack.post('/connect', (req: any, res: any) => {
-    const imageUrl = API_ROOT + `/qr/connect/${POOL_ADDRESS}/${req.body.user_id}`;
-    const message = {
-        "as_user": true,
-        "attachments": [
-            {
-                "blocks": [
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": "*Connect your THX wallet!*"
-                        }
-                    },
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": `Scan the QR code with your authorized THX wallet. \n Verify that you connect with Slack ID: *${req.body.user_id}*`
-                        },
-                        "accessory": {
-                            "type": "image",
-                            "image_url": imageUrl,
-                            "alt_text": "qr code for connecting your account"
-                        }
-                    }
-                ]
-            }
-        ]
-    };
-    res.send(`_THXBot is busy processing your request..._`);
-    res.send(message);
-})
-
-slack.post('/reward', (req: any, res: any) => {
-    const query = req.body.text.split(' ');
-
-    res.send(`_THXBot is busy processing your request..._`);
-
-    if (query[0].startsWith('<@')) {
-        const channel = query[0].split('@')[1].split('|')[0];
-        const rule = query[1];
-        const message = {
-            "as_user": true,
-            "channel": channel,
-            "attachments": [
-                {
-                    "blocks": [
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "*Congratulations! You have received a reward!* :moneybag:"
-                            }
-                        },
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": "Scan the QR code with your authorized THX wallet and claim this reward. \n\n You don't have a wallet?:scream: No harm done, register a fresh one!"
-                            },
-                            "accessory": {
-                                "type": "image",
-                                "image_url": API_ROOT + `/qr/claim/${POOL_ADDRESS}/${rule}`,
-                                "alt_text": "qr code for reward verification"
-                            }
-                        },
-                        {
-                            "type": "actions",
-                            "elements": [
-                                {
-                                    "type": "button",
-                                    "url": APP_ROOT + "/register",
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "Register Wallet"
-                                    }
-                                },
-                                {
-                                    "type": "button",
-                                    "url": APP_ROOT + `/claim/${POOL_ADDRESS}/${rule}`,
-                                    "text": {
-                                        "type": "plain_text",
-                                        "text": "Claim on this device"
-                                    },
-                                    "style": "primary"
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        };
-
-        axios({
-                method: 'POST',
-                url: 'https://slack.com/api/chat.postMessage',
-                headers: {
-                    'Authorization': 'Bearer xoxb-874849905696-951441147569-jiqzfWErHKgPlDvBNzE40Jwh',
-                    'Content-Type': 'application/json;charset=utf-8',
-                },
-                data: message,
-            })
-            .catch((e: any) => {
-                console.error(e);
-            });
-
-    } else {
-        res.send('Make sure to mention a pool member. \n Example: `/reward @chuck`')
-    }
-});
-
-slack.post('/rules', async (req: any, res: any) => {
-    const query = req.body.text.split(' ');
-
-    res.send(`_THXBot is busy processing your request..._`);
-
-    if (query[0] === 'list') {
-        const length = parseInt(await POOL_CONTRACT.methods.countRules().call({ from: API_ADDRESS }), 10);
-        const poolName = await POOL_CONTRACT.methods.name().call({ from: API_ADDRESS });
-        const sendMessage = (url: string, message: any) => {
-            axios({
-                    method: 'POST',
-                    url: url,
-                    headers: {
-                        'Content-Type': 'application/json;charset=utf-8',
-                    },
-                    data: message,
-                })
-                .catch((e: any) => {
-                    console.error(e);
-                    res.send(SLACK_ERROR)
-                });
-        }
-
-        if (length > 0) {
-            const blocks: string[] = await getRewardRuleBlocks(length);
-            const message = {
-                "text": `*${poolName}* has ${blocks.length} reward rules available: `,
-            };
-            for (const b of blocks) {
-                message.text += b;
-            }
-
-            sendMessage(req.body.response_url, message);
-        } else {
-            const message = {
-                "text": `Pool *${poolName}* has no rules available.`
-            };
-
-            sendMessage(req.body.response_url, message);
-        }
-    }
-    else {
-        res.send('Send a query with your command. \n Example: `/rules list`')
-    }
-});
-
-exports.slack = functions.https.onRequest(slack);

@@ -1,10 +1,10 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import PoolService from '@/services/PoolService';
-import { RewardPool } from '@/models/RewardPool';
+import { RewardPool, IRewardPools } from '@/models/RewardPool';
 import firebase from 'firebase/app';
 import StateService from '@/services/StateService';
 import { RewardRule } from '@/models/RewardRule';
 import ClaimService from '@/services/ClaimService';
+import PoolService from '@/services/PoolService';
 
 const QRCode = (window as any).QRCode;
 
@@ -13,14 +13,16 @@ const QRCode = (window as any).QRCode;
 })
 export default class Claim extends Vue {
     public error: string = '';
-    public poolService: PoolService = new PoolService();
-    public pool!: RewardPool;
+    public pool: RewardPool | null = null;
     public rule: RewardRule | null = null;
     public confetti: any = [];
     public $state!: StateService;
-    private isClaimed: boolean = false;
-    private claimService: ClaimService = new ClaimService();
+
     private data!: any;
+    private isClaimed: boolean = false;
+    private rewardPools!: IRewardPools;
+    private poolService: PoolService = new PoolService();
+    private claimService: ClaimService = new ClaimService();
 
     private async mounted() {
         if (this.$route.params.rule && this.$route.params.pool) {
@@ -51,7 +53,7 @@ export default class Claim extends Vue {
             if (this.$state.extdevPrivateKey) {
                 try {
                     this.pool = await this.poolService.getRewardPool(this.data.pool);
-                    this.rule = await this.poolService.getRewardRule(this.data.rule, this.pool);
+                    this.rule = await this.pool.getRewardRule(this.data.rule);
                 } catch (err) {
                     this.error = `An error occured while connecting to the pool.`;
                 }
@@ -63,6 +65,7 @@ export default class Claim extends Vue {
             this.error = 'Your have tried a faulty URL. Please use another one.';
         }
     }
+
     private createQRCode(dataString: string) {
         QRCode.toCanvas(
             this.$refs.canvas,

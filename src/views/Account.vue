@@ -21,8 +21,8 @@
                         <input type="file" @change="onFileChange" class="d-none">
                     </label>
                 </span>
-                <span v-if="$account.profile.picture" class="float-left mr-3 text-center">
-                    <div class="account-picture account-picture-lg bg-yellow">
+                <span v-if="$account.profile.picture" class="float-right ml-3 text-center">
+                    <div class="account-picture account-picture-sm bg-yellow">
                         <img :src="$account.profile.picture.url"
                             :alt="$account.profile.picture.name"
                             width="100%"

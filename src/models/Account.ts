@@ -1,6 +1,6 @@
 import { Vue } from 'vue-property-decorator';
 import { Profile } from './Profile';
-import { Network } from './Network';
+import NetworkService from '@/services/NetworkService';
 import BN from 'bn.js';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
@@ -8,7 +8,7 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 export class Account extends Vue {
     public uid: string = '';
     public profile: Profile | null = null;
-    private $network!: Network;
+    private $network!: NetworkService;
 
     constructor(
         currentUser: firebase.User | any,

@@ -44,7 +44,7 @@
                     </a>
                 </div>
 
-                <div class="alert alert-warning" v-if="!isMember">
+                <div class="alert alert-warning" v-if="!pool.isMember">
                     <strong>You are not a member of this pool and can not join the poll.</strong>
                 </div>
 
@@ -99,12 +99,12 @@
                 </div>
 
                 <template slot="footer">
-                    <template v-if="!rule.hasPollAddress && isMember">
+                    <template v-if="!rule.hasPollAddress && pool.isMember">
                         <button @click="$refs.modalCreateRulePoll.show()" :class="{ disabled: loading }" class="btn btn-link btn-block">
                             Change reward size
                         </button>
                     </template>
-                    <template v-if="rule.hasPollAddress && poll && isMember">
+                    <template v-if="rule.hasPollAddress && poll && pool.isMember">
                         <div class="row" v-if="now < poll.endTime">
                             <div class="col-md-6" v-if="!poll.hasVoted">
                                 <button @click="vote(true)" :class="{ disabled: poll.loading }" class="btn btn-success btn-block mb-2">

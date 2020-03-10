@@ -7,9 +7,9 @@ import 'firebase/auth';
 import router from './router';
 import store from './store';
 import { Account } from './models/Account';
-import { Network } from './models/Network';
 import StateService from './services/StateService';
 import EventService from './services/EventService';
+import NetworkService from './services/NetworkService';
 import config from './config.json';
 import './registerServiceWorker';
 import './custom.scss';
@@ -29,8 +29,7 @@ firebase.auth()
 
             Vue.prototype.$state = state;
             Vue.prototype.$account = new Account(currentUser);
-            Vue.prototype.$events = new EventService();
-            Vue.prototype.$network = new Network(
+            Vue.prototype.$network = new NetworkService(
                 state.extdevPrivateKey,
                 state.rinkebyPrivateKey,
             );
@@ -42,7 +41,7 @@ firebase.auth()
                 console.warn('It looks like you misconfigured your extdev private key. Provide it through the accounts page.');
             }
         } else {
-            Vue.prototype.$network = new Network();
+            Vue.prototype.$network = new NetworkService();
         }
 
         if (!app) {

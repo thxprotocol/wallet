@@ -26,31 +26,24 @@
 
                 <template slot="footer" class="">
                     <div class="text-right">
-                        <button class="btn btn-link card-link" @click="onLeavePool(p.address)">Leave pool</button>
+                        <button class="btn btn-link card-link" @click="leaveRewardPool(p.address)">Leave pool</button>
                         <button class="btn btn-link card-link" @click="$router.replace(`/pools/${p.address}`)">Open pool</button>
                     </div>
                 </template>
 
             </b-card>
 
-            <p v-if="loading" class="d-flex w-100 justify-content-center">
-                <b-spinner></b-spinner>
-            </p>
-
             <button class="btn btn-primary btn-block" @click="$refs.modalJoinPool.show()">
                 Add Reward Pool
             </button>
 
             <b-modal ref="modalJoinPool" centered title="Join a reward pool">
-                <p v-if="loading" class="d-flex w-100 justify-content-center">
-                    <b-spinner></b-spinner>
-                </p>
-                <input v-if="!loading" v-model="input.poolAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000" />
+                <input v-model="input.poolAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000" />
                 <template v-slot:modal-footer="{ ok, cancel }">
                     <button class="btn btn-link" @click="$refs.modalJoinPool.hide()">
                         Cancel
                     </button>
-                    <button @click="onJoinRewardPool()" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                    <button @click="joinRewardPool(input.poolAddress)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
                         Join
                     </button>
                 </template>

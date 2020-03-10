@@ -20,6 +20,7 @@
         "deploy:reset:extdev": "truffle deploy --reset --network extdev_plasma_us1",
         "deploy:rinkeby": "truffle deploy --network rinkeby",
         "deploy:reset:rinkeby": "truffle deploy --reset --network rinkeby",
+        "map-contracts": "node ./gateway-cli.js map-contracts coin",
         "test:ganache": "truffle test --network ganache",
         "serve:ganache": "NETWORK=ganache yarn run serve",
         "serve:extdev": "NETWORK=extdev yarn run serve",

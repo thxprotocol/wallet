@@ -14,6 +14,7 @@ export default class Login extends Vue {
     public email: string = '';
     public password: string = '';
     public loading: boolean = false;
+    public error: string = '';
     public $router!: VueRouter;
 
     public login() {
@@ -25,9 +26,10 @@ export default class Login extends Vue {
                 this.$router.push((this.$route.query.redirect as any) || '/account');
             })
             .catch((err) => {
+                this.loading = false;
                 if (typeof err !== 'undefined') {
+                    this.error = err.message;
                     console.error(err.code + ' ' + err.message);
-                    alert('Error during authentication');
                 }
             });
     }

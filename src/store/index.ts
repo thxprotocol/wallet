@@ -2,32 +2,29 @@ import { Vue } from 'vue-property-decorator';
 import Vuex from 'vuex';
 import BN from 'bn.js';
 import { IRewardPools, RewardPool } from '../models/RewardPool';
+import { IRewards, Reward } from '../models/Reward';
+import { IRewardRules } from '@/models/RewardRule';
 
 Vue.use(Vuex);
 
 export interface State {
-  rewardPools: IRewardPools;
-  rewardRules: any[];
-  rewards: any[];
-  transactions: any[];
-  accounts: any[];
-  profiles: any[];
-  networks: any[];
-  balance: {
-      eth: BN;
-      token: BN;
-      tokenRinkeby: BN;
-  };
+    rewardPools: IRewardPools;  // Index by address
+    rewardRules: IRewardRules; // Index by pool and ID
+    rewards: IRewards; // Index by address
+    transactions: any[];  // Index by tx hash
+    balance: any;
+    // balance: {
+    //     eth: BN,
+    //     token: BN,
+    //     tokenRinkeby: BN,
+    // }
 }
 
 const state: State = {
     rewardPools: {},
-    rewardRules: [],
-    rewards: [],
+    rewardRules: {},
+    rewards: {},
     transactions: [],
-    accounts: [],
-    profiles: [],
-    networks: [],
     balance: {
         eth: new BN(0),
         token: new BN(0),
@@ -36,29 +33,47 @@ const state: State = {
 };
 
 const getters = {
-    tokenRinkebyBalance: (s: any) => {
-        return s.balance.tokenRinkeby;
+    tokenRinkebyBalance: (store: State) => {
+        return store.balance.tokenRinkeby;
     },
-    tokenBalance: (s: any) => {
-        return s.balance.token;
+    tokenBalance: (store: State) => {
+        return store.balance.token;
     },
-    ethRinkebyBalance: (s: any) => {
-        return s.balance.eth;
+    ethRinkebyBalance: (store: State) => {
+        return store.balance.eth;
     },
-    rewardPools: (s: any) => {
-        return s.rewardPools;
+    rewardPools: (store: State) => {
+        return store.rewardPools;
+    },
+    rewardRules: (store: State) => {
+        return store.rewardRules;
+    },
+    rewards: (store: State) => {
+        return store.rewards;
     },
 };
 
 const mutations = {
-    updateBalance: (s: any, options: { type: string, balance: BN }) => {
-        s.balance[options.type] = options.balance;
+    updateBalance: (store: State, options: { type: string, balance: BN }) => {
+        store.balance[options.type] = options.balance;
     },
-    addRewardPool: (s: any, pool: RewardPool) => {
-        Vue.set(s.rewardPools, pool.address, pool);
+    addRewardPool: (store: State, pool: RewardPool) => {
+        Vue.set(store.rewardPools, pool.address, pool);
     },
-    removeRewardPool: (s: any, address: string) => {
-        Vue.delete(s.rewardPools, address);
+    removeRewardPool: (store: State, address: string) => {
+        Vue.delete(store.rewardPools, address);
+    },
+    addRewardToPool: (store: State, data: { reward: Reward, pool: RewardPool}) => {
+        Vue.set(store.rewardPools[data.pool.address].rewards, data.reward.address, data.reward);
+    },
+    updateReward: (store: State, address: string) => {
+        Vue.delete(store.rewards, address);
+    },
+    addRewardRule: (store: State, rewardRule: Reward) => {
+        Vue.set(store.rewardRules, rewardRule.id, rewardRule);
+    },
+    updateRewardRule: (store: State, id: number) => {
+        Vue.delete(store.rewardRules, id);
     },
 };
 

@@ -4,6 +4,22 @@ import UserService from '@/services/UserService';
 const RULE_STATE = ['Pending', 'Approved', 'Rejected', 'Withdrawn'];
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
+export class RewardPoolEvents {
+    public eventTypes: string[] = [
+        'Deposited',
+        'ManagerAdded',
+        'ManagerRemoved',
+        'MemberAdded',
+        'MemberRemoved',
+        'RewardPollCreated',
+        'RewardPollFinished',
+        'RulePollCreated',
+        'RulePollFinished',
+        'RuleStateChanged',
+        'Withdrawn',
+    ];
+}
+
 export class TransactionEvent {
     public component: string;
     public blockTime: number;

@@ -13,17 +13,13 @@
             :key="key"
             v-if="ev.rule"
             :rule="ev.rule"
-            :pool="ev.pool"
-            :isManager="isManager"
-            :isMember="isMember" />
+            :pool="ev.pool" />
 
         <reward
-            :key="key"
             v-if="ev.reward && ev.reward.state === 'Pending' && isManager"
+            :key="key"
             :reward="ev.reward"
-            :pool="ev.pool"
-            :isManager="isManager"
-            :isMember="isMember" />
+            :pool="ev.pool" />
 
     </div>
 

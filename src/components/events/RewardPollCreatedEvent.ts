@@ -3,7 +3,6 @@ import { BListGroupItem } from 'bootstrap-vue';
 import { RewardPool } from '@/models/RewardPool';
 import { RewardPollCreatedEvent } from '@/models/RewardPoolEvents';
 import { RewardRule } from '@/models/RewardRule';
-import PoolService from '@/services/PoolService';
 import { Reward } from '@/models/Reward';
 import ProfilePicture from '@/components/ProfilePicture.vue';
 
@@ -20,10 +19,9 @@ export default class RewardPollCreated extends Vue {
 
     private reward: Reward | null = null;
     private rule: RewardRule | null = null;
-    private poolService: PoolService = new PoolService();
 
     public async created() {
-        this.reward = await this.poolService.getReward(this.ev.id, this.pool);
-        this.rule = await this.poolService.getRewardRule(this.reward.rule, this.pool);
+        this.reward = await this.pool.getReward(this.ev.id);
+        this.rule = await this.pool.getRewardRule(this.reward.rule);
     }
 }

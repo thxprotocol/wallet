@@ -10,6 +10,9 @@
             <div class="form-group text-center">
                 <h2>Enter your credentials</h2>
             </div>
+            <div class="alert alert-danger" v-if="error">
+                {{error}}
+            </div>
             <div class="form-group">
                 <input required type="text" class="form-control" v-model="email" placeholder="E-mail">
             </div>

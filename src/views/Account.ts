@@ -7,7 +7,7 @@ import { BAlert, BButton, BModal, BSpinner } from 'bootstrap-vue';
 import ProfilePicture from '../components/ProfilePicture.vue';
 import Header from '../components/Header';
 import { Account } from '../models/Account';
-import { Network } from '../models/Network';
+import NetworkService from '../services/NetworkService';
 import StateService from '@/services/StateService';
 import BN from 'bn.js';
 
@@ -50,7 +50,7 @@ export default class AccountDetail extends Vue {
     };
 
     private $account!: Account;
-    private $network!: Network;
+    private $network!: NetworkService;
     private $state!: StateService;
 
     public isDuplicateAddress(address: string) {
@@ -199,7 +199,7 @@ export default class AccountDetail extends Vue {
         this.loading = true;
 
         return this.$network.transferEther(this.input.transferEtherAddress, amount)
-            .then((tx) => {
+            .then((tx: any) => {
                 this.loading = false;
                 this.input.transferEtherAmount = 0;
                 this.input.transferEtherAddress = '';
@@ -229,7 +229,7 @@ export default class AccountDetail extends Vue {
         this.loading = true;
 
         return this.$network.mintExtdevCoin(
-            this.$network.extdev.address,
+            this.$network.extdev.account,
             amount,
         )
             .then(() => {

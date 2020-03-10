@@ -1,8 +1,9 @@
+import { mapGetters } from 'vuex';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BSpinner, BAlert } from 'bootstrap-vue';
 import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 import PoolService from '@/services/PoolService';
-import { RewardPool } from '@/models/RewardPool';
+import { RewardPool, IRewardPools } from '@/models/RewardPool';
 import { RewardRule } from '@/models/RewardRule';
 import ClaimService from '@/services/ClaimService';
 import UserService from '@/services/UserService';
@@ -16,6 +17,11 @@ import { VueRouter } from 'vue-router/types/router';
         'b-spinner': BSpinner,
         'qrcode-stream': QrcodeStream,
         'qrcode-capture': QrcodeCapture,
+    },
+    computed: {
+        ...mapGetters({
+            rewardPools: 'rewardPools',
+        }),
     },
 })
 export default class Camera extends Vue {
@@ -31,6 +37,7 @@ export default class Camera extends Vue {
     private poolService: PoolService = new PoolService();
     private userService: UserService = new UserService();
     private claimService: ClaimService = new ClaimService();
+    private rewardPools!: IRewardPools;
 
     private repaint() {
         return;
@@ -43,8 +50,8 @@ export default class Camera extends Vue {
 
             try {
                 if (this.data.pool && this.data.rule) {
-                    this.pool = await this.poolService.getRewardPool(this.data.pool);
-                    this.rule = await this.poolService.getRewardRule(this.data.rule, this.pool);
+                    this.pool = this.rewardPools[this.data.pool];
+                    this.rule = this.pool.rewardRules[this.data.rule];
                 }
                 if (this.data.slack) {
                     this.pool = await this.poolService.getRewardPool(this.data.pool);

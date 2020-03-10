@@ -3,13 +3,9 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import { BCard, BCardText, BSpinner, BModal } from 'bootstrap-vue';
 import { Account } from '@/models/Account';
-import { Network } from '@/models/Network';
-import PoolService from '@/services/PoolService';
-import CoinService from '@/services/CoinService';
+import NetworkService from '@/services/NetworkService';
 import BN from 'bn.js';
 import { mapGetters } from 'vuex';
-import { IRewardPools, RewardPool } from '@/models/RewardPool';
-import EventService from '@/services/EventService';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
@@ -28,52 +24,22 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
     },
 })
 export default class Pools extends Vue {
+    public loading: boolean = false;
     public error: string = '';
-    public loading: any = true;
     public input: any = {
         poolAddress: '',
     };
     private $account!: Account;
-    private $network!: Network;
-    private poolService!: PoolService;
-    private coinService!: CoinService;
-    private eventService!: EventService;
-    private pools: IRewardPools = {};
+    private $network!: NetworkService;
 
-    public async created() {
-        this.eventService = new EventService();
-        this.coinService = new CoinService();
-        this.poolService = new PoolService();
-
-        this.poolService.subscribeRewardPools();
-
-        try {
-            const pools = await this.poolService.getMyRewardPools();
-
-            for (const address in pools) {
-                if (pools[address]) {
-                    const balance = await this.coinService.getExtdevBalance(address);
-                    pools[address].setBalance(balance);
-
-                    this.$store.commit('addRewardPool', pools[address]);
-                }
-            }
-
-            this.loading = false;
-        } catch (error) {
-            this.loading = false;
-            this.error = `Oops! Your Reward Pools could not be loaded. Did you provide your keys?`;
-        }
-    }
-
-    public onJoinRewardPool() {
+    private joinRewardPool(address: string) {
         const utils: any = this.$network.web3js.utils;
-        const address: string = this.input.poolAddress;
-
-        this.loading = true;
 
         if (utils.isAddress(address)) {
-            this.poolService.joinRewardPool(address)
+            this.loading = true;
+
+            firebase.database().ref(`users/${this.$account.uid}/pools`).child(address)
+                .set({ address })
                 .then(() => {
                     this.loading = false;
                     (this.$refs.modalJoinPool as BModal).hide();
@@ -82,29 +48,17 @@ export default class Pools extends Vue {
                     this.loading = false;
                     this.error = err;
                 });
-        } else {
-            this.loading = false;
         }
     }
 
-    public async onLeavePool(poolAddress: string) {
-        this.loading = true;
-
+    private leaveRewardPool(poolAddress: string) {
         firebase.database().ref(`users/${this.$account.uid}/pools`).child(poolAddress)
             .remove()
             .then(() => {
                 this.$store.commit('removeRewardPool', poolAddress);
-
-                this.loading = false;
             })
             .catch((err: string) => {
-                this.loading = false;
                 this.error = err;
             });
-    }
-
-    private async updateBalance(address: string) {
-        const balance = await this.coinService.getExtdevBalance(address);
-        this.pools[address].setBalance(balance);
     }
 }

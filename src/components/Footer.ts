@@ -1,6 +1,6 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BNav, BNavItem } from 'bootstrap-vue';
-import { Network } from '@/models/Network';
+import NetworkService from '@/services/NetworkService';
 
 @Component({
     name: 'Footer',
@@ -22,5 +22,5 @@ export default class Footer extends Vue {
         camera: require('../assets/qrcode.svg'),
         pools: require('../assets/community.svg'),
     };
-    private $network!: Network;
+    private $network!: NetworkService;
 }

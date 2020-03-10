@@ -29,14 +29,14 @@
                                     {{ reward.state }}
                                 </span>
                             </div>
-                            <small>{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                            <small v-if="reward.startTime">{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
                         </div>
                     </div>
                     <div class="text-right">
                         <button class="btn btn-link btn-sm ml-1" @click="showDetails = !showDetails">
                             {{showDetails ? 'Hide' : 'Show'}} poll
                         </button>
-                        <button v-if="now < reward.endTime" class="btn btn-link btn-sm ml-1" @click="update()">
+                        <button v-if="reward.endTime && now < reward.endTime" class="btn btn-link btn-sm ml-1" @click="update()">
                             Update
                         </button>
                     </div>
@@ -54,10 +54,10 @@
                             :max="100"
                         ></b-progress>
                     </div>
-                    <div class="col-6">
+                    <div class="col-6" v-if="reward.startTime">
                         <small>{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
                     </div>
-                    <div class="col-6 text-right">
+                    <div class="col-6 text-right" v-if="reward.endTime">
                         <small>{{reward.endTime | moment("MMMM Do YYYY HH:mm") }}</small>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
                         Finalize Poll
                     </button>
                 </template>
-                <template v-if="isManager">
+                <template v-if="pool.isManager">
                     <div class="row" v-if="now < reward.endTime">
                         <div class="col-md-6" v-if="!reward.hasVoted">
                             <button @click="vote(true)" :class="{ disabled: disabled }" class="btn btn-success btn-block mb-2">
