@@ -11,6 +11,8 @@ import {
     RulePollFinishedEvent,
     MemberAddedEvent,
     MemberRemovedEvent,
+    // ManagerAddedEvent,
+    // ManagerRemovedEvent,
     RewardPollCreatedEvent,
     RewardPollFinishedEvent,
     RewardPoolEvents,
@@ -27,40 +29,41 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 export class RewardPool extends RewardPoolEvents {
 
     get claimableRewards() {
-        const filtered = _.filter(this.allRewards, (r: Reward) => {
+        const filtered = _.filter(this.rewards, (r: Reward) => {
             return (r.state === 'Approved' || r.state === 'Pending');
         });
         return _.orderBy(filtered, 'startTime', 'desc');
     }
 
     get archivedRewards() {
-        const filtered = _.filter(this.allRewards, (r: Reward) => {
+        const filtered = _.filter(this.rewards, (r: Reward) => {
             return (r.state === 'Withdrawn' || r.state === 'Rejected');
         });
         return _.orderBy(filtered, 'startTime', 'desc');
     }
 
-    get rewards() {
-        return _.orderBy(this.allRewards, 'startTime', 'desc');
-    }
-
-    set rewards(r: any) {
-        this.allRewards[r.address] = r;
-    }
+    // get myRewards() {
+    //     return _.orderBy(this.allMyRewards, 'startTime', 'desc');
+    // }
+    //
+    // set myRewards(r: any) {
+    //     this.allMyRewards[r.address] = r;
+    // }
 
     public name: string = '';
     public balance: BN = new BN(0);
     public events: any[] = [];
     public rewardRules: IRewardRules = {};
-    // public members: any = {};
+    public members: any = {};
     // public managers: any = {};
     public isMember: boolean = false;
     public isManager: boolean = false;
     public address: string = '';
     public outOfSync: boolean = true;
     public transactions: any[] = [];
+    public rewards: IRewards = {};
 
-    private allRewards: IRewards = {};
+    private allMyRewards: IRewards = {};
     private account: string = '';
     private contract: any;
     private network: NetworkService;
@@ -78,9 +81,10 @@ export class RewardPool extends RewardPoolEvents {
 
         this.updateBalance();
         this.checkMemberships();
-        this.getRewards();
         this.getRewardRules();
+        this.getRewards();
         this.getTransactions();
+        this.getMembers();
         this.getStream(); // Do this last since it uses other data
 
         this.contract.methods.name().call({ from: this.account })
@@ -91,9 +95,19 @@ export class RewardPool extends RewardPoolEvents {
         for (const event of this.eventTypes) {
             this.contract.events[event]()
                 .on('data', (e: any) => {
-                    (this as any)[`on${e.event}`](e.returnValues);
+                    const method = `on${e.event}`;
+                    if ((this as any)[method]) {
+                        (this as any)[method](e.returnValues);
+                    }
                 });
         }
+    }
+
+    public async getMembers() {
+        const member = await this.contract.methods.members(0).call({ from: this.account });
+        const hasRole = await this.contract.methods.isMember(member).call({ from: this.account });
+
+        this.members[member] = hasRole;
     }
 
     public async getRewardRules() {
@@ -110,9 +124,20 @@ export class RewardPool extends RewardPoolEvents {
 
         for (let i = 0; i < length; i++) {
             const reward = await this.getReward(i);
-            this.allRewards[i] = reward;
+
+            this.rewards[i] = reward;
         }
     }
+
+    // public async getRewardsOf() {
+    //     const length = await this.countRewardsOf(this.account);
+    //
+    //     for (let i = 0; i < length; i++) {
+    //         const reward = await this.getRewardOf(this.account, i);
+    //
+    //         this.myRewards[i] = reward;
+    //     }
+    // }
 
     public async getTransactions() {
         const dLength = await this.countDeposits(this.account);
@@ -207,11 +232,7 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async createReward(ruleId: number) {
-        return await this.contract.methods.createReward(ruleId)
-            .send({
-                from: this.account,
-            });
-
+        return await this.contract.methods.createReward(ruleId).send({ from: this.account });
     }
 
     public async addManager(address: string) {
@@ -270,11 +291,11 @@ export class RewardPool extends RewardPoolEvents {
         });
     }
 
-    // public async countRewardsOf(account: string) {
-    //     return await this.contract.methods.countRewardsOf(account).call({
-    //         from: this.account,
-    //     });
-    // }
+    public async countRewardsOf(account: string) {
+        return await this.contract.methods.countRewardsOf(account).call({
+            from: this.account,
+        });
+    }
 
     public async countDeposits(address: string) {
         return await this.contract.methods.countDeposits(address).call({
@@ -283,7 +304,7 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async countWithdrawels(address: string) {
-        return await this.contract.methods.countDeposits(address).call({
+        return await this.contract.methods.countWithdrawels(address).call({
             from: this.account,
         });
     }
@@ -307,16 +328,16 @@ export class RewardPool extends RewardPoolEvents {
         );
     }
 
-    // public async getRewardOf(index: number, account: string, pool: RewardPool) {
-    //     const address = await this.contract.methods.rewardsOf(index, account).call({from: this.account});
-    //     const contract = await this.getContract(REWARD_JSON.abi, address);
-    //
-    //     return new Reward(
-    //         address,
-    //         contract,
-    //         this.account,
-    //     );
-    // }
+    public async getRewardOf(account: string, index: number) {
+        const address = await this.contract.methods.rewardsOf(index, account).call({from: this.account});
+        const contract = await this.network.getExtdevContract(REWARD_JSON.abi, address);
+
+        return new Reward(
+            address,
+            contract,
+            this.account,
+        );
+    }
 
     public async depositOf(address: string, index: number) {
         return await this.contract.methods.deposits(address, index)
@@ -390,9 +411,13 @@ export class RewardPool extends RewardPoolEvents {
 
     private async updateReward(data: any) {
         const id = parseInt(data.reward, 10);
-        const reward = await this.getReward(id);
 
-        this.allRewards[id] = reward;
+        if (this.rewards[id]) {
+            await this.rewards[id].update();
+        } else {
+            const reward = await this.getReward(id);
+            this.rewards[reward.id] = reward;
+        }
     }
 
     private async updateRule(data: any) {
@@ -432,6 +457,12 @@ export class RewardPool extends RewardPoolEvents {
         if (type === 'MemberRemoved') {
             eventModel = new MemberRemovedEvent(data, data.blockTime);
         }
+        // if (type === 'ManagerAdded') {
+        //     eventModel = new ManagerAddedEvent(data, data.blockTime);
+        // }
+        // if (type === 'ManagerRemoved') {
+        //     eventModel = new ManagerRemovedEvent(data, data.blockTime);
+        // }
         if (type === 'Deposited') {
             eventModel = new DepositEvent(data, data.blockTime);
         }

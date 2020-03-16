@@ -17,11 +17,14 @@ export default class RewardPollCreated extends Vue {
     @Prop() public ev!: RewardPollCreatedEvent;
     @Prop() public pool!: RewardPool;
 
-    private reward: Reward | null = null;
     private rule: RewardRule | null = null;
+    private reward: Reward | null = null;
 
-    public async created() {
-        this.reward = await this.pool.getReward(this.ev.id);
-        this.rule = await this.pool.getRewardRule(this.reward.rule);
+    private created() {
+        this.reward = this.pool.rewards[this.ev.id];
+
+        if (this.reward) {
+            this.rule = this.pool.rewardRules[this.reward.rule];
+        }
     }
 }

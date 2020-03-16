@@ -4,7 +4,6 @@ import NetworkService from '@/services/NetworkService';
 import { Reward } from '@/models/Reward';
 import { RewardPool } from '@/models/RewardPool';
 import ProfilePicture from '@/components/ProfilePicture.vue';
-import PoolService from '@/services/PoolService';
 
 @Component({
     name: 'CReward',

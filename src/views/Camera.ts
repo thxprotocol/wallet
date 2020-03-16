@@ -21,14 +21,15 @@ import { VueRouter } from 'vue-router/types/router';
     computed: {
         ...mapGetters({
             rewardPools: 'rewardPools',
+            account: 'account',
         }),
     },
 })
 export default class Camera extends Vue {
-    public $account!: Account;
     public loading: boolean = true;
     public hasStream: boolean = false;
     public $router!: VueRouter;
+    private account!: Account;
     private slack: string = '';
     private data!: any;
     private pool!: RewardPool;
@@ -64,8 +65,8 @@ export default class Camera extends Vue {
     }
 
     private connect() {
-        if (this.pool && this.$account) {
-            this.userService.connectSlack(this.$account, this.data.slack)
+        if (this.pool && this.account) {
+            this.userService.connectSlack(this.account, this.data.slack)
                 .then(() => {
                     this.$router.push(`/account`);
                 })

@@ -20,7 +20,11 @@ export default class RewardPollFinished extends Vue {
     private reward: Reward | null = null;
     private rule: RewardRule | null = null;
 
-    public async created() {
-        this.reward = await this.pool.getReward(this.ev.id);
+    public created() {
+        this.reward = this.pool.rewards[this.ev.id];
+
+        if (this.reward) {
+            this.rule = this.pool.rewardRules[this.reward.rule];
+        }
     }
 }

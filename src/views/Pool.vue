@@ -1,7 +1,7 @@
 <template>
     <article class="region region-container">
         <main class="region region-content" v-if="pool">
-            <div class="region region-jumbotron" >
+            <div class="region region-jumbotron">
                 <strong class="font-size-xl">{{pool.balance}} THX</strong>
                 <p>{{ pool.name }}</p>
             </div>
@@ -89,7 +89,7 @@
                 </template>
             </b-modal>
 
-            <b-modal ref="modalAddMember" centered title="Invite a member for this reward pool">
+            <b-modal ref="modalAddMember" centered title="Remove a member from this reward pool">
                 <input v-if="!loading" v-model="input.memberAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
                 <p v-if="loading" class="d-flex w-100 justify-content-center">
                     <b-spinner></b-spinner>
@@ -98,22 +98,22 @@
                     <button class="btn btn-link" @click="$refs.modalAddMember.hide()">
                         Cancel
                     </button>
-                    <button @click="updateRole(input.memberAddress, 'Member', true)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                    <button @click="updateRole(input.memberAddress, 'Member', false)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
                         Add Member
                     </button>
                 </template>
             </b-modal>
 
-            <b-modal ref="modalRemoveManager" centered title="Remove a member from this reward pool">
+            <b-modal ref="modalRemoveMember" centered title="Invite a member for this reward pool">
                 <input v-if="!loading" v-model="input.memberAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
                 <p v-if="loading" class="d-flex w-100 justify-content-center">
                     <b-spinner></b-spinner>
                 </p>
                 <template v-slot:modal-footer="{ ok, cancel }">
-                    <button class="btn btn-link" @click="$refs.modalRemoveManager.hide()">
+                    <button class="btn btn-link" @click="$refs.modalRemoveMember.hide()">
                         Cancel
                     </button>
-                    <button @click="updateRole(input.memberAddress, 'Member', false)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                    <button @click="updateRole(input.memberAddress, 'Member', true)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
                         Remove Member
                     </button>
                 </template>
@@ -128,7 +128,7 @@
                     <button class="btn btn-link" @click="$refs.modalAddManager.hide()">
                         Cancel
                     </button>
-                    <button @click="updateRole(input.managerAddress, 'Manager', true)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                    <button @click="updateRole(input.managerAddress, 'Manager', false)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
                         Add Manager
                     </button>
                 </template>
@@ -143,7 +143,7 @@
                     <button class="btn btn-link" @click="$refs.modalRemoveManager.hide()">
                         Cancel
                     </button>
-                    <button @click="updateRole(input.managerAddress, 'Manager', false)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
+                    <button @click="updateRole(input.managerAddress, 'Manager', true)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
                         Add Manager
                     </button>
                 </template>

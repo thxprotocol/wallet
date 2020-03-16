@@ -14,4 +14,12 @@ import ProfilePicture from '@/components/ProfilePicture.vue';
 export default class MemberAdded extends Vue {
     @Prop() public ev!: MemberAddedEvent;
     @Prop() public pool!: RewardPool;
+
+    public created() {
+        console.log('memberadded created');
+    }
+
+    public mounted() {
+        console.log('memberadded mounted');
+    }
 }

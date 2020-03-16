@@ -2,10 +2,10 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import firebase from 'firebase/app';
 import 'firebase/database';
 import { BCard, BCardText, BSpinner, BModal } from 'bootstrap-vue';
-import { Account } from '@/models/Account';
 import NetworkService from '@/services/NetworkService';
 import BN from 'bn.js';
 import { mapGetters } from 'vuex';
+import { Account } from '@/models/Account';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
@@ -20,6 +20,7 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
     computed: {
         ...mapGetters({
             rewardPools: 'rewardPools',
+            account: 'account',
         }),
     },
 })
@@ -29,7 +30,7 @@ export default class Pools extends Vue {
     public input: any = {
         poolAddress: '',
     };
-    private $account!: Account;
+    private account!: Account;
     private $network!: NetworkService;
 
     private joinRewardPool(address: string) {
@@ -38,7 +39,7 @@ export default class Pools extends Vue {
         if (utils.isAddress(address)) {
             this.loading = true;
 
-            firebase.database().ref(`users/${this.$account.uid}/pools`).child(address)
+            firebase.database().ref(`users/${this.account.uid}/pools`).child(address)
                 .set({ address })
                 .then(() => {
                     this.loading = false;
@@ -52,7 +53,7 @@ export default class Pools extends Vue {
     }
 
     private leaveRewardPool(poolAddress: string) {
-        firebase.database().ref(`users/${this.$account.uid}/pools`).child(poolAddress)
+        firebase.database().ref(`users/${this.account.uid}/pools`).child(poolAddress)
             .remove()
             .then(() => {
                 this.$store.commit('removeRewardPool', poolAddress);

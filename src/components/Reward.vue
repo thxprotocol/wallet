@@ -1,14 +1,16 @@
 <template>
     <div class="mb-2 w-100">
         <b-card
+            v-if="!loading"
             :no-body="!showDetails"
             tag="article"
             footer-tag="footer"
-            header-tag="header" v-if="!loading" >
+            header-tag="header">
 
             <template slot="header">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center justify-content-between">
+                        {{reward.id}}
                         <profile-picture :uid="reward.beneficiary.uid" size="xs" class="mr-3" v-if="reward.beneficiary" />
                         <div class="flex-grow-1" v-if="reward.beneficiary">
                             <div style="line-height: 1">

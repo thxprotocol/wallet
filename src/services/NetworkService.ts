@@ -45,8 +45,7 @@ export default class NetworkService {
         if (extdevPrivateKey !== '' && rinkebyPrivateKey !== '') {
             this.extdev = this.loadExtdevAccount();
             this.rinkeby = this.loadRinkebyAccount();
-
-            this.resumeWithdrawal();
+            // this.resumeWithdrawal();
         }
     }
 
@@ -162,7 +161,7 @@ export default class NetworkService {
         );
     }
 
-    public async getExtdevContract(contractAbi: any, contractAddr: string) {
+    public getExtdevContract(contractAbi: any, contractAddr: string) {
         return new this.extdev.web3js.eth.Contract(
             contractAbi,
             contractAddr,

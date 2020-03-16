@@ -17,7 +17,7 @@ import CManagerRemovedEvent from '@/components/events/ManagerRemovedEvent.vue';
 import PoolService from '@/services/PoolService';
 import CoinService from '@/services/CoinService';
 import EventService from '@/services/EventService';
-import { Account } from '@/models/Account';
+import NetworkService from '@/services/NetworkService';
 import { RewardPool, IRewardPools } from '@/models/RewardPool';
 import { RewardRule } from '@/models/RewardRule';
 import { IRewards } from '@/models/Reward';
@@ -74,16 +74,11 @@ export default class PoolDetail extends Vue {
             description: '',
         },
     };
-    private $account!: Account;
     private rewardPools!: IRewardPools;
+    private $network!: NetworkService;
 
     get stream() {
         return _.orderBy(this.pool.events, 'blockTime', 'desc');
-    }
-
-    get myRewards() {
-        console.log(this.pool.rewards);
-        return _.orderBy(this.pool.rewards, 'startTime', 'desc');
     }
 
     get pool(): RewardPool {
@@ -111,8 +106,10 @@ export default class PoolDetail extends Vue {
         if (promise) {
             promise
                 .then(() => {
-                    (this.$refs.modalUpdateMember as BModal).hide();
-                    (this.$refs.modalUpdateManager as BModal).hide();
+                    (this.$refs.modalAddMember as BModal).hide();
+                    (this.$refs.modalAddManager as BModal).hide();
+                    (this.$refs.modalRemoveMember as BModal).hide();
+                    (this.$refs.modalRemoveManager as BModal).hide();
 
                     this.loading = false;
                 })
@@ -123,22 +120,29 @@ export default class PoolDetail extends Vue {
         }
     }
 
-    public deposit() {
+    public async deposit() {
         const amount = new BN(this.input.poolDeposit).mul(TOKEN_MULTIPLIER);
+        const address = this.$network.extdev.account;
+        const balanceWei = await this.coinService.getExtdevBalance(address);
+        const balance = new BN(balanceWei).mul(TOKEN_MULTIPLIER);
 
-        this.loading = true;
+        if (parseInt(balance.toString(), 10) >= parseInt(amount.toString(), 10)) {
+            this.loading = true;
 
-        this.pool.addDeposit(amount)
-            .then(() => {
-                (this.$refs.modalDeposit as BModal).hide();
-                this.$account.getExtdevCoinBalance();
-                this.input.poolDeposit = 0;
-                this.loading = false;
-            })
-            .catch((err: string) => {
-                this.loading = false;
-                this.error = err;
-            });
+            this.pool.addDeposit(amount)
+                .then(() => {
+                    (this.$refs.modalDeposit as BModal).hide();
+
+                    this.input.poolDeposit = 0;
+                    this.loading = false;
+                })
+                .catch((err: string) => {
+                    this.loading = false;
+                    this.error = err;
+                });
+        } else {
+            this.error = 'Your balance is not sufficient.';
+        }
     }
 
     public addRewardRule(rule: any) {

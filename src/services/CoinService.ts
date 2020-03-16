@@ -1,6 +1,5 @@
 import { Vue } from 'vue-property-decorator';
 import NetworkService from '@/services/NetworkService';
-import { Account } from '@/models/Account';
 import store from '../store';
 import BN from 'bn.js';
 
@@ -8,59 +7,58 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export default class CoinService extends Vue {
     public $store: any = store;
-    private $account!: Account;
     private $network!: NetworkService;
 
-    public async init() {
-
+    public async listen() {
         if (this.$network.rinkeby) {
             const rinkebyContract: any = await this.$network.getRinkebyCoinContract();
+            const rinkebyAddress: string = this.$network.rinkeby.account.address;
 
             rinkebyContract.events
                 .Transfer({
-                    to: this.$network.rinkeby.account.address,
+                    to: rinkebyAddress,
                 })
                 .on('data', async () => {
                     this.$store.commit('updateBalance', {
                         type: 'tokenRinkeby',
-                        balance: await this.$account.getRinkebyCoinBalance(),
+                        balance: await this.getRinkebyBalance(rinkebyAddress),
                     });
                 });
 
             rinkebyContract.events
                 .Transfer({
-                    from: this.$network.rinkeby.account.address,
+                    from: rinkebyAddress,
                 })
                 .on('data', async () => {
                     this.$store.commit('updateBalance', {
                         type: 'tokenRinkeby',
-                        balance: await this.$account.getRinkebyCoinBalance(),
+                        balance: await this.getRinkebyBalance(rinkebyAddress),
                     });
                 });
         }
-
         if (this.$network.extdev) {
             const extdevContract: any = await this.$network.getExtdevCoinContract();
+            const extdevAddress = this.$network.extdev.account;
 
             extdevContract.events
                 .Transfer({
-                    to: this.$network.extdev.account,
+                    to: extdevAddress,
                 })
                 .on('data', async () => {
                     this.$store.commit('updateBalance', {
                         type: 'token',
-                        balance: await this.$account.getExtdevCoinBalance(),
+                        balance: await this.getExtdevBalance(extdevAddress),
                     });
                 });
 
             extdevContract.events
                 .Transfer({
-                    from: this.$network.extdev.account,
+                    from: extdevAddress,
                 })
                 .on('data', async () => {
                     this.$store.commit('updateBalance', {
                         type: 'token',
-                        balance: await this.$account.getExtdevCoinBalance(),
+                        balance: await this.getExtdevBalance(extdevAddress),
                     });
                 });
         }
@@ -68,7 +66,8 @@ export default class CoinService extends Vue {
 
     public async getEthBalance(address: string) {
         const balance = await this.$network.rinkeby.web3js.eth.getBalance(address);
-        return new BN(balance).div(TOKEN_MULTIPLIER);
+
+        return this.$network.rinkeby.web3js.utils.fromWei(balance, 'ether');
     }
 
     public async getExtdevBalance(address: string) {
