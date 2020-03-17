@@ -11,14 +11,12 @@ import {
     RulePollFinishedEvent,
     MemberAddedEvent,
     MemberRemovedEvent,
-    // ManagerAddedEvent,
-    // ManagerRemovedEvent,
     RewardPollCreatedEvent,
     RewardPollFinishedEvent,
     RewardPoolEvents,
 } from '@/models/RewardPoolEvents';
-import { IRewards, Reward } from '@/models/Reward';
-import { IRewardRules, RewardRule, RewardRulePoll } from '@/models/RewardRule';
+import { Reward } from '@/models/Reward';
+import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import _ from 'lodash';
 import BN from 'bn.js';
 import REWARD_JSON from '@/contracts/Reward.json';
@@ -27,43 +25,19 @@ import REWARD_RULE_POLL_JSON from '@/contracts/RulePoll.json';
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export class RewardPool extends RewardPoolEvents {
-
-    get claimableRewards() {
-        const filtered = _.filter(this.rewards, (r: Reward) => {
-            return (r.state === 'Approved' || r.state === 'Pending');
-        });
-        return _.orderBy(filtered, 'startTime', 'desc');
-    }
-
-    get archivedRewards() {
-        const filtered = _.filter(this.rewards, (r: Reward) => {
-            return (r.state === 'Withdrawn' || r.state === 'Rejected');
-        });
-        return _.orderBy(filtered, 'startTime', 'desc');
-    }
-
-    // get myRewards() {
-    //     return _.orderBy(this.allMyRewards, 'startTime', 'desc');
-    // }
-    //
-    // set myRewards(r: any) {
-    //     this.allMyRewards[r.address] = r;
-    // }
-
     public name: string = '';
     public balance: BN = new BN(0);
-    public events: any[] = [];
-    public rewardRules: IRewardRules = {};
     public members: any = {};
-    // public managers: any = {};
     public isMember: boolean = false;
     public isManager: boolean = false;
     public address: string = '';
     public outOfSync: boolean = true;
     public transactions: any[] = [];
-    public rewards: IRewards = {};
 
-    private allMyRewards: IRewards = {};
+    public events: any[] = [];
+    public rewards: Reward[] = [];
+    public rewardRules: RewardRule[] = [];
+
     private account: string = '';
     private contract: any;
     private network: NetworkService;
@@ -111,33 +85,33 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async getRewardRules() {
-        const length = await this.countRewardRules();
+        const length = parseInt(await this.countRewardRules(), 10);
 
-        for (let i = 0; i < length; i++) {
-            const rewardRule = await this.getRewardRule(i);
-            this.rewardRules[rewardRule.id] = rewardRule;
+        if (length > 0) {
+            for (let id = length - 1; id >= 0; id--) {
+                const rewardRule = await this.getRewardRule(id);
+
+                if (this.rewardRules.indexOf(rewardRule) === -1) {
+                    this.rewardRules.push(rewardRule);
+                }
+            }
         }
     }
 
     public async getRewards() {
-        const length = await this.countRewards();
+        const length = parseInt(await this.countRewards(), 10);
 
-        for (let i = 0; i < length; i++) {
-            const reward = await this.getReward(i);
+        if (length > 0) {
+            for (let id = length - 1; id >= 0 ; id--) {
+                const reward = await this.getReward(id);
 
-            this.rewards[i] = reward;
+                if (this.rewards.indexOf(reward) === -1) {
+                    this.rewards.push(reward);
+                    console.log(this.rewards);
+                }
+            }
         }
     }
-
-    // public async getRewardsOf() {
-    //     const length = await this.countRewardsOf(this.account);
-    //
-    //     for (let i = 0; i < length; i++) {
-    //         const reward = await this.getRewardOf(this.account, i);
-    //
-    //         this.myRewards[i] = reward;
-    //     }
-    // }
 
     public async getTransactions() {
         const dLength = await this.countDeposits(this.account);
@@ -216,7 +190,7 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public onRewardPollCreated(data: any) {
-        this.updateReward(data);
+        this.addReward(data);
     }
 
     public onRewardPollFinished(data: any) {
@@ -322,6 +296,7 @@ export class RewardPool extends RewardPoolEvents {
         const contract = await this.network.getExtdevContract(REWARD_JSON.abi, address);
 
         return new Reward(
+            id,
             address,
             contract,
             this.account,
@@ -333,6 +308,7 @@ export class RewardPool extends RewardPoolEvents {
         const contract = await this.network.getExtdevContract(REWARD_JSON.abi, address);
 
         return new Reward(
+            index,
             address,
             contract,
             this.account,
@@ -409,21 +385,39 @@ export class RewardPool extends RewardPoolEvents {
         this.balance = await new CoinService().getExtdevBalance(this.address);
     }
 
-    private async updateReward(data: any) {
-        const id = parseInt(data.reward, 10);
+    private async addReward(data: any) {
+        const id = parseInt(data.id, 10);
+        console.log(id);
+        const reward = await this.getReward(id);
 
+        if (this.rewards.indexOf(reward) === -1) {
+            this.rewards.push(reward);
+            console.log(this.rewards);
+        }
+    }
+
+    private async updateReward(data: any) {
+        const id = parseInt(data.id, 10);
+        console.log(id);
         if (this.rewards[id]) {
             await this.rewards[id].update();
-        } else {
-            const reward = await this.getReward(id);
-            this.rewards[reward.id] = reward;
         }
     }
 
     private async updateRule(data: any) {
         const id = parseInt(data.id, 10);
+        const rule = this.rewardRules.find((r: RewardRule) => {
+            return id === r.id;
+        });
+        if (rule) {
+            const index = this.rewardRules.indexOf(rule);
 
-        this.rewardRules[id] = await this.getRewardRule(id);
+            this.rewardRules[index] = rule;
+        } else {
+            const r = await this.getRewardRule(id);
+
+            this.rewardRules.push(r);
+        }
     }
 
     private getStream() {

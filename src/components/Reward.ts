@@ -18,7 +18,7 @@ import ProfilePicture from '@/components/ProfilePicture.vue';
     },
 })
 export default class CReward extends Vue {
-    public loading: boolean = false;
+    public loading: boolean = true;
     public disabled: boolean = false;
     public error: string = '';
     public now: number = Math.floor(new Date().getTime() / 1000);
@@ -33,9 +33,8 @@ export default class CReward extends Vue {
     @Prop() private reward!: Reward;
     @Prop() private pool!: RewardPool;
 
-    public created() {
-        this.loading = true;
-        this.update();
+    public async created() {
+        await this.reward.update();
         this.showDetails = (this.reward.state === 'Pending' || this.reward.state === 'Approved');
         this.loading = false;
     }

@@ -20,7 +20,7 @@ import EventService from '@/services/EventService';
 import NetworkService from '@/services/NetworkService';
 import { RewardPool, IRewardPools } from '@/models/RewardPool';
 import { RewardRule } from '@/models/RewardRule';
-import { IRewards } from '@/models/Reward';
+import { IRewards, Reward } from '@/models/Reward';
 import BN from 'bn.js';
 import _ from 'lodash';
 
@@ -55,16 +55,11 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
     },
 })
 export default class PoolDetail extends Vue {
-    public $events!: EventService;
     public error: string = '';
     public loading: boolean = false;
-    public poolService!: PoolService;
     public coinService: CoinService = new CoinService();
-    public events: any = [];
     public isManager: boolean = false;
     public isMember: boolean = false;
-    public rules: RewardRule[] | null = null;
-    public rewards: IRewards = {};
     public input: any = {
         poolDeposit: 0,
         addMember: '',
@@ -78,7 +73,29 @@ export default class PoolDetail extends Vue {
     private $network!: NetworkService;
 
     get stream() {
-        return _.orderBy(this.pool.events, 'blockTime', 'desc');
+        const id = this.$route.params.id;
+        return _.orderBy(this.rewardPools[id].events, 'blockTime', 'desc');
+    }
+
+    get rewardRules() {
+        const id = this.$route.params.id;
+        return _.orderBy(this.rewardPools[id].rewardRules, 'id', 'desc');
+    }
+
+    get claimableRewards() {
+        const id = this.$route.params.id;
+        const filtered = this.rewardPools[id].rewards.filter((r: Reward) => {
+            return r.state && (r.state === 'Approved' || r.state === 'Pending');
+        });
+        return _.orderBy(filtered, 'id', 'desc');
+    }
+
+    get archivedRewards() {
+        const id = this.$route.params.id;
+        const filtered = this.rewardPools[id].rewards.filter((r: Reward) => {
+            return r.state && (r.state === 'Withdrawn' || r.state === 'Rejected');
+        });
+        return _.orderBy(filtered, 'id', 'desc');
     }
 
     get pool(): RewardPool {

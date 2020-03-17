@@ -9,7 +9,7 @@ export class RewardPoolEvents {
         'Deposited',
         'ManagerAdded',
         'ManagerRemoved',
-        'MemberAdded',
+        // 'MemberAdded',
         'MemberRemoved',
         'RewardPollCreated',
         'RewardPollFinished',

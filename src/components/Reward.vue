@@ -46,7 +46,7 @@
 
             </template>
 
-            <div :class="{disabled: now > reward.endTime}" v-if="showDetails">
+            <div :class="{disabled: (now > reward.endTime || disabled)}" v-if="showDetails">
                 <h3>Votes ({{reward.totalVoted}}):</h3>
                 <div class="row">
                     <div class="col-12">

@@ -4,7 +4,7 @@
         <div class="border-left flex-grow-1 pl-3">
             <div class="d-flex w-100">
                 <span class="flex-grow-1">
-                    Withdrawel: <strong>{{ev.amount}} THX</strong>
+                    Withdrawal: <strong>{{ev.amount}} THX</strong>
                 </span>
                 <small class="flex-shrink-0">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
             </div>

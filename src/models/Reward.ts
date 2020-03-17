@@ -12,7 +12,7 @@ export interface IRewards {
 export class Reward extends BasePoll {
     public id!: number;
     public rule!: number;
-    public state!: string;
+    public state: string = '';
     public created!: number;
     public amount!: BN;
     public beneficiaryAddress!: string;
@@ -20,6 +20,7 @@ export class Reward extends BasePoll {
     private userService: UserService = new UserService();
 
     constructor(
+        id: number,
         address: string,
         contract: any,
         owner: string,
@@ -29,7 +30,7 @@ export class Reward extends BasePoll {
             contract,
             owner,
         );
-
+        this.id = id;
         this.update();
     }
 
