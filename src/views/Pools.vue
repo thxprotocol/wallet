@@ -10,7 +10,6 @@
             <b-card
                 v-for="(p, key) in rewardPools"
                 :key="key"
-                :no-body="!showDetails"
                 footer-tag="footer"
                 header-tag="header"
                 tag="article"
@@ -29,7 +28,7 @@
                     </small>
                 </b-card-text>
 
-                <template slot="footer" class="">
+                <template slot="footer">
                     <div class="text-right">
                         <button class="btn btn-link card-link" @click="leaveRewardPool(p.address)">Leave pool</button>
                         <button class="btn btn-link card-link" @click="$router.replace(`/pools/${p.address}`)">Open pool</button>

@@ -31,7 +31,7 @@ export default class CRewardRule extends Vue {
         },
     };
     public poll: RewardRulePoll | null = null;
-    private showDetails: boolean = false;
+    private showDetails: boolean = true;
     private $network!: NetworkService;
 
     @Prop() private rule!: RewardRule;

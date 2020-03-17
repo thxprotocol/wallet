@@ -49,9 +49,11 @@
         </div>
 
         <div class="card mb-3" v-if="$network.rinkeby && $network.rinkeby.account">
-            <div class="card-header">
-                <strong>Rinkeby Network</strong><br>
-                <small>{{$network.rinkeby.account.address}} <a class="text-primary" @click="copyClipboard($network.rinkeby.account.address)">({{clipboard === $network.rinkeby.account.address ? 'Copied!' : 'Copy'}})</a></small>
+            <div class="card-header pl-3 pr-3 pt-2 pb-2">
+                <div>
+                    <strong>Rinkeby Network</strong><br>
+                    <small>{{$network.rinkeby.account.address}} <a class="text-primary" @click="copyClipboard($network.rinkeby.account.address)">({{clipboard === $network.rinkeby.account.address ? 'Copied!' : 'Copy'}})</a></small>
+                </div>
             </div>
             <div class="card-body">
                 <ul class="list-bullets">
@@ -65,13 +67,15 @@
         </div>
 
         <div class="card mb-3" v-if="$network.extdev && $network.extdev.account">
-            <div class="card-header">
-                <strong>Loom Network</strong><br>
-                <small>{{$network.extdev.account}}
-                    <a class="text-primary" @click="copyClipboard($network.extdev.account)">
-                        ({{clipboard === $network.extdev.account ? 'Copied!' : 'Copy'}})
-                    </a>
-                </small>
+            <div class="card-header pl-3 pr-3 pt-2 pb-2">
+                <div>
+                    <strong>Loom Network</strong><br />
+                    <small>{{$network.extdev.account}}
+                        <a class="text-primary" @click="copyClipboard($network.extdev.account)">
+                            ({{clipboard === $network.extdev.account ? 'Copied!' : 'Copy'}})
+                        </a>
+                    </small>
+                </div>
             </div>
             <div class="card-body">
                 <ul class="list-bullets">

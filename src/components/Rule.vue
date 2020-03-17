@@ -12,41 +12,37 @@
             </div>
 
             <template v-if="!rule.loading">
-                <div slot="header" class="w-100 d-flex flex-column">
-                    <div class="font-size-xl text-light bg-blue text-center pt-3 pb-3">
-                        {{rule.amount}} THX
+                <button slot="header" class="btn p-0 w-100 border-0" @click="showDetails = !showDetails">
+                    <div class="text-light bg-blue text-center pt-3 pb-3">
+                        <span class="font-size-l">{{rule.amount}} THX</span>
+                        <sup v-if="rule.state === 'Active'" class="badge badge-success badge-xs">
+                            {{ rule.state }}
+                        </sup>
+                        <sup v-if="rule.state === 'Disabled' " class="badge badge-danger badge-xs">
+                            {{ rule.state }}
+                        </sup>
                     </div>
-                    <button class="btn text-left flex-grow-1 d-flex align-items-center p-2" @click="showDetails = !showDetails">
-                        <span class="text-muted mr-2">#{{ rule.id }}</span>
-                        <div class="flex-grow-1">
-                            <div>
-                                <span>{{ rule.title }} <strong>{{ rule.amount }} THX</strong></span>
-                                <span v-if="rule.state === 'Active'" class="badge badge-success ml-1">
-                                    {{ rule.state }}
-                                </span>
-                                <span v-if="rule.state === 'Disabled' " class="badge badge-danger ml-1">
-                                    {{ rule.state }}
-                                </span>
-                            </div>
-                            <small>{{ rule.created | moment("DD/MM/'YY HH:mm") }}</small>
-                        </div>
-                    </button>
-                </div>
+                </button>
 
                 <template v-if="showDetails">
+                    <h2 class="h4 mb-0">
+                        #{{ rule.id }} | {{ rule.title }}
+                    </h2>
+                    <small class="text-muted m-0">Created: {{ rule.created | moment("DD/MM/'YY HH:mm") }}</small>
                     <p v-if="rule.description">
                         <i>{{ rule.description }}</i>
                     </p>
+
                     <button class="btn btn-success btn-block" @click="openClaim(pool.address, rule.id)" target="_blank">
                         Claim reward
                     </button>
-                    <hr class="dotted" />
 
                     <div class="alert alert-warning" v-if="!pool.isMember">
                         <strong>You are not a member of this pool and can not join the poll.</strong>
                     </div>
 
                     <template v-if="rule.hasPollAddress && poll">
+                        <hr class="dotted" />
                         <div :class="{disabled: poll.loading}">
 
                             <div class="alert alert-warning">
