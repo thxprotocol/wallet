@@ -17,6 +17,12 @@ import { mapGetters } from 'vuex';
     },
 })
 export default class Header extends Vue {
+    private ethRinkebyBalance!: string;
+
+    get ethBalance() {
+        return Number(this.ethRinkebyBalance).toFixed(5);
+    }
+
     public goToAccount() {
         this.$router.replace('/account');
     }

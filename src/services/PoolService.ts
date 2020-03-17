@@ -8,6 +8,14 @@ import 'firebase/database';
 export default class PoolService extends Vue {
     private $network!: NetworkService;
 
+    public async getRewardPoolAddress() {
+        const nid = await this.$network.extdev.web3js.eth.net.getId();
+        const hash = REWARD_POOL_JSON.networks[nid].transactionHash;
+        const receipt = await this.$network.extdev.web3js.eth.getTransactionReceipt(hash);
+
+        return receipt.contractAddress;
+    }
+
     public async getRewardPool(address: string) {
         const nid = await this.$network.extdev.web3js.eth.net.getId();
         const hash = REWARD_POOL_JSON.networks[nid].transactionHash;

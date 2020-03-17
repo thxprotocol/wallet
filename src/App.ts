@@ -26,10 +26,16 @@ export default class App extends Vue {
     private poolService: PoolService = new PoolService();
     private coinService: CoinService = new CoinService();
 
-    public created() {
+    public async created() {
         this.currentUser = firebase.auth().currentUser;
 
         if (this.currentUser) {
+            const contractAddress = await this.poolService.getRewardPoolAddress();
+            const snap = await firebase.database().ref(`users/${this.currentUser.uid}/pools`).once('value');
+
+            if (!snap.val() || !snap.val()[contractAddress]) {
+                this.poolService.join(this.currentUser.uid, contractAddress);
+            }
 
             this.getBalances();
             this.getAccount(this.currentUser.uid);

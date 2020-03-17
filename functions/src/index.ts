@@ -8,7 +8,7 @@ const cors = require('cors');
 const qrcode = require('qrcode');
 const Web3 = require('web3');
 
-const POOL_ADDRESS = "0xbce2653Fe5C7366A03a747110F885f02dabb1E9F";
+const POOL_ADDRESS = "0x20AdB9e55D0C7f430335a9b30039EBD27Bd8Aa6A";
 const API_ROOT = 'https://us-central1-thx-wallet-dev.cloudfunctions.net/api';
 const APP_ROOT = 'https://thx-wallet-dev.firebaseapp.com';
 const REWARD_POOL_JSON = require('./contracts/RewardPool.json');
@@ -112,9 +112,7 @@ slack.post('/connect', (req: any, res: any) => {
 slack.post('/reward', (req: any, res: any) => {
     const query = req.body.text.split(' ');
 
-    res.send({
-        message: 'THXBot is handling your request'
-    });
+    res.send('THXBot is handling your request');
 
     if (query[0].startsWith('<@')) {
         const channel = query[0].split('@')[1].split('|')[0];
@@ -185,9 +183,7 @@ slack.post('/reward', (req: any, res: any) => {
 slack.post('/rules', async (req: any, res: any) => {
     const query = req.body.text.split(' ');
 
-    res.send({
-        message: 'THXBot is handling your request'
-    });
+    res.send('THXBot is handling your request');
 
     if (query[0] === 'list') {
         const length = parseInt(await POOL_CONTRACT.methods.countRules().call({ from: API_ADDRESS }), 10);
