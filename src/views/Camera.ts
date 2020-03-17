@@ -50,16 +50,19 @@ export default class Camera extends Vue {
             this.error = '';
 
             try {
-                if (this.data.pool && this.data.rule) {
-                    this.pool = this.rewardPools[this.data.pool];
-                    this.rule = this.pool.rewardRules[this.data.rule];
-                }
-                if (this.data.slack) {
+                if (this.data.pool && (this.data.rule >= 0)) {
+                    // Should check for membership of the pool instead of pool existance
+                    this.pool = await this.poolService.getRewardPool(this.data.pool);
+                    this.rule = await this.pool.getRewardRule(this.data.rule);
+                } else if (this.data.slack) {
+                    // Should check for membership of the pool instead of pool existance
                     this.pool = await this.poolService.getRewardPool(this.data.pool);
                     this.slack = this.data.slack;
+                } else {
+                    throw({ message: `An error occured while decoding your QR code.`});
                 }
             } catch (err) {
-                this.error = `An error occured while decoding your QR code.`;
+                this.error = (err.message) ? err.message : err;
             }
         }
     }

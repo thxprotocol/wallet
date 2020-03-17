@@ -56,7 +56,6 @@
             <div class="card-body">
                 <ul class="list-bullets">
                     <li><button class="btn btn-link" @click="showModal('modal-gateway-deposit')">Deposit THX</button></li>
-                    <li><button class="btn btn-link" @click="showModal('modal-gateway-withdraw')">Withdraw THX</button></li>
                     <li><button class="btn btn-link" @click="showModal('modal-transfer-coin-rinkeby')">Transfer THX</button></li>
                     <li><button class="btn btn-link" @click="showModal('modal-transfer-ether')">Transfer ETH</button></li>
                     <li v-if="isRinkebyMinter"><button class="btn btn-link" @click="showModal('modal-add-minter')">Add minter role</button></li>
@@ -76,8 +75,9 @@
             </div>
             <div class="card-body">
                 <ul class="list-bullets">
-                    <li v-if="isExtdevMinter"><button class="btn btn-link" @click="showModal('modal-mint-extdev')">Mint Loom tokens</button></li>
+                    <li><button class="btn btn-link" @click="showModal('modal-gateway-withdraw')">Withdraw THX</button></li>
                     <li><button class="btn btn-link" @click="showModal('modal-transfer-coin-extdev')">Transfer THX</button></li>
+                    <li v-if="isExtdevMinter"><button class="btn btn-link" @click="showModal('modal-mint-extdev')">Mint tokens</button></li>
                 </ul>
             </div>
         </div>

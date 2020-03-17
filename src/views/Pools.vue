@@ -10,18 +10,23 @@
             <b-card
                 v-for="(p, key) in rewardPools"
                 :key="key"
+                :no-body="!showDetails"
                 footer-tag="footer"
                 header-tag="header"
                 tag="article"
                 class="mb-2 card-pool">
 
-                <span slot="header" class="font-size-xl text-light">{{p.balance}} THX</span>
+                <div slot="header" class="font-size-xl text-light">{{p.balance}} THX</div>
 
                 <b-card-text>
                     <span v-if="p.outOfSync" class="badge badge-danger float-right">Out of sync</span>
                     <span v-if="!p.outOfSync" class="badge badge-success float-right">Up to date</span>
                     <strong>{{p.name}}</strong><br>
-                    <small>{{p.address}}</small>
+                    <small>{{p.address}}
+                        <a class="text-primary" @click="copyClipboard(p.address)">
+                            ({{clipboard === p.address ? 'Copied!' : 'Copy'}})
+                        </a>
+                    </small>
                 </b-card-text>
 
                 <template slot="footer" class="">

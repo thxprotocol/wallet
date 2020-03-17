@@ -14,13 +14,12 @@ import CMemberAddedEvent from '@/components/events/MemberAddedEvent.vue';
 import CMemberRemovedEvent from '@/components/events/MemberRemovedEvent.vue';
 import CManagerAddedEvent from '@/components/events/ManagerAddedEvent.vue';
 import CManagerRemovedEvent from '@/components/events/ManagerRemovedEvent.vue';
-import PoolService from '@/services/PoolService';
 import CoinService from '@/services/CoinService';
-import EventService from '@/services/EventService';
 import NetworkService from '@/services/NetworkService';
+import PoolService from '@/services/PoolService';
 import { RewardPool, IRewardPools } from '@/models/RewardPool';
-import { RewardRule } from '@/models/RewardRule';
-import { IRewards, Reward } from '@/models/Reward';
+import { Account } from '@/models/Account';
+import { Reward } from '@/models/Reward';
 import BN from 'bn.js';
 import _ from 'lodash';
 
@@ -51,13 +50,13 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
     computed: {
         ...mapGetters({
             rewardPools: 'rewardPools',
+            account: 'account',
         }),
     },
 })
 export default class PoolDetail extends Vue {
     public error: string = '';
-    public loading: boolean = false;
-    public coinService: CoinService = new CoinService();
+    public loading: boolean = true;
     public isManager: boolean = false;
     public isMember: boolean = false;
     public input: any = {
@@ -70,7 +69,10 @@ export default class PoolDetail extends Vue {
         },
     };
     private rewardPools!: IRewardPools;
+    private account!: Account;
     private $network!: NetworkService;
+    private coinService: CoinService = new CoinService();
+    private poolService: PoolService = new PoolService();
 
     get stream() {
         const id = this.$route.params.id;
@@ -102,7 +104,24 @@ export default class PoolDetail extends Vue {
         return this.rewardPools[this.$route.params.id];
     }
 
-    public updateRole(account: string, role: string, hasRole: boolean) {
+    private mounted() {
+        const address = this.$route.params.id;
+
+        if (!this.rewardPools[address]) {
+            this.poolService.join(this.account.uid, address)
+                .then(() => {
+                    this.loading = false;
+                })
+                .catch((err: string) => {
+                    this.loading = false;
+                    this.error = err;
+                });
+        } else {
+            this.loading = false;
+        }
+    }
+
+    private updateRole(account: string, role: string, hasRole: boolean) {
         let promise;
 
         this.loading = true;
@@ -137,7 +156,7 @@ export default class PoolDetail extends Vue {
         }
     }
 
-    public async deposit() {
+    private async deposit() {
         const amount = new BN(this.input.poolDeposit).mul(TOKEN_MULTIPLIER);
         const address = this.$network.extdev.account;
         const balanceWei = await this.coinService.getExtdevBalance(address);
@@ -162,7 +181,7 @@ export default class PoolDetail extends Vue {
         }
     }
 
-    public addRewardRule(rule: any) {
+    private addRewardRule(rule: any) {
         this.loading = true;
 
         if (this.pool) {

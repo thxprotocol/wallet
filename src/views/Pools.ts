@@ -1,13 +1,10 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import firebase from 'firebase/app';
-import 'firebase/database';
 import { BCard, BCardText, BSpinner, BModal } from 'bootstrap-vue';
 import NetworkService from '@/services/NetworkService';
 import BN from 'bn.js';
 import { mapGetters } from 'vuex';
 import { Account } from '@/models/Account';
-
-const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
+import PoolService from '@/services/PoolService';
 
 @Component({
     name: 'pools',
@@ -30,31 +27,42 @@ export default class Pools extends Vue {
     public input: any = {
         poolAddress: '',
     };
+    public clipboard: any = null;
     private account!: Account;
     private $network!: NetworkService;
+    private poolService: PoolService = new PoolService();
+
+    private copyClipboard(value: string) {
+        const input = document.createElement('input');
+
+        input.setAttribute('id', 'clippy');
+        input.setAttribute('type', 'text');
+        input.setAttribute('value', value);
+        input.setAttribute('style', 'display: block; opacity: 0;');
+
+        (document as any).getElementById('app').appendChild(input);
+        (document as any).getElementById('clippy').select();
+        (document as any).execCommand('copy');
+        (document as any).getElementById('clippy').remove();
+
+        this.clipboard = value;
+    }
 
     private joinRewardPool(address: string) {
-        const utils: any = this.$network.web3js.utils;
-
-        if (utils.isAddress(address)) {
-            this.loading = true;
-
-            firebase.database().ref(`users/${this.account.uid}/pools`).child(address)
-                .set({ address })
-                .then(() => {
-                    this.loading = false;
-                    (this.$refs.modalJoinPool as BModal).hide();
-                })
-                .catch((err: string) => {
-                    this.loading = false;
-                    this.error = err;
-                });
-        }
+        this.loading = true;
+        this.poolService.join(this.account.uid, address)
+            .then(() => {
+                this.loading = false;
+                (this.$refs.modalJoinPool as BModal).hide();
+            })
+            .catch((err: string) => {
+                this.loading = false;
+                this.error = err;
+            });
     }
 
     private leaveRewardPool(poolAddress: string) {
-        firebase.database().ref(`users/${this.account.uid}/pools`).child(poolAddress)
-            .remove()
+        this.poolService.leave(this.account.uid, poolAddress)
             .then(() => {
                 this.$store.commit('removeRewardPool', poolAddress);
             })

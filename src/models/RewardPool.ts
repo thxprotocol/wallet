@@ -107,7 +107,6 @@ export class RewardPool extends RewardPoolEvents {
 
                 if (this.rewards.indexOf(reward) === -1) {
                     this.rewards.push(reward);
-                    console.log(this.rewards);
                 }
             }
         }
@@ -387,18 +386,16 @@ export class RewardPool extends RewardPoolEvents {
 
     private async addReward(data: any) {
         const id = parseInt(data.id, 10);
-        console.log(id);
         const reward = await this.getReward(id);
 
         if (this.rewards.indexOf(reward) === -1) {
             this.rewards.push(reward);
-            console.log(this.rewards);
         }
     }
 
     private async updateReward(data: any) {
         const id = parseInt(data.id, 10);
-        console.log(id);
+
         if (this.rewards[id]) {
             await this.rewards[id].update();
         }

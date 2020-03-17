@@ -1,5 +1,5 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { BModal, BCard, BCardText, BSpinner, BProgress, BProgressBar } from 'bootstrap-vue';
+import { BModal, BCard, BCardText, BSpinner, BProgress, BProgressBar, BRow, BCol } from 'bootstrap-vue';
 import NetworkService from '@/services/NetworkService';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import { RewardPool } from '@/models/RewardPool';
@@ -11,6 +11,8 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 @Component({
     name: 'CRewardRule',
     components: {
+        'b-col': BCol,
+        'b-row': BRow,
         'b-modal': BModal,
         'b-card': BCard,
         'b-card-text': BCardText,
@@ -29,6 +31,7 @@ export default class CRewardRule extends Vue {
         },
     };
     public poll: RewardRulePoll | null = null;
+    private showDetails: boolean = false;
     private $network!: NetworkService;
 
     @Prop() private rule!: RewardRule;
@@ -128,5 +131,9 @@ export default class CRewardRule extends Vue {
                     this.loading = false;
                 });
         }
+    }
+
+    private openClaim(address: string, id: number) {
+        window.open(`/claim/${address}/${id}`);
     }
 }

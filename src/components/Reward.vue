@@ -8,42 +8,35 @@
             header-tag="header">
 
             <template slot="header">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center justify-content-between">
-                        {{reward.id}}
-                        <profile-picture :uid="reward.beneficiary.uid" size="xs" class="mr-3" v-if="reward.beneficiary" />
-                        <div class="flex-grow-1" v-if="reward.beneficiary">
-                            <div style="line-height: 1">
-                                <strong> {{ reward.beneficiary.firstName }} {{ reward.beneficiary.lastName }}</strong>
-                                claims
-                                <strong>{{ reward.amount}} THX</strong>
-                                for rule <strong class="mr-1">#{{ reward.rule }}</strong>
-                                <span v-if="reward.state === 'Approved'" class="badge badge-success">
-                                    {{ reward.state }}
-                                </span>
-                                <span v-if="reward.state === 'Rejected' " class="badge badge-danger">
-                                    {{ reward.state }}
-                                </span>
-                                <span v-if="reward.state === 'Withdrawn' " class="badge badge-warning">
-                                    {{ reward.state }}
-                                </span>
-                                <span v-if="reward.state === 'Pending' " class="badge badge-info">
-                                    {{ reward.state }}
-                                </span>
-                            </div>
-                            <small v-if="reward.startTime">{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                <button class="btn text-left flex-grow-1 d-flex align-items-center p-2" @click="showDetails = !showDetails">
+                    <profile-picture :uid="reward.beneficiary.uid" size="xs" class="mr-3" v-if="reward.beneficiary" />
+                    <div v-if="reward.beneficiary">
+                        <div>
+                            <strong> {{ reward.beneficiary.firstName }}</strong>
+                            claims
+                            <strong class="mr-1">{{ reward.amount}} THX</strong>
+                            <span v-if="reward.state === 'Approved'" class="badge badge-success">
+                                {{ reward.state }}
+                            </span>
+                            <span v-if="reward.state === 'Rejected' " class="badge badge-danger">
+                                {{ reward.state }}
+                            </span>
+                            <span v-if="reward.state === 'Withdrawn' " class="badge badge-warning">
+                                {{ reward.state }}
+                            </span>
+                            <span v-if="reward.state === 'Pending' " class="badge badge-info">
+                                {{ reward.state }}
+                            </span>
                         </div>
+                        <small v-if="reward.startTime">{{reward.startTime | moment("DD/MM/'YY HH:mm") }}</small>
                     </div>
-                    <div class="text-right">
-                        <button class="btn btn-link btn-sm ml-1" @click="showDetails = !showDetails">
-                            {{showDetails ? 'Hide' : 'Show'}} poll
-                        </button>
-                        <button v-if="reward.endTime && now < reward.endTime" class="btn btn-link btn-sm ml-1" @click="update()">
-                            Update
-                        </button>
-                    </div>
+                </button>
+                <div class="p-2">
+                     <!-- v-if="reward.endTime && now < reward.endTime" -->
+                    <button class="btn btn-link btn-sm" @click="update()">
+                        Update
+                    </button>
                 </div>
-
             </template>
 
             <div :class="{disabled: (now > reward.endTime || disabled)}" v-if="showDetails">
@@ -57,10 +50,10 @@
                         ></b-progress>
                     </div>
                     <div class="col-6" v-if="reward.startTime">
-                        <small>{{reward.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                        <small>{{reward.startTime | moment("DD/MM/'YY HH:mm") }}</small>
                     </div>
                     <div class="col-6 text-right" v-if="reward.endTime">
-                        <small>{{reward.endTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                        <small>{{reward.endTime | moment("DD/MM/'YY HH:mm") }}</small>
                     </div>
                 </div>
                 <div class="row mt-2 mb-2">

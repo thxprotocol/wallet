@@ -35,7 +35,7 @@
             </div>
         </div>
 
-        <qrcode-stream v-if="!rule" class="ui-video" @init="init" @decode="onDecode" :track="repaint"></qrcode-stream>
+        <qrcode-stream class="ui-video" @init="init" @decode="onDecode" :track="repaint"></qrcode-stream>
 
         <template v-if="!loading && !rule && !slack">
             <div class="ui-camera">
@@ -46,7 +46,7 @@
             </div>
 
             <div class="ui-file">
-                <qrcode-capture :capture="false" :multiple="false" @init="init" @decode="onDecode"></qrcode-capture>
+                <qrcode-capture :capture="false" :multiple="false" @decode="onDecode"></qrcode-capture>
                 <small>Upload QR code image if the camera does not work on your device.</small>
             </div>
         </template>

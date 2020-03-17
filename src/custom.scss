@@ -349,12 +349,16 @@ a,
     }
 }
 
-.card-pool .card-header {
-    background-color: #039be5;
-    height: 125px;
+.card-header {
     display: flex;
-    justify-content: center;
     align-items: center;
+    padding: 0;
+}
+
+.card-pool .card-header {
+    background-color: $blue;
+    height: 125px;
+    justify-content: center;
 }
 
 @media (min-width: 768px) {
@@ -372,4 +376,8 @@ a,
     text-overflow: ellipsis;
     display: block;
     overflow: hidden;
+}
+
+.bg-blue {
+    background-color: $blue !important;
 }

@@ -2,6 +2,7 @@
     <div class="mb-2 w-100">
         <b-card
             tag="article"
+            :no-body="!showDetails"
             footer-tag="footer"
             header-tag="header"
             class="mb-2 w-100">
@@ -10,53 +11,49 @@
                 {{error}}
             </div>
 
-            <div v-if="rule.loading" class="d-flex w-100 justify-content-center">
-                <b-spinner variant="primary" ></b-spinner>
-            </div>
+            <template v-if="!rule.loading">
+                <div slot="header" class="w-100 d-flex flex-column">
+                    <div class="font-size-xl text-light bg-blue text-center pt-3 pb-3">
+                        {{rule.amount}} THX
+                    </div>
+                    <button class="btn text-left flex-grow-1 d-flex align-items-center p-2" @click="showDetails = !showDetails">
+                        <span class="text-muted mr-2">#{{ rule.id }}</span>
+                        <div class="flex-grow-1">
+                            <div>
+                                <span>{{ rule.title }} <strong>{{ rule.amount }} THX</strong></span>
+                                <span v-if="rule.state === 'Active'" class="badge badge-success ml-1">
+                                    {{ rule.state }}
+                                </span>
+                                <span v-if="rule.state === 'Disabled' " class="badge badge-danger ml-1">
+                                    {{ rule.state }}
+                                </span>
+                            </div>
+                            <small>{{ rule.created | moment("DD/MM/'YY HH:mm") }}</small>
+                        </div>
+                    </button>
+                </div>
 
-            <template v-else>
-                <template slot="header">
-
-                    <span class="text-muted mr-2">#{{ rule.id }}</span>
-                    <span>{{ rule.title }}: <strong>{{ rule.amount }} THX</strong></span>
-
-                    <sup v-if="rule.state === 'Active'" class="badge badge-success ml-1">
-                        {{ rule.state }}
-                    </sup>
-
-                    <sup v-if="rule.state === 'Disabled' " class="badge badge-danger ml-1">
-                        {{ rule.state }}
-                    </sup>
-
-                    <small class="float-right">
-                        {{ rule.created | moment("DD/MM/'YY HH:mm") }}
-                    </small>
-
-                </template>
-
-                <div v-if="rule.description" class="alert alert-info">
-                    <small>Rule trigger:</small><br>
-                    <p>
+                <template v-if="showDetails">
+                    <p v-if="rule.description">
                         <i>{{ rule.description }}</i>
                     </p>
-                    <a class="btn btn-success btn-xs btn-block" :href="`/claim/${pool.address}/${rule.id}`" target="_blank">
+                    <button class="btn btn-success btn-block" @click="openClaim(pool.address, rule.id)" target="_blank">
                         Claim reward
-                    </a>
-                </div>
+                    </button>
+                    <hr class="dotted" />
 
-                <div class="alert alert-warning" v-if="!pool.isMember">
-                    <strong>You are not a member of this pool and can not join the poll.</strong>
-                </div>
+                    <div class="alert alert-warning" v-if="!pool.isMember">
+                        <strong>You are not a member of this pool and can not join the poll.</strong>
+                    </div>
 
-                <div class="card card-light" v-if="rule.hasPollAddress && poll">
-                    <div class="card-body bg-light">
-                        <template v-if="!poll.loading">
+                    <template v-if="rule.hasPollAddress && poll">
+                        <div :class="{disabled: poll.loading}">
+
                             <div class="alert alert-warning">
                                 <small>Rule Change Proposal:</small><br>
                                 <del>{{rule.amount}} THX</del> &#x2192; <strong>{{poll.proposedAmount}} THX</strong>
                             </div>
 
-                            <hr class="dotted" />
                             <h3>Total Votes: {{poll.totalVoted}}</h3>
                             <div class="row">
                                 <div class="col-12">
@@ -67,10 +64,10 @@
                                     ></b-progress>
                                 </div>
                                 <div class="col-6">
-                                    <small>{{poll.startTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                                    <small>{{poll.startTime | moment("DD/MM/'YY HH:mm") }}</small>
                                 </div>
                                 <div class="col-6 text-right">
-                                    <small>{{poll.endTime | moment("MMMM Do YYYY HH:mm") }}</small>
+                                    <small>{{poll.endTime | moment("DD/MM/'YY HH:mm") }}</small>
                                 </div>
                             </div>
                             <div class="row mt-2">
@@ -87,16 +84,13 @@
                                     <small>{{poll.noCounter}} THX</small>
                                 </div>
                             </div>
-                        </template>
+                        </div>
 
-                        <button v-if="poll" class="btn btn-link btn-block" @click="update()">
-                            <span v-if="!poll.loading">Update poll results</span>
-                            <div v-else class="d-flex w-100 justify-content-center">
-                                <b-spinner variant="dark" ></b-spinner>
-                            </div>
+                        <button v-if="poll" :class="{disabled: poll.loading}" class="btn btn-link btn-block" @click="update()">
+                            Update poll results
                         </button>
-                    </div>
-                </div>
+                    </template>
+                </template>
 
                 <template slot="footer">
                     <template v-if="!rule.hasPollAddress && pool.isMember">

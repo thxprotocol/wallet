@@ -90,7 +90,7 @@
                 </template>
             </b-modal>
 
-            <b-modal ref="modalAddMember" centered title="Remove a member from this reward pool">
+            <b-modal ref="modalAddMember" centered title="Add a member to this reward pool">
                 <input v-if="!loading" v-model="input.memberAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
                 <p v-if="loading" class="d-flex w-100 justify-content-center">
                     <b-spinner></b-spinner>
@@ -105,7 +105,7 @@
                 </template>
             </b-modal>
 
-            <b-modal ref="modalRemoveMember" centered title="Invite a member for this reward pool">
+            <b-modal ref="modalRemoveMember" centered title="Remove a member from this reward pool">
                 <input v-if="!loading" v-model="input.memberAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
                 <p v-if="loading" class="d-flex w-100 justify-content-center">
                     <b-spinner></b-spinner>
