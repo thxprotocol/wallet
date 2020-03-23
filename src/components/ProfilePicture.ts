@@ -12,19 +12,40 @@ export default class ProfilePicture extends Vue {
 
     public initials: string | null;
     public picture: ProfilePictureData | null;
+    public online: boolean = false;
 
     constructor() {
         super();
+
         this.picture = null;
         this.initials = null;
     }
 
     public created() {
+        this.getInitials();
+        this.getPicture();
+
         firebase.database().ref(`users/${this.uid}`)
-            .once('value')
-            .then((s: any) => {
-                this.initials = s.val().firstName.charAt(0) + s.val().lastName.charAt(0);
-                this.picture = s.val().picture;
+            .on('child_changed', (s: any) => {
+                if (s.key === 'online') {
+                    this.online = s.val();
+                }
+                if (s.key === 'picture') {
+                    this.getPicture();
+                }
+                if (s.key === 'firstName' || s.key === 'lastName') {
+                    this.getInitials();
+                }
             });
+    }
+
+    private async getInitials() {
+        const snap = await firebase.database().ref(`users/${this.uid}`).once('value');
+        this.initials = snap.val().firstName.charAt(0) + snap.val().lastName.charAt(0);
+    }
+
+    private async getPicture() {
+        const snap = await firebase.database().ref(`users/${this.uid}`).once('value');
+        this.picture = snap.val().picture;
     }
 }

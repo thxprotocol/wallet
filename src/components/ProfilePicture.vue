@@ -9,6 +9,7 @@
         <span v-else>
             {{ initials}}
         </span>
+        <span class="status" :class="online ? 'status-online' : 'status-offline'"></span>
     </div>
 </template>
 

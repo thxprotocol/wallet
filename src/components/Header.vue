@@ -11,6 +11,7 @@
             <span v-if="!account.picture && account.initials">
                 {{ account.initials}}
             </span>
+            <span class="status" :class="account.online ? 'status-online' : 'status-offline'"></span>
         </div>
     </button>
 

@@ -47,7 +47,6 @@ export class Account {
                 this.slack = s.val().slack;
                 this.online = s.val().online;
             });
-
     }
 
     public setPicture(name: string, files: File[]) {

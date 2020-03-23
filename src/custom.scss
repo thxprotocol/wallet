@@ -325,12 +325,35 @@ a,
     font-weight: bold;
     font-size: 1.5rem;
 
+    .status {
+        width: 10px;
+        height: 10px;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        display: block;
+        border-radius: 50%;
+
+        &-online {
+            background-color: $success;
+        }
+
+        &-offline {
+            background-color: $danger;
+        }
+    }
+
     &.account-picture-xs {
         width: 25px;
         height: 25px;
         max-width: 25px;
         max-height: 25px;
         font-size: 1rem;
+
+        .status {
+            width: 5px;
+            height: 5px;
+        }
     }
 
     &.account-picture-sm {
@@ -338,6 +361,11 @@ a,
         height: 50px;
         max-width: 50px;
         max-height: 50px;
+
+        .status {
+            width: 10px;
+            height: 10px;
+        }
     }
 
     &.account-picture-lg {
@@ -346,6 +374,11 @@ a,
         max-width: 100px;
         max-height: 100px;
         font-size: 2rem;
+
+        .status {
+            width: 15px;
+            height: 15px;
+        }
     }
 }
 

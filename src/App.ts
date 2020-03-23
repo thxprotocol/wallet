@@ -9,12 +9,18 @@ import EventService from './services/EventService';
 import { Account } from '@/models/Account';
 import store from './store';
 import NetworkService from './services/NetworkService';
+import { mapGetters } from 'vuex';
 
 @Component({
     name: 'App',
     components: {
         Header,
         Footer,
+    },
+    computed: {
+        ...mapGetters({
+            account: 'account',
+        }),
     },
 })
 export default class App extends Vue {
@@ -25,6 +31,7 @@ export default class App extends Vue {
     private $network!: NetworkService;
     private poolService: PoolService = new PoolService();
     private coinService: CoinService = new CoinService();
+    private account!: Account;
 
     public async created() {
         this.currentUser = firebase.auth().currentUser;
@@ -84,7 +91,8 @@ export default class App extends Vue {
 
         this.$store.commit('addAccount', account);
 
-        return account;
+        window.onblur = () => this.account.setOnline(false);
+        window.onfocus = () => this.account.setOnline(true);
     }
 
     private async getBalances() {

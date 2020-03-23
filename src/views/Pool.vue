@@ -72,21 +72,23 @@
                                     :key="address">
                                     <profile-picture
                                         :uid="m.uid"
-                                        size="sm" class="mr-2 flex-shrink-0" />
+                                        size="sm"
+                                        :online="m.online"
+                                        class="mr-2 flex-shrink-0" />
                                     <div class="border-left flex-grow-1 pl-3">
                                         <div>
                                             <strong>{{m.firstName}} {{m.lastName}}</strong>
                                             <a
-                                                v-if="!m.isManager"
-                                                class="text-primary"
+                                                v-if="pool.isManager && !m.isManager"
+                                                class="ml-1 text-primary"
                                                 @click="$refs.modalAddManager.show()">
                                                 <small>
                                                     Add Manager
                                                 </small>
                                             </a>
-                                            <span v-if="m.isManager" class="text-muted">
-                                                (Manager)
-                                            </span>
+                                            <small v-if="m.isManager" class="ml-1 text-muted">
+                                                Manager
+                                            </small>
                                         </div>
                                         <div class="d-flex">
                                             <small class="text-muted list-item-text-overflow">
