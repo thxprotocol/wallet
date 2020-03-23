@@ -21,6 +21,7 @@ import _ from 'lodash';
 import BN from 'bn.js';
 import REWARD_JSON from '@/contracts/Reward.json';
 import REWARD_RULE_POLL_JSON from '@/contracts/RulePoll.json';
+import UserService from '@/services/UserService';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
@@ -41,6 +42,7 @@ export class RewardPool extends RewardPoolEvents {
     private account: string = '';
     private contract: any;
     private network: NetworkService;
+    private userService: UserService = new UserService();
 
     constructor(
         address: string,
@@ -78,10 +80,24 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async getMembers() {
-        const member = await this.contract.methods.members(0).call({ from: this.account });
-        const hasRole = await this.contract.methods.isMember(member).call({ from: this.account });
+        let i = 0;
+        while (i < 10) {
+            try {
+                const address = await this.contract.methods.members(i).call({ from: this.account });
+                const member = await this.userService.getMemberByAddress(address);
 
-        this.members[member] = hasRole;
+                member.isMember = await this.contract.methods.isMember(address).call({ from: this.account });
+                member.isManager = await this.contract.methods.isManager(address).call({ from: this.account });
+
+                if (member.isMember) {
+                    this.members[address] = member;
+                }
+
+                i++;
+            } catch (e) {
+                break; // We are letting this.contract.methods.members(i) fail delibirately.
+            }
+        }
     }
 
     public async getRewardRules() {

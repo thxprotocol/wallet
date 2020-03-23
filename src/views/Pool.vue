@@ -2,9 +2,24 @@
     <article class="region region-container">
 
         <main class="region region-content" v-if="pool">
-            <div class="region region-jumbotron">
-                <strong class="font-size-xl">{{pool.balance}} THX</strong>
+            <div class="region region-jumbotron position-relative">
+                <button
+                    style="top: 1rem; right: 1rem;"
+                    class="btn btn-primary btn-sm position-absolute"
+                    @click="$refs.modalDeposit.show()">
+                    Deposit
+                </button>
+                <strong class="font-size-xl">
+                    {{pool.balance}} THX
+                </strong>
                 <p>{{ pool.name }}</p>
+                <div class="d-flex mt-3">
+                    <profile-picture
+                        v-for="(m, address) in poolMembers"
+                        :key="address"
+                        v-if="m.uid"
+                        :uid="m.uid" size="xs" class="m-1" />
+                </div>
             </div>
 
             <div class="row">
@@ -49,18 +64,46 @@
                                 :pool="pool" />
                         </b-tab>
 
-                        <b-tab title="Actions">
-                            <ul class="list list-group">
-                                <li v-if="pool.isManager" class="list-group-item">
-                                    <button class="btn btn-link" @click="$refs.modalAddManager.show()">Add Manager</button>
-                                </li>
-                                <li v-if="pool.isMember" class="list-group-item">
-                                    <button class="btn btn-link" @click="$refs.modalAddMember.show()">Invite Member</button>
-                                </li>
-                                <li class="list-group-item">
-                                    <button class="btn btn-link" @click="$refs.modalDeposit.show()">Pool Deposit</button>
+                        <b-tab title="Members">
+                            <ul class="list list-group mb-2">
+                                <li class="list-group-item d-flex justify-content-between align-items-center p-2"
+                                    v-for="(m, address) in poolMembers"
+                                    v-if="m.isMember"
+                                    :key="address">
+                                    <profile-picture
+                                        :uid="m.uid"
+                                        size="sm" class="mr-2 flex-shrink-0" />
+                                    <div class="border-left flex-grow-1 pl-3">
+                                        <div>
+                                            <strong>{{m.firstName}} {{m.lastName}}</strong>
+                                            <a
+                                                v-if="!m.isManager"
+                                                class="text-primary"
+                                                @click="$refs.modalAddManager.show()">
+                                                <small>
+                                                    Add Manager
+                                                </small>
+                                            </a>
+                                            <span v-if="m.isManager" class="text-muted">
+                                                (Manager)
+                                            </span>
+                                        </div>
+                                        <div class="d-flex">
+                                            <small class="text-muted list-item-text-overflow">
+                                                {{address}}
+                                            </small>
+                                            <small>
+                                                <a class="text-primary" @click="copyClipboard(address)">
+                                                    ({{clipboard === address ? 'Copied!' : 'Copy'}})
+                                                </a>
+                                            </small>
+                                        </div>
+                                    </div>
                                 </li>
                             </ul>
+                            <button
+                                v-if="pool.isMember"
+                                class="btn btn-primary btn-block" @click="$refs.modalAddMember.show()">Invite Member</button>
                         </b-tab>
                     </b-tabs>
                 </div>

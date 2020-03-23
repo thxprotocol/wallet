@@ -29,6 +29,7 @@ export class Account {
     public email: string = '';
     public picture: ProfilePictureData | null;
     public slack: string = '';
+    public online: boolean = false;
     private $network!: NetworkService;
 
     constructor(uid: string) {
@@ -44,6 +45,7 @@ export class Account {
                 this.picture = s.val().picture;
                 this.email = s.val().email;
                 this.slack = s.val().slack;
+                this.online = s.val().online;
             });
 
     }
@@ -69,4 +71,8 @@ export class Account {
             });
     }
 
+    public setOnline(online: boolean) {
+        firebase.database().ref(`users/${this.uid}`)
+            .update({ online });
+    }
 }

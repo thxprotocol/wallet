@@ -14,6 +14,7 @@ import CMemberAddedEvent from '@/components/events/MemberAddedEvent.vue';
 import CMemberRemovedEvent from '@/components/events/MemberRemovedEvent.vue';
 import CManagerAddedEvent from '@/components/events/ManagerAddedEvent.vue';
 import CManagerRemovedEvent from '@/components/events/ManagerRemovedEvent.vue';
+import ProfilePicture from '@/components/ProfilePicture.vue';
 import CoinService from '@/services/CoinService';
 import NetworkService from '@/services/NetworkService';
 import PoolService from '@/services/PoolService';
@@ -22,6 +23,7 @@ import { Account } from '@/models/Account';
 import { Reward } from '@/models/Reward';
 import BN from 'bn.js';
 import _ from 'lodash';
+import UserService from '@/services/UserService';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
@@ -30,6 +32,7 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
     components: {
         'rule': CRewardRule,
         'reward': CReward,
+        'profile-picture': ProfilePicture,
         'rewardpollcreated-event': CRewardPollCreatedEvent,
         'rewardpollfinished-event': CRewardPollFinishedEvent,
         'rulepollcreated-event': CRulePollCreatedEvent,
@@ -68,11 +71,13 @@ export default class PoolDetail extends Vue {
             description: '',
         },
     };
+    public clipboard: any = null;
     private rewardPools!: IRewardPools;
     private account!: Account;
     private $network!: NetworkService;
     private coinService: CoinService = new CoinService();
     private poolService: PoolService = new PoolService();
+    private userService: UserService = new UserService();
 
     get stream() {
         const id = this.$route.params.id;
@@ -102,6 +107,26 @@ export default class PoolDetail extends Vue {
 
     get pool(): RewardPool {
         return this.rewardPools[this.$route.params.id];
+    }
+
+    get poolMembers(): string {
+        return this.rewardPools[this.$route.params.id].members;
+    }
+
+    private copyClipboard(value: string) {
+        const input = document.createElement('input');
+
+        input.setAttribute('id', 'clippy');
+        input.setAttribute('type', 'text');
+        input.setAttribute('value', value);
+        input.setAttribute('style', 'display: block; opacity: 0;');
+
+        (document as any).getElementById('app').appendChild(input);
+        (document as any).getElementById('clippy').select();
+        (document as any).execCommand('copy');
+        (document as any).getElementById('clippy').remove();
+
+        this.clipboard = value;
     }
 
     private mounted() {
