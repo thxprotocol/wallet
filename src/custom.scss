@@ -333,7 +333,8 @@ a,
         right: 0;
         display: block;
         border-radius: 50%;
-
+        transition: .2s background-color ease;
+        
         &-online {
             background-color: $success;
         }
