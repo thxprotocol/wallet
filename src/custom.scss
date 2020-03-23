@@ -334,7 +334,7 @@ a,
         display: block;
         border-radius: 50%;
         transition: .2s background-color ease;
-        
+
         &-online {
             background-color: $success;
         }
@@ -349,7 +349,7 @@ a,
         height: 25px;
         max-width: 25px;
         max-height: 25px;
-        font-size: 1rem;
+        font-size: .8rem;
 
         .status {
             width: 5px;

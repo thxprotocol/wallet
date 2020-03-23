@@ -41,11 +41,11 @@ export class Account {
                 this.email = s.val().email;
                 this.slack = s.val().slack;
 
-                firebase.database().ref(`users/${this.uid}/online`)
+                s.ref.child('online')
                     .onDisconnect()
                     .set(false);
 
-                firebase.database().ref(`users/${this.uid}/online`)
+                s.ref.child('online')
                     .set(true);
             });
     }
