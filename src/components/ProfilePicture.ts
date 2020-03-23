@@ -22,13 +22,15 @@ export default class ProfilePicture extends Vue {
     }
 
     public created() {
+        this.getOnline();
         this.getInitials();
         this.getPicture();
 
         firebase.database().ref(`users/${this.uid}`)
             .on('child_changed', (s: any) => {
+
                 if (s.key === 'online') {
-                    this.online = s.val();
+                    this.getOnline();
                 }
                 if (s.key === 'picture') {
                     this.getPicture();
@@ -37,6 +39,11 @@ export default class ProfilePicture extends Vue {
                     this.getInitials();
                 }
             });
+    }
+
+    private async getOnline() {
+        const snap = await firebase.database().ref(`users/${this.uid}`).once('value');
+        this.online = snap.val().online;
     }
 
     private async getInitials() {

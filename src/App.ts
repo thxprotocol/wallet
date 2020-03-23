@@ -90,9 +90,6 @@ export default class App extends Vue {
         const account = new Account(uid);
 
         this.$store.commit('addAccount', account);
-
-        window.onfocus = () => this.account.setOnline(true);
-        window.onblur = () => this.account.setOnline(false);
     }
 
     private async getBalances() {

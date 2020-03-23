@@ -1,11 +1,7 @@
-import { Vue } from 'vue-property-decorator';
 import firebase from 'firebase/app';
 import 'firebase/database';
 import NetworkService from '@/services/NetworkService';
-import BN from 'bn.js';
 import store from '@/store';
-
-const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export class ProfilePictureData {
     public name: string;
@@ -30,7 +26,6 @@ export class Account {
     public picture: ProfilePictureData | null;
     public slack: string = '';
     public online: boolean = false;
-    private $network!: NetworkService;
 
     constructor(uid: string) {
         this.uid = uid;
@@ -45,7 +40,13 @@ export class Account {
                 this.picture = s.val().picture;
                 this.email = s.val().email;
                 this.slack = s.val().slack;
-                this.online = s.val().online;
+
+                firebase.database().ref(`users/${this.uid}/online`)
+                    .onDisconnect()
+                    .set(false);
+
+                firebase.database().ref(`users/${this.uid}/online`)
+                    .set(true);
             });
     }
 
@@ -68,10 +69,5 @@ export class Account {
             .then(() => {
                 return pictureRef.remove();
             });
-    }
-
-    public setOnline(online: boolean) {
-        firebase.database().ref(`users/${this.uid}`)
-            .update({ online });
     }
 }
