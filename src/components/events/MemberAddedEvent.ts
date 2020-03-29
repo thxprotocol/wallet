@@ -3,6 +3,7 @@ import { BListGroupItem } from 'bootstrap-vue';
 import { RewardPool } from '@/models/RewardPool';
 import { MemberAddedEvent } from '@/models/RewardPoolEvents';
 import ProfilePicture from '@/components/ProfilePicture.vue';
+import UserService from '@/services/UserService';
 
 @Component({
     name: 'memberadded',
@@ -14,12 +15,10 @@ import ProfilePicture from '@/components/ProfilePicture.vue';
 export default class MemberAdded extends Vue {
     @Prop() public ev!: MemberAddedEvent;
     @Prop() public pool!: RewardPool;
+    private userService: UserService = new UserService();
+    private member: any = null;
 
-    public created() {
-        console.log('memberadded created');
-    }
-
-    public mounted() {
-        console.log('memberadded mounted');
+    private async created() {
+        this.member = await this.userService.getMemberByAddress(this.ev.account);
     }
 }

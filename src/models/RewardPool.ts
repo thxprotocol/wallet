@@ -14,6 +14,8 @@ import {
     RewardPollCreatedEvent,
     RewardPollFinishedEvent,
     RewardPoolEvents,
+    ManagerAddedEvent,
+    ManagerRemovedEvent,
 } from '@/models/RewardPoolEvents';
 import { Reward } from '@/models/Reward';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
@@ -161,27 +163,23 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async onManagerAdded(data: any) {
-        if (data.account === this.account) {
-            this.isManager = await this.hasManagerRole(this.account);
-        }
+        this.getMembers();
+        this.checkMemberships();
     }
 
     public async onManagerRemoved(data: any) {
-        if (data.account === this.account) {
-            this.isManager = await this.hasManagerRole(this.account);
-        }
+        this.getMembers();
+        this.checkMemberships();
     }
 
     public async onMemberAdded(data: any) {
-        if (data.account === this.account) {
-            this.isMember = await this.hasMemberRole(this.account);
-        }
+        this.getMembers();
+        this.checkMemberships();
     }
 
     public async onMemberRemoved(data: any) {
-        if (data.account === this.account) {
-            this.isMember = await this.hasMemberRole(this.account);
-        }
+        this.getMembers();
+        this.checkMemberships();
     }
 
     public onDeposited(data: any) {
@@ -217,7 +215,7 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async removeMember(address: string) {
-        return await this.callPoolMethod(this.contract.methods.removeMember(address));
+        return await this.callPoolMethod(this.contract.methods.renounceMember());
     }
 
     public async createReward(ruleId: number) {
@@ -229,7 +227,7 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async removeManager(address: string) {
-        return await this.callPoolMethod(this.contract.methods.removeManager(address));
+        return await this.callPoolMethod(this.contract.methods.renounceManager());
     }
 
     public async addDeposit(tokenAmount: BN) {
@@ -464,12 +462,12 @@ export class RewardPool extends RewardPoolEvents {
         if (type === 'MemberRemoved') {
             eventModel = new MemberRemovedEvent(data, data.blockTime);
         }
-        // if (type === 'ManagerAdded') {
-        //     eventModel = new ManagerAddedEvent(data, data.blockTime);
-        // }
-        // if (type === 'ManagerRemoved') {
-        //     eventModel = new ManagerRemovedEvent(data, data.blockTime);
-        // }
+        if (type === 'ManagerAdded') {
+            eventModel = new ManagerAddedEvent(data, data.blockTime);
+        }
+        if (type === 'ManagerRemoved') {
+            eventModel = new ManagerRemovedEvent(data, data.blockTime);
+        }
         if (type === 'Deposited') {
             eventModel = new DepositEvent(data, data.blockTime);
         }

@@ -81,14 +81,22 @@
                                             <a
                                                 v-if="pool.isManager && !m.isManager"
                                                 class="ml-1 text-primary"
-                                                @click="$refs.modalAddManager.show()">
+                                                @click="updateRole(m.address, 'Manager', false)">
                                                 <small>
-                                                    Add Manager
+                                                    Promote
                                                 </small>
                                             </a>
-                                            <small v-if="m.isManager" class="ml-1 text-muted">
+                                            <span v-if="m.isManager" class="ml-1 text-muted">
                                                 Manager
-                                            </small>
+                                            </span>
+                                            <a
+                                                v-if="m.isManager && m.address === $network.extdev.account"
+                                                class="ml-1 text-primary"
+                                                @click="updateRole(m.address, 'Manager', true)">
+                                                <small>
+                                                    (Revoke)
+                                                </small>
+                                            </a>
                                         </div>
                                         <div class="d-flex">
                                             <small class="text-muted list-item-text-overflow">

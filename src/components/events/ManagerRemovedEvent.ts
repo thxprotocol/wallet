@@ -3,6 +3,7 @@ import { BListGroupItem } from 'bootstrap-vue';
 import { ManagerRemovedEvent } from '@/models/RewardPoolEvents';
 import { RewardPool } from '@/models/RewardPool';
 import ProfilePicture from '@/components/ProfilePicture.vue';
+import UserService from '@/services/UserService';
 
 @Component({
     name: 'managerremoved',
@@ -14,4 +15,10 @@ import ProfilePicture from '@/components/ProfilePicture.vue';
 export default class ManagerRemoved extends Vue {
     @Prop() public ev!: ManagerRemovedEvent;
     @Prop() public pool!: RewardPool;
+    private userService: UserService = new UserService();
+    private member: any = null;
+
+    private created() {
+        this.member = this.userService.getMemberByAddress(this.ev.account);
+    }
 }

@@ -13,6 +13,8 @@ export default class UserService extends Vue {
             const s: any = await firebase.database().ref(`users/${wallet.uid}`).once('value');
             const member = s.val();
 
+            member.address = address.toLowerCase();
+
             return member;
         }
     }

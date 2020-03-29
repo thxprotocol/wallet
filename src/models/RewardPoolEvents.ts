@@ -9,7 +9,7 @@ export class RewardPoolEvents {
         'Deposited',
         'ManagerAdded',
         'ManagerRemoved',
-        // 'MemberAdded',
+        'MemberAdded',
         'MemberRemoved',
         'RewardPollCreated',
         'RewardPollFinished',
@@ -137,6 +137,7 @@ export class MemberAddedEvent extends TransactionEvent {
 
     constructor(data: any, blockTime: string) {
         super(data, blockTime);
+
         this.account = data.event.account;
         this.component = 'memberadded-event';
     }
@@ -147,6 +148,7 @@ export class MemberRemovedEvent extends TransactionEvent {
 
     constructor(data: any, blockTime: string) {
         super(data, blockTime);
+
         this.account = data.event.account;
         this.component = 'memberremoved-event';
     }
@@ -157,6 +159,7 @@ export class ManagerAddedEvent extends TransactionEvent {
 
     constructor(data: any, blockTime: string) {
         super(data, blockTime);
+
         this.account = data.event.account;
         this.component = 'manageradded-event';
     }
@@ -167,6 +170,7 @@ export class ManagerRemovedEvent extends TransactionEvent {
 
     constructor(data: any, blockTime: string) {
         super(data, blockTime);
+
         this.account = data.event.account;
         this.component = 'managerremoved-event';
     }

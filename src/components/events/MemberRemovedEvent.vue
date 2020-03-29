@@ -3,9 +3,9 @@
         <profile-picture class="mr-2" v-if="ev.from" :uid="ev.from.uid" size="sm"/>
         <div class="border-left flex-grow-1 pl-3">
             <div class="d-flex w-100">
-                <strong class="flex-grow-1">
-                    Member Removed
-                </strong>
+                <div class="flex-grow-1">
+                    <strong>{{member.firstName}} {{member.lastName}} left...</strong>
+                </div>
                 <small class="flex-shrink-0">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
             </div>
             <span class="text-muted list-item-text-overflow">
