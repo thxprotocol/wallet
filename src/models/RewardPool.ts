@@ -134,12 +134,12 @@ export class RewardPool extends RewardPoolEvents {
 
         for (let i = 0; i < dLength; i++) {
             const d = await this.depositOf(this.account, i);
-            this.transactions.push(new Deposit(d));
+            this.transactions.push(new Deposit(d, this));
         }
 
         for (let i = 0; i < wLength; i++) {
             const w = await this.withdrawelOf(this.account, i);
-            this.transactions.push(new Withdrawel(w));
+            this.transactions.push(new Withdrawel(w, this));
         }
     }
 
@@ -557,18 +557,22 @@ class Transaction {
 
 export class Deposit extends Transaction {
     public sender: string;
+    public pool: RewardPool;
 
-    constructor(data: any) {
+    constructor(data: any, pool: RewardPool) {
         super(data);
         this.sender = data.sender;
+        this.pool = pool;
     }
 }
 
 export class Withdrawel extends Transaction {
     public receiver: string;
+    public pool: RewardPool;
 
-    constructor(data: any) {
+    constructor(data: any, pool: RewardPool) {
         super(data);
         this.receiver = data.receiver;
+        this.pool = pool;
     }
 }

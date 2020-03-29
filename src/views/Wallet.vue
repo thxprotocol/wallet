@@ -17,6 +17,13 @@
                     <strong>{{tx.sender ? 'Deposit ' : 'Withdraw '}}{{tx.amount}} THX</strong>
                     <small>{{ tx.created | moment("MMMM Do YYYY HH:mm") }}</small>
                 </div>
+                <small class="d-flex">
+                    <span class="mr-1">{{tx.pool.name}}</span>
+                    <span class="d-flex text-muted">
+                        (<span class="list-item-text-overflow">{{tx.pool.address}}</span>)
+                    </span>
+                </small>
+
             </b-list-group-item>
         </b-list-group>
 
