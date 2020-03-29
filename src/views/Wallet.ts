@@ -1,7 +1,6 @@
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { BSpinner, BListGroup, BListGroupItem } from 'bootstrap-vue';
-import NetworkService from '@/services/NetworkService';
-import { Deposit, Withdrawel, IRewardPools } from '@/models/RewardPool';
+import { IRewardPools } from '@/models/RewardPool';
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
 import store from '@/store';
@@ -23,19 +22,23 @@ export default class Wallet extends Vue {
     public $store: any = store;
     public error: string = '';
     public loading: boolean = false;
-
-    private $network!: NetworkService;
-    private transactions: any[] = [];
     private rewardPools!: IRewardPools;
 
-    get sortedTransactions() {
+    get allPoolTransactions() {
+        let transfers: any[] = [];
+
         for (const address in this.rewardPools) {
             if (this.rewardPools[address]) {
                 const pool = this.rewardPools[address];
-                this.transactions = pool.transactions;
+
+                transfers = [...transfers, ...pool.transactions];
             }
         }
 
-        return _.orderBy(this.transactions, 'created', 'desc');
+        return transfers;
+    }
+
+    get sortedTransactions() {
+        return _.orderBy(this.allPoolTransactions, 'created', 'desc');
     }
 }

@@ -5,7 +5,7 @@
         <div class="alert alert-danger" v-if="error">
             {{error}}
         </div>
-        <div class="text-center" v-if="!transactions.length">
+        <div class="text-center" v-if="!allPoolTransactions.length">
             <b-spinner label="Loading..."></b-spinner>
         </div>
         <b-list-group>
