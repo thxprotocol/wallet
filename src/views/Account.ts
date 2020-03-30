@@ -4,18 +4,20 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/storage';
 import { CryptoUtils, LocalAddress } from 'loom-js';
-import { BAlert, BButton, BModal, BSpinner } from 'bootstrap-vue';
+import { BOverlay, BAlert, BButton, BModal, BSpinner } from 'bootstrap-vue';
 import ProfilePicture from '@/components/ProfilePicture.vue';
 import { Account } from '@/models/Account';
 import NetworkService from '@/services/NetworkService';
 import StateService from '@/services/StateService';
 import BN from 'bn.js';
+import UserService from '@/services/UserService';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 @Component({
     name: 'AccountDetail',
     components: {
+        'b-overlay': BOverlay,
         'b-spinner': BSpinner,
         'b-button': BButton,
         'b-modal': BModal,
@@ -29,12 +31,14 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
     },
 })
 export default class AccountDetail extends Vue {
-    public loading: any = false;
-    public isExtdevMinter: boolean = false;
-    public isRinkebyMinter: boolean = false;
-    public alert: any = null;
-    public clipboard: any = null;
-    public input: any = {
+    private updating: any = false;
+    private loading: any = false;
+    private isExtdevMinter: boolean = false;
+    private isRinkebyMinter: boolean = false;
+    private alert: any = null;
+    private clipboard: any = null;
+    private txHash: string = '';
+    private input: any = {
         extdevPrivateKey: '',
         rinkebyPrivateKey: '',
         mintForAccount: 0,
@@ -52,6 +56,7 @@ export default class AccountDetail extends Vue {
     private account!: Account;
     private $network!: NetworkService;
     private $state!: StateService;
+    private userService: UserService = new UserService();
 
     public async created() {
         this.input.extdevPrivateKey = this.$state.extdevPrivateKey;
@@ -68,12 +73,6 @@ export default class AccountDetail extends Vue {
                 this.$network.rinkeby.account.address,
             );
         }
-    }
-
-    public async isDuplicateAddress(address: string) {
-        const s = await firebase.database().ref(`wallets/${address}`).once('value');
-
-        return s.exists() && (s.val().uid !== this.account.uid);
     }
 
     public onFileChange(e: any) {
@@ -95,17 +94,10 @@ export default class AccountDetail extends Vue {
         this.$router.push('/logout');
     }
 
-    public async removeMapping(address: string) {
-        const walletRef = firebase.database().ref(`wallets/${address}`);
-        await walletRef.remove();
-
-        return (this.$refs['modal-account-mapping'] as any).hide();
-    }
-
-    public reset() {
+    public async reset() {
         this.$state.clear();
 
-        this.removeMapping(this.$network.extdev.account);
+        await this.userService.removeMapping(this.$network.extdev.account);
 
         return window.location.reload();
     }
@@ -114,68 +106,61 @@ export default class AccountDetail extends Vue {
         const privateKeyArray = CryptoUtils.B64ToUint8Array(this.input.extdevPrivateKey);
         const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKeyArray);
         const address = LocalAddress.fromPublicKey(publicKey).toString().toLowerCase();
-        const walletRef = firebase.database().ref(`wallets/${address}`);
 
         this.loading = true;
 
-        const isDuplicate = await this.isDuplicateAddress(address);
+        await this.userService.updateMapping(address, this.account.uid);
+        await this.$network.mapAccounts(this.input.rinkebyPrivateKey, this.input.extdevPrivateKey);
 
-        // If there is a connection remove the current wallet mapping before
-        // setting the new mapping
-        if (this.$network.extdev) {
-            firebase.database().ref(`wallets/${this.$network.extdev.account}`)
-                .remove();
-        }
+        this.alert = {
+            text: 'Your connection is established. The app will restart in 3 seconds.',
+            variant: 'success',
+        };
 
-        if (!isDuplicate) {
-
-            walletRef.child('uid').set(this.account.uid);
-
-            await this.$network.mapAccounts(this.input.rinkebyPrivateKey, this.input.extdevPrivateKey);
-
-            this.alert = {
-                text: 'Your account is connected. The app will restart in 3 seconds.',
-                variant: 'success',
-            };
-
-            this.$state.extdevPrivateKey = this.input.extdevPrivateKey;
-
-            window.setTimeout(() => {
-                window.location.reload();
-            }, 3000);
-        } else {
-            this.alert = {
-                text: 'The extdev private key provided is already in use and will not be stored.',
-                variant: 'danger',
-            };
-        }
-
+        this.$state.extdevPrivateKey = this.input.extdevPrivateKey;
         this.$state.rinkebyPrivateKey = this.input.rinkebyPrivateKey;
         this.$state.save();
 
         this.loading = false;
+
         (this.$refs['modal-connect'] as any).hide();
+
+        window.setTimeout(() => {
+            window.location.reload();
+        }, 3000);
     }
 
     public onDeposit() {
         this.loading = true;
-
-        return this.$network.depositCoin(this.input.depositToGateway)
-            .then(() => {
+        this.$network.depositCoin(this.input.depositToGateway)
+            .then((hash: any) => {
+                this.txHash = hash;
                 this.input.depositToGateway = 0;
                 this.loading = false;
-                return (this.$refs['modal-gateway-deposit'] as any).hide();
+                (this.$refs['modal-gateway-deposit'] as any).hide();
+            })
+            .catch((e: string) => {
+                this.alert = {
+                    text: e,
+                    type: 'danger',
+                };
             });
     }
 
     public onWithdraw() {
         this.loading = true;
-
-        return this.$network.withdrawCoin(this.input.withdrawToGateway)
-            .then(() => {
+        this.$network.withdrawCoin(this.input.withdrawToGateway)
+            .then((hash: any) => {
+                this.txHash = hash;
                 this.input.withdrawToGateway = 0;
                 this.loading = false;
                 (this.$refs['modal-gateway-withdraw'] as any).hide();
+            })
+            .catch((e: string) => {
+                this.alert = {
+                    text: e,
+                    type: 'danger',
+                };
             });
     }
 
@@ -262,6 +247,12 @@ export default class AccountDetail extends Vue {
                 this.loading = false;
                 (this.$refs['modal-add-minter'] as any).hide();
             });
+    }
+
+    private async onUpdateAccount(account: Account) {
+        this.updating = true;
+        await this.userService.update(account);
+        this.updating = false;
     }
 
     private showModal(id: string) {

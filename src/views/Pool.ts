@@ -110,7 +110,7 @@ export default class PoolDetail extends Vue {
     }
 
     get poolMembers(): string {
-        return this.rewardPools[this.$route.params.id].members;
+        return _.orderBy(this.rewardPools[this.$route.params.id].members, 'connected', 'desc');
     }
 
     private copyClipboard(value: string) {

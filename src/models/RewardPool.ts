@@ -30,7 +30,7 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 export class RewardPool extends RewardPoolEvents {
     public name: string = '';
     public balance: BN = new BN(0);
-    public members: any = {};
+    public members: any[] = [];
     public isMember: boolean = false;
     public isManager: boolean = false;
     public address: string = '';
@@ -83,22 +83,36 @@ export class RewardPool extends RewardPoolEvents {
 
     public async getMembers() {
         let i = 0;
-        while (i < 10) {
+
+        this.members.splice(0);
+
+        while (i !== 20) {
             try {
                 const address = await this.contract.methods.members(i).call({ from: this.account });
-                const member = await this.userService.getMemberByAddress(address);
+                const member = await this.getMember(address);
+                const exists = this.members.find((m) => {
+                    return member.address === m.address;
+                });
 
-                member.isMember = await this.contract.methods.isMember(address).call({ from: this.account });
-                member.isManager = await this.contract.methods.isManager(address).call({ from: this.account });
-
-                if (member.isMember) {
-                    this.members[address] = member;
+                if (member && member.isMember && !exists) {
+                    this.members.push(member);
                 }
-
-                i++;
             } catch (e) {
-                break; // We are letting this.contract.methods.members(i) fail delibirately.
+                // Ignore errors when retreiving non existant members.
             }
+
+            i++;
+        }
+    }
+
+    public async getMember(account: string) {
+        const member = await this.userService.getMemberByAddress(account);
+
+        if (member) {
+            member.isMember = await this.contract.methods.isMember(account).call({ from: this.account });
+            member.isManager = await this.contract.methods.isManager(account).call({ from: this.account });
+
+            return member;
         }
     }
 
@@ -163,23 +177,58 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async onManagerAdded(data: any) {
-        this.getMembers();
-        this.checkMemberships();
+        const address = data.account.toLowerCase();
+        const member = this.members.find((m: any) => {
+            return address === m.address;
+        });
+        const index = this.members.indexOf(member);
+
+        this.members[index].isManager = true;
+
+        if (address === this.account) {
+            this.isManager = true;
+        }
     }
 
     public async onManagerRemoved(data: any) {
-        this.getMembers();
-        this.checkMemberships();
+        const address = data.account.toLowerCase();
+        const member = this.members.find((m: any) => {
+            return address === m.address;
+        });
+        const index = this.members.indexOf(member);
+
+        if (index > -1) {
+            this.members[index].isManager = false;
+        }
+
+        if (address === this.account) {
+            this.isManager = false;
+        }
     }
 
     public async onMemberAdded(data: any) {
-        this.getMembers();
-        this.checkMemberships();
+        const address = data.account.toLowerCase();
+        const member = await this.getMember(address);
+
+        this.members.push(member);
+
+        if (address === this.account) {
+            this.isMember = true;
+        }
     }
 
     public async onMemberRemoved(data: any) {
-        this.getMembers();
-        this.checkMemberships();
+        const address = data.account.toLowerCase();
+        const member = this.members.find((m: any) => {
+            return address === m.address;
+        });
+        const index = this.members.indexOf(member);
+
+        this.members.splice(index, 1);
+
+        if (address === this.account) {
+            this.isMember = false;
+        }
     }
 
     public onDeposited(data: any) {

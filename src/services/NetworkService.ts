@@ -45,7 +45,6 @@ export default class NetworkService {
         if (extdevPrivateKey !== '' && rinkebyPrivateKey !== '') {
             this.extdev = this.loadExtdevAccount();
             this.rinkeby = this.loadRinkebyAccount();
-            // this.resumeWithdrawal();
         }
     }
 
@@ -348,6 +347,7 @@ export default class NetworkService {
             );
             console.log(`${amount} tokens deposited to Transfer Gateway.`);
             console.log(`Rinkeby tx hash: ${txHash}`);
+            return txHash;
         } catch (err) {
             console.error(err);
         }
@@ -514,6 +514,7 @@ export default class NetworkService {
             });
             console.log(`${amount} tokens withdrawn from Transfer Gateway.`);
             console.log(`Rinkeby tx hash: ${txHash}`);
+            return txHash;
         } catch (err) {
             console.error(err);
         }

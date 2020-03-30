@@ -25,9 +25,11 @@
                 </button>
 
                 <template v-if="showDetails">
-                    <h2 class="h4 mb-0">
-                        #{{ rule.id }} | {{ rule.title }}
-                    </h2>
+                    <div class="mb-0">
+                        <strong>
+                            #{{ rule.id }} | {{ rule.title }}
+                        </strong>
+                    </div>
                     <small class="text-muted m-0">Created: {{ rule.created | moment("DD/MM/'YY HH:mm") }}</small>
                     <p v-if="rule.description">
                         <i>{{ rule.description }}</i>
@@ -37,7 +39,7 @@
                         Claim reward
                     </button>
 
-                    <div class="alert alert-warning" v-if="!pool.isMember">
+                    <div v-if="!pool.isMember" class="alert alert-warning mb-0 mt-3">
                         <strong>You are not a member of this pool and can not join the poll.</strong>
                     </div>
 

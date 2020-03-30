@@ -4,13 +4,14 @@
         <div class="border-left flex-grow-1 pl-3">
             <div class="d-flex w-100">
                 <div class="flex-grow-1">
-                    <strong>{{member.firstName}} {{member.lastName}} left...</strong>
+                    <span v-if="member"><strong>{{member.firstName}} {{member.lastName}}</strong> left...</span>
+                    <span v-else><strong>Unknown User</strong> left...</span>
                 </div>
                 <small class="flex-shrink-0">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
             </div>
-            <span class="text-muted list-item-text-overflow">
+            <small class="text-muted list-item-text-overflow">
                 {{ev.account}}
-            </span>
+            </small>
         </div>
     </b-list-group-item>
 </template>

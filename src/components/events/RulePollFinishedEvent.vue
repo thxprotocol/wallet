@@ -14,9 +14,9 @@
                 </span>
                 <small class="flex-shrink-0">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
             </div>
-            <div v-if="ev.approved" class="text-muted">
+            <small v-if="ev.approved" class="text-muted">
                 Rule changed to <strong>{{ rule.amount }} THX</strong>.
-            </div>
+            </small>
         </div>
     </b-list-group-item>
 </template>

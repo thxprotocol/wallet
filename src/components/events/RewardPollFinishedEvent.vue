@@ -5,12 +5,13 @@
             <div class="d-flex w-100" v-if="reward && !reward.loading">
                 <span class="flex-grow-1">
                     <strong> {{ev.from.firstName }}</strong> claims <strong>{{ reward.amount }} THX</strong>
-                    <span :class="`badge badge-${ev.approved ? 'success' : 'danger'} ml-1`">
-                        {{ev.approved ? 'Approved' : 'Rejected'}}
-                    </span>
+
                 </span>
                 <small class="flex-shrink-0">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
             </div>
+            <small :class="`badge badge-${ev.approved ? 'success' : 'danger'}`">
+                {{ev.approved ? 'Approved' : 'Rejected'}}
+            </small>
         </div>
     </b-list-group-item>
 </template>

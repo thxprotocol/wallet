@@ -2,49 +2,76 @@
 <article class="region region-container">
     <main class="region region-content">
 
-        <h2>{{account.firstName}} {{account.lastName}}</h2>
+        <div class="d-flex">
+            <label
+                v-if="account && !account.picture"
+                class="text-center">
+                <div class="account-picture account-picture-sm bg-yellow mr-3">
+                    <span>
+                        {{ account.initials}}
+                    </span>
+                </div><br>
+                <input type="file" @change="onFileChange" class="d-none">
+            </label>
+            <div
+                v-if="account && account.picture"
+                @click="removeImage"
+                class="account-picture account-picture-sm bg-yellow mr-3">
+                <img :src="account.picture.url"
+                    :alt="account.picture.name"
+                    width="100%"
+                    height="100%"
+                    class="rounded-circle" />
+            </div>
 
-        <b-alert v-if="alert" show :variant="alert.variant ? alert.variant : 'info'">
+            <h2 class="mt-2">{{account.firstName}} {{account.lastName}}</h2>
+        </div>
+
+        <b-alert v-if="txHash" dismissible show variant="info">
+          <small>Track your transaction:</small>
+          <div class="text-muted list-item-text-overflow">
+              <a :href="`https://rinkeby.etherscan.io/tx/${txHash}`">
+                  {{ txHash }}
+              </a>
+          </div>
+        </b-alert>
+
+        <b-alert v-if="alert" dismissible show :variant="alert.variant ? alert.variant : 'info'">
           {{ alert.text }}
         </b-alert>
 
-        <div class="card mb-3">
+        <div class="card clearfix mb-3 d-block">
             <div class="card-body" v-if="account">
-                <span v-if="!account.picture" class="float-right ml-3">
-                    <label class="text-center">
-                        <div class="account-picture account-picture-sm bg-yellow">
-                            <span>
-                                {{ account.initials}}
-                            </span>
-                        </div><br>
-                        <span class="btn btn-link">Change</span>
-                        <input type="file" @change="onFileChange" class="d-none">
-                    </label>
-                </span>
-                <span v-if="account.picture" class="float-right ml-3 text-center">
-                    <div class="account-picture account-picture-sm bg-yellow">
-                        <img :src="account.picture.url"
-                            :alt="account.picture.name"
-                            width="100%"
-                            height="100%"
-                            class="rounded-circle" />
-                    </div><br>
-                    <button class="btn btn-link" @click="removeImage">Delete</button>
-                </span>
-
-                <h3>E-mail:</h3>
-                <p>{{account.email}}</p>
-
-                <h3>UID:</h3>
-                <p>{{account.uid}}</p>
-
-                <template v-if="account.slack">
-                    <h3>Slack:</h3>
-                    {{account.slack}}
-                </template>
+                <b-overlay :show="updating">
+                    <div class="form-group form-row">
+                        <div class="col-6">
+                            <label>First name:</label>
+                            <input type="text" class="form-control" v-model="account.firstName" />
+                        </div>
+                        <div class="col-6">
+                            <label>Last name:</label>
+                            <input type="text" class="form-control" v-model="account.lastName" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>E-mail:</label>
+                        <input type="text" class="form-control" :value="account.email" readonly disabled />
+                    </div>
+                    <div class="form-group">
+                        <label>UID:</label>
+                        <input type="text" class="form-control" :value="account.uid" readonly disabled />
+                    </div>
+                    <div class="form-group" v-if="account.slack">
+                        <label>Slack ID:</label>
+                        <input type="text" class="form-control" :value="account.slack" readonly disabled />
+                    </div>
+                </b-overlay>
             </div>
-            <div class="card-footer">
-                <button class="btn btn-link btn-block" @click="showModal('modal-connect')">Connect Accounts</button>
+            <div class="card-footer d-flex justify-content-between">
+                <button @click="logout()" class="btn btn-link mr-2">Logout</button>
+                <button @click="onUpdateAccount(account)" class="btn btn-primary">
+                    <span>Update</span>
+                </button>
             </div>
         </div>
 
@@ -86,12 +113,13 @@
             </div>
         </div>
 
-        <div class="d-flex justify-content-end">
-            <button @click="reset()" class="btn btn-link mr-2">Reset</button>
-            <button @click="logout()" class="btn btn-primary">Logout</button>
-        </div>
+        <button class="btn btn-secondary mb-3 btn-block" @click="showModal('modal-connect')">
+            <span v-if="$network.extdev">Reconnect Network</span>
+            <span v-else>Connect Network</span>
+        </button>
+        <button v-if="$network.extdev" @click="reset()" class="btn btn-link btn-block text-danger">Reset Network Connection</button>
 
-        <b-modal title="Connect accounts" centered ref="modal-connect">
+        <b-modal title="Setup network connection" centered ref="modal-connect">
             <p>Add private keys for the loom sidechain and the parent Rinkeby network. These keys will only be stored on your device and used to verify transactions.</p>
             <div class="alert alert-warning"><strong>Make sure to store your private keys safely and not only on this device. We can not recover your keys!</strong></div>
             <div class="form-group">

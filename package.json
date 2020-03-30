@@ -40,7 +40,7 @@
         "@types/lodash": "^4.14.149",
         "axios": "^0.19.2",
         "bootstrap": "^4.3.1",
-        "bootstrap-vue": "^2.0.4",
+        "bootstrap-vue": "^2.9.0",
         "core-js": "^3.1.2",
         "dotenv": "^6.2.0",
         "ethereum-input-data-decoder": "^0.3.0",

@@ -67,9 +67,9 @@
                         <b-tab title="Members">
                             <ul class="list list-group mb-2">
                                 <li class="list-group-item d-flex justify-content-between align-items-center p-2"
-                                    v-for="(m, address) in poolMembers"
+                                    v-for="m in rewardPools[$route.params.id].members"
                                     v-if="m.isMember"
-                                    :key="address">
+                                    :key="m.address">
                                     <profile-picture
                                         :uid="m.uid"
                                         size="sm"
@@ -94,17 +94,17 @@
                                                 class="ml-1 text-primary"
                                                 @click="updateRole(m.address, 'Manager', true)">
                                                 <small>
-                                                    (Revoke)
+                                                    Revoke
                                                 </small>
                                             </a>
                                         </div>
                                         <div class="d-flex">
                                             <small class="text-muted list-item-text-overflow">
-                                                {{address}}
+                                                {{m.address}}
                                             </small>
                                             <small>
-                                                <a class="text-primary" @click="copyClipboard(address)">
-                                                    ({{clipboard === address ? 'Copied!' : 'Copy'}})
+                                                <a class="text-primary" @click="copyClipboard(m.address)">
+                                                    ({{clipboard === m.address ? 'Copied!' : 'Copy'}})
                                                 </a>
                                             </small>
                                         </div>
@@ -114,6 +114,9 @@
                             <button
                                 v-if="pool.isMember"
                                 class="btn btn-primary btn-block" @click="$refs.modalAddMember.show()">Invite Member</button>
+                            <button
+                                v-if="pool.isMember"
+                                class="btn btn-link text-danger btn-block" @click="$refs.modalRemoveMember.show()">Leave</button>
                         </b-tab>
                     </b-tabs>
                 </div>
@@ -159,16 +162,13 @@
             </b-modal>
 
             <b-modal ref="modalRemoveMember" centered title="Remove a member from this reward pool">
-                <input v-if="!loading" v-model="input.memberAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000000000000000">
-                <p v-if="loading" class="d-flex w-100 justify-content-center">
-                    <b-spinner></b-spinner>
-                </p>
+                <strong>Are you sure you want to leave this reward pool?</strong>
                 <template v-slot:modal-footer="{ ok, cancel }">
                     <button class="btn btn-link" @click="$refs.modalRemoveMember.hide()">
                         Cancel
                     </button>
-                    <button @click="updateRole(input.memberAddress, 'Member', true)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
-                        Remove Member
+                    <button @click="updateRole(input.memberAddress, 'Member', true)" v-bind:class="{ disabled: loading }" class="btn btn-danger">
+                        Leave
                     </button>
                 </template>
             </b-modal>

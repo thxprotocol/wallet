@@ -8,9 +8,9 @@
                 </span>
                 <small class="flex-shrink-0">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
             </div>
-            <span class="text-muted list-item-text-overflow">
+            <small class="text-muted list-item-text-overflow">
                 {{ev.sender}}
-            </span>
+            </small>
         </div>
     </b-list-group-item>
 </template>

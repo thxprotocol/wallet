@@ -9,9 +9,9 @@
                 </span>
                 <small class="flex-shrink-0">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
             </div>
-            <span class="text-muted list-item-text-overflow" v-if="rule">
+            <small class="text-muted list-item-text-overflow" v-if="rule">
                 {{rule.title}}
-            </span>
+            </small>
         </div>
     </b-list-group-item>
 </template>

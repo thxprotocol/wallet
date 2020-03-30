@@ -8,9 +8,9 @@
                 </span>
                 <small class="flex-shrink-0">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
             </div>
-            <div class="text-muted">
+            <small class="text-muted">
                 Proposal: <del v-if="rule.amount">{{rule.amount}} THX</del> → <strong>{{ ev.proposedAmount ? ev.proposedAmount : 0 }} THX</strong>.
-            </div>
+            </small>
         </div>
     </b-list-group-item>
 </template>

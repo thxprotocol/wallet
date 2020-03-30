@@ -14,9 +14,9 @@
                 </strong>
                 <small class="flex-shrink-0">{{ev.blockTime | moment("D/M/'YY HH:mm")}}</small>
             </div>
-            <span v-if="rule && rule.title" class="text-muted">
+            <small v-if="rule && rule.title" class="text-muted">
                 Earn <strong>{{rule.amount}} THX</strong> for <i>{{rule.title}}</i>
-            </span>
+            </small>
         </div>
     </b-list-group-item>
 </template>

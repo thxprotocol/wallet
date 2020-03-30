@@ -21,7 +21,7 @@ export default class MemberRemoved extends Vue {
     private userService: UserService = new UserService();
     private member: any = null;
 
-    private created() {
-        this.member = this.userService.getMemberByAddress(this.ev.account);
+    private async created() {
+        this.member = await this.userService.getMemberByAddress(this.ev.account);
     }
 }
