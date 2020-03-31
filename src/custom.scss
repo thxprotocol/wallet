@@ -71,7 +71,7 @@ a,
 
 .region-container {
     flex-direction: row;
-    flex: 1;
+    flex: 1 auto;
     flex-wrap: wrap;
     z-index: 1;
     height: 1px;
@@ -142,9 +142,10 @@ a,
     background-color: white;
     padding: 1rem;
     width: calc(100% - 4rem);
+    overflow: hidden auto;
     overflow-x: hidden;
     overflow-y: auto;
-    height: 100%;
+    height: calc(100% + 1rem);
     box-shadow: 0 -10px 15px rgba(0, 0, 0, .2);
 }
 

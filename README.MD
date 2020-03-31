@@ -1,7 +1,7 @@
 # THX Wallet v0.1.2-alpha
 
 ## Description
-The THX
+This repository holds the source for the Wallet VueJs app and Firebase Functions used for the API and Slack Proxy.
 
 ## Index
 1. Prerequisites
@@ -17,6 +17,7 @@ The THX
 * nodejs v12.16.0
 * nvm 0.35.2
 * yarn 1.22.0
+* firebase-cli 7.13.0
 
 ## 2. Install
 1. `npm install;`
@@ -31,7 +32,7 @@ Populate the `.env` file with:
 RINKEBY_PRIVATE_KEY="0x0000000000000000000000000000000000000000000000000000000000000000"
 INFURA_API_KEY="000a0a00000a000a000000a"
 ```
-Populate the `.config.json` file with your credentials following this schema:
+Populate the `./config.json` file with your credentials following this schema:
 ```
 {
     "firebase": {
