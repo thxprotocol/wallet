@@ -18,8 +18,8 @@
                 <div slot="header" class="font-size-xl text-light">{{p.balance}} THX</div>
 
                 <b-card-text>
-                    <span v-if="p.outOfSync" class="badge badge-danger float-right">Out of sync</span>
-                    <span v-if="!p.outOfSync" class="badge badge-success float-right">Up to date</span>
+                    <!-- <span v-if="p.outOfSync" class="badge badge-danger float-right">Out of sync</span>
+                    <span v-if="!p.outOfSync" class="badge badge-success float-right">Up to date</span> -->
                     <strong>{{p.name}}</strong><br>
                     <small>{{p.address}}
                         <a class="text-primary" @click="copyClipboard(p.address)">
