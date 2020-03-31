@@ -53,4 +53,31 @@ export default class PoolService extends Vue {
             return Promise.resolve();
         }
     }
+
+    public async create(name: string): Promise<string | void> {
+        if (!name) {return Promise.resolve(); }
+
+        const poolName = name.substring(0, 30);
+
+        const extdev = this.$network.loadExtdevAccount();
+        const rewardPoolContract = new extdev.web3js.eth.Contract(REWARD_POOL_JSON.abi);
+
+        const myExtDevCoinAddress = await this.$network.getExtdevCoinContractAddress();
+
+        return rewardPoolContract
+            .deploy({
+                data: REWARD_POOL_JSON.bytecode,
+                arguments: [poolName, myExtDevCoinAddress],
+            })
+            .send({ from: extdev.account })
+            .then((newContractInstance: any) =>  newContractInstance.options.address );
+     }
+
+    public async createAndJoin(uid: string, name: string) {
+        const poolAddress = await this.create(name);
+        if (poolAddress) {
+            return this.join(uid, poolAddress);
+        }
+    }
+
 }

@@ -160,6 +160,11 @@ export default class NetworkService {
         );
     }
 
+    public async getExtdevCoinContractAddress() {
+        const networkId = await this.extdev.web3js.eth.net.getId();
+        return MyCoinJSON.networks[networkId].address;
+    }
+
     public getExtdevContract(contractAbi: any, contractAddr: string) {
         return new this.extdev.web3js.eth.Contract(
             contractAbi,
