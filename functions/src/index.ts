@@ -229,23 +229,23 @@ slack.post('/rules', async (req: any, res: any) => {
 exports.slack = functions.https.onRequest(slack);
 
 
-
 api.use(cors({ origin: true }));
 
 api.post('/rewards', async (req: any, res: any) => {
-    const data = {
-        pool: req.body.pool,
-        rule: req.body.rule,
-        address: req.body.address,
-    };
-    console.log(data.pool);
-    const pool = new web3.eth.Contract(REWARD_POOL_JSON.abi, data.pool);
-    console.log(pool.methods);
-    console.log(data.rule, data.address);
-    console.log(API_ADDRESS);
-    const tx = await pool.methods.createReward(data.rule, data.address).send({ from: API_ADDRESS });
-    console.log(tx);
-    res.send(tx);
+    try {
+        const data = {
+            pool: req.body.pool,
+            rule: req.body.rule,
+            address: req.body.address,
+        };
+        const pool = new web3.eth.Contract(REWARD_POOL_JSON.abi, data.pool);
+        const tx = await pool.methods.createReward(data.rule, data.address).send({ from: API_ADDRESS });
+
+        res.send(tx);
+    } catch (e) {
+        console.error(e);
+        res.send(e);
+    }
 });
 
 api.get('/rules/:id', async (req: any, res: any) => {
