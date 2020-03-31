@@ -35,7 +35,7 @@
                         <i>{{ rule.description }}</i>
                     </p>
 
-                    <button class="btn btn-success btn-block" @click="openClaim(pool, rule.id, account.address)" target="_blank">
+                    <button class="btn btn-success btn-block" @click="$refs.modalCreateReward.show()" target="_blank">
                         Claim reward
                     </button>
 
@@ -131,6 +131,19 @@
             <template v-slot:modal-footer="{ ok, cancel }">
                 <button @click="startRulePoll()" :class="{ disabled: loading }" class="btn btn-primary">
                     Start proposal
+                </button>
+            </template>
+        </b-modal>
+
+
+        <b-modal ref="modalCreateReward" centered title="Create a new reward for someone">
+            <b-overlay :show="loading">
+                <input v-model="input.reward.beneficiary" type="text" class="form-control" />
+                <small v-if="input.reward.beneficiary === $network.extdev.account" class="text-muted">Mind that this is your personal address</small>
+            </b-overlay>
+            <template v-slot:modal-footer="{ ok, cancel }">
+                <button :class="{ disabled: loading }" @click="createReward(rule.id, input.reward.beneficiary)" class="btn btn-primary">
+                    Give Reward
                 </button>
             </template>
         </b-modal>

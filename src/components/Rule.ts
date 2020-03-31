@@ -1,5 +1,5 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { BModal, BCard, BCardText, BSpinner, BProgress, BProgressBar, BRow, BCol } from 'bootstrap-vue';
+import { BModal, BCard, BCardText, BSpinner, BProgress, BProgressBar, BRow, BCol, BOverlay } from 'bootstrap-vue';
 import NetworkService from '@/services/NetworkService';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import { RewardPool } from '@/models/RewardPool';
@@ -10,6 +10,7 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 @Component({
     name: 'CRewardRule',
     components: {
+        'b-overlay': BOverlay,
         'b-col': BCol,
         'b-row': BRow,
         'b-modal': BModal,
@@ -25,6 +26,10 @@ export default class CRewardRule extends Vue {
     public error: string = '';
     public now: number = Math.floor(new Date().getTime() / 1000);
     public input: any = {
+        reward: {
+            beneficiary: '',
+            rule: null,
+        },
         poll: {
             proposal: 0,
         },
@@ -37,6 +42,8 @@ export default class CRewardRule extends Vue {
     @Prop() private pool!: RewardPool;
 
     public async created() {
+        this.input.reward.beneficiary = this.$network.extdev.account;
+
         if (this.rule.hasPollAddress) {
             this.poll = await this.pool.getRewardRulePoll(this.rule);
             this.update();
@@ -132,7 +139,10 @@ export default class CRewardRule extends Vue {
         }
     }
 
-    private async openClaim(pool: RewardPool, id: number) {
-        window.open(`/claim/${pool.address}/${this.$network.extdev.account}/${id}`);
+    private async createReward(id: number, beneficiary: string) {
+        this.loading = true;
+        await this.pool.createReward(id, beneficiary);
+        this.loading = false;
+        (this.$refs.modalCreateReward as BModal).hide();
     }
 }

@@ -23,7 +23,6 @@ import { Account } from '@/models/Account';
 import { Reward } from '@/models/Reward';
 import BN from 'bn.js';
 import _ from 'lodash';
-import UserService from '@/services/UserService';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
@@ -77,7 +76,6 @@ export default class PoolDetail extends Vue {
     private $network!: NetworkService;
     private coinService: CoinService = new CoinService();
     private poolService: PoolService = new PoolService();
-    private userService: UserService = new UserService();
 
     get stream() {
         const id = this.$route.params.id;
