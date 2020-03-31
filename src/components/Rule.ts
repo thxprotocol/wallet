@@ -3,7 +3,6 @@ import { BModal, BCard, BCardText, BSpinner, BProgress, BProgressBar, BRow, BCol
 import NetworkService from '@/services/NetworkService';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import { RewardPool } from '@/models/RewardPool';
-import PoolService from '@/services/PoolService';
 import BN from 'bn.js';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
@@ -133,7 +132,7 @@ export default class CRewardRule extends Vue {
         }
     }
 
-    private openClaim(address: string, id: number) {
-        window.open(`/claim/${address}/${id}`);
+    private async openClaim(pool: RewardPool, id: number) {
+        window.open(`/claim/${pool.address}/${this.$network.extdev.account}/${id}`);
     }
 }

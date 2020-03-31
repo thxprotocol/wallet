@@ -267,8 +267,8 @@ export class RewardPool extends RewardPoolEvents {
         return await this.callPoolMethod(this.contract.methods.renounceMember());
     }
 
-    public async createReward(ruleId: number) {
-        return await this.contract.methods.createReward(ruleId).send({ from: this.account });
+    public async createReward(ruleId: number, address: string) {
+        return await this.contract.methods.createReward(ruleId, address).send({ from: this.account });
     }
 
     public async addManager(address: string) {
@@ -572,6 +572,7 @@ export class RewardPool extends RewardPoolEvents {
         } catch (err) {
             await firebase.database().ref(`pools/${this.address}/events/${snap.key}`)
                 .remove();
+            console.error(err);
             return err;
         }
     }

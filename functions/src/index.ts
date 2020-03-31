@@ -8,7 +8,7 @@ const cors = require('cors');
 const qrcode = require('qrcode');
 const Web3 = require('web3');
 
-const POOL_ADDRESS = "0x20AdB9e55D0C7f430335a9b30039EBD27Bd8Aa6A";
+const POOL_ADDRESS = "0xf1E0b062BfBa97c43385cEe1a9276D042876cE8b";
 const API_ROOT = 'https://us-central1-thx-wallet-dev.cloudfunctions.net/api';
 const APP_ROOT = 'https://thx-wallet-dev.firebaseapp.com';
 const REWARD_POOL_JSON = require('./contracts/RewardPool.json');
@@ -236,10 +236,16 @@ api.post('/rewards', async (req: any, res: any) => {
     const data = {
         pool: req.body.pool,
         rule: req.body.rule,
+        address: req.body.address,
     };
-    const qrBase64 = await qrcode.toDataURL(JSON.stringify(data));
-
-    res.send(qrBase64);
+    console.log(data.pool);
+    const pool = new web3.eth.Contract(REWARD_POOL_JSON.abi, data.pool);
+    console.log(pool.methods);
+    console.log(data.rule, data.address);
+    console.log(API_ADDRESS);
+    const tx = await pool.methods.createReward(data.rule, data.address).send({ from: API_ADDRESS });
+    console.log(tx);
+    res.send(tx);
 });
 
 api.get('/rules/:id', async (req: any, res: any) => {
@@ -284,19 +290,6 @@ api.get('/qr/connect/:pool/:slack', async (req: any, res: any) => {
     const data = {
         pool: req.params.pool,
         slack: req.params.slack,
-    };
-    const qrBase64 = await qrcode.toDataURL(JSON.stringify(data));
-
-    res.writeHead(200, {
-        'Content-Type': 'image/png',
-    });
-    res.end(QRBuffer(qrBase64));
-});
-
-api.get('/qr/claim/:pool/:rule', async (req: any, res: any) => {
-    const data = {
-        pool: req.params.pool,
-        rule: req.params.rule,
     };
     const qrBase64 = await qrcode.toDataURL(JSON.stringify(data));
 

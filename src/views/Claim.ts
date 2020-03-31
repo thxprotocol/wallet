@@ -3,7 +3,6 @@ import { RewardPool, IRewardPools } from '@/models/RewardPool';
 import firebase from 'firebase/app';
 import StateService from '@/services/StateService';
 import { RewardRule } from '@/models/RewardRule';
-import ClaimService from '@/services/ClaimService';
 import PoolService from '@/services/PoolService';
 
 const QRCode = (window as any).QRCode;
@@ -22,17 +21,15 @@ export default class Claim extends Vue {
     private isClaimed: boolean = false;
     private rewardPools!: IRewardPools;
     private poolService: PoolService = new PoolService();
-    private claimService: ClaimService = new ClaimService();
 
     private async mounted() {
-        if (this.$route.params.rule && this.$route.params.pool) {
+        if (this.$route.params.rule && this.$route.params.pool && this.$route.params.address) {
             const rewardsRef = firebase.database().ref(`pools/${this.$route.params.pool}/rewards`);
-            const snap = await rewardsRef.push();
 
             this.data = {
                  rule: parseInt(this.$route.params.rule, 10),
                  pool: this.$route.params.pool,
-                 key: snap.key,
+                 address: this.$route.params.address,
             };
 
             rewardsRef.child(this.data.key)
@@ -76,17 +73,6 @@ export default class Claim extends Vue {
                 }
             },
         );
-    }
-
-    private claim() {
-        if (this.rule && this.pool) {
-            this.claimService.claim(this.data, this.rule, this.pool)
-                .catch((err: any) => {
-                    if (err) {
-                        this.error = err.message;
-                    }
-                });
-        }
     }
 
     private startConfetti() {

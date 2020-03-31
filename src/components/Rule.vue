@@ -35,7 +35,7 @@
                         <i>{{ rule.description }}</i>
                     </p>
 
-                    <button class="btn btn-success btn-block" @click="openClaim(pool.address, rule.id)" target="_blank">
+                    <button class="btn btn-success btn-block" @click="openClaim(pool, rule.id, account.address)" target="_blank">
                         Claim reward
                     </button>
 

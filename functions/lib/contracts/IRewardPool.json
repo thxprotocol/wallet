@@ -69,9 +69,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.5.0;\n\n/**\n * @title IRewardPool\n * @dev Fund callbacks used by polling contracts\n */\ninterface IRewardPool {\n    /**\n     * @dev RulePoll callback\n     * @param id The referenced rule\n     * @param agree True if the rule should apply or change\n     * @param proposedAmount The proposed reward size\n     */\n    function onRulePollFinish(uint256 id, bool agree, uint256 proposedAmount) external;\n\n    /**\n     * @dev RewardPoll callback\n     * @param id The referenced reward\n     * @param agree True if the rule should apply or change\n     */\n    function onRewardPollFinish(uint256 id, bool agree) external;\n\n    /**\n     * @dev Withdrawel callback\n     * @param beneficiary The addres of the account receiving the reward\n     * @param amount The amount the beneficiary will receive\n     * @param created The timestamp of the moment the reward was claimed\n     */\n    function onWithdrawel(address beneficiary, uint256 amount, uint256 created) external;\n}\n",
-  "sourcePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol",
+  "sourcePath": "/Users/peterpolman/Sites/thx/wallet/contracts/IRewardPool.sol",
   "ast": {
-    "absolutePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol",
+    "absolutePath": "/Users/peterpolman/Sites/thx/wallet/contracts/IRewardPool.sol",
     "exportedSymbols": {
       "IRewardPool": [
         27
@@ -405,7 +405,7 @@
     "src": "0:975:0"
   },
   "legacyAST": {
-    "absolutePath": "/Users/peterpolman/Sites/thx/thx-wallet/contracts/IRewardPool.sol",
+    "absolutePath": "/Users/peterpolman/Sites/thx/wallet/contracts/IRewardPool.sol",
     "exportedSymbols": {
       "IRewardPool": [
         27
@@ -744,7 +744,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.1",
-  "updatedAt": "2020-01-06T13:05:10.030Z",
+  "updatedAt": "2020-03-16T13:01:40.135Z",
   "devdoc": {
     "details": "Fund callbacks used by polling contracts",
     "methods": {

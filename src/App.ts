@@ -58,7 +58,6 @@ export default class App extends Vue {
                     if (this.$network.extdev) {
                         const poolRef = firebase.database().ref(`users/${user.uid}/pools`);
 
-                        this.joinLatestRewardPool();
                         this.getBalances();
 
                         this.coinService.listen();
@@ -83,15 +82,6 @@ export default class App extends Vue {
 
     private setOnline() {
         return this.userRef.child('online').set(true);
-    }
-
-    private async joinLatestRewardPool() {
-        const contractAddress = await this.poolService.getRewardPoolAddress();
-        const snap = await firebase.database().ref(`users/${this.$user.uid}/pools`).once('value');
-
-        if (!snap.val() || !snap.val()[contractAddress]) {
-            this.poolService.join(this.$user.uid, contractAddress);
-        }
     }
 
     private getAccount(uid: string) {

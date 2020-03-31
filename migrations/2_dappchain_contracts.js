@@ -12,12 +12,8 @@ module.exports = function(deployer, network, accounts) {
         await deployer.deploy(THXToken, gatewayAddress)
         const THXTokenInstance = await THXToken.deployed()
 
-        await deployer.deploy(RewardPool, "Volunteers United", THXTokenInstance.address);
-        const RewardPoolInstance = await RewardPool.deployed();
-
         console.log('\n*************************************************************************\n')
         console.log(`Deployment account: ${accounts[0]}`)
-        console.log(`THXToken Contract Address: ${THXTokenInstance.address}`)
         console.log(`RewardPool Contract Address: ${RewardPoolInstance.address}`)
         console.log('\n*************************************************************************\n')
     })

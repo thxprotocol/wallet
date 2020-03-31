@@ -100,7 +100,7 @@ const routes: any = [
     },
     {
         name: 'claim',
-        path: '/claim/:pool/:rule',
+        path: '/claim/:pool/:rule/:key',
         component: Claim,
         meta: {
             header: false,

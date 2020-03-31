@@ -38,7 +38,7 @@
             </b-card>
 
             <button class="btn btn-primary btn-block" @click="$refs.modalJoinPool.show()">
-                Add Reward Pool
+                Join Reward Pool
             </button>
             <button class="btn btn-primary btn-block" @click="$refs.modalCreatePool.show()">
                 Create Reward Pool

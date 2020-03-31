@@ -5,7 +5,6 @@ import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 import PoolService from '@/services/PoolService';
 import { RewardPool, IRewardPools } from '@/models/RewardPool';
 import { RewardRule } from '@/models/RewardRule';
-import ClaimService from '@/services/ClaimService';
 import UserService from '@/services/UserService';
 import { Account } from '@/models/Account';
 import { VueRouter } from 'vue-router/types/router';
@@ -37,7 +36,6 @@ export default class Camera extends Vue {
     private error: string = '';
     private poolService: PoolService = new PoolService();
     private userService: UserService = new UserService();
-    private claimService: ClaimService = new ClaimService();
     private rewardPools!: IRewardPools;
 
     private repaint() {
@@ -79,22 +77,6 @@ export default class Camera extends Vue {
                     }
                 });
 
-        }
-    }
-
-    private claim() {
-        if (this.rule && this.pool) {
-            this.loading = true;
-            this.claimService.claim(this.data, this.rule, this.pool)
-                .then(() => {
-                    this.loading = false;
-                    this.$router.push(`/pools/${this.pool.address}`);
-                })
-                .catch((err: any) => {
-                    if (err) {
-                        this.error = err.message;
-                    }
-                });
         }
     }
 
