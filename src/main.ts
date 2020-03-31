@@ -19,12 +19,11 @@ let app: any;
 
 firebase.initializeApp(config.firebase[(process.env.NODE_ENV as any)]);
 firebase.auth()
-    .onAuthStateChanged(() => {
-        const currentUser: firebase.User | any = firebase.auth().currentUser;
+    .onAuthStateChanged((user: firebase.User | any = firebase.auth().currentUser) => {
+        if (user) {
+            const state: StateService = new StateService(user.uid);
 
-        if (currentUser) {
-            const state: StateService = new StateService(currentUser.uid);
-
+            Vue.prototype.$user = user;
             Vue.prototype.$state = state;
             Vue.prototype.$network = new NetworkService(
                 state.extdevPrivateKey,

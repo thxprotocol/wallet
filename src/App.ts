@@ -26,65 +26,71 @@ import { mapGetters } from 'vuex';
 export default class App extends Vue {
     public $store: any = store;
     public $events!: EventService;
-    private currentUser: firebase.User | any;
+    private $user: firebase.User | any;
     private $network!: NetworkService;
     private poolService: PoolService = new PoolService();
     private coinService: CoinService = new CoinService();
     private account!: Account;
+    private userRef!: firebase.database.Reference;
 
     public async created() {
-        this.currentUser = firebase.auth().currentUser;
+        firebase.auth()
+            .onAuthStateChanged((user: firebase.User | any) => {
+                if (user) {
+                    this.userRef = firebase.database().ref(`users/${user.uid}`);
 
-        if (this.currentUser) {
-            const userRef = firebase.database().ref(`users/${this.currentUser.uid}`);
+                    this.getAccount(user.uid);
 
-            this.getAccount(this.currentUser.uid);
+                    window.addEventListener('focus', this.setOnline);
 
-            window.onfocus = () => {
-                return userRef.child('online').set(true);
-            };
+                    this.userRef.on('child_added', (s: any) => {
+                        this.$store.commit('updateAccount', { prop: s.key, val: s.val() });
+                    });
 
-            userRef.on('child_added', (s: any) => {
-                this.$store.commit('updateAccount', { prop: s.key, val: s.val() });
-            });
+                    this.userRef.on('child_changed', (s: any) => {
+                        this.$store.commit('updateAccount', { prop: s.key, val: s.val() });
+                    });
 
-            userRef.on('child_changed', (s: any) => {
-                this.$store.commit('updateAccount', { prop: s.key, val: s.val() });
-            });
+                    this.userRef.on('child_removed', (s: any) => {
+                        this.$store.commit('updateAccount', { prop: s.key, val: null });
+                    });
 
-            userRef.on('child_removed', (s: any) => {
-                this.$store.commit('updateAccount', { prop: s.key, val: null });
-            });
+                    if (this.$network.extdev) {
+                        const poolRef = firebase.database().ref(`users/${user.uid}/pools`);
 
-            if (this.$network.extdev) {
-                const poolRef = firebase.database().ref(`users/${this.currentUser.uid}/pools`);
+                        this.joinLatestRewardPool();
+                        this.getBalances();
 
-                this.joinLatestRewardPool();
-                this.getBalances();
+                        this.coinService.listen();
 
-                this.coinService.listen();
+                        poolRef.on('child_added', async (s: any) => {
+                            const pool = await this.poolService.getRewardPool(s.key);
 
-                poolRef.on('child_added', async (s: any) => {
-                    const pool = await this.poolService.getRewardPool(s.key);
+                            this.$store.commit('addRewardPool', pool);
+                        });
 
-                    this.$store.commit('addRewardPool', pool);
-                });
+                        poolRef.on('child_removed', async (s: any) => {
+                            const pool = await this.poolService.getRewardPool(s.key);
 
-                poolRef.on('child_removed', async (s: any) => {
-                    const pool = await this.poolService.getRewardPool(s.key);
+                            this.$store.commit('removeRewardPool', pool);
+                        });
+                    }
+                } else {
+                    window.removeEventListener('focus', this.setOnline);
+                }
+        });
+    }
 
-                    this.$store.commit('removeRewardPool', pool);
-                });
-            }
-        }
+    private setOnline() {
+        return this.userRef.child('online').set(true);
     }
 
     private async joinLatestRewardPool() {
         const contractAddress = await this.poolService.getRewardPoolAddress();
-        const snap = await firebase.database().ref(`users/${this.currentUser.uid}/pools`).once('value');
+        const snap = await firebase.database().ref(`users/${this.$user.uid}/pools`).once('value');
 
         if (!snap.val() || !snap.val()[contractAddress]) {
-            this.poolService.join(this.currentUser.uid, contractAddress);
+            this.poolService.join(this.$user.uid, contractAddress);
         }
     }
 

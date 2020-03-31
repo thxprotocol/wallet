@@ -2,9 +2,9 @@
 <article class="region region-container">
     <main class="region region-content">
 
-        <div class="d-flex">
+        <div class="d-flex" v-if="account">
             <label
-                v-if="account && !account.picture"
+                v-if="!account.picture"
                 class="text-center">
                 <div class="account-picture account-picture-sm bg-yellow mr-3">
                     <span>
@@ -14,7 +14,7 @@
                 <input type="file" @change="onFileChange" class="d-none">
             </label>
             <div
-                v-if="account && account.picture"
+                v-if="account.picture"
                 @click="removeImage"
                 class="account-picture account-picture-sm bg-yellow mr-3">
                 <img :src="account.picture.url"
