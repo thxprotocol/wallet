@@ -49,7 +49,7 @@ export class Reward extends BasePoll {
         this.created = parseInt(created, 10);
         this.state = REWARD_STATE[parseInt(state, 10)];
         this.amount = new BN(amount).div(TOKEN_MULTIPLIER);
-        this.beneficiaryAddress = beneficiary;
+        this.beneficiaryAddress = beneficiary.toLowerCase();
         this.beneficiary = await this.userService.getMemberByAddress(beneficiary);
 
         await this.updateBasePoll();

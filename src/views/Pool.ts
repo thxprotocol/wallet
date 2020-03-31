@@ -92,7 +92,9 @@ export default class PoolDetail extends Vue {
     get claimableRewards() {
         const id = this.$route.params.id;
         const filtered = this.rewardPools[id].rewards.filter((r: Reward) => {
-            return r.state && (r.state === 'Approved' || r.state === 'Pending');
+            return r.state &&
+                (r.state === 'Approved' || r.state === 'Pending') &&
+                (this.$network.extdev.account === r.beneficiaryAddress);
         });
         return _.orderBy(filtered, 'id', 'desc');
     }
@@ -100,7 +102,9 @@ export default class PoolDetail extends Vue {
     get archivedRewards() {
         const id = this.$route.params.id;
         const filtered = this.rewardPools[id].rewards.filter((r: Reward) => {
-            return r.state && (r.state === 'Withdrawn' || r.state === 'Rejected');
+            return r.state &&
+                (r.state === 'Withdrawn' || r.state === 'Rejected') &&
+                (this.$network.extdev.account === r.beneficiaryAddress);
         });
         return _.orderBy(filtered, 'id', 'desc');
     }
@@ -111,6 +115,23 @@ export default class PoolDetail extends Vue {
 
     get poolMembers(): string {
         return _.orderBy(this.rewardPools[this.$route.params.id].members, 'connected', 'desc');
+    }
+
+    private mounted() {
+        const address = this.$route.params.id;
+
+        if (!this.rewardPools[address] && this.account) {
+            this.poolService.join(this.account.uid, address)
+                .then(() => {
+                    this.loading = false;
+                })
+                .catch((err: string) => {
+                    this.loading = false;
+                    this.error = err;
+                });
+        } else {
+            this.loading = false;
+        }
     }
 
     private copyClipboard(value: string) {
@@ -127,23 +148,6 @@ export default class PoolDetail extends Vue {
         (document as any).getElementById('clippy').remove();
 
         this.clipboard = value;
-    }
-
-    private mounted() {
-        const address = this.$route.params.id;
-
-        if (!this.rewardPools[address]) {
-            this.poolService.join(this.account.uid, address)
-                .then(() => {
-                    this.loading = false;
-                })
-                .catch((err: string) => {
-                    this.loading = false;
-                    this.error = err;
-                });
-        } else {
-            this.loading = false;
-        }
     }
 
     private updateRole(account: string, role: string, hasRole: boolean) {

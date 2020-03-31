@@ -135,7 +135,7 @@ export class RewardPool extends RewardPoolEvents {
 
         if (length > 0) {
             for (let id = length - 1; id >= 0 ; id--) {
-                const reward = await this.getReward(id);
+                const reward: Reward = await this.getReward(id);
 
                 if (this.rewards.indexOf(reward) === -1) {
                     this.rewards.push(reward);
