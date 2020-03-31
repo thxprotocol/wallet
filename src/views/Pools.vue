@@ -40,16 +40,31 @@
             <button class="btn btn-primary btn-block" @click="$refs.modalJoinPool.show()">
                 Add Reward Pool
             </button>
+            <button class="btn btn-primary btn-block" @click="$refs.modalCreatePool.show()">
+                Create Reward Pool
+            </button>
 
             <b-modal ref="modalJoinPool" centered title="Join a reward pool">
                 <input v-model="input.poolAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000" />
-                <template v-slot:modal-footer="{ ok, cancel }">
+                <template v-slot:modal-footer>
                     <button class="btn btn-link" @click="$refs.modalJoinPool.hide()">
                         Cancel
                     </button>
                     <button @click="joinRewardPool(input.poolAddress)" v-bind:class="{ disabled: loading }" class="btn btn-primary">
                         Join
                     </button>
+                </template>
+            </b-modal>
+
+            <b-modal ref="modalCreatePool" centered title="Create a reward pool">
+                <input v-model="input.poolName" type="text" class="form-control" placeholder="Volunteers united" />
+                <template v-slot:modal-footer>
+                    <b-button variant="link" @click="$refs.modalCreatePool.hide()">
+                        Cancel
+                    </b-button>
+                    <b-button @click="createRewardPool(input.poolName)" variant="primary" v-bind:disabled="loading" >
+                        Create
+                    </b-button>
                 </template>
             </b-modal>
         </main>

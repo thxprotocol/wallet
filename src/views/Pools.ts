@@ -1,8 +1,7 @@
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import { BCard, BCardText, BSpinner, BModal } from 'bootstrap-vue';
-import NetworkService from '@/services/NetworkService';
-import BN from 'bn.js';
+import { Component, Vue } from 'vue-property-decorator';
+import { BCard, BCardText, BSpinner, BModal, BButton, BOverlay } from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
+import NetworkService from '@/services/NetworkService';
 import { Account } from '@/models/Account';
 import PoolService from '@/services/PoolService';
 
@@ -13,6 +12,8 @@ import PoolService from '@/services/PoolService';
         'b-card': BCard,
         'b-card-text': BCardText,
         'b-spinner': BSpinner,
+        'b-button': BButton,
+        'b-overlay': BOverlay,
     },
     computed: {
         ...mapGetters({
@@ -26,6 +27,7 @@ export default class Pools extends Vue {
     public error: string = '';
     public input: any = {
         poolAddress: '',
+        poolName: '',
     };
     public clipboard: any = null;
     private account!: Account;
@@ -54,6 +56,19 @@ export default class Pools extends Vue {
             .then(() => {
                 this.loading = false;
                 (this.$refs.modalJoinPool as BModal).hide();
+            })
+            .catch((err: string) => {
+                this.loading = false;
+                this.error = err;
+            });
+    }
+
+    private async createRewardPool(name: string) {
+        this.loading = true;
+        this.poolService.createAndJoin(this.account.uid, name)
+            .then(() => {
+                this.loading = false;
+                (this.$refs.modalCreatePool as BModal).hide();
             })
             .catch((err: string) => {
                 this.loading = false;
