@@ -1,12 +1,8 @@
 {
     "defaultSeverity": "warning",
-    "extends": [
-        "tslint:recommended"
-    ],
+    "extends": ["tslint:recommended", "tslint-config-prettier"],
     "linterOptions": {
-        "exclude": [
-            "node_modules/**"
-        ]
+        "exclude": ["node_modules/**"]
     },
     "rules": {
         "indent": [true, "spaces", 4],
@@ -18,11 +14,6 @@
         "no-console": [false, "log", "error"],
         "max-classes-per-file": [false, 1],
         "no-eval": false,
-        "variable-name": [
-            true,
-            "ban-keywords",
-            "check-format",
-            "allow-leading-underscore"
-        ]
+        "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"]
     }
 }
