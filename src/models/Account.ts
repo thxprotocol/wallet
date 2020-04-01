@@ -1,7 +1,5 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
-import NetworkService from '@/services/NetworkService';
-import store from '@/store';
 
 export class ProfilePictureData {
     public name: string;
@@ -17,7 +15,6 @@ export class ProfilePictureData {
 }
 
 export class Account {
-    public $store: any = store;
     public uid!: string;
     public firstName: string = '';
     public lastName: string = '';

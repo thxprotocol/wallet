@@ -1,5 +1,4 @@
 import { Vue } from 'vue-property-decorator';
-import NetworkService from '@/services/NetworkService';
 import store from '../store';
 import BN from 'bn.js';
 
@@ -7,7 +6,6 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export default class CoinService extends Vue {
     public $store: any = store;
-    private $network!: NetworkService;
 
     public async listen() {
         if (this.$network.rinkeby) {
