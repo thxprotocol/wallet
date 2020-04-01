@@ -48,7 +48,7 @@ export default class Camera extends Vue {
             this.error = '';
 
             try {
-                if (this.data.pool && (this.data.rule >= 0)) {
+                if (this.data.pool && this.data.rule >= 0) {
                     // Should check for membership of the pool instead of pool existance
                     this.pool = await this.poolService.getRewardPool(this.data.pool);
                     this.rule = await this.pool.getRewardRule(this.data.rule);
@@ -57,17 +57,18 @@ export default class Camera extends Vue {
                     this.pool = await this.poolService.getRewardPool(this.data.pool);
                     this.slack = this.data.slack;
                 } else {
-                    throw({ message: `An error occured while decoding your QR code.`});
+                    throw { message: `An error occured while decoding your QR code.` };
                 }
             } catch (err) {
-                this.error = (err.message) ? err.message : err;
+                this.error = err.message ? err.message : err;
             }
         }
     }
 
     private connect() {
         if (this.pool && this.account) {
-            this.userService.connectSlack(this.account, this.data.slack)
+            this.userService
+                .connectSlack(this.account, this.data.slack)
                 .then(() => {
                     this.$router.push(`/account`);
                 })
@@ -76,7 +77,6 @@ export default class Camera extends Vue {
                         this.error = err.message;
                     }
                 });
-
         }
     }
 
@@ -102,5 +102,4 @@ export default class Camera extends Vue {
             this.loading = false;
         }
     }
-
 }

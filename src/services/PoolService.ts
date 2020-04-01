@@ -21,11 +21,7 @@ export default class PoolService extends Vue {
         const hash = REWARD_POOL_JSON.networks[nid].transactionHash;
         const receipt = await this.$network.extdev.web3js.eth.getTransactionReceipt(hash);
         const contract = await this.$network.getExtdevContract(REWARD_POOL_JSON.abi, address);
-        const pool = new RewardPool(
-            address,
-            contract,
-            this.$network,
-        );
+        const pool = new RewardPool(address, contract, this.$network);
 
         pool.setOutOfSync(address !== receipt.contractAddress);
 
@@ -36,7 +32,10 @@ export default class PoolService extends Vue {
         const utils: any = this.$network.web3js.utils;
 
         if (utils.isAddress(address)) {
-            return firebase.database().ref(`users/${uid}/pools`).child(address)
+            return firebase
+                .database()
+                .ref(`users/${uid}/pools`)
+                .child(address)
                 .set({ address });
         } else {
             return Promise.resolve();
@@ -47,7 +46,10 @@ export default class PoolService extends Vue {
         const utils: any = this.$network.web3js.utils;
 
         if (utils.isAddress(address)) {
-            return firebase.database().ref(`users/${uid}/pools`).child(address)
+            return firebase
+                .database()
+                .ref(`users/${uid}/pools`)
+                .child(address)
                 .remove();
         } else {
             return Promise.resolve();
@@ -55,7 +57,9 @@ export default class PoolService extends Vue {
     }
 
     public async create(name: string): Promise<string | void> {
-        if (!name) { return Promise.resolve(); }
+        if (!name) {
+            return Promise.resolve();
+        }
 
         const poolName = name.substring(0, 30);
         const extdev = this.$network.extdev;
@@ -79,5 +83,4 @@ export default class PoolService extends Vue {
             return this.join(uid, poolAddress);
         }
     }
-
 }

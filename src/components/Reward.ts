@@ -35,7 +35,7 @@ export default class CReward extends Vue {
 
     public async created() {
         await this.reward.update();
-        this.showDetails = (this.reward.state === 'Pending' || this.reward.state === 'Approved');
+        this.showDetails = this.reward.state === 'Pending' || this.reward.state === 'Approved';
         this.loading = false;
     }
 
@@ -47,9 +47,11 @@ export default class CReward extends Vue {
     }
 
     get canWithdraw() {
-        return (this.reward.yesCounter > this.reward.noCounter) &&
-            (this.reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account.toLowerCase()) &&
-            (this.reward.state === 'Pending' || this.reward.state === 'Approved');
+        return (
+            this.reward.yesCounter > this.reward.noCounter &&
+            this.reward.beneficiaryAddress.toLowerCase() === this.$network.extdev.account.toLowerCase() &&
+            (this.reward.state === 'Pending' || this.reward.state === 'Approved')
+        );
     }
 
     public async withdraw() {
@@ -66,7 +68,8 @@ export default class CReward extends Vue {
 
     public vote(agree: boolean) {
         this.disabled = true;
-        this.pool.voteForReward(this.reward, agree)
+        this.pool
+            .voteForReward(this.reward, agree)
             .then((tx: any) => {
                 this.update();
             })
@@ -77,7 +80,8 @@ export default class CReward extends Vue {
 
     public revokeVote() {
         this.disabled = true;
-        this.pool.revokeVoteForReward(this.reward)
+        this.pool
+            .revokeVoteForReward(this.reward)
             .then((tx: any) => {
                 this.update();
             })
@@ -88,7 +92,8 @@ export default class CReward extends Vue {
 
     public tryToFinalize() {
         this.disabled = true;
-        this.pool.tryToFinalizeRewardPoll(this.reward)
+        this.pool
+            .tryToFinalizeRewardPoll(this.reward)
             .then((tx: any) => {
                 this.update();
             })

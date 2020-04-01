@@ -32,10 +32,9 @@ export class TransactionEvent {
         if (data.from) {
             const userService = new UserService();
 
-            userService.getMemberByAddress(data.from)
-                .then((m: any) => {
-                    this.from = m;
-                });
+            userService.getMemberByAddress(data.from).then((m: any) => {
+                this.from = m;
+            });
         }
     }
 }
@@ -106,7 +105,6 @@ export class RulePollFinishedEvent extends TransactionEvent {
         this.component = 'rulepollfinished-event';
     }
 }
-
 
 export class RewardPollCreatedEvent extends TransactionEvent {
     public id: number;

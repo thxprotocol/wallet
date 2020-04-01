@@ -20,12 +20,14 @@ export default class Login extends Vue {
     public login() {
         this.loading = true;
 
-        return firebase.auth().signInWithEmailAndPassword(this.email, this.password)
+        return firebase
+            .auth()
+            .signInWithEmailAndPassword(this.email, this.password)
             .then(() => {
                 this.loading = false;
                 this.$router.push((this.$route.query.redirect as any) || '/account');
             })
-            .catch((err) => {
+            .catch(err => {
                 this.loading = false;
                 if (typeof err !== 'undefined') {
                     this.error = err.message;
