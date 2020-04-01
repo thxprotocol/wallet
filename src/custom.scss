@@ -2,7 +2,7 @@
 @import 'node_modules/bootstrap-vue/src/index.scss';
 @import url('https://fonts.googleapis.com/css?family=Exo+2:200,400,400i,700,700i,900,900i');
 
-$yellow: #FDE542;
+$yellow: #fde542;
 $blue: #039be5;
 
 .bg-info {
@@ -13,11 +13,11 @@ body,
 html {
     margin: 0;
     font-family: 'Exo 2';
-    background-color: #EFEFEF;
+    background-color: #efefef;
     height: 100%;
     font-size: 14px;
 
-    @media(min-width: 768px) {
+    @media (min-width: 768px) {
         font-size: 1rem;
     }
 }
@@ -53,7 +53,7 @@ a,
     border-radius: 20px;
 
     &:hover {
-        background: #EFEFEF;
+        background: #efefef;
     }
 }
 
@@ -85,11 +85,11 @@ a,
     z-index: 2;
     flex: 0 60px;
     background: white;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 .bg-yellow {
-    background-color: #FBE54D;
+    background-color: #fbe54d;
 }
 
 .region-header {
@@ -146,21 +146,21 @@ a,
     overflow-x: hidden;
     overflow-y: auto;
     height: calc(100% + 1rem);
-    box-shadow: 0 -10px 15px rgba(0, 0, 0, .2);
+    box-shadow: 0 -10px 15px rgba(0, 0, 0, 0.2);
 }
 
 .section-notifications {
     background-size: cover;
     background-position: center center;
-    background-image: url("./assets/background.jpg");
+    background-image: url('./assets/background.jpg');
     background-repeat: no-repeat;
 
     &:before {
-        content: "";
+        content: '';
         display: block;
         height: 100%;
         width: 100%;
-        background-color: rgba(0,0,0,0.5);
+        background-color: rgba(0, 0, 0, 0.5);
         position: absolute;
         top: 0;
         left: 0;
@@ -201,7 +201,7 @@ a,
     &[disabled],
     &.disabled:focus,
     &[disabled]:focus {
-        opacity: .6;
+        opacity: 0.6;
         cursor: not-allowed;
         pointer-events: none;
         background-color: $gray-400;
@@ -215,7 +215,7 @@ a,
 }
 
 .disabled {
-    opacity: .6;
+    opacity: 0.6;
     cursor: not-allowed;
     pointer-events: none;
     box-shadow: none;
@@ -260,12 +260,11 @@ a,
     align-items: center;
     justify-content: center;
     display: flex;
-    padding: 1rem .5rem;
-
+    padding: 1rem 0.5rem;
 }
 
 .router-link-exact-active {
-    background: #EFEFEF;
+    background: #efefef;
 }
 
 .nav-tabs {
@@ -311,7 +310,7 @@ a,
 }
 
 .region-header .account-picture {
-    box-shadow: 0 0 0px 4px rgba(255,255,255,.3);
+    box-shadow: 0 0 0px 4px rgba(255, 255, 255, 0.3);
 }
 
 .account-picture {
@@ -334,7 +333,7 @@ a,
         right: 0;
         display: block;
         border-radius: 50%;
-        transition: .2s background-color ease;
+        transition: 0.2s background-color ease;
 
         &-online {
             background-color: $success;
@@ -350,7 +349,7 @@ a,
         height: 25px;
         max-width: 25px;
         max-height: 25px;
-        font-size: .8rem;
+        font-size: 0.8rem;
 
         .status {
             width: 5px;

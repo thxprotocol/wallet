@@ -33,7 +33,9 @@ export default class Register extends Vue {
     }
 
     public createAccount() {
-        firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
+        firebase
+            .auth()
+            .createUserWithEmailAndPassword(this.email, this.password)
             .then((r: any) => {
                 const user = {
                     uid: r.user.uid,
@@ -42,7 +44,11 @@ export default class Register extends Vue {
                     lastName: this.lastName,
                 };
 
-                firebase.database().ref('users').child(user.uid).set(user);
+                firebase
+                    .database()
+                    .ref('users')
+                    .child(user.uid)
+                    .set(user);
 
                 this.loading = false;
                 this.$router.replace('/account');

@@ -42,18 +42,18 @@ export default class Notifications extends Vue {
 
                 for (const i in pool.rewards) {
                     if (pool.rewards[i]) {
-                        rewards.push({reward: pool.rewards[i], pool});
+                        rewards.push({ reward: pool.rewards[i], pool });
                     }
                 }
 
                 for (const i in pool.rewardRules) {
                     if (pool.rewardRules[i]) {
-                        rules.push({rule: pool.rewardRules[i], pool});
+                        rules.push({ rule: pool.rewardRules[i], pool });
                     }
                 }
             }
         }
 
-        return {...rules, ...rewards};
+        return { ...rules, ...rewards };
     }
 }
