@@ -24,7 +24,8 @@ const routes: any = [
             footer: true,
             requiresAuth: true,
         },
-    }, {
+    },
+    {
         path: '/pools',
         name: 'pools',
         component: Pools,
@@ -34,7 +35,8 @@ const routes: any = [
             footer: true,
             requiresAuth: true,
         },
-    }, {
+    },
+    {
         path: '/pools/:id',
         name: 'pool',
         component: Pool,
@@ -45,7 +47,8 @@ const routes: any = [
             footer: true,
             requiresAuth: true,
         },
-    }, {
+    },
+    {
         path: '/wallet',
         name: 'wallet',
         component: Wallet,
@@ -55,7 +58,8 @@ const routes: any = [
             footer: true,
             requiresAuth: true,
         },
-    }, {
+    },
+    {
         path: '/camera',
         name: 'camera',
         component: Camera,
@@ -65,7 +69,8 @@ const routes: any = [
             footer: true,
             requiresAuth: true,
         },
-    }, {
+    },
+    {
         path: '/notifications',
         name: 'notifications',
         component: Notifications,
@@ -75,7 +80,8 @@ const routes: any = [
             footer: true,
             requiresAuth: true,
         },
-    }, {
+    },
+    {
         path: '/account',
         name: 'account',
         component: Account,
@@ -85,15 +91,18 @@ const routes: any = [
             footer: true,
             requiresAuth: true,
         },
-    }, {
+    },
+    {
         name: 'login',
         path: '/login',
         component: Login,
-    }, {
+    },
+    {
         name: 'logout',
         path: '/logout',
         component: Logout,
-    }, {
+    },
+    {
         name: 'register',
         path: '/register',
         component: Register,

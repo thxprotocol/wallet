@@ -26,9 +26,10 @@ export default class ProfilePicture extends Vue {
         this.getInitials();
         this.getPicture();
 
-        firebase.database().ref(`users/${this.uid}`)
+        firebase
+            .database()
+            .ref(`users/${this.uid}`)
             .on('child_changed', (s: any) => {
-
                 if (s.key === 'online') {
                     this.getOnline();
                 }

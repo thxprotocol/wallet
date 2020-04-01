@@ -62,7 +62,8 @@ export default class AccountDetail extends Vue {
 
         if (this.$network.extdev && this.$network.extdev.account) {
             this.isExtdevMinter = await this.$network.isExtdevMinter(
-                this.$network.extdev.web3js, this.$network.extdev.account,
+                this.$network.extdev.web3js,
+                this.$network.extdev.account,
             );
         }
         if (this.$network.rinkeby && this.$network.rinkeby.account) {
@@ -130,7 +131,8 @@ export default class AccountDetail extends Vue {
 
     public onDeposit() {
         this.loading = true;
-        this.$network.depositCoin(this.input.depositToGateway)
+        this.$network
+            .depositCoin(this.input.depositToGateway)
             .then((hash: any) => {
                 this.txHash = hash;
                 this.input.depositToGateway = 0;
@@ -147,7 +149,8 @@ export default class AccountDetail extends Vue {
 
     public onWithdraw() {
         this.loading = true;
-        this.$network.withdrawCoin(this.input.withdrawToGateway)
+        this.$network
+            .withdrawCoin(this.input.withdrawToGateway)
             .then((hash: any) => {
                 this.txHash = hash;
                 this.input.withdrawToGateway = 0;
@@ -167,13 +170,12 @@ export default class AccountDetail extends Vue {
 
         this.loading = true;
 
-        return this.$network.transferRinkebyCoin(this.input.transferRinkebyCoinAddress, amount)
-            .then(() => {
-                this.loading = false;
-                this.input.transferRinkebyCoinAddress = '';
-                this.input.transferRinkebyCoinAmount = 0;
-                (this.$refs['modal-transfer-coin-rinkeby'] as any).hide();
-            });
+        return this.$network.transferRinkebyCoin(this.input.transferRinkebyCoinAddress, amount).then(() => {
+            this.loading = false;
+            this.input.transferRinkebyCoinAddress = '';
+            this.input.transferRinkebyCoinAmount = 0;
+            (this.$refs['modal-transfer-coin-rinkeby'] as any).hide();
+        });
     }
 
     public onTransferExtdevCoin() {
@@ -181,28 +183,25 @@ export default class AccountDetail extends Vue {
 
         this.loading = true;
 
-        return this.$network.transferExtdevCoin(this.input.transferTokensAddress, amount)
-            .then(() => {
-                this.loading = false;
-                this.input.transferTokens = 0;
-                this.input.transferTokensAddress = '';
-                (this.$refs['modal-transfer-coin-extdev'] as any).hide();
-            });
+        return this.$network.transferExtdevCoin(this.input.transferTokensAddress, amount).then(() => {
+            this.loading = false;
+            this.input.transferTokens = 0;
+            this.input.transferTokensAddress = '';
+            (this.$refs['modal-transfer-coin-extdev'] as any).hide();
+        });
     }
-
 
     public onTransferEther() {
         const amount = new BN(this.input.transferEtherAmount).mul(TOKEN_MULTIPLIER);
 
         this.loading = true;
 
-        return this.$network.transferEther(this.input.transferEtherAddress, amount)
-            .then((tx: any) => {
-                this.loading = false;
-                this.input.transferEtherAmount = 0;
-                this.input.transferEtherAddress = '';
-                (this.$refs['modal-transfer-ether'] as any).hide();
-            });
+        return this.$network.transferEther(this.input.transferEtherAddress, amount).then((tx: any) => {
+            this.loading = false;
+            this.input.transferEtherAmount = 0;
+            this.input.transferEtherAddress = '';
+            (this.$refs['modal-transfer-ether'] as any).hide();
+        });
     }
 
     public onMintRinkebyCoin() {
@@ -210,15 +209,11 @@ export default class AccountDetail extends Vue {
 
         this.loading = true;
 
-        return this.$network.mintRinkebyCoin(
-            this.$network.rinkeby.account.address,
-            amount,
-        )
-            .then(() => {
-                this.input.mintForAccount = 0;
-                this.loading = false;
-                (this.$refs['modal-mint-rinkeby'] as any).hide();
-            });
+        return this.$network.mintRinkebyCoin(this.$network.rinkeby.account.address, amount).then(() => {
+            this.input.mintForAccount = 0;
+            this.loading = false;
+            (this.$refs['modal-mint-rinkeby'] as any).hide();
+        });
     }
 
     public onMintExtdevCoin() {
@@ -226,25 +221,20 @@ export default class AccountDetail extends Vue {
 
         this.loading = true;
 
-        return this.$network.mintExtdevCoin(
-            this.$network.extdev.account,
-            amount,
-        )
-            .then(() => {
-                this.input.mintForExtdevAccount = 0;
-                this.loading = false;
-                (this.$refs['modal-mint-extdev'] as any).hide();
-            });
+        return this.$network.mintExtdevCoin(this.$network.extdev.account, amount).then(() => {
+            this.input.mintForExtdevAccount = 0;
+            this.loading = false;
+            (this.$refs['modal-mint-extdev'] as any).hide();
+        });
     }
 
     public onAddRinkebyMinter() {
         this.loading = true;
 
-        return this.$network.addRinkebyMinter(this.input.newMinterAddress)
-            .then(() => {
-                this.loading = false;
-                (this.$refs['modal-add-minter'] as any).hide();
-            });
+        return this.$network.addRinkebyMinter(this.input.newMinterAddress).then(() => {
+            this.loading = false;
+            (this.$refs['modal-add-minter'] as any).hide();
+        });
     }
 
     private async onUpdateAccount(account: Account) {

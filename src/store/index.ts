@@ -10,9 +10,9 @@ export interface State {
     account: Account | null;
     rewardPools: IRewardPools;
     balance: {
-        eth: BN,
-        token: BN,
-        tokenRinkeby: BN,
+        eth: BN;
+        token: BN;
+        tokenRinkeby: BN;
     };
 }
 
@@ -45,7 +45,7 @@ const getters = {
 };
 
 const mutations = {
-    updateBalance: (store: State, options: { type: string, balance: BN }) => {
+    updateBalance: (store: State, options: { type: string; balance: BN }) => {
         (store.balance as any)[options.type] = options.balance;
     },
     addRewardPool: (store: State, pool: RewardPool) => {
@@ -57,7 +57,7 @@ const mutations = {
     addAccount: (store: State, account: Account) => {
         Vue.set(store, 'account', account);
     },
-    updateAccount: (store: State, options: { prop: string, val: any }) => {
+    updateAccount: (store: State, options: { prop: string; val: any }) => {
         if (store.account) {
             Vue.set(store.account, options.prop, options.val);
         }

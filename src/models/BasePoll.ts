@@ -15,11 +15,7 @@ export class BasePoll {
     public loading: boolean = true;
     public finalized!: boolean;
 
-    constructor(
-        address: string,
-        contract: any,
-        owner: string,
-    ) {
+    constructor(address: string, contract: any, owner: string) {
         this.address = address;
         this.contract = contract;
         this.owner = owner;
@@ -41,7 +37,7 @@ export class BasePoll {
         this.noCounter = parseInt(new BN(noCounter).div(TOKEN_MULTIPLIER).toString(), 10);
         this.totalVoted = parseInt(totalVoted, 10);
         this.vote = new Vote(voteByAddress);
-        this.hasVoted = (this.vote.time !== 0);
+        this.hasVoted = this.vote.time !== 0;
     }
 }
 

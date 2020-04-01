@@ -5,10 +5,7 @@ export class ProfilePictureData {
     public name: string;
     public url: string;
 
-    constructor(
-        name: string,
-        url: string,
-    ) {
+    constructor(name: string, url: string) {
         this.name = name;
         this.url = url;
     }
@@ -28,7 +25,9 @@ export class Account {
         this.uid = uid;
         this.picture = null;
 
-        firebase.database().ref(`users/${this.uid}`)
+        firebase
+            .database()
+            .ref(`users/${this.uid}`)
             .once('value')
             .then((s: any) => {
                 this.firstName = s.val().firstName;
@@ -38,23 +37,22 @@ export class Account {
                 this.email = s.val().email;
                 this.slack = s.val().slack;
 
-                s.ref.child('online')
-                    .onDisconnect()
-                    .set(false);
+                s.ref.child('online').onDisconnect().set(false);
 
-                s.ref.child('online')
-                    .set(true);
+                s.ref.child('online').set(true);
             });
     }
 
     public setPicture(name: string, files: File[]) {
-        firebase.storage().ref(`avatars/${name}`).put(files[0])
+        firebase
+            .storage()
+            .ref(`avatars/${name}`)
+            .put(files[0])
             .then(async (s: any) => {
                 const url = await s.ref.getDownloadURL();
                 const picture = new ProfilePictureData(name, url);
 
-                firebase.database().ref(`users/${this.uid}`)
-                    .update({ picture });
+                firebase.database().ref(`users/${this.uid}`).update({ picture });
             });
     }
 
@@ -62,7 +60,10 @@ export class Account {
         const pictureRef = firebase.database().ref(`users/${this.uid}/picture`);
         const name = (await pictureRef.child('name').once('value')).val();
 
-        firebase.storage().ref(`avatars/${name}`).delete()
+        firebase
+            .storage()
+            .ref(`avatars/${name}`)
+            .delete()
             .then(() => {
                 return pictureRef.remove();
             });

@@ -9,7 +9,6 @@ import { BNav, BNavItem } from 'bootstrap-vue';
     },
 })
 export default class Footer extends Vue {
-
     get routes(): any {
         return (this.$router as any).options.routes.filter((item: any) => item.visible);
     }

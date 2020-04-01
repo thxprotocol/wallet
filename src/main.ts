@@ -17,34 +17,34 @@ Vue.use(VueMoment);
 
 let app: any;
 
-firebase.initializeApp(config.firebase[(process.env.NODE_ENV as any)]);
-firebase.auth()
-    .onAuthStateChanged((user: firebase.User | any = firebase.auth().currentUser) => {
-        if (user) {
-            const state: StateService = new StateService(user.uid);
+firebase.initializeApp(config.firebase[process.env.NODE_ENV as any]);
+firebase.auth().onAuthStateChanged((user: firebase.User | any = firebase.auth().currentUser) => {
+    if (user) {
+        const state: StateService = new StateService(user.uid);
 
-            Vue.prototype.$user = user;
-            Vue.prototype.$state = state;
-            Vue.prototype.$network = new NetworkService(
-                state.extdevPrivateKey,
-                state.rinkebyPrivateKey,
+        Vue.prototype.$user = user;
+        Vue.prototype.$state = state;
+        Vue.prototype.$network = new NetworkService(state.extdevPrivateKey, state.rinkebyPrivateKey);
+
+        if (!state.rinkebyPrivateKey) {
+            console.warn(
+                'It looks like you misconfigured your rinkeby private key. Provide it through the accounts page.',
             );
-
-            if (!state.rinkebyPrivateKey) {
-                console.warn('It looks like you misconfigured your rinkeby private key. Provide it through the accounts page.');
-            }
-            if (!state.extdevPrivateKey) {
-                console.warn('It looks like you misconfigured your extdev private key. Provide it through the accounts page.');
-            }
-        } else {
-            Vue.prototype.$network = new NetworkService();
         }
-
-        if (!app) {
-            app = new Vue({
-                router,
-                store,
-                render: (h) => h(App),
-            }).$mount('#app');
+        if (!state.extdevPrivateKey) {
+            console.warn(
+                'It looks like you misconfigured your extdev private key. Provide it through the accounts page.',
+            );
         }
-    });
+    } else {
+        Vue.prototype.$network = new NetworkService();
+    }
+
+    if (!app) {
+        app = new Vue({
+            router,
+            store,
+            render: (h) => h(App),
+        }).$mount('#app');
+    }
+});
