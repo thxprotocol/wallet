@@ -8,7 +8,6 @@ import PoolService from './services/PoolService';
 import EventService from './services/EventService';
 import { Account } from '@/models/Account';
 import store from './store';
-import NetworkService from './services/NetworkService';
 import { mapGetters } from 'vuex';
 
 @Component({
@@ -27,7 +26,6 @@ export default class App extends Vue {
     public $store: any = store;
     public $events!: EventService;
     private $user: firebase.User | any;
-    private $network!: NetworkService;
     private poolService: PoolService = new PoolService();
     private coinService: CoinService = new CoinService();
     private account!: Account;

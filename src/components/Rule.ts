@@ -1,6 +1,5 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BModal, BCard, BCardText, BSpinner, BProgress, BProgressBar, BRow, BCol, BOverlay } from 'bootstrap-vue';
-import NetworkService from '@/services/NetworkService';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import { RewardPool } from '@/models/RewardPool';
 import BN from 'bn.js';
@@ -36,7 +35,6 @@ export default class CRewardRule extends Vue {
     };
     public poll: RewardRulePoll | null = null;
     private showDetails: boolean = true;
-    private $network!: NetworkService;
 
     @Prop() private rule!: RewardRule;
     @Prop() private pool!: RewardPool;

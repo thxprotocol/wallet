@@ -7,7 +7,6 @@ import { CryptoUtils, LocalAddress } from 'loom-js';
 import { BOverlay, BAlert, BButton, BModal, BSpinner } from 'bootstrap-vue';
 import ProfilePicture from '@/components/ProfilePicture.vue';
 import { Account } from '@/models/Account';
-import NetworkService from '@/services/NetworkService';
 import StateService from '@/services/StateService';
 import BN from 'bn.js';
 import UserService from '@/services/UserService';
@@ -54,7 +53,6 @@ export default class AccountDetail extends Vue {
         transferEtherAmount: 0,
     };
     private account!: Account;
-    private $network!: NetworkService;
     private $state!: StateService;
     private userService: UserService = new UserService();
 

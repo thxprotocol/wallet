@@ -16,7 +16,6 @@ import CManagerAddedEvent from '@/components/events/ManagerAddedEvent.vue';
 import CManagerRemovedEvent from '@/components/events/ManagerRemovedEvent.vue';
 import ProfilePicture from '@/components/ProfilePicture.vue';
 import CoinService from '@/services/CoinService';
-import NetworkService from '@/services/NetworkService';
 import PoolService from '@/services/PoolService';
 import { RewardPool, IRewardPools } from '@/models/RewardPool';
 import { Account } from '@/models/Account';
@@ -73,7 +72,6 @@ export default class PoolDetail extends Vue {
     public clipboard: any = null;
     private rewardPools!: IRewardPools;
     private account!: Account;
-    private $network!: NetworkService;
     private coinService: CoinService = new CoinService();
     private poolService: PoolService = new PoolService();
 

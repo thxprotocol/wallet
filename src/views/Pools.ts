@@ -1,7 +1,6 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { BCard, BCardText, BSpinner, BModal, BButton, BOverlay } from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
-import NetworkService from '@/services/NetworkService';
 import { Account } from '@/models/Account';
 import PoolService from '@/services/PoolService';
 
@@ -31,7 +30,6 @@ export default class Pools extends Vue {
     };
     public clipboard: any = null;
     private account!: Account;
-    private $network!: NetworkService;
     private poolService: PoolService = new PoolService();
 
     private copyClipboard(value: string) {

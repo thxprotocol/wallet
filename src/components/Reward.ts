@@ -1,6 +1,5 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BProgress, BSpinner, BCardText, BCard, BModal, BProgressBar } from 'bootstrap-vue';
-import NetworkService from '@/services/NetworkService';
 import { Reward } from '@/models/Reward';
 import { RewardPool } from '@/models/RewardPool';
 import ProfilePicture from '@/components/ProfilePicture.vue';
@@ -28,7 +27,6 @@ export default class CReward extends Vue {
         },
     };
     private showDetails: boolean = false;
-    private $network!: NetworkService;
 
     @Prop() private reward!: Reward;
     @Prop() private pool!: RewardPool;
