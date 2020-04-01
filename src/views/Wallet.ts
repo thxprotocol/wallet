@@ -3,7 +3,6 @@ import { BSpinner, BListGroup, BListGroupItem } from 'bootstrap-vue';
 import { IRewardPools } from '@/models/RewardPool';
 import { mapGetters } from 'vuex';
 import _ from 'lodash';
-import store from '@/store';
 
 @Component({
     name: 'wallet',
@@ -19,7 +18,6 @@ import store from '@/store';
     },
 })
 export default class Wallet extends Vue {
-    public $store: any = store;
     public error: string = '';
     public loading: boolean = false;
     private rewardPools!: IRewardPools;
