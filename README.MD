@@ -10,8 +10,7 @@ This repository holds the source for the Wallet VueJs app and Firebase Functions
 4. Contract Migrations
 5. Transfer Gateway
 6. Testing
-7. Known issues
-8. References
+7. References
 
 ## 1. Prerequisites
 * nodejs v12.16.0
@@ -60,7 +59,7 @@ Populate the `./config.json` file with your credentials following this schema:
     }
 ```
 
-## 2. Deployment
+## 3. Deployment
 
 ### VueJS app
 These commands will switch the connected Firebase Database, build the app accordingly and deploy the compiled files to the specified Firebase hosting environment (development or production).
@@ -79,34 +78,34 @@ yarn deploy:slack:dev;
 yarn deploy:slack:prod;
 ```
 
-## 3. Contract Migrations
+## 4. Contract Migrations
 We use `truffle` to compile contract data and deploy them onto the networks specified. Configuration is found in `./truffle.js`.
 
-### 4. Deploy on Extdev
+### Deploy on Extdev
 Loom's Extdev network is used for most Reward Pool interactions and holds most of the Solidity logic.
 ```
 yarn deploy:reset:extdev;
 ```
 
-### 5. Deploy on Rinkeby
+### Deploy on Rinkeby
 Ethereum's Rinkeby test network is used for de deployment of the ERC-20 Smart Contract for the THX token. It will be mapped to the Extdev equivalent of that contract by the Transfer Gateway to setup a two-way peg.
 ```
 yarn deploy:reset:rinkeby;
 ```
 
-## 6. Transfer Gateway
+## 5. Transfer Gateway
 Transfer Gateway helper methods are currently found in `gateway-cli.js`. Only one method is used currently to map contracts. Account mappings are set up during account creating in the wallet.
 ```
 yarn map-contracts
 ```
 
-### 7. Testing
+## 6. Testing
 
 ```
 Sheer emptiness...
 ```
 
-## 8. References
+## 7. References
 * [Firebase Realtime Database](https://firebase.google.com/docs/database/)
 * [Truffle Migrations](https://www.trufflesuite.com/docs/truffle/getting-started/running-migrations)
 * [Loom Transfer Gateway](https://loomx.io/developers/en/transfer-gateway.html#overview)

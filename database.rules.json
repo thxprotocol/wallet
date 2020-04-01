@@ -1,14 +1,14 @@
 {
-    "rules": {
-        ".read": "auth != null",
-        ".write": "auth != null",
-      	"pools": {
-            "$pool": {
-                "rewards": {
-                  ".read": true,
-                  ".write": true
-                }
-            }
+    "pools": {
+        "$pool": {
+            "rewards": {
+                ".read": true,
+                ".write": true
+            },
+            "rules": {
+                ".read": "auth != null",
+                ".write": "auth != null"
+            },
         }
     }
 }
