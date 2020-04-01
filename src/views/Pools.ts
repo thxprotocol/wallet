@@ -52,7 +52,8 @@ export default class Pools extends Vue {
 
     private joinRewardPool(address: string) {
         this.loading = true;
-        this.poolService.join(this.account.uid, address)
+        this.poolService
+            .join(this.account.uid, address)
             .then(() => {
                 this.loading = false;
                 (this.$refs.modalJoinPool as BModal).hide();
@@ -65,7 +66,8 @@ export default class Pools extends Vue {
 
     private async createRewardPool(name: string) {
         this.loading = true;
-        this.poolService.createAndJoin(this.account.uid, name)
+        this.poolService
+            .createAndJoin(this.account.uid, name)
             .then(() => {
                 this.loading = false;
                 (this.$refs.modalCreatePool as BModal).hide();
@@ -77,7 +79,8 @@ export default class Pools extends Vue {
     }
 
     private leaveRewardPool(poolAddress: string) {
-        this.poolService.leave(this.account.uid, poolAddress)
+        this.poolService
+            .leave(this.account.uid, poolAddress)
             .then(() => {
                 this.$store.commit('removeRewardPool', poolAddress);
             })

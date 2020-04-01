@@ -19,17 +19,8 @@ export class Reward extends BasePoll {
     public beneficiary!: string;
     private userService: UserService = new UserService();
 
-    constructor(
-        id: number,
-        address: string,
-        contract: any,
-        owner: string,
-    ) {
-        super(
-            address,
-            contract,
-            owner,
-        );
+    constructor(id: number, address: string, contract: any, owner: string) {
+        super(address, contract, owner);
         this.id = id;
         this.update();
     }
@@ -68,5 +59,4 @@ export class Reward extends BasePoll {
 
         return parseInt(vote.time, 10) ? true : false;
     }
-
 }

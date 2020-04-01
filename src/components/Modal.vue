@@ -29,7 +29,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, .5);
+    background-color: rgba(0, 0, 0, 0.5);
     display: table;
     transition: opacity 0.3s ease;
 }
@@ -45,7 +45,7 @@
     margin: 0 auto;
     background-color: #fff;
     border-radius: 2px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
     transition: all 0.3s ease;
 
     @media (max-width: 360px) {
@@ -80,13 +80,13 @@
 
 .modal-footer {
     display: block;
-    background-color: #EFEFEF;
+    background-color: #efefef;
     text-align: right;
 
     .btn {
         margin: 0;
         margin-right: 0.5rem;
-        margin-bottom: .5rem;
+        margin-bottom: 0.5rem;
 
         &:last-child {
             margin-right: 0;

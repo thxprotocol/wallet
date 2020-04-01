@@ -9,7 +9,6 @@
 
         <div class="region region-container" style="height: 100%;">
             <main class="region region-content">
-
                 <div class="text-center" v-if="loading">
                     <BSpinner label="Loading..."></BSpinner>
                 </div>
@@ -17,19 +16,43 @@
                 <form class="form" v-on:submit.prevent="register" v-if="!loading">
                     <h2>Authentication</h2>
                     <div class="form-group">
-                        <input required type="text" class="form-control" v-model="firstName" placeholder="e.g. Ada">
+                        <input required type="text" class="form-control" v-model="firstName" placeholder="e.g. Ada" />
                     </div>
                     <div class="form-group">
-                        <input required type="text" class="form-control" v-model="lastName" placeholder="e.g. Lovelace">
+                        <input
+                            required
+                            type="text"
+                            class="form-control"
+                            v-model="lastName"
+                            placeholder="e.g. Lovelace"
+                        />
                     </div>
                     <div class="form-group">
-                        <input required type="email" class="form-control" v-model="email" placeholder="e.g. alovelace@abc.xyz">
+                        <input
+                            required
+                            type="email"
+                            class="form-control"
+                            v-model="email"
+                            placeholder="e.g. alovelace@abc.xyz"
+                        />
                     </div>
                     <div class="form-group">
-                        <input required type="password" v-model="password" class="form-control" placeholder="********">
+                        <input
+                            required
+                            type="password"
+                            v-model="password"
+                            class="form-control"
+                            placeholder="********"
+                        />
                     </div>
                     <div class="form-group">
-                        <input required type="password" v-model="passwordVerify" class="form-control" placeholder="********">
+                        <input
+                            required
+                            type="password"
+                            v-model="passwordVerify"
+                            class="form-control"
+                            placeholder="********"
+                        />
                     </div>
                     <div class="form-group">
                         <button class="btn btn-primary" type="submit">Create account</button>

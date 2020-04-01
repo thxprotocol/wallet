@@ -4,10 +4,7 @@ class EventListener {
     public e: string;
     public cb: any;
 
-    constructor(
-        e: string,
-        cb: any,
-    ) {
+    constructor(e: string, cb: any) {
         this.e = e;
         this.cb = cb;
     }

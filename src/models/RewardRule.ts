@@ -38,16 +38,8 @@ export class RewardRule {
 export class RewardRulePoll extends BasePoll {
     public proposedAmount!: BN;
 
-    constructor(
-        address: string,
-        contract: any,
-        owner: string,
-    ) {
-        super(
-            address,
-            contract,
-            owner,
-        );
+    constructor(address: string, contract: any, owner: string) {
+        super(address, contract, owner);
     }
 
     public async update() {

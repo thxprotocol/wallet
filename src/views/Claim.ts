@@ -27,23 +27,20 @@ export default class Claim extends Vue {
             const rewardsRef = firebase.database().ref(`pools/${this.$route.params.pool}/rewards`);
 
             this.data = {
-                 rule: parseInt(this.$route.params.rule, 10),
-                 pool: this.$route.params.pool,
-                 address: this.$route.params.address,
+                rule: parseInt(this.$route.params.rule, 10),
+                pool: this.$route.params.pool,
+                address: this.$route.params.address,
             };
 
-            rewardsRef.child(this.data.key)
-                .set(this.data);
+            rewardsRef.child(this.data.key).set(this.data);
 
-            rewardsRef.child(this.data.key)
-                .on('child_added', (s: any) => {
-                    if (s.key === 'hash') {
-                        this.isClaimed = true;
-                    }
-                });
+            rewardsRef.child(this.data.key).on('child_added', (s: any) => {
+                if (s.key === 'hash') {
+                    this.isClaimed = true;
+                }
+            });
 
-            rewardsRef.child(this.data.key)
-                .onDisconnect().remove();
+            rewardsRef.child(this.data.key).onDisconnect().remove();
 
             this.startConfetti();
 
@@ -64,15 +61,11 @@ export default class Claim extends Vue {
     }
 
     private createQRCode(dataString: string) {
-        QRCode.toCanvas(
-            this.$refs.canvas,
-            dataString,
-            (err: string) => {
-                if (err) {
-                    console.error(err);
-                }
-            },
-        );
+        QRCode.toCanvas(this.$refs.canvas, dataString, (err: string) => {
+            if (err) {
+                console.error(err);
+            }
+        });
     }
 
     private startConfetti() {
@@ -80,5 +73,4 @@ export default class Claim extends Vue {
             this.confetti.push(i);
         }
     }
-
 }

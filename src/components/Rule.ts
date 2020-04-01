@@ -59,10 +59,8 @@ export default class CRewardRule extends Vue {
 
     public async startRulePoll() {
         this.loading = true;
-        this.pool.addRewardRulePoll(
-            this.rule,
-            new BN(this.input.poll.proposal).mul(TOKEN_MULTIPLIER),
-            )
+        this.pool
+            .addRewardRulePoll(this.rule, new BN(this.input.poll.proposal).mul(TOKEN_MULTIPLIER))
             .then(async (tx: any) => {
                 const rule: RewardRule = await this.pool.getRewardRule(this.rule.id);
 
@@ -82,10 +80,8 @@ export default class CRewardRule extends Vue {
     public async vote(agree: boolean) {
         if (this.poll) {
             this.poll.loading = true;
-            this.pool.voteForRule(
-                this.rule,
-                agree,
-                )
+            this.pool
+                .voteForRule(this.rule, agree)
                 .then(async (tx: any) => {
                     if (this.poll) {
                         this.poll.update();
@@ -104,9 +100,8 @@ export default class CRewardRule extends Vue {
     public async revokeVote() {
         if (this.poll) {
             this.poll.loading = true;
-            this.pool.revokeVoteForRule(
-                this.rule,
-                )
+            this.pool
+                .revokeVoteForRule(this.rule)
                 .then(async (tx: any) => {
                     if (this.poll) {
                         this.poll.update();
@@ -122,13 +117,10 @@ export default class CRewardRule extends Vue {
     public async tryToFinalize() {
         this.loading = true;
         if (this.poll) {
-            this.pool.tryToFinalize(
-                this.poll,
-                )
+            this.pool
+                .tryToFinalize(this.poll)
                 .then(async (tx: any) => {
-                    this.rule = await this.pool.getRewardRule(
-                        this.rule.id,
-                    );
+                    this.rule = await this.pool.getRewardRule(this.rule.id);
                     this.loading = false;
                 })
                 .catch((err: string) => {
