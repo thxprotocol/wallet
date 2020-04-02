@@ -1,7 +1,6 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { BCard, BCardText, BSpinner, BModal, BButton, BOverlay } from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
-import NetworkService from '@/services/NetworkService';
 import { Account } from '@/models/Account';
 import PoolService from '@/services/PoolService';
 
@@ -31,7 +30,6 @@ export default class Pools extends Vue {
     };
     public clipboard: any = null;
     private account!: Account;
-    private $network!: NetworkService;
     private poolService: PoolService = new PoolService();
 
     private copyClipboard(value: string) {
@@ -52,7 +50,8 @@ export default class Pools extends Vue {
 
     private joinRewardPool(address: string) {
         this.loading = true;
-        this.poolService.join(this.account.uid, address)
+        this.poolService
+            .join(this.account.uid, address)
             .then(() => {
                 this.loading = false;
                 (this.$refs.modalJoinPool as BModal).hide();
@@ -65,7 +64,8 @@ export default class Pools extends Vue {
 
     private async createRewardPool(name: string) {
         this.loading = true;
-        this.poolService.createAndJoin(this.account.uid, name)
+        this.poolService
+            .createAndJoin(this.account.uid, name)
             .then(() => {
                 this.loading = false;
                 (this.$refs.modalCreatePool as BModal).hide();
@@ -77,7 +77,8 @@ export default class Pools extends Vue {
     }
 
     private leaveRewardPool(poolAddress: string) {
-        this.poolService.leave(this.account.uid, poolAddress)
+        this.poolService
+            .leave(this.account.uid, poolAddress)
             .then(() => {
                 this.$store.commit('removeRewardPool', poolAddress);
             })

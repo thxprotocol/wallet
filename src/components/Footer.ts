@@ -1,6 +1,5 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BNav, BNavItem } from 'bootstrap-vue';
-import NetworkService from '@/services/NetworkService';
 
 @Component({
     name: 'Footer',
@@ -10,7 +9,6 @@ import NetworkService from '@/services/NetworkService';
     },
 })
 export default class Footer extends Vue {
-
     get routes(): any {
         return (this.$router as any).options.routes.filter((item: any) => item.visible);
     }
@@ -22,5 +20,4 @@ export default class Footer extends Vue {
         camera: require('../assets/qrcode.svg'),
         pools: require('../assets/community.svg'),
     };
-    private $network!: NetworkService;
 }

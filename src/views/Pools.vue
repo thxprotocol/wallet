@@ -4,7 +4,7 @@
             <h2>Pools</h2>
 
             <div class="alert alert-danger" v-if="error">
-                {{error}}
+                {{ error }}
             </div>
 
             <b-card
@@ -13,17 +13,19 @@
                 footer-tag="footer"
                 header-tag="header"
                 tag="article"
-                class="mb-2 card-pool">
-
-                <div slot="header" class="font-size-xl text-light">{{p.balance}} THX</div>
+                class="mb-2 card-pool"
+            >
+                <div slot="header" class="font-size-xl text-light">{{ p.balance }} THX</div>
 
                 <b-card-text>
                     <!-- <span v-if="p.outOfSync" class="badge badge-danger float-right">Out of sync</span>
                     <span v-if="!p.outOfSync" class="badge badge-success float-right">Up to date</span> -->
-                    <strong>{{p.name}}</strong><br>
-                    <small>{{p.address}}
+                    <strong>{{ p.name }}</strong
+                    ><br />
+                    <small
+                        >{{ p.address }}
                         <a class="text-primary" @click="copyClipboard(p.address)">
-                            ({{clipboard === p.address ? 'Copied!' : 'Copy'}})
+                            ({{ clipboard === p.address ? 'Copied!' : 'Copy' }})
                         </a>
                     </small>
                 </b-card-text>
@@ -31,10 +33,11 @@
                 <template slot="footer">
                     <div class="text-right">
                         <button class="btn btn-link card-link" @click="leaveRewardPool(p.address)">Leave pool</button>
-                        <button class="btn btn-link card-link" @click="$router.replace(`/pools/${p.address}`)">Open pool</button>
+                        <button class="btn btn-link card-link" @click="$router.replace(`/pools/${p.address}`)">
+                            Open pool
+                        </button>
                     </div>
                 </template>
-
             </b-card>
 
             <b-button variant="primary" class="btn-block" @click="$refs.modalJoinPool.show()">
@@ -45,7 +48,12 @@
             </b-button>
 
             <b-modal ref="modalJoinPool" centered title="Join a reward pool">
-                <input v-model="input.poolAddress" type="text" class="form-control" placeholder="0x0000000000000000000000000000" />
+                <input
+                    v-model="input.poolAddress"
+                    type="text"
+                    class="form-control"
+                    placeholder="0x0000000000000000000000000000"
+                />
                 <template v-slot:modal-footer>
                     <b-overlay :show="loading" no-wrap></b-overlay>
                     <b-button variant="link" @click="$refs.modalJoinPool.hide()">

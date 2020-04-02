@@ -16,7 +16,6 @@ import CManagerAddedEvent from '@/components/events/ManagerAddedEvent.vue';
 import CManagerRemovedEvent from '@/components/events/ManagerRemovedEvent.vue';
 import ProfilePicture from '@/components/ProfilePicture.vue';
 import CoinService from '@/services/CoinService';
-import NetworkService from '@/services/NetworkService';
 import PoolService from '@/services/PoolService';
 import { RewardPool, IRewardPools } from '@/models/RewardPool';
 import { Account } from '@/models/Account';
@@ -73,7 +72,6 @@ export default class PoolDetail extends Vue {
     public clipboard: any = null;
     private rewardPools!: IRewardPools;
     private account!: Account;
-    private $network!: NetworkService;
     private coinService: CoinService = new CoinService();
     private poolService: PoolService = new PoolService();
 
@@ -90,9 +88,11 @@ export default class PoolDetail extends Vue {
     get claimableRewards() {
         const id = this.$route.params.id;
         const filtered = this.rewardPools[id].rewards.filter((r: Reward) => {
-            return r.state &&
+            return (
+                r.state &&
                 (r.state === 'Approved' || r.state === 'Pending') &&
-                (this.$network.extdev.account === r.beneficiaryAddress);
+                this.$network.extdev.account === r.beneficiaryAddress
+            );
         });
         return _.orderBy(filtered, 'id', 'desc');
     }
@@ -100,9 +100,11 @@ export default class PoolDetail extends Vue {
     get archivedRewards() {
         const id = this.$route.params.id;
         const filtered = this.rewardPools[id].rewards.filter((r: Reward) => {
-            return r.state &&
+            return (
+                r.state &&
                 (r.state === 'Withdrawn' || r.state === 'Rejected') &&
-                (this.$network.extdev.account === r.beneficiaryAddress);
+                this.$network.extdev.account === r.beneficiaryAddress
+            );
         });
         return _.orderBy(filtered, 'id', 'desc');
     }
@@ -119,7 +121,8 @@ export default class PoolDetail extends Vue {
         const address = this.$route.params.id;
 
         if (!this.rewardPools[address] && this.account) {
-            this.poolService.join(this.account.uid, address)
+            this.poolService
+                .join(this.account.uid, address)
                 .then(() => {
                     this.loading = false;
                 })
@@ -154,16 +157,11 @@ export default class PoolDetail extends Vue {
         this.loading = true;
 
         if (role === 'Member') {
-            promise = (hasRole)
-                ? this.pool.removeMember(account)
-                : this.pool.addMember(account);
+            promise = hasRole ? this.pool.removeMember(account) : this.pool.addMember(account);
             this.input.memberAddress = '';
-
         }
         if (role === 'Manager') {
-            promise = (hasRole)
-                ? this.pool.removeManager(account)
-                : this.pool.addManager(account);
+            promise = hasRole ? this.pool.removeManager(account) : this.pool.addManager(account);
             this.input.managerAddress = '';
         }
         if (promise) {
@@ -192,7 +190,8 @@ export default class PoolDetail extends Vue {
         if (parseInt(balance.toString(), 10) >= parseInt(amount.toString(), 10)) {
             this.loading = true;
 
-            this.pool.addDeposit(amount)
+            this.pool
+                .addDeposit(amount)
                 .then(() => {
                     (this.$refs.modalDeposit as BModal).hide();
 
@@ -212,7 +211,8 @@ export default class PoolDetail extends Vue {
         this.loading = true;
 
         if (this.pool) {
-            this.pool.addRewardRule(rule)
+            this.pool
+                .addRewardRule(rule)
                 .then(() => {
                     (this.$refs.modalCreateRule as BModal).hide();
                     this.input.rule.title = '';
@@ -225,5 +225,4 @@ export default class PoolDetail extends Vue {
                 });
         }
     }
-
 }

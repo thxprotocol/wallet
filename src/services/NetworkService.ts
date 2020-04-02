@@ -35,10 +35,7 @@ export default class NetworkService {
     public rinkeby: any;
     public web3js: any = new Web3();
 
-    constructor(
-        extdevPrivateKey: string = '',
-        rinkebyPrivateKey: string = '',
-    ) {
+    constructor(extdevPrivateKey: string = '', rinkebyPrivateKey: string = '') {
         this.loomPrivateKeyString = extdevPrivateKey;
         this.rinkebyPrivateKeyString = rinkebyPrivateKey;
 
@@ -49,10 +46,9 @@ export default class NetworkService {
     }
 
     public async now() {
-        return this.extdev.web3js.eth.getBlock('latest')
-            .then((block: any) => {
-                return block.timestamp;
-            });
+        return this.extdev.web3js.eth.getBlock('latest').then((block: any) => {
+            return block.timestamp;
+        });
     }
 
     // Returns a promise that will be resolved with the signed withdrawal receipt that contains the
@@ -72,11 +68,9 @@ export default class NetworkService {
 
         const coinContract = await this.getExtdevCoinContract();
         try {
-            await coinContract.methods
-                .approve(EXTDEV_GATEWAY_ADDRESS.toLowerCase(), amount.toString())
-                .send({
-                    from: ownerExtdevAddress,
-                });
+            await coinContract.methods.approve(EXTDEV_GATEWAY_ADDRESS.toLowerCase(), amount.toString()).send({
+                from: ownerExtdevAddress,
+            });
         } catch (err) {
             console.error('Withdraw failed while trying to approve token transfer to DAppChain Gateway.');
             throw err;
@@ -121,22 +115,18 @@ export default class NetworkService {
         const contractAddress = await this.getRinkebyCoinContractAddress();
         const gateway = await this.getRinkebyGatewayContract(ownerAccount);
 
-        const gasEstimate = await contract.methods
-            .approve(RINKEBY_GATEWAY_ADDRESS, amount.toString())
-            .estimateGas({
-                from: ownerAccount.address,
-            });
+        const gasEstimate = await contract.methods.approve(RINKEBY_GATEWAY_ADDRESS, amount.toString()).estimateGas({
+            from: ownerAccount.address,
+        });
 
         if (gasEstimate === gas) {
             throw new Error('Not enough enough gas, send more.');
         }
 
-        await contract.methods
-            .approve(RINKEBY_GATEWAY_ADDRESS, amount.toString())
-            .send({
-                from: ownerAccount.address,
-                gas: gasEstimate,
-            });
+        await contract.methods.approve(RINKEBY_GATEWAY_ADDRESS, amount.toString()).send({
+            from: ownerAccount.address,
+            gas: gasEstimate,
+        });
 
         const tx = await gateway.depositERC20Async(amount, contractAddress, {
             gasLimit: gas,
@@ -154,10 +144,7 @@ export default class NetworkService {
 
     public async getExtdevCoinContract() {
         const networkId = await this.extdev.web3js.eth.net.getId();
-        return new this.extdev.web3js.eth.Contract(
-            MyCoinJSON.abi,
-            MyCoinJSON.networks[networkId].address,
-        );
+        return new this.extdev.web3js.eth.Contract(MyCoinJSON.abi, MyCoinJSON.networks[networkId].address);
     }
 
     public async getExtdevCoinContractAddress() {
@@ -166,10 +153,7 @@ export default class NetworkService {
     }
 
     public getExtdevContract(contractAbi: any, contractAddr: string) {
-        return new this.extdev.web3js.eth.Contract(
-            contractAbi,
-            contractAddr,
-        );
+        return new this.extdev.web3js.eth.Contract(contractAbi, contractAddr);
     }
 
     public async getRinkebyCoinContractAddress() {
@@ -204,12 +188,7 @@ export default class NetworkService {
         );
     }
 
-    public async withdrawCoinFromRinkebyGateway({
-        web3js,
-        web3Account,
-        receipt,
-        gas,
-    }: any) {
+    public async withdrawCoinFromRinkebyGateway({ web3js, web3Account, receipt, gas }: any) {
         const gatewayContract = await this.getRinkebyGatewayContract(web3Account);
         const tx = await gatewayContract.withdrawAsync(receipt, {
             gasLimit: gas,
@@ -243,10 +222,7 @@ export default class NetworkService {
             'wss://extdev-plasma-us1.dappchains.com/websocket',
             'wss://extdev-plasma-us1.dappchains.com/queryws',
         );
-        client.txMiddleware = [
-            new NonceTxMiddleware(publicKey, client),
-            new SignedTxMiddleware(privateKey),
-        ];
+        client.txMiddleware = [new NonceTxMiddleware(publicKey, client), new SignedTxMiddleware(privateKey)];
 
         client.on('error', (msg: any) => {
             console.error('PlasmaChain connection error', msg);
@@ -272,13 +248,16 @@ export default class NetworkService {
         const foreignContract = Address.fromString(`eth:${tokenRinkebyAddress}`);
         const localContract = Address.fromString(`${client.chainId}:${tokenExtdevAddress}`);
 
-        const hash = soliditySha3({
-            type: 'address',
-            value: tokenRinkebyAddress.slice(2),
-        }, {
-            type: 'address',
-            value: tokenExtdevAddress.slice(2),
-        });
+        const hash = soliditySha3(
+            {
+                type: 'address',
+                value: tokenRinkebyAddress.slice(2),
+            },
+            {
+                type: 'address',
+                value: tokenExtdevAddress.slice(2),
+            },
+        );
 
         const foreignContractCreatorSig = await signer.signAsync(hash);
         const foreignContractCreatorTxHash = Buffer.from(rinkebyTxHash.slice(2), 'hex');
@@ -291,12 +270,7 @@ export default class NetworkService {
         });
     }
 
-    public async _mapAccounts({
-        client,
-        signer,
-        ownerRinkebyAddress,
-        ownerExtdevAddress,
-    }: any) {
+    public async _mapAccounts({ client, signer, ownerRinkebyAddress, ownerExtdevAddress }: any) {
         const ownerRinkebyAddr = Address.fromString(`eth:${ownerRinkebyAddress}`);
         const ownerExtdevAddr = Address.fromString(`${client.chainId}:${ownerExtdevAddress}`);
         const mapperContract = await AddressMapper.createAsync(client, ownerExtdevAddr);
@@ -341,15 +315,10 @@ export default class NetworkService {
     }
 
     public async depositCoin(amount: string) {
-        const {
-            account,
-            web3js,
-        } = this.loadRinkebyAccount();
+        const { account, web3js } = this.loadRinkebyAccount();
         try {
             const actualAmount = new BN(amount).mul(TOKEN_MULTIPLIER);
-            const txHash = await this.depositCoinToRinkebyGateway(
-                actualAmount, account, 350000,
-            );
+            const txHash = await this.depositCoinToRinkebyGateway(actualAmount, account, 350000);
             console.log(`${amount} tokens deposited to Transfer Gateway.`);
             console.log(`Rinkeby tx hash: ${txHash}`);
             return txHash;
@@ -360,79 +329,64 @@ export default class NetworkService {
 
     public async getRinkebyCoinBalance(web3js: any, accountAddress: string) {
         const contract = await this.getRinkebyCoinContract();
-        const balance = await contract.methods
-            .balanceOf(accountAddress)
-            .call();
+        const balance = await contract.methods.balanceOf(accountAddress).call();
         return balance;
     }
 
     public async getExtdevCoinBalance(web3js: any, accountAddress: string) {
         const contract = await this.getExtdevCoinContract();
         const addr = accountAddress.toLowerCase();
-        const balance = await contract.methods
-            .balanceOf(addr)
-            .call({
-                from: addr,
-            });
+        const balance = await contract.methods.balanceOf(addr).call({
+            from: addr,
+        });
         return balance;
     }
 
     public async isExtdevMinter(web3js: any, accountAddress: string) {
         const contract = await this.getExtdevCoinContract();
         const addr = accountAddress.toLowerCase();
-        const isMinter = await contract.methods
-            .isMinter(addr)
-            .call({
-                from: addr,
-            });
+        const isMinter = await contract.methods.isMinter(addr).call({
+            from: addr,
+        });
         return isMinter;
     }
 
     public async isRinkebyMinter(web3js: any, accountAddress: string) {
         const contract = await this.getRinkebyCoinContract();
-        const isMinter = await contract.methods
-            .isMinter(accountAddress)
-            .call();
+        const isMinter = await contract.methods.isMinter(accountAddress).call();
         return isMinter;
     }
 
     public async transferExtdevCoin(receiver: string, amount: BN) {
         const contract = await this.getExtdevCoinContract();
-        const approvedTx = await contract.methods
-            .approve(receiver, amount.toString())
-            .send({
-                from: this.extdev.account,
-            });
-        const sendTx = await contract.methods
-            .transfer(receiver, amount.toString())
-            .send({
-                from: this.extdev.account,
-            });
+        const approvedTx = await contract.methods.approve(receiver, amount.toString()).send({
+            from: this.extdev.account,
+        });
+        const sendTx = await contract.methods.transfer(receiver, amount.toString()).send({
+            from: this.extdev.account,
+        });
     }
 
     public async transferRinkebyCoin(receiver: string, amount: BN) {
         const rinkeby = this.loadRinkebyAccount();
         const contract = await this.getRinkebyCoinContract();
 
-        const approvedTx = await contract.methods
-            .approve(receiver, amount.toString())
-            .send({
-                from: rinkeby.account.address,
-                gas: 350000,
-            });
+        const approvedTx = await contract.methods.approve(receiver, amount.toString()).send({
+            from: rinkeby.account.address,
+            gas: 350000,
+        });
 
-        const sendTx = await contract.methods
-            .transfer(receiver, amount.toString())
-            .send({
-                from: rinkeby.account.address,
-                gas: 350000,
-            });
+        const sendTx = await contract.methods.transfer(receiver, amount.toString()).send({
+            from: rinkeby.account.address,
+            gas: 350000,
+        });
     }
 
     public async transferEther(receiver: string, amount: BN) {
         const rinkeby = this.loadRinkebyAccount();
 
-        return rinkeby.web3js.eth.sendTransaction({
+        return rinkeby.web3js.eth
+            .sendTransaction({
                 to: receiver,
                 from: rinkeby.account.address,
                 value: amount,
@@ -450,48 +404,40 @@ export default class NetworkService {
         const rinkeby = this.loadRinkebyAccount();
         const contract = await this.getRinkebyCoinContract();
 
-        const tx = await contract.methods
-            .mint(receiver, amount.toString())
-            .send({
-                from: rinkeby.account.address,
-                gas: 350000,
-            });
+        const tx = await contract.methods.mint(receiver, amount.toString()).send({
+            from: rinkeby.account.address,
+            gas: 350000,
+        });
     }
 
     public async mintExtdevCoin(receiver: string, amount: BN) {
         const extdev = this.loadExtdevAccount();
         const contract = await this.getExtdevCoinContract();
 
-        const tx = await contract.methods
-            .mint(receiver, amount.toString())
-            .send({
-                from: extdev.account,
-                gas: 350000,
-            });
+        const tx = await contract.methods.mint(receiver, amount.toString()).send({
+            from: extdev.account,
+            gas: 350000,
+        });
     }
 
     public async addRinkebyMinter(address: string) {
         const rinkeby = this.loadRinkebyAccount();
         const contract = await this.getRinkebyCoinContract();
 
-        const tx = await contract.methods
-            .addMinter(address)
-            .send({
-                from: rinkeby.account,
-                gas: 350000,
-            });
+        const tx = await contract.methods.addMinter(address).send({
+            from: rinkeby.account,
+            gas: 350000,
+        });
     }
 
     public async addExtdevMinter(address: string) {
         const extdev = this.loadExtdevAccount();
         const contract = await this.getExtdevCoinContract();
 
-        const tx = await contract.methods
-            .addMinter(address)
-            .send({
-                from: extdev.account,
-                gas: 350000,
-            });
+        const tx = await contract.methods.addMinter(address).send({
+            from: extdev.account,
+            gas: 350000,
+        });
     }
 
     public async withdrawCoin(amount: string) {
@@ -544,7 +490,9 @@ export default class NetworkService {
                     receipt,
                     gas: 350000,
                 });
-                console.log(`${receipt.tokenAmount.div(TOKEN_MULTIPLIER).toString()} tokens withdrawn from Transfer Gateway.`);
+                console.log(
+                    `${receipt.tokenAmount.div(TOKEN_MULTIPLIER).toString()} tokens withdrawn from Transfer Gateway.`,
+                );
                 console.log(`Rinkeby tx hash: ${txHash}`);
             } else {
                 console.log('No pending withdrawels found!');
