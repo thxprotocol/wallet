@@ -13,8 +13,8 @@ import {
 import Web3 from 'web3';
 import Config from '../config.json';
 import { OfflineWeb3Signer } from 'loom-js/dist/solidity-helpers';
-import MyRinkebyCoinJSON from '../contracts/THXTokenRinkeby.json';
-import MyCoinJSON from '../contracts/THXToken.json';
+import MyRinkebyCoinJSON from '../contracts/THXTokenRinkeby_meta.json';
+import MyCoinJSON from '../contracts/THXToken_meta.json';
 const TransferGateway = Contracts.TransferGateway;
 const AddressMapper = Contracts.AddressMapper;
 import { ethers } from 'ethers';
@@ -25,6 +25,8 @@ import BN from 'bn.js';
 const RINKEBY_GATEWAY_ADDRESS = '0x9c67fD4eAF0497f9820A3FBf782f81D6b6dC4Baa';
 const EXTDEV_GATEWAY_ADDRESS = '0xE754d9518bF4a9C63476891eF9Aa7D91c8236a5d';
 const EXTDEV_CHAIN_ID = 'extdev-plasma-us1';
+const RINKEBY_COIN_ADDRESS = '0xa3b7af43e248593cC391fd856e306c6B18bFD00c';
+const COIN_ADDRESS = '0xF3B67034C7239D777F8935d34Af6e1c209a4cDAA';
 const INFURA_API_KEY = Config.infura.key;
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
@@ -136,20 +138,17 @@ export default class NetworkService {
 
     public async getRinkebyCoinContract() {
         const networkId = await this.rinkeby.web3js.eth.net.getId();
-        return new this.rinkeby.web3js.eth.Contract(
-            MyRinkebyCoinJSON.abi,
-            MyRinkebyCoinJSON.networks[networkId].address,
-        );
+        return new this.rinkeby.web3js.eth.Contract(MyRinkebyCoinJSON.output.abi, RINKEBY_COIN_ADDRESS);
     }
 
     public async getExtdevCoinContract() {
         const networkId = await this.extdev.web3js.eth.net.getId();
-        return new this.extdev.web3js.eth.Contract(MyCoinJSON.abi, MyCoinJSON.networks[networkId].address);
+        return new this.extdev.web3js.eth.Contract(MyCoinJSON.output.abi, COIN_ADDRESS);
     }
 
     public async getExtdevCoinContractAddress() {
         const networkId = await this.extdev.web3js.eth.net.getId();
-        return MyCoinJSON.networks[networkId].address;
+        return COIN_ADDRESS;
     }
 
     public getExtdevContract(contractAbi: any, contractAddr: string) {
@@ -158,7 +157,7 @@ export default class NetworkService {
 
     public async getRinkebyCoinContractAddress() {
         const networkId = await this.rinkeby.web3js.eth.net.getId();
-        return MyRinkebyCoinJSON.networks[networkId].address;
+        return RINKEBY_COIN_ADDRESS;
     }
 
     public async getRinkebyGatewayContract(web3Account: any) {
@@ -453,8 +452,8 @@ export default class NetworkService {
                 amount: actualAmount,
                 ownerExtdevAddress: extdev.account,
                 ownerRinkebyAddress: rinkeby.account.address,
-                tokenExtdevAddress: MyCoinJSON.networks[extdevNetworkId].address,
-                tokenRinkebyAddress: MyRinkebyCoinJSON.networks[rinkebyNetworkId].address,
+                tokenExtdevAddress: COIN_ADDRESS,
+                tokenRinkebyAddress: RINKEBY_COIN_ADDRESS,
                 timeout: 120000,
             });
             const txHash = await this.withdrawCoinFromRinkebyGateway({
@@ -477,7 +476,7 @@ export default class NetworkService {
             const rinkeby = this.loadRinkebyAccount();
 
             const networkId = await rinkeby.web3js.eth.net.getId();
-            const myRinkebyCoinAddress = Address.fromString(`eth:${MyRinkebyCoinJSON.networks[networkId].address}`);
+            const myRinkebyCoinAddress = Address.fromString(`eth:${RINKEBY_COIN_ADDRESS}`);
             const receipt: any = await this.getPendingWithdrawalReceipt(extdev.client, extdev.account);
 
             if (receipt && receipt.tokenContract.toString() === myRinkebyCoinAddress.toString()) {
