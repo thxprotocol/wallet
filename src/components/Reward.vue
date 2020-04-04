@@ -54,7 +54,7 @@
                 </div>
                 <div class="row mt-2 mb-2">
                     <div class="col-12">
-                        <b-progress show-value :max="(reward.yesCounter + reward.noCounter)">
+                        <b-progress show-value :max="reward.yesCounter + reward.noCounter">
                             <b-progress-bar variant="success" :value="reward.yesCounter"></b-progress-bar>
                             <b-progress-bar variant="danger" :value="reward.noCounter"></b-progress-bar>
                         </b-progress>
