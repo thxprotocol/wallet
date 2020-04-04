@@ -104,7 +104,9 @@ export default class AccountDetail extends Vue {
     public async onCreateAccountsFromPrivateKey() {
         const privateKeyArray = CryptoUtils.B64ToUint8Array(this.input.extdevPrivateKey);
         const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKeyArray);
-        const address = LocalAddress.fromPublicKey(publicKey).toString().toLowerCase();
+        const address = LocalAddress.fromPublicKey(publicKey)
+            .toString()
+            .toLowerCase();
 
         this.loading = true;
 

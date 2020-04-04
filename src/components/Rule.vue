@@ -61,7 +61,7 @@
                             </div>
                             <div class="row mt-2">
                                 <div class="col-12">
-                                    <b-progress show-progress :max="(poll.yesCounter + poll.noCounter)">
+                                    <b-progress show-progress :max="poll.yesCounter + poll.noCounter">
                                         <b-progress-bar variant="success" :value="poll.yesCounter"></b-progress-bar>
                                         <b-progress-bar variant="danger" :value="poll.noCounter"></b-progress-bar>
                                     </b-progress>
