@@ -40,7 +40,7 @@
             <button class="btn btn-primary btn-block" @click="$refs.modalJoinPool.show()">
                 Join Reward Pool
             </button>
-            <button class="btn btn-primary btn-block" @click="$refs.modalCreatePool.show()">
+            <button class="btn btn-link btn-block" @click="$refs.modalCreatePool.show()">
                 Create Reward Pool
             </button>
 

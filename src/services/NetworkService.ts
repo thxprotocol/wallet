@@ -11,14 +11,14 @@ import {
     soliditySha3,
 } from 'loom-js';
 import Web3 from 'web3';
-import Config from '../config.json';
+import Config from '@/config.json';
 import { OfflineWeb3Signer } from 'loom-js/dist/solidity-helpers';
-import MyRinkebyCoinJSON from '../contracts/THXTokenRinkeby_meta.json';
-import MyCoinJSON from '../contracts/THXToken_meta.json';
 const TransferGateway = Contracts.TransferGateway;
 const AddressMapper = Contracts.AddressMapper;
 import { ethers } from 'ethers';
 import BN from 'bn.js';
+import RINKEBY_COIN_ABI from '@/contracts/THXTokenRinkeby.abi';
+import COIN_ABI from '@/contracts/THXToken.abi';
 
 // See https://loomx.io/developers/en/testnet-plasma.html#ethereum-integration
 // for the most up to date address.
@@ -137,17 +137,14 @@ export default class NetworkService {
     }
 
     public async getRinkebyCoinContract() {
-        const networkId = await this.rinkeby.web3js.eth.net.getId();
-        return new this.rinkeby.web3js.eth.Contract(MyRinkebyCoinJSON.output.abi, RINKEBY_COIN_ADDRESS);
+        return new this.rinkeby.web3js.eth.Contract(RINKEBY_COIN_ABI, RINKEBY_COIN_ADDRESS);
     }
 
     public async getExtdevCoinContract() {
-        const networkId = await this.extdev.web3js.eth.net.getId();
-        return new this.extdev.web3js.eth.Contract(MyCoinJSON.output.abi, COIN_ADDRESS);
+        return new this.extdev.web3js.eth.Contract(COIN_ABI, COIN_ADDRESS);
     }
 
     public async getExtdevCoinContractAddress() {
-        const networkId = await this.extdev.web3js.eth.net.getId();
         return COIN_ADDRESS;
     }
 
@@ -156,7 +153,6 @@ export default class NetworkService {
     }
 
     public async getRinkebyCoinContractAddress() {
-        const networkId = await this.rinkeby.web3js.eth.net.getId();
         return RINKEBY_COIN_ADDRESS;
     }
 
@@ -475,7 +471,6 @@ export default class NetworkService {
             const extdev = this.loadExtdevAccount();
             const rinkeby = this.loadRinkebyAccount();
 
-            const networkId = await rinkeby.web3js.eth.net.getId();
             const myRinkebyCoinAddress = Address.fromString(`eth:${RINKEBY_COIN_ADDRESS}`);
             const receipt: any = await this.getPendingWithdrawalReceipt(extdev.client, extdev.account);
 

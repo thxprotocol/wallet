@@ -73,7 +73,8 @@ yarn deploy:prod;
 ## 5. Contract Compilation
 
 ```
-yarn contracts:compile
+yarn contracts:compile:abi;
+yarn contracts:compile:bin;
 ```
 
 ## 6. Testing
