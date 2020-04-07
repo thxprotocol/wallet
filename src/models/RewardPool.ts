@@ -401,6 +401,7 @@ export class RewardPool extends RewardPoolEvents {
                 (o: any) => o.name === type && o.type === 'event',
             );
             const log = _.find(receipt.logs, (l: any) => l.topics.includes(eventInterface.signature));
+
             if (log) {
                 const event = await this.network.extdev.web3js.eth.abi.decodeLog(
                     eventInterface.inputs,
@@ -437,18 +438,27 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     private async updateRule(data: any) {
+        let rule: RewardRule;
+        let index: number;
         const id = parseInt(data.id, 10);
-        const rule = this.rewardRules.find((r: RewardRule) => {
-            return id === r.id;
+        const r = this.rewardRules.find((rr: RewardRule) => {
+            return id === rr.id;
         });
-        if (rule) {
-            const index = this.rewardRules.indexOf(rule);
 
-            this.rewardRules[index] = rule;
+        if (r) {
+            rule = await this.getRewardRule(r.id);
+            index = this.rewardRules.indexOf(r);
+
+            this.rewardRules.splice(index, 1, rule);
         } else {
-            const r = await this.getRewardRule(id);
+            rule = await this.getRewardRule(id);
+            index = this.rewardRules.push(rule);
+        }
 
-            this.rewardRules.push(r);
+        if (rule.hasPollAddress) {
+            const poll: RewardRulePoll = await this.getRewardRulePoll(rule);
+
+            this.rewardRules[index].setPoll(poll);
         }
     }
 

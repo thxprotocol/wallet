@@ -3,6 +3,7 @@ import { Vue } from 'vue-property-decorator';
 import { Account } from '@/models/Account';
 import { IRewardPools, RewardPool } from '../models/RewardPool';
 import BN from 'bn.js';
+import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 
 Vue.use(Vuex);
 

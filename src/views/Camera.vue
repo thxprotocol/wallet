@@ -5,12 +5,11 @@
             <span v-html="error"></span>
         </div>
 
-        <div v-if="loading" class="d-flex w-100 h-100 align-items-center justify-content-center">
-            <b-spinner></b-spinner>
-        </div>
-
         <div v-if="rule && pool" class="d-flex w-100 h-100 align-items-center justify-content-center bg-yellow">
-            <div class="text-center">
+            <div v-if="loading">
+                <b-spinner></b-spinner>
+            </div>
+            <div v-else class="text-center">
                 <h1>
                     You are rewarded
                     <span>{{ rule.amount }} THX!</span>
@@ -25,7 +24,10 @@
         </div>
 
         <div v-if="slack && pool" class="d-flex w-100 h-100 align-items-center justify-content-center bg-yellow">
-            <div class="text-center">
+            <div v-if="loading">
+                <b-spinner></b-spinner>
+            </div>
+            <div v-else class="text-center">
                 <h1>
                     Connect your account!
                 </h1>

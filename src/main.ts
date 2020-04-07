@@ -11,9 +11,11 @@ import NetworkService from './services/NetworkService';
 import config from './config.json';
 import './registerServiceWorker';
 import './custom.scss';
+import { ModalPlugin } from 'bootstrap-vue';
 
 Vue.config.productionTip = false;
 Vue.use(VueMoment);
+Vue.use(ModalPlugin);
 
 let app: any;
 

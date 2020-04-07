@@ -14,6 +14,7 @@ export class RewardRule {
     public created: number;
     public amount: BN;
     public pollAddress: string;
+    public poll: RewardRulePoll | null = null;
     public title: string = '';
     public description: string = '';
 
@@ -33,6 +34,10 @@ export class RewardRule {
     public get hasPollAddress() {
         return this.pollAddress !== '0x0000000000000000000000000000000000000000';
     }
+
+    public setPoll(poll: RewardRulePoll) {
+        this.poll = poll;
+    }
 }
 
 export class RewardRulePoll extends BasePoll {
@@ -44,9 +49,9 @@ export class RewardRulePoll extends BasePoll {
 
     public async update() {
         this.loading = true;
-
-        const proposedAmount = await this.contract.methods.proposedAmount().call({ from: this.owner });
-        this.proposedAmount = new BN(proposedAmount).div(TOKEN_MULTIPLIER);
+        this.proposedAmount = new BN(await this.contract.methods.proposedAmount().call({ from: this.owner })).div(
+            TOKEN_MULTIPLIER,
+        );
 
         await this.updateBasePoll();
 
