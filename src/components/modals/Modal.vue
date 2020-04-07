@@ -3,7 +3,6 @@
         <b-overlay :show="loading" no-wrap></b-overlay>
         <slot name="content"> </slot>
         <template v-slot:modal-footer="{ ok, cancel }">
-            <b-button @click="$bvModal.hide(id)" variant="link">Cancel</b-button>
             <slot name="footer"> </slot>
         </template>
     </b-modal>

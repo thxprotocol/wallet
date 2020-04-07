@@ -9,7 +9,8 @@
             <pre v-if="data" class="p-2 bg-light">{{ data }}</pre>
         </template>
         <template slot="footer">
-            <b-button variant="danger" @click="invalidate()">Invalidate</b-button>
+            <b-button variant="link" @click="cancel()">Cancel</b-button>
+            <b-button variant="danger" :disabled="loading" @click="invalidate()">Invalidate</b-button>
         </template>
     </c-modal>
 </template>

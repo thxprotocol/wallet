@@ -7,6 +7,7 @@
             </small>
         </template>
         <template slot="footer">
+            <b-button variant="link" @click="cancel()">Cancel</b-button>
             <b-button @click="createReward(rule.id, input.beneficiary)" :disabled="loading" variant="primary">
                 Give Reward
             </b-button>

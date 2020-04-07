@@ -24,13 +24,19 @@ export default class ModalRewardGive extends Vue {
         this.input.beneficiary = this.$network.extdev.account;
     }
 
+    private async cancel() {
+        this.input.beneficiary = '';
+
+        this.$bvModal.hide('ModalRewardGive');
+    }
+
     private createReward(id: number, beneficiary: string) {
         this.loading = true;
         this.pool
             .createReward(id, beneficiary)
             .then(() => {
                 this.loading = false;
-                this.$bvModal.hide('modalRewardCreate');
+                this.$bvModal.hide('ModalRewardGive');
             })
             .catch(() => {
                 this.loading = false;

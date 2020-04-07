@@ -8,6 +8,7 @@
             <input v-model="input.proposal" type="number" class="form-control" />
         </template>
         <template slot="footer">
+            <b-button variant="link" @click="cancel()">Cancel</b-button>
             <b-button @click="startRulePoll()" :disabled="loading" variant="primary">
                 Create Poll
             </b-button>

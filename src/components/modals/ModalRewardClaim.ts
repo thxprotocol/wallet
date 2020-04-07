@@ -21,8 +21,18 @@ export default class ModalRewardClaim extends Vue {
     private data: any = null;
     private dataString: string = '';
 
+    private async cancel() {
+        this.data = null;
+        this.dataString = '';
+
+        this.$bvModal.hide('modalRewardClaim');
+    }
+
     private async invalidate() {
         await firebase.database().ref(`/pools/rewards/${this.data.key}`).remove();
+        this.data = null;
+        this.dataString = '';
+
         this.$bvModal.hide('modalRewardClaim');
     }
 
