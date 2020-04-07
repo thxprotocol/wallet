@@ -25,7 +25,6 @@ import { mapGetters } from 'vuex';
 export default class App extends Vue {
     public $store: any = store;
     public $events!: EventService;
-    private $user: firebase.User | any;
     private poolService: PoolService = new PoolService();
     private coinService: CoinService = new CoinService();
     private account!: Account;

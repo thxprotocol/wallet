@@ -21,8 +21,8 @@ import { Reward } from '@/models/Reward';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import _ from 'lodash';
 import BN from 'bn.js';
-import REWARD_JSON from '@/contracts/Reward.json';
-import REWARD_RULE_POLL_JSON from '@/contracts/RulePoll.json';
+import REWARD_ABI from '@/contracts/Reward.abi';
+import REWARD_RULE_POLL_ABI from '@/contracts/RulePoll.abi';
 import UserService from '@/services/UserService';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
@@ -34,7 +34,6 @@ export class RewardPool extends RewardPoolEvents {
     public isMember: boolean = false;
     public isManager: boolean = false;
     public address: string = '';
-    public outOfSync: boolean = true;
     public transactions: any[] = [];
 
     public events: any[] = [];
@@ -154,10 +153,6 @@ export class RewardPool extends RewardPoolEvents {
             const w = await this.withdrawelOf(this.account, i);
             this.transactions.push(new Withdrawel(w, this));
         }
-    }
-
-    public setOutOfSync(state: boolean) {
-        this.outOfSync = state;
     }
 
     public async checkMemberships() {
@@ -352,14 +347,14 @@ export class RewardPool extends RewardPoolEvents {
 
     public async getReward(id: number) {
         const address = await this.contract.methods.rewards(id).call({ from: this.account });
-        const contract = await this.network.getExtdevContract(REWARD_JSON.abi, address);
+        const contract = await this.network.getExtdevContract(REWARD_ABI, address);
 
         return new Reward(id, address, contract, this.account);
     }
 
     public async getRewardOf(account: string, index: number) {
         const address = await this.contract.methods.rewardsOf(index, account).call({ from: this.account });
-        const contract = await this.network.getExtdevContract(REWARD_JSON.abi, address);
+        const contract = await this.network.getExtdevContract(REWARD_ABI, address);
 
         return new Reward(index, address, contract, this.account);
     }
@@ -377,7 +372,7 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async getRewardRulePoll(rule: RewardRule) {
-        const contract = await this.getContract(REWARD_RULE_POLL_JSON.abi, rule.pollAddress);
+        const contract = await this.getContract(REWARD_RULE_POLL_ABI, rule.pollAddress);
         const poll = new RewardRulePoll(rule.pollAddress, contract, this.account);
 
         await poll.update();
@@ -558,7 +553,6 @@ export interface IRewardPool {
     address: string;
     name: string;
     balance: number;
-    outOfSync: boolean;
     contract: any;
     owner: string;
     eventService: EventService;
