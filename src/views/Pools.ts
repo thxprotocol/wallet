@@ -1,33 +1,29 @@
 import { Component, Vue } from 'vue-property-decorator';
-import { BCard, BCardText, BSpinner, BModal, BButton, BOverlay } from 'bootstrap-vue';
+import { BCard, BCardText, BSpinner, BButton } from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
 import { Account } from '@/models/Account';
 import PoolService from '@/services/PoolService';
+import ModalPoolCreate from '@/components/modals/ModalPoolCreate.vue';
+import ModalPoolJoin from '@/components/modals/ModalPoolJoin.vue';
 
 @Component({
     name: 'pools',
     components: {
-        'b-modal': BModal,
         'b-card': BCard,
         'b-card-text': BCardText,
         'b-spinner': BSpinner,
         'b-button': BButton,
-        'b-overlay': BOverlay,
+        'modal-pool-create': ModalPoolCreate,
+        'modal-pool-join': ModalPoolJoin,
     },
-    computed: {
-        ...mapGetters({
-            rewardPools: 'rewardPools',
-            account: 'account',
-        }),
-    },
+    computed: mapGetters({
+        rewardPools: 'rewardPools',
+        account: 'account',
+    }),
 })
 export default class Pools extends Vue {
     public loading: boolean = false;
     public error: string = '';
-    public input: any = {
-        poolAddress: '',
-        poolName: '',
-    };
     public clipboard: any = null;
     private account!: Account;
     private poolService: PoolService = new PoolService();
@@ -46,34 +42,6 @@ export default class Pools extends Vue {
         (document as any).getElementById('clippy').remove();
 
         this.clipboard = value;
-    }
-
-    private joinRewardPool(address: string) {
-        this.loading = true;
-        this.poolService
-            .join(this.account.uid, address)
-            .then(() => {
-                this.loading = false;
-                (this.$refs.modalJoinPool as BModal).hide();
-            })
-            .catch((err: string) => {
-                this.loading = false;
-                this.error = err;
-            });
-    }
-
-    private async createRewardPool(name: string) {
-        this.loading = true;
-        this.poolService
-            .createAndJoin(this.account.uid, name)
-            .then(() => {
-                this.loading = false;
-                (this.$refs.modalCreatePool as BModal).hide();
-            })
-            .catch((err: string) => {
-                this.loading = false;
-                this.error = err;
-            });
     }
 
     private leaveRewardPool(poolAddress: string) {

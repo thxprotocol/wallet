@@ -34,7 +34,7 @@ export default class PoolService extends Vue {
         if (utils.isAddress(address)) {
             return firebase.database().ref(`users/${uid}/pools`).child(address).set({ address });
         } else {
-            return Promise.resolve();
+            return Promise.reject(`${address} is not a valid address.`);
         }
     }
 
@@ -44,13 +44,13 @@ export default class PoolService extends Vue {
         if (utils.isAddress(address)) {
             return firebase.database().ref(`users/${uid}/pools`).child(address).remove();
         } else {
-            return Promise.resolve();
+            return Promise.reject(`${address} is not a valid address.`);
         }
     }
 
     public async create(name: string): Promise<string | void> {
         if (!name) {
-            return Promise.resolve();
+            return Promise.reject(`No name provided for the pool to be created.`);
         }
 
         const poolName = name.substring(0, 30);
