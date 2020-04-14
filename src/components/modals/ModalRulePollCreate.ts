@@ -31,7 +31,7 @@ export default class ModalRulePollCreate extends Vue {
         this.$bvModal.hide('modalRulePollCreate');
     }
 
-    public async startRulePoll() {
+    private async startRulePoll() {
         this.loading = true;
 
         this.pool
