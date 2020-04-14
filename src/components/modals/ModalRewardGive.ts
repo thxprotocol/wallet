@@ -1,14 +1,14 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { RewardPool } from '@/models/RewardPool';
 import { RewardRule } from '@/models/RewardRule';
-import CModal from './Modal.vue';
+import BaseModal from '@/components/modals/BaseModal.vue';
 import { BButton } from 'bootstrap-vue';
 
 @Component({
     name: 'ModalRewardGive',
     components: {
         'b-button': BButton,
-        'c-modal': CModal,
+        'base-modal': BaseModal,
     },
 })
 export default class ModalRewardGive extends Vue {

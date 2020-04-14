@@ -1,7 +1,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { RewardPool } from '@/models/RewardPool';
 import { RewardRule } from '@/models/RewardRule';
-import CModal from './Modal.vue';
+import BaseModal from '@/components/modals/BaseModal.vue';
 import { BButton } from 'bootstrap-vue';
 import firebase from 'firebase/app';
 import 'firebase/database';
@@ -10,7 +10,7 @@ import 'firebase/database';
     name: 'ModalRewardClaim',
     components: {
         'b-button': BButton,
-        'c-modal': CModal,
+        'base-modal': BaseModal,
     },
 })
 export default class ModalRewardClaim extends Vue {

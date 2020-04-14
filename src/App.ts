@@ -5,10 +5,11 @@ import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
 import CoinService from './services/CoinService';
 import PoolService from './services/PoolService';
-import EventService from './services/EventService';
 import { Account } from '@/models/Account';
 import store from './store';
 import { mapGetters } from 'vuex';
+import { RewardPool } from '@/models/RewardPool';
+import { Notification } from '@/models/Notification';
 
 @Component({
     name: 'App',
@@ -24,11 +25,11 @@ import { mapGetters } from 'vuex';
 })
 export default class App extends Vue {
     public $store: any = store;
-    public $events!: EventService;
     private poolService: PoolService = new PoolService();
     private coinService: CoinService = new CoinService();
     private account!: Account;
     private userRef!: firebase.database.Reference;
+    private notificationsRef!: firebase.database.Reference;
 
     public async created() {
         firebase.auth().onAuthStateChanged((user: firebase.User | any) => {
@@ -59,9 +60,17 @@ export default class App extends Vue {
                     this.coinService.listen();
 
                     poolRef.on('child_added', async (s: any) => {
-                        const pool = await this.poolService.getRewardPool(s.key);
+                        const pool: RewardPool = await this.poolService.getRewardPool(s.key);
+                        const notificationRef = firebase.database().ref(`pools/${pool.address}/notifications`);
 
                         this.$store.commit('addRewardPool', pool);
+
+                        notificationRef.on('child_added', (snap: any) => {
+                            const account: Account = new Account(snap.val().uid);
+                            const notification: Notification = new Notification(pool, snap.key, account, snap.val());
+
+                            this.$store.commit('setNotification', notification);
+                        });
                     });
 
                     poolRef.on('child_removed', async (s: any) => {

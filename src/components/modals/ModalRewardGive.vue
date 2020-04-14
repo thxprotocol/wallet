@@ -1,5 +1,5 @@
 <template>
-    <c-modal :id="'modalRewardGive'" :title="'Give a reward'" :loading="loading">
+    <base-modal :id="'modalRewardGive'" :title="'Give a reward'" :loading="loading">
         <template slot="content">
             <input v-model="input.beneficiary" type="text" class="form-control" />
             <small v-if="input.beneficiary === $network.extdev.account" class="text-muted">
@@ -12,7 +12,7 @@
                 Give Reward
             </b-button>
         </template>
-    </c-modal>
+    </base-modal>
 </template>
 
 <script src="./ModalRewardGive.ts" lang="ts"></script>

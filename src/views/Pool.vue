@@ -29,6 +29,15 @@
                         <div class="alert alert-danger" v-if="error">
                             {{ error }}
                         </div>
+                        <div class="alert alert-warning">
+                            <p>
+                                You are not a member of this pool. Make sure to contact manager for this pool obtain a
+                                membership.
+                            </p>
+                            <button class="btn btn-block btn-success" v-b-modal="'modalMembershipRequest'">
+                                Request membership
+                            </button>
+                        </div>
 
                         <b-tab title="Stream" active>
                             <b-list-group>
@@ -291,6 +300,8 @@
                     </button>
                 </template>
             </b-modal>
+
+            <modal-membership-request :pool="pool"></modal-membership-request>
         </main>
     </article>
 </template>

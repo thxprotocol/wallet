@@ -1,5 +1,5 @@
 <template>
-    <c-modal :id="'modalRulePollCreate'" :title="'Create Rule Poll'" :loading="loading" :error="error">
+    <base-modal :id="'modalRulePollCreate'" :title="'Create Rule Poll'" :loading="loading" :error="error">
         <template slot="content">
             <p>
                 Propose a new reward size for this rule. A poll will be started and members of the pool can vote to
@@ -13,7 +13,7 @@
                 Create Poll
             </b-button>
         </template>
-    </c-modal>
+    </base-modal>
 </template>
 
 <script src="./ModalRulePollCreate.ts" lang="ts"></script>

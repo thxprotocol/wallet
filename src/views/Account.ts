@@ -1,13 +1,9 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import firebase from 'firebase/app';
-import 'firebase/database';
-import 'firebase/storage';
 import { CryptoUtils, LocalAddress } from 'loom-js';
 import { BOverlay, BAlert, BButton, BModal, BSpinner } from 'bootstrap-vue';
 import ProfilePicture from '@/components/ProfilePicture.vue';
 import { Account } from '@/models/Account';
-import StateService from '@/services/StateService';
 import BN from 'bn.js';
 import UserService from '@/services/UserService';
 

@@ -1,7 +1,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { RewardPool } from '@/models/RewardPool';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
-import CModal from './Modal.vue';
+import BaseModal from '@/components/modals/BaseModal.vue';
 import { BButton } from 'bootstrap-vue';
 import BN from 'bn.js';
 
@@ -11,7 +11,7 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
     name: 'ModalRulePollCreate',
     components: {
         'b-button': BButton,
-        'c-modal': CModal,
+        'base-modal': BaseModal,
     },
 })
 export default class ModalRulePollCreate extends Vue {

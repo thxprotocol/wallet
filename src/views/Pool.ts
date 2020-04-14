@@ -22,6 +22,7 @@ import { Account } from '@/models/Account';
 import { Reward } from '@/models/Reward';
 import BN from 'bn.js';
 import _ from 'lodash';
+import ModalMembershipRequest from '@/components/modals/ModalMembershipRequest.vue';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
@@ -47,6 +48,7 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
         'b-tab': BTab,
         'b-spinner': BSpinner,
         'b-modal': BModal,
+        'modal-membership-request': ModalMembershipRequest,
     },
     computed: {
         ...mapGetters({

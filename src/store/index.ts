@@ -1,15 +1,16 @@
 import Vuex from 'vuex';
 import { Vue } from 'vue-property-decorator';
 import { Account } from '@/models/Account';
-import { IRewardPools, RewardPool } from '../models/RewardPool';
+import { IRewardPools, RewardPool } from '@/models/RewardPool';
+import { Notification } from '@/models/Notification';
 import BN from 'bn.js';
-import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 
 Vue.use(Vuex);
 
 export interface State {
     account: Account | null;
     rewardPools: IRewardPools;
+    notifications: { [key: string]: Notification };
     balance: {
         eth: BN;
         token: BN;
@@ -20,6 +21,7 @@ export interface State {
 const state: State = {
     account: null,
     rewardPools: {},
+    notifications: {},
     balance: {
         eth: new BN(0),
         token: new BN(0),
@@ -43,6 +45,9 @@ const getters = {
     rewardPools: (store: State) => {
         return store.rewardPools;
     },
+    notifications: (store: State) => {
+        return store.notifications;
+    },
 };
 
 const mutations = {
@@ -54,6 +59,12 @@ const mutations = {
     },
     removeRewardPool: (store: State, address: string) => {
         Vue.delete(store.rewardPools, address);
+    },
+    setNotification: (store: State, notification: Notification) => {
+        Vue.set(store.notifications, notification.key, notification);
+    },
+    deleteNotification: (store: State, key: string) => {
+        Vue.delete(store.notifications, key);
     },
     addAccount: (store: State, account: Account) => {
         Vue.set(store, 'account', account);
