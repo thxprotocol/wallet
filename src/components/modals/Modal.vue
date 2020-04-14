@@ -1,8 +1,8 @@
 <template>
     <b-modal :id="id" :title="title" centered>
-        <b-overlay :show="loading" no-wrap></b-overlay>
         <slot name="content"> </slot>
         <template v-slot:modal-footer="{ ok, cancel }">
+            <b-overlay :show="loading" no-wrap></b-overlay>
             <slot name="footer"> </slot>
         </template>
     </b-modal>
