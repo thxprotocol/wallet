@@ -12,6 +12,8 @@ import config from './config.json';
 import './registerServiceWorker';
 import './custom.scss';
 import { ModalPlugin } from 'bootstrap-vue';
+import UserService from '@/services/UserService';
+import PoolService from '@/services/PoolService';
 
 Vue.config.productionTip = false;
 Vue.use(VueMoment);
@@ -25,6 +27,8 @@ firebase.auth().onAuthStateChanged((user: firebase.User | any = firebase.auth().
         const state: StateService = new StateService(user.uid);
 
         Vue.prototype.$user = user;
+        Vue.prototype.$users = new UserService();
+        Vue.prototype.$pools = new PoolService();
         Vue.prototype.$state = state;
         Vue.prototype.$network = new NetworkService(state.extdevPrivateKey, state.rinkebyPrivateKey);
 

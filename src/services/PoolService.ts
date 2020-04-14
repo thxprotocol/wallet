@@ -13,14 +13,14 @@ export default class PoolService extends Vue {
         return pool;
     }
 
-    public async requestMembership(uid: string, message: string, pool: RewardPool): Promise<string | void> {
+    public async requestMembership(address: string, message: string, pool: RewardPool): Promise<string | void> {
         const snap = await firebase.database().ref(`/pools/${pool.address}/notificatons`).push();
 
         return firebase
             .database()
-            .ref(`/pools/${pool.address}/notificatons/${snap.key}`)
+            .ref(`/pools/${pool.address}/notifications/${snap.key}`)
             .set({
-                uid,
+                address,
                 title: 'Membership requested',
                 public: false,
                 message: message ? message : null,

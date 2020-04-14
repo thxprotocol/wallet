@@ -1,18 +1,17 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Notification } from '@/models/Notification';
-import { BCard, BButton, BButtonGroup } from 'bootstrap-vue';
+import { BCard, BOverlay } from 'bootstrap-vue';
 import ProfilePicture from '@/components/ProfilePicture.vue';
 
 @Component({
-    name: 'Notification',
+    name: 'BaseNotification',
     components: {
+        'b-overlay': BOverlay,
         'b-card': BCard,
-        'b-button': BButton,
-        'b-button-group': BButtonGroup,
         'profile-picture': ProfilePicture,
     },
 })
-export default class CNotification extends Vue {
-    private loading: boolean = false;
+export default class BaseNotification extends Vue {
     @Prop() private notification!: Notification;
+    @Prop() private loading!: boolean;
 }

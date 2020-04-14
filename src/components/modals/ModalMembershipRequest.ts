@@ -28,7 +28,7 @@ export default class ModalMembershipRequest extends Vue {
     private async request() {
         this.loading = true;
         this.poolService
-            .requestMembership(this.$user.uid, this.input, this.pool)
+            .requestMembership(this.$network.extdev.account, this.input, this.pool)
             .then(() => {
                 this.loading = false;
                 this.$bvModal.hide('modalMembershipRequest');

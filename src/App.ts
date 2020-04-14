@@ -24,12 +24,9 @@ import { Notification } from '@/models/Notification';
     },
 })
 export default class App extends Vue {
-    public $store: any = store;
     private poolService: PoolService = new PoolService();
     private coinService: CoinService = new CoinService();
-    private account!: Account;
     private userRef!: firebase.database.Reference;
-    private notificationsRef!: firebase.database.Reference;
 
     public async created() {
         firebase.auth().onAuthStateChanged((user: firebase.User | any) => {
@@ -65,9 +62,17 @@ export default class App extends Vue {
 
                         this.$store.commit('addRewardPool', pool);
 
-                        notificationRef.on('child_added', (snap: any) => {
-                            const account: Account = new Account(snap.val().uid);
-                            const notification: Notification = new Notification(pool, snap.key, account, snap.val());
+                        notificationRef.on('child_added', async (snap: any) => {
+                            const address = snap.val().address;
+                            const member = await this.$users.getMemberByAddress(address);
+                            const account: Account = new Account(member.uid);
+                            const notification: Notification = new Notification(
+                                pool,
+                                address,
+                                snap.key,
+                                account,
+                                snap.val(),
+                            );
 
                             this.$store.commit('setNotification', notification);
                         });
