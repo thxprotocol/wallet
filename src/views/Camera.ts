@@ -1,13 +1,15 @@
 import { mapGetters } from 'vuex';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { BSpinner, BAlert } from 'bootstrap-vue';
 import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 import PoolService from '@/services/PoolService';
-import { RewardPool, IRewardPools } from '@/models/RewardPool';
+import { RewardPool } from '@/models/RewardPool';
 import { RewardRule } from '@/models/RewardRule';
 import UserService from '@/services/UserService';
 import { Account } from '@/models/Account';
 import { VueRouter } from 'vue-router/types/router';
+import firebase from 'firebase/app';
+import 'firebase/database';
 
 @Component({
     name: 'Camera',
@@ -36,7 +38,6 @@ export default class Camera extends Vue {
     private error: string = '';
     private poolService: PoolService = new PoolService();
     private userService: UserService = new UserService();
-    private rewardPools!: IRewardPools;
 
     private repaint() {
         return;
@@ -49,33 +50,69 @@ export default class Camera extends Vue {
 
             try {
                 if (this.data.pool && this.data.rule >= 0) {
-                    // Should check for membership of the pool instead of pool existance
-                    this.pool = await this.poolService.getRewardPool(this.data.pool);
-                    this.rule = await this.pool.getRewardRule(this.data.rule);
-                } else if (this.data.slack) {
-                    // Should check for membership of the pool instead of pool existance
+                    const valid = await this.isValid();
+
+                    if (valid) {
+                        this.pool = await this.poolService.getRewardPool(this.data.pool);
+                        this.rule = await this.pool.getRewardRule(this.data.rule);
+
+                        await firebase.database().ref(`/pools/${this.pool.address}/rewards/${this.data.key}`).remove();
+                    } else {
+                        throw { message: 'Your QR code is not valid.' };
+                    }
+                } else if (this.data.pool && this.data.slack) {
                     this.pool = await this.poolService.getRewardPool(this.data.pool);
                     this.slack = this.data.slack;
                 } else {
-                    throw { message: `An error occured while decoding your QR code.` };
+                    throw { message: 'An error occured while decoding your QR code.' };
                 }
             } catch (err) {
-                this.error = err.message ? err.message : err;
+                this.error = err.message || err;
             }
         }
     }
 
+    private async isValid() {
+        const snap: any = await firebase
+            .database()
+            .ref(`pools/${this.data.pool}/rewards/${this.data.key}`)
+            .once('value');
+
+        return snap.exists();
+    }
+
     private connect() {
+        this.loading = true;
         if (this.pool && this.account) {
             this.userService
                 .connectSlack(this.account, this.data.slack)
                 .then(() => {
                     this.$router.push(`/account`);
+                    this.loading = false;
                 })
                 .catch((err: any) => {
                     if (err) {
                         this.error = err.message;
                     }
+                    this.loading = false;
+                });
+        }
+    }
+
+    private claim() {
+        this.loading = true;
+        if (this.pool && this.rule) {
+            this.pool
+                .createReward(this.rule.id, this.$network.extdev.account)
+                .then(() => {
+                    this.$router.push(`/pools/${this.pool.address}`);
+                    this.loading = false;
+                })
+                .catch((err: any) => {
+                    if (err) {
+                        this.error = err.message;
+                    }
+                    this.loading = false;
                 });
         }
     }

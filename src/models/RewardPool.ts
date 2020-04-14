@@ -21,8 +21,8 @@ import { Reward } from '@/models/Reward';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import _ from 'lodash';
 import BN from 'bn.js';
-import REWARD_JSON from '@/contracts/Reward.json';
-import REWARD_RULE_POLL_JSON from '@/contracts/RulePoll.json';
+import REWARD_ABI from '@/contracts/Reward.abi';
+import REWARD_RULE_POLL_ABI from '@/contracts/RulePoll.abi';
 import UserService from '@/services/UserService';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
@@ -34,7 +34,6 @@ export class RewardPool extends RewardPoolEvents {
     public isMember: boolean = false;
     public isManager: boolean = false;
     public address: string = '';
-    public outOfSync: boolean = true;
     public transactions: any[] = [];
 
     public events: any[] = [];
@@ -87,7 +86,7 @@ export class RewardPool extends RewardPoolEvents {
             try {
                 const address = await this.contract.methods.members(i).call({ from: this.account });
                 const member = await this.getMember(address);
-                const exists = this.members.find(m => {
+                const exists = this.members.find((m) => {
                     return member.address === m.address;
                 });
 
@@ -154,10 +153,6 @@ export class RewardPool extends RewardPoolEvents {
             const w = await this.withdrawelOf(this.account, i);
             this.transactions.push(new Withdrawel(w, this));
         }
-    }
-
-    public setOutOfSync(state: boolean) {
-        this.outOfSync = state;
     }
 
     public async checkMemberships() {
@@ -344,10 +339,7 @@ export class RewardPool extends RewardPoolEvents {
 
     public async getRewardRule(id: number) {
         const data = await this.contract.methods.rules(id).call({ from: this.account });
-        const snap = await firebase
-            .database()
-            .ref(`pools/${this.address}/rules/${id}`)
-            .once('value');
+        const snap = await firebase.database().ref(`pools/${this.address}/rules/${id}`).once('value');
         const meta = snap.val();
 
         return new RewardRule(data, meta);
@@ -355,14 +347,14 @@ export class RewardPool extends RewardPoolEvents {
 
     public async getReward(id: number) {
         const address = await this.contract.methods.rewards(id).call({ from: this.account });
-        const contract = await this.network.getExtdevContract(REWARD_JSON.abi, address);
+        const contract = await this.network.getExtdevContract(REWARD_ABI, address);
 
         return new Reward(id, address, contract, this.account);
     }
 
     public async getRewardOf(account: string, index: number) {
         const address = await this.contract.methods.rewardsOf(index, account).call({ from: this.account });
-        const contract = await this.network.getExtdevContract(REWARD_JSON.abi, address);
+        const contract = await this.network.getExtdevContract(REWARD_ABI, address);
 
         return new Reward(index, address, contract, this.account);
     }
@@ -380,7 +372,7 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async getRewardRulePoll(rule: RewardRule) {
-        const contract = await this.getContract(REWARD_RULE_POLL_JSON.abi, rule.pollAddress);
+        const contract = await this.getContract(REWARD_RULE_POLL_ABI, rule.pollAddress);
         const poll = new RewardRulePoll(rule.pollAddress, contract, this.account);
 
         await poll.update();
@@ -393,14 +385,11 @@ export class RewardPool extends RewardPoolEvents {
         const id = tx.events.RuleStateChanged.returnValues.id;
         const state = tx.events.RuleStateChanged.returnValues.state;
 
-        return await firebase
-            .database()
-            .ref(`pools/${this.address}/rules/${id}`)
-            .set({
-                title: rule.title,
-                description: rule.description,
-                state,
-            });
+        return await firebase.database().ref(`pools/${this.address}/rules/${id}`).set({
+            title: rule.title,
+            description: rule.description,
+            state,
+        });
     }
 
     public async getRewardPoolEventDataFromHash(hash: string, type: string) {
@@ -412,6 +401,7 @@ export class RewardPool extends RewardPoolEvents {
                 (o: any) => o.name === type && o.type === 'event',
             );
             const log = _.find(receipt.logs, (l: any) => l.topics.includes(eventInterface.signature));
+
             if (log) {
                 const event = await this.network.extdev.web3js.eth.abi.decodeLog(
                     eventInterface.inputs,
@@ -448,18 +438,27 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     private async updateRule(data: any) {
+        let rule: RewardRule;
+        let index: number;
         const id = parseInt(data.id, 10);
-        const rule = this.rewardRules.find((r: RewardRule) => {
-            return id === r.id;
+        const r = this.rewardRules.find((rr: RewardRule) => {
+            return id === rr.id;
         });
-        if (rule) {
-            const index = this.rewardRules.indexOf(rule);
 
-            this.rewardRules[index] = rule;
+        if (r) {
+            rule = await this.getRewardRule(r.id);
+            index = this.rewardRules.indexOf(r);
+
+            this.rewardRules.splice(index, 1, rule);
         } else {
-            const r = await this.getRewardRule(id);
+            rule = await this.getRewardRule(id);
+            index = this.rewardRules.push(rule);
+        }
 
-            this.rewardRules.push(r);
+        if (rule.hasPollAddress) {
+            const poll: RewardRulePoll = await this.getRewardRulePoll(rule);
+
+            this.rewardRules[index].setPoll(poll);
         }
     }
 
@@ -482,10 +481,7 @@ export class RewardPool extends RewardPoolEvents {
                         }
                     }
                 } else {
-                    await firebase
-                        .database()
-                        .ref(`pools/${this.address}/events/${snap.key}`)
-                        .remove();
+                    await firebase.database().ref(`pools/${this.address}/events/${snap.key}`).remove();
                 }
             });
     }
@@ -536,35 +532,23 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     private async callPoolMethod(method: any) {
-        const snap = await firebase
-            .database()
-            .ref(`pools/${this.address}/events`)
-            .push();
+        const snap = await firebase.database().ref(`pools/${this.address}/events`).push();
 
         try {
-            await firebase
-                .database()
-                .ref(`pools/${this.address}/events/${snap.key}`)
-                .set({
-                    state: 0,
-                });
+            await firebase.database().ref(`pools/${this.address}/events/${snap.key}`).set({
+                state: 0,
+            });
 
             const tx = await method.send({ from: this.account });
 
-            await firebase
-                .database()
-                .ref(`pools/${this.address}/events/${snap.key}`)
-                .update({
-                    hash: tx.transactionHash,
-                    state: 1,
-                });
+            await firebase.database().ref(`pools/${this.address}/events/${snap.key}`).update({
+                hash: tx.transactionHash,
+                state: 1,
+            });
 
             return tx;
         } catch (err) {
-            await firebase
-                .database()
-                .ref(`pools/${this.address}/events/${snap.key}`)
-                .remove();
+            await firebase.database().ref(`pools/${this.address}/events/${snap.key}`).remove();
             console.error(err);
             return err;
         }
@@ -579,7 +563,6 @@ export interface IRewardPool {
     address: string;
     name: string;
     balance: number;
-    outOfSync: boolean;
     contract: any;
     owner: string;
     eventService: EventService;

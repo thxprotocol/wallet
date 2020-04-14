@@ -40,10 +40,7 @@ export default class Claim extends Vue {
                 }
             });
 
-            rewardsRef
-                .child(this.data.key)
-                .onDisconnect()
-                .remove();
+            rewardsRef.child(this.data.key).onDisconnect().remove();
 
             this.startConfetti();
 

@@ -53,7 +53,6 @@ export default class AccountDetail extends Vue {
         transferEtherAmount: 0,
     };
     private account!: Account;
-    private $state!: StateService;
     private userService: UserService = new UserService();
 
     public async created() {
@@ -104,9 +103,7 @@ export default class AccountDetail extends Vue {
     public async onCreateAccountsFromPrivateKey() {
         const privateKeyArray = CryptoUtils.B64ToUint8Array(this.input.extdevPrivateKey);
         const publicKey = CryptoUtils.publicKeyFromPrivateKey(privateKeyArray);
-        const address = LocalAddress.fromPublicKey(publicKey)
-            .toString()
-            .toLowerCase();
+        const address = LocalAddress.fromPublicKey(publicKey).toString().toLowerCase();
 
         this.loading = true;
 

@@ -37,10 +37,7 @@ export class Account {
                 this.email = s.val().email;
                 this.slack = s.val().slack;
 
-                s.ref
-                    .child('online')
-                    .onDisconnect()
-                    .set(false);
+                s.ref.child('online').onDisconnect().set(false);
 
                 s.ref.child('online').set(true);
             });
@@ -55,10 +52,7 @@ export class Account {
                 const url = await s.ref.getDownloadURL();
                 const picture = new ProfilePictureData(name, url);
 
-                firebase
-                    .database()
-                    .ref(`users/${this.uid}`)
-                    .update({ picture });
+                firebase.database().ref(`users/${this.uid}`).update({ picture });
             });
     }
 
