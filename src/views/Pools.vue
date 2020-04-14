@@ -37,10 +37,10 @@
                 </template>
             </b-card>
 
-            <b-button variant="primary" class="btn-block" v-b-modal.modalPoolJoin>
+            <b-button variant="primary" class="btn-block" v-b-modal.ModalPoolJoin>
                 Join Reward Pool
             </b-button>
-            <b-button variant="link" class="btn-block" v-b-modal.modalPoolCreate>
+            <b-button variant="link" class="btn-block" v-b-modal.ModalPoolCreate>
                 Create Reward Pool
             </b-button>
 

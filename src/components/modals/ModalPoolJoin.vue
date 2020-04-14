@@ -1,5 +1,5 @@
 <template>
-    <c-modal id="modalPoolJoin" centered title="Join a reward pool" :loading="loading">
+    <c-modal id="ModalPoolJoin" centered title="Join a reward pool" :loading="loading">
         <template slot="content">
             <div class="alert alert-danger" v-if="error">
                 {{ error }}

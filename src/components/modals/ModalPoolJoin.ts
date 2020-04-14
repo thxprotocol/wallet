@@ -32,7 +32,7 @@ export default class ModalPoolJoin extends Vue {
 
     private cancel() {
         this.resetInput();
-        this.$bvModal.hide('modalPoolJoin');
+        this.$bvModal.hide('ModalPoolJoin');
     }
 
     private join() {
@@ -41,7 +41,7 @@ export default class ModalPoolJoin extends Vue {
             .join(this.account.uid, this.input.poolAddress)
             .then(() => {
                 this.loading = false;
-                this.$bvModal.hide('modalPoolJoin');
+                this.$bvModal.hide('ModalPoolJoin');
                 this.resetInput();
             })
             .catch((err: string) => {

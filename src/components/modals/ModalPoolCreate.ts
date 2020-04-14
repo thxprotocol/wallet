@@ -33,7 +33,7 @@ export default class ModalPoolCreate extends Vue {
     private async cancel() {
         this.resetInput();
 
-        this.$bvModal.hide('modalPoolCreate');
+        this.$bvModal.hide('ModalPoolCreate');
     }
 
     private create() {
@@ -43,7 +43,7 @@ export default class ModalPoolCreate extends Vue {
             .createAndJoin(this.account.uid, this.input.poolName)
             .then(() => {
                 this.loading = false;
-                this.$bvModal.hide('modalPoolCreate');
+                this.$bvModal.hide('ModalPoolCreate');
                 this.resetInput();
             })
             .catch((err: string) => {
