@@ -40,7 +40,7 @@
             <b-button variant="primary" class="btn-block" v-b-modal.modalPoolJoin>
                 Join Reward Pool
             </b-button>
-            <b-button variant="link" class="btn-block" v-b-modal="'modalPoolCreate'">
+            <b-button variant="link" class="btn-block" v-b-modal.modalPoolCreate>
                 Create Reward Pool
             </b-button>
 
