@@ -8,7 +8,7 @@
     >
         <template slot="content">
             <label>Provide a message (optional):</label>
-            <textarea @v-modal="input" class="form-control"> </textarea>
+            <textarea v-model="input" class="form-control"> </textarea>
         </template>
         <template slot="footer">
             <b-button variant="link" @click="cancel()">Cancel</b-button>

@@ -17,10 +17,15 @@ export default class UserService extends Vue {
         }
     }
 
+    public async removeNotification(uid: string, key: string) {
+        return await firebase.database().ref(`users/${uid}/notifications/${key}/removed`).set(true);
+    }
+
     public async update(account: Account) {
-        await firebase.database().ref(`users/${account.uid}`).update({
+        return await firebase.database().ref(`users/${account.uid}`).update({
             firstName: account.firstName,
             lastName: account.lastName,
+            notifications: account.notifications,
         });
     }
 

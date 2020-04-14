@@ -1,5 +1,6 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BNav, BNavItem } from 'bootstrap-vue';
+import { mapGetters } from 'vuex';
 
 @Component({
     name: 'Footer',
@@ -7,17 +8,27 @@ import { BNav, BNavItem } from 'bootstrap-vue';
         'b-nav': BNav,
         'b-nav-item': BNavItem,
     },
+    computed: {
+        ...mapGetters({
+            notifications: 'notifications',
+        }),
+    },
 })
 export default class Footer extends Vue {
-    get routes(): any {
-        return (this.$router as any).options.routes.filter((item: any) => item.visible);
-    }
-    public amountOfNewRewards: number = 0;
-    public assets: any = {
+    private assets: any = {
         wallet: require('../assets/wallet.svg'),
         notifications: require('../assets/notification.svg'),
         account: require('../assets/account.svg'),
         camera: require('../assets/qrcode.svg'),
         pools: require('../assets/community.svg'),
     };
+    private notifications!: { [key: string]: Notification };
+
+    get routes(): any {
+        return (this.$router as any).options.routes.filter((item: any) => item.visible);
+    }
+
+    get notificationCount(): number {
+        return Object.keys(this.notifications).length;
+    }
 }

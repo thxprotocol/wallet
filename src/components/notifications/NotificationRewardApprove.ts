@@ -6,7 +6,7 @@ import { Account } from '@/models/Account';
 import { mapGetters } from 'vuex';
 
 @Component({
-    name: 'NotificationMembershipRequest',
+    name: 'NotificationRewardApprove',
     components: {
         'b-button': BButton,
         'b-button-group': BButtonGroup,
@@ -18,22 +18,15 @@ import { mapGetters } from 'vuex';
         }),
     },
 })
-export default class NotificationMembershipRequest extends Vue {
+export default class NotificationRewardApprove extends Vue {
     private loading: boolean = false;
     private account!: Account;
 
     @Prop() private notification!: Notification;
 
-    private async grant() {
+    private async approve() {
         this.loading = true;
-        this.notification.pool
-            .addMember(this.notification.address)
-            .then(async () => {
-                this.remove();
-            })
-            .catch((e: string) => {
-                this.loading = false;
-            });
+        const reward = await this.notification.pool.getReward(this.notification.metadata.reward);
     }
 
     private async decline() {

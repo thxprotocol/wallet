@@ -1,6 +1,7 @@
 import { mapGetters } from 'vuex';
 import { Component, Vue } from 'vue-property-decorator';
 import NotificationMembershipRequest from '@/components/notifications/NotificationMembershipRequest.vue';
+import { Notification } from '@/models/Notification';
 
 @Component({
     name: 'notifications',
@@ -9,7 +10,6 @@ import NotificationMembershipRequest from '@/components/notifications/Notificati
     },
     computed: {
         ...mapGetters({
-            rewardPools: 'rewardPools',
             notifications: 'notifications',
         }),
     },

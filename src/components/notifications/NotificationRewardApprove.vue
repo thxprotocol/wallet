@@ -1,22 +1,21 @@
 <template>
     <base-notification :notification="notification" :loading="loading" @loading="loading = $event">
         <div slot="notification-content">
-            <p>
-                <strong>{{ notification.account.firstName }} {{ notification.account.lastName }}</strong> is requesting
-                membership for pool
+            <p class="m-0">
+                <strong>{{ notification.account.firstName }}</strong> is claiming a reward for pool
                 <strong>{{ notification.pool.name }}</strong>
             </p>
-            <blockquote class="blockquote">
-                {{ notification.account.firstName }}: {{ notification.metadata.message }}
-            </blockquote>
+            <p>
+                {{ notification.metadata }}
+            </p>
         </div>
         <div slot="notification-footer">
             <b-button-group class="w-100">
-                <b-button variant="success" @click="grant()">Grant</b-button>
+                <b-button variant="success" @click="approve()">Approve</b-button>
                 <b-button variant="danger" @click="decline()">Decline</b-button>
             </b-button-group>
         </div>
     </base-notification>
 </template>
 
-<script src="./NotificationMembershipRequest.ts" lang="ts"></script>
+<script src="./NotificationRewardApprove.ts" lang="ts"></script>

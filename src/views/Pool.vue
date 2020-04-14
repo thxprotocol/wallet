@@ -29,7 +29,7 @@
                         <div class="alert alert-danger" v-if="error">
                             {{ error }}
                         </div>
-                        <div class="alert alert-warning">
+                        <div v-if="!pool.isMember" class="alert alert-warning">
                             <p>
                                 You are not a member of this pool. Make sure to contact manager for this pool obtain a
                                 membership.

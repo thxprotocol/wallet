@@ -6,10 +6,10 @@ import Footer from './components/Footer.vue';
 import CoinService from './services/CoinService';
 import PoolService from './services/PoolService';
 import { Account } from '@/models/Account';
-import store from './store';
 import { mapGetters } from 'vuex';
 import { RewardPool } from '@/models/RewardPool';
 import { Notification } from '@/models/Notification';
+import _ from 'lodash';
 
 @Component({
     name: 'App',
@@ -27,6 +27,7 @@ export default class App extends Vue {
     private poolService: PoolService = new PoolService();
     private coinService: CoinService = new CoinService();
     private userRef!: firebase.database.Reference;
+    private account!: Account;
 
     public async created() {
         firebase.auth().onAuthStateChanged((user: firebase.User | any) => {
@@ -56,6 +57,24 @@ export default class App extends Vue {
 
                     this.coinService.listen();
 
+                    this.userRef.child('notifications').on('child_added', async (s: any) => {
+                        if (!s.val().removed) {
+                            const pool: RewardPool = await this.poolService.getRewardPool(s.val().pool);
+                            const snap = await firebase
+                                .database()
+                                .ref(`pools/${pool.address}/notifications/${s.key}`)
+                                .once('value');
+
+                            this.addNotification(pool, snap);
+                        }
+                    });
+
+                    this.userRef.child('notifications').on('child_changed', async (snap: any) => {
+                        if (snap.val().removed) {
+                            this.$store.commit('deleteNotification', snap.key);
+                        }
+                    });
+
                     poolRef.on('child_added', async (s: any) => {
                         const pool: RewardPool = await this.poolService.getRewardPool(s.key);
                         const notificationRef = firebase.database().ref(`pools/${pool.address}/notifications`);
@@ -63,18 +82,9 @@ export default class App extends Vue {
                         this.$store.commit('addRewardPool', pool);
 
                         notificationRef.on('child_added', async (snap: any) => {
-                            const address = snap.val().address;
-                            const member = await this.$users.getMemberByAddress(address);
-                            const account: Account = new Account(member.uid);
-                            const notification: Notification = new Notification(
-                                pool,
-                                address,
-                                snap.key,
-                                account,
-                                snap.val(),
-                            );
-
-                            this.$store.commit('setNotification', notification);
+                            if (!_.has(this.account.notifications, snap.key)) {
+                                this.addNotification(pool, snap);
+                            }
                         });
                     });
 
@@ -88,6 +98,15 @@ export default class App extends Vue {
                 window.removeEventListener('focus', this.setOnline);
             }
         });
+    }
+
+    private async addNotification(pool: RewardPool, snap: any) {
+        const address = snap.val().address;
+        const member = await this.$users.getMemberByAddress(address);
+        const account: Account = new Account(member.uid);
+        const notification: Notification = new Notification(pool, address, snap.key, account, snap.val());
+
+        this.$store.commit('setNotification', notification);
     }
 
     private setOnline() {

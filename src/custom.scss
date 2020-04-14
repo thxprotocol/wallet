@@ -9,6 +9,13 @@ $blue: #039be5;
     background-color: $blue !important;
 }
 
+.blockquote {
+    border-left: 3px solid $blue;
+    padding-left: 1rem;
+    margin: 0;
+    font-size: 1rem;
+}
+
 body,
 html {
     margin: 0;
@@ -86,6 +93,18 @@ a,
     flex: 0 60px;
     background: white;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+
+    .nav-item {
+        position: relative;
+    }
+
+    .badge-danger {
+        position: absolute;
+        bottom: 50%;
+        left: 50%;
+        margin-left: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
 }
 
 .bg-yellow {

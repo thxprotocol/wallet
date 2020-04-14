@@ -20,6 +20,7 @@ export class Account {
     public picture: ProfilePictureData | null;
     public slack: string = '';
     public online: boolean = false;
+    public notifications: { [key: string]: { pool: string; removed: boolean } } = {};
 
     constructor(uid: string) {
         this.uid = uid;
@@ -30,15 +31,17 @@ export class Account {
             .ref(`users/${this.uid}`)
             .once('value')
             .then((s: any) => {
-                this.firstName = s.val().firstName;
-                this.lastName = s.val().lastName;
-                this.initials = s.val().firstName.charAt(0) + s.val().lastName.charAt(0);
-                this.picture = s.val().picture;
-                this.email = s.val().email;
-                this.slack = s.val().slack;
+                const data = s.val();
+
+                this.firstName = data.firstName || '';
+                this.lastName = data.lastName || '';
+                this.initials = data.firstName.charAt(0) + s.val().lastName.charAt(0);
+                this.picture = data.picture;
+                this.email = data.email;
+                this.slack = data.slack;
+                this.notifications = data.notifications || {};
 
                 s.ref.child('online').onDisconnect().set(false);
-
                 s.ref.child('online').set(true);
             });
     }
