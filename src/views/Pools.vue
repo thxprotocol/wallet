@@ -37,44 +37,15 @@
                 </template>
             </b-card>
 
-            <b-button variant="primary" class="btn-block" @click="$refs.modalJoinPool.show()">
+            <b-button variant="primary" class="btn-block" v-b-modal.modalPoolJoin>
                 Join Reward Pool
             </b-button>
-            <b-button variant="link" class="btn-block" @click="$refs.modalCreatePool.show()">
+            <b-button variant="link" class="btn-block" v-b-modal="'modalPoolCreate'">
                 Create Reward Pool
             </b-button>
 
-            <b-modal ref="modalJoinPool" centered title="Join a reward pool">
-                <input
-                    v-model="input.poolAddress"
-                    type="text"
-                    class="form-control"
-                    placeholder="0x0000000000000000000000000000"
-                />
-                <template v-slot:modal-footer>
-                    <b-overlay :show="loading" no-wrap></b-overlay>
-                    <b-button variant="link" @click="$refs.modalJoinPool.hide()">
-                        Cancel
-                    </b-button>
-                    <b-button @click="joinRewardPool(input.poolAddress)" variant="primary" :disabled="loading">
-                        Join
-                    </b-button>
-                </template>
-            </b-modal>
-
-            <b-modal ref="modalCreatePool" centered title="Create a reward pool">
-                <input v-model="input.poolName" type="text" class="form-control" placeholder="Volunteers united" />
-                <template v-slot:modal-footer>
-                    <b-overlay :show="loading" no-wrap></b-overlay>
-
-                    <b-button variant="link" @click="$refs.modalCreatePool.hide()">
-                        Cancel
-                    </b-button>
-                    <b-button @click="createRewardPool(input.poolName)" variant="primary" :disabled="loading">
-                        Create
-                    </b-button>
-                </template>
-            </b-modal>
+            <modal-pool-join />
+            <modal-pool-create />
         </main>
     </article>
 </template>
