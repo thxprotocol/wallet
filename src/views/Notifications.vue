@@ -1,7 +1,7 @@
 <template>
     <article class="region region-container overflow p-3 d-block">
         <div class="pb-2 w-100" :key="key" v-for="(notification, key) in notifications">
-            <notification-membership-request :notification="notification" />
+            <component :is="notification.metadata.component" :notification="notification" />
         </div>
     </article>
 </template>

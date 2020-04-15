@@ -21,7 +21,7 @@ export default class PoolService extends Vue {
             .ref(`/pools/${pool.address}/notifications/${snap.key}`)
             .set({
                 address,
-                title: 'Membership requested',
+                component: 'notification-membership-request',
                 public: false,
                 message: message ? message : null,
                 timestamp: firebase.database.ServerValue.TIMESTAMP,

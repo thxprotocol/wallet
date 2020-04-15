@@ -12,12 +12,12 @@ import PoolService from '@/services/PoolService';
     },
 })
 export default class ModalMembershipRequest extends Vue {
+    @Prop() private pool!: RewardPool;
+
     private error: string = '';
     private loading: boolean = false;
     private input: string = '';
     private poolService: PoolService = new PoolService();
-
-    @Prop() private pool!: RewardPool;
 
     private async cancel() {
         this.error = '';

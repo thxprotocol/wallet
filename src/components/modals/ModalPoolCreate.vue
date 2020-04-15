@@ -1,5 +1,12 @@
 <template>
-    <base-modal id="ModalPoolCreate" centered title="Create a reward pool" :loading="loading">
+    <base-modal
+        id="ModalPoolCreate"
+        @error="error = $event"
+        :error="error"
+        centered
+        title="Create a reward pool"
+        :loading="loading"
+    >
         <template slot="content">
             <div class="alert alert-danger" v-if="error">
                 {{ error }}

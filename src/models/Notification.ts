@@ -23,4 +23,5 @@ class NotificationMetadata {
     public title!: string;
     public timestamp!: number;
     public uid!: string;
+    public component!: string;
 }

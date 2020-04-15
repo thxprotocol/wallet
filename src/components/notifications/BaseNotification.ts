@@ -19,10 +19,11 @@ import { mapGetters } from 'vuex';
     },
 })
 export default class BaseNotification extends Vue {
-    private account!: Account;
-
     @Prop() private notification!: Notification;
     @Prop() private loading!: boolean;
+    @Prop() private title!: string;
+
+    private account!: Account;
 
     private async mounted() {
         const account = this.account;

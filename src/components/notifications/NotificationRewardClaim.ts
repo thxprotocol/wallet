@@ -4,9 +4,11 @@ import { BButton, BButtonGroup } from 'bootstrap-vue';
 import BaseNotification from '@/components/notifications/BaseNotification.vue';
 import { Account } from '@/models/Account';
 import { mapGetters } from 'vuex';
+import { Reward } from '@/models/Reward';
+import { IRewardPools } from '@/models/RewardPool';
 
 @Component({
-    name: 'NotificationRewardApprove',
+    name: 'NotificationRewardClaim',
     components: {
         'b-button': BButton,
         'b-button-group': BButtonGroup,
@@ -15,23 +17,43 @@ import { mapGetters } from 'vuex';
     computed: {
         ...mapGetters({
             account: 'account',
+            rewardPools: 'rewardPools',
         }),
     },
 })
-export default class NotificationRewardApprove extends Vue {
+export default class NotificationRewardClaim extends Vue {
     private loading: boolean = false;
     private account!: Account;
+    private rewardPools!: IRewardPools;
 
     @Prop() private notification!: Notification;
 
+    get reward() {
+        return this.rewardPools[this.notification.pool.address].rewards[this.notification.metadata.reward];
+    }
+
     private async approve() {
         this.loading = true;
-        const reward = await this.notification.pool.getReward(this.notification.metadata.reward);
+        if (this.reward) {
+            this.notification.pool
+                .voteForReward(this.reward, true)
+                .then(() => this.remove())
+                .catch(() => {
+                    this.loading = false;
+                });
+        }
     }
 
     private async decline() {
         this.loading = true;
-        this.remove();
+        if (this.reward) {
+            this.notification.pool
+                .voteForReward(this.reward, false)
+                .then(() => this.remove())
+                .catch(() => {
+                    this.loading = false;
+                });
+        }
     }
 
     private async remove() {

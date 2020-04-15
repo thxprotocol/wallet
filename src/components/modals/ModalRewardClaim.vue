@@ -1,5 +1,11 @@
 <template>
-    <base-modal :id="'modalRewardClaim'" :title="'Claim a reward'" :loading="loading">
+    <base-modal
+        :id="'modalRewardClaim'"
+        @error="error = $event"
+        :error="error"
+        :title="'Claim a reward'"
+        :loading="loading"
+    >
         <template slot="content">
             <div class="d-flex justify-content-center">
                 <b-button class="mt-3 mb-3" variant="primary" @click="generate()" v-if="!data">Generate QR</b-button>

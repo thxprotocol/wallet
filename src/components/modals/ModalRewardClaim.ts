@@ -17,6 +17,7 @@ export default class ModalRewardClaim extends Vue {
     @Prop() private pool!: RewardPool;
     @Prop() private rule!: RewardRule;
 
+    private error: string = '';
     private loading: boolean = false;
     private data: any = null;
     private dataString: string = '';
@@ -50,7 +51,7 @@ export default class ModalRewardClaim extends Vue {
 
         QRCode.toCanvas(this.$refs.canvas, dataString, (err: string) => {
             if (err) {
-                console.error(err);
+                this.error = err;
             }
         });
     }

@@ -260,7 +260,21 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async createReward(ruleId: number, address: string) {
-        return await this.contract.methods.createReward(ruleId, address).send({ from: this.account });
+        return this.contract.methods
+            .createReward(ruleId, address)
+            .send({ from: this.account })
+            .then(async (tx: any) => {
+                const id = tx.events.RewardPollCreated.returnValues.id;
+                const snap = await firebase.database().ref(`/pools/${this.address}/notificatons`).push();
+
+                return firebase.database().ref(`/pools/${this.address}/notifications/${snap.key}`).set({
+                    address,
+                    reward: id,
+                    public: false,
+                    component: 'notification-reward-claim',
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                });
+            });
     }
 
     public async addManager(address: string) {
@@ -343,6 +357,13 @@ export class RewardPool extends RewardPoolEvents {
         const meta = snap.val();
 
         return new RewardRule(data, meta);
+    }
+
+    public async getRewardByAddress(address: string) {
+        const contract = await this.network.getExtdevContract(REWARD_ABI, address);
+        const id = await contract.methods.id().call({ from: this.account });
+
+        return new Reward(id, address, contract, this.account);
     }
 
     public async getReward(id: number) {

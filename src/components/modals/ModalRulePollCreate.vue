@@ -1,5 +1,11 @@
 <template>
-    <base-modal :id="'modalRulePollCreate'" :title="'Create Rule Poll'" :loading="loading" :error="error">
+    <base-modal
+        :id="'modalRulePollCreate'"
+        @error="error = $event"
+        :error="error"
+        :title="'Create Rule Poll'"
+        :loading="loading"
+    >
         <template slot="content">
             <p>
                 Propose a new reward size for this rule. A poll will be started and members of the pool can vote to

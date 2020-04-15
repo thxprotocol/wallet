@@ -15,6 +15,7 @@ export default class ModalRewardGive extends Vue {
     @Prop() private pool!: RewardPool;
     @Prop() private rule!: RewardRule;
 
+    private error: string = '';
     private input: any = {
         beneficiary: '',
     };
@@ -38,7 +39,8 @@ export default class ModalRewardGive extends Vue {
                 this.loading = false;
                 this.$bvModal.hide('ModalRewardGive');
             })
-            .catch(() => {
+            .catch((e: string) => {
+                this.error = e;
                 this.loading = false;
             });
     }
