@@ -31,30 +31,7 @@
             </template>
 
             <div :class="{ disabled: now > reward.endTime || disabled }" v-if="showDetails">
-                <h3>Votes ({{ reward.totalVoted }}):</h3>
-                <div class="row">
-                    <div class="col-12">
-                        <b-progress
-                            variant="info"
-                            :value="((now - reward.startTime) / (reward.endTime - reward.startTime)) * 100"
-                            :max="100"
-                        ></b-progress>
-                    </div>
-                    <div class="col-6" v-if="reward.startTime">
-                        <small>{{ reward.startTime | moment("DD/MM/'YY HH:mm") }}</small>
-                    </div>
-                    <div class="col-6 text-right" v-if="reward.endTime">
-                        <small>{{ reward.endTime | moment("DD/MM/'YY HH:mm") }}</small>
-                    </div>
-                </div>
-                <div class="row mt-2 mb-2">
-                    <div class="col-12">
-                        <b-progress show-value :max="reward.yesCounter + reward.noCounter">
-                            <b-progress-bar variant="success" :value="reward.yesCounter"></b-progress-bar>
-                            <b-progress-bar variant="danger" :value="reward.noCounter"></b-progress-bar>
-                        </b-progress>
-                    </div>
-                </div>
+                <base-poll @start="$timer.start('update')" :now="now" :poll="reward" /></base-poll>
             </div>
 
             <template slot="footer">

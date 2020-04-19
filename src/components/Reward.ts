@@ -3,12 +3,13 @@ import { BProgress, BSpinner, BCardText, BCard, BModal, BProgressBar } from 'boo
 import { Reward } from '@/models/Reward';
 import { RewardPool } from '@/models/RewardPool';
 import ProfilePicture from '@/components/ProfilePicture.vue';
+import BasePoll from '@/components/BasePoll.vue';
 
 @Component({
     name: 'CReward',
     timers: {
         update: { 
-            time: 10000, 
+            time: 5000, 
             repeat: true,
             autostart: false,
         }
@@ -21,6 +22,7 @@ import ProfilePicture from '@/components/ProfilePicture.vue';
         'b-progress': BProgress,
         'b-progress-bar': BProgressBar,
         'profile-picture': ProfilePicture,
+        'base-poll': BasePoll,
     },
 })
 export default class CReward extends Vue {
@@ -43,16 +45,11 @@ export default class CReward extends Vue {
         await this.reward.update();
         
         this.loading = false;
-        
         this.showDetails = this.reward.state === 'Pending' || this.reward.state === 'Approved';
         this.now = await this.$network.now();
-
-        if (this.reward.state === 'Pending' && this.now < this.reward.endTime) {
-            this.$timer.start('update');
-        }
     }
 
-    public async update() {
+    private async update() {
         this.now = await this.$network.now();
         
         await this.reward.update();
@@ -71,7 +68,7 @@ export default class CReward extends Vue {
         );
     }
 
-    public async withdraw() {
+    private async withdraw() {
         this.disabled = true;
         try {
             await this.pool.tryToFinalizeRewardPoll(this.reward);
@@ -83,7 +80,7 @@ export default class CReward extends Vue {
         }
     }
 
-    public vote(agree: boolean) {
+    private vote(agree: boolean) {
         this.disabled = true;
         this.pool
             .voteForReward(this.reward, agree)
@@ -95,7 +92,7 @@ export default class CReward extends Vue {
             });
     }
 
-    public revokeVote() {
+    private revokeVote() {
         this.disabled = true;
         this.pool
             .revokeVoteForReward(this.reward)
@@ -107,7 +104,7 @@ export default class CReward extends Vue {
             });
     }
 
-    public tryToFinalize() {
+    private tryToFinalize() {
         this.disabled = true;
         this.pool
             .tryToFinalizeRewardPoll(this.reward)

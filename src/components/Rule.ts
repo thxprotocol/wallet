@@ -1,13 +1,21 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { BCard, BCardText, BSpinner, BProgress, BProgressBar, BRow, BCol, BOverlay } from 'bootstrap-vue';
-import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
+import { RewardRule } from '@/models/RewardRule';
 import { RewardPool } from '@/models/RewardPool';
 import ModalRewardGive from '@/components/modals/ModalRewardGive.vue';
 import ModalRewardClaim from '@/components/modals/ModalRewardClaim.vue';
 import ModalRulePollCreate from '@/components/modals/ModalRulePollCreate.vue';
+import BasePoll from '@/components/BasePoll.vue';
 
 @Component({
     name: 'CRewardRule',
+    timers: {
+        update: { 
+            time: 5000, 
+            repeat: true,
+            autostart: false,
+        }
+    },
     components: {
         'b-overlay': BOverlay,
         'b-col': BCol,
@@ -17,83 +25,85 @@ import ModalRulePollCreate from '@/components/modals/ModalRulePollCreate.vue';
         'b-spinner': BSpinner,
         'b-progress': BProgress,
         'b-progress-bar': BProgressBar,
+        'base-poll': BasePoll,
         'modal-reward-give': ModalRewardGive,
         'modal-reward-claim': ModalRewardClaim,
         'modal-rule-poll-create': ModalRulePollCreate,
     },
 })
 export default class CRewardRule extends Vue {
-    public loading: boolean = false;
-    public error: string = '';
-    public now: number = Math.floor(new Date().getTime() / 1000);
+    private error: string = '';
+    private now: number = Math.floor(new Date().getTime() / 1000);
     private showDetails: boolean = true;
+    private $timer!: any;
 
     @Prop() private rule!: RewardRule;
     @Prop() private pool!: RewardPool;
 
-    private mounted() {
-        this.update();
-    }
-
-    private async update() {
-        this.loading = true;
+    private async created() {
         if (this.rule.hasPollAddress) {
             const poll = await this.pool.getRewardRulePoll(this.rule);
 
             this.rule.setPoll(poll);
         }
+    }
 
+    private async update() {        
         this.now = await this.$network.now();
-        this.loading = false;
+        
+        if (this.rule.poll) {
+            await this.rule.poll.updateBasePoll();
+            
+            if (this.now > this.rule.poll.endTime) {
+                this.$timer.stop('update');
+            }    
+        }
     }
 
     private async vote(agree: boolean) {
         if (this.rule.poll) {
-            this.loading = true;
+            this.rule.poll.loading = true;
             this.pool
                 .voteForRule(this.rule, agree)
                 .then(async (tx: any) => {
-                    if (this.rule.poll) {
-                        this.rule.poll.update();
-                    }
-                    this.loading = false;
+                    this.update();
                 })
                 .catch((err: string) => {
                     this.error = err;
-                    this.loading = false;
+                    if (this.rule.poll) {
+                        this.rule.poll.loading = false;
+                    }
                 });
         }
     }
 
     private async revokeVote() {
         if (this.rule.poll) {
-            this.loading = true;
+            this.rule.poll.loading = true;
             this.pool
                 .revokeVoteForRule(this.rule)
                 .then(async (tx: any) => {
-                    if (this.rule.poll) {
-                        this.rule.poll.update();
-                    }
-                    this.loading = false;
+                    this.update();
                 })
                 .catch((err: string) => {
                     this.error = err;
-                    this.loading = false;
+                    if (this.rule.poll) {
+                        this.rule.poll.loading = false;
+                    }
                 });
         }
     }
 
     private async tryToFinalize() {
-        this.loading = true;
         if (this.rule.poll) {
+            this.rule.poll.loading = true;
             this.pool
                 .tryToFinalize(this.rule.poll)
-                .then(async (tx: any) => {
-                    this.loading = false;
-                })
                 .catch((err: string) => {
                     this.error = err;
-                    this.loading = false;
+                    if (this.rule.poll) {
+                        this.rule.poll.loading = false;
+                    }
                 });
         }
     }
