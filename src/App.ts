@@ -106,7 +106,13 @@ export default class App extends Vue {
         const account: Account = new Account(member.uid);
         const notification: Notification = new Notification(pool, address, snap.key, account, snap.val());
 
-        this.$store.commit('setNotification', notification);
+        if (
+            notification.metadata.public && pool.isMember || 
+            !notification.metadata.public && pool.isManager
+        ) {
+            this.$store.commit('setNotification', notification);    
+        }
+        
     }
 
     private setOnline() {

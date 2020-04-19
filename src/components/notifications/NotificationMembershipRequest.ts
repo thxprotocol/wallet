@@ -19,10 +19,10 @@ import { mapGetters } from 'vuex';
     },
 })
 export default class NotificationMembershipRequest extends Vue {
+    @Prop() private notification!: Notification;
+
     private loading: boolean = false;
     private account!: Account;
-
-    @Prop() private notification!: Notification;
 
     private async grant() {
         this.loading = true;
