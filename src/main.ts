@@ -1,6 +1,6 @@
 import { Vue } from 'vue-property-decorator';
+import VueTimers from 'vue-timers';
 import VueMoment from 'vue-moment';
-
 import App from './App.vue';
 import firebase from 'firebase/app';
 import 'firebase/auth';
@@ -15,6 +15,7 @@ import { ModalPlugin } from 'bootstrap-vue';
 import UserService from '@/services/UserService';
 import PoolService from '@/services/PoolService';
 
+Vue.use(VueTimers);
 Vue.config.productionTip = false;
 Vue.use(VueMoment);
 Vue.use(ModalPlugin);

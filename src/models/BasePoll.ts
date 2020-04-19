@@ -38,7 +38,18 @@ export class BasePoll {
         this.totalVoted = parseInt(totalVoted, 10);
         this.vote = new Vote(voteByAddress);
         this.hasVoted = this.vote.time !== 0;
+        this.loading = false;
     }
+}
+
+export interface IBasePoll {
+    startTime: number;
+    endTime: number;
+    yesCounter: number;
+    noCounter: number;
+    totalVoted: number;
+    
+    updateBasePoll(): void;
 }
 
 export class Vote {

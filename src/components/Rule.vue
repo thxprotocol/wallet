@@ -8,8 +8,7 @@
             header-tag="header"
             class="mb-2 w-100"
         >
-            <b-overlay :show="loading" no-wrap></b-overlay>
-
+        
             <div class="alert alert-danger" v-if="error">
                 {{ error }}
             </div>
@@ -56,59 +55,15 @@
 
                     <template v-if="rule.hasPollAddress && rule.poll">
                         <hr class="dotted" />
-                        <div :class="{ disabled: rule.poll.loading }">
+                        <div class="position-relative" :class="{ disabled: rule.poll.loading }">
+                            <b-overlay :show="rule.poll.loading" no-wrap></b-overlay>
                             <div class="alert alert-warning">
                                 <small>Rule Change Proposal:</small><br />
                                 <del>{{ rule.amount }} THX</del> &#x2192;
                                 <strong>{{ rule.poll.proposedAmount }} THX</strong>
                             </div>
-
-                            <h3>Total Votes: {{ rule.poll.totalVoted }}</h3>
-                            <div class="row">
-                                <div class="col-12">
-                                    <b-progress
-                                        variant="info"
-                                        :value="
-                                            ((now - rule.poll.startTime) / (rule.poll.endTime - rule.poll.startTime)) *
-                                            100
-                                        "
-                                        :max="100"
-                                    ></b-progress>
-                                </div>
-                                <div class="col-6">
-                                    <small>{{ rule.poll.startTime | moment("DD/MM/'YY HH:mm") }}</small>
-                                </div>
-                                <div class="col-6 text-right">
-                                    <small>{{ rule.poll.endTime | moment("DD/MM/'YY HH:mm") }}</small>
-                                </div>
-                            </div>
-                            <div class="row mt-2">
-                                <div class="col-12">
-                                    <b-progress show-progress :max="rule.poll.yesCounter + rule.poll.noCounter">
-                                        <b-progress-bar
-                                            variant="success"
-                                            :value="rule.poll.yesCounter"
-                                        ></b-progress-bar>
-                                        <b-progress-bar variant="danger" :value="rule.poll.noCounter"></b-progress-bar>
-                                    </b-progress>
-                                </div>
-                                <div class="col-6">
-                                    <small>{{ rule.poll.yesCounter }} THX</small>
-                                </div>
-                                <div class="col-6 text-right">
-                                    <small>{{ rule.poll.noCounter }} THX</small>
-                                </div>
-                            </div>
+                            <base-poll v-if="rule.poll" @start="$timer.start('update')" :now="now" :poll="rule.poll" /></base-poll>
                         </div>
-
-                        <button
-                            v-if="rule.poll"
-                            :class="{ disabled: rule.poll.loading }"
-                            class="btn btn-link btn-block"
-                            @click="update()"
-                        >
-                            Update poll results
-                        </button>
                     </template>
                 </template>
 
@@ -116,7 +71,7 @@
                     <template v-if="!rule.hasPollAddress && pool.isMember">
                         <button
                             v-b-modal="'modalRulePollCreate'"
-                            :class="{ disabled: loading }"
+                            :class="{ disabled: rule.loading }"
                             class="btn btn-link btn-block"
                         >
                             Change reward size
@@ -155,7 +110,7 @@
                         <template v-if="now > rule.poll.endTime">
                             <button
                                 @click="tryToFinalize()"
-                                :class="{ disabled: loading }"
+                                :class="{ disabled: rule.loading }"
                                 class="btn btn-link btn-block"
                             >
                                 Finalize Poll
