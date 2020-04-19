@@ -28,11 +28,6 @@
                         <small v-if="reward.startTime">{{ reward.startTime | moment("DD/MM/'YY HH:mm") }}</small>
                     </div>
                 </button>
-                <div v-if="reward.endTime && now < reward.endTime" class="p-2">
-                    <button class="btn btn-link btn-sm" @click="update()">
-                        Update
-                    </button>
-                </div>
             </template>
 
             <div :class="{ disabled: now > reward.endTime || disabled }" v-if="showDetails">
