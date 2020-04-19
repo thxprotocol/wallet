@@ -5,7 +5,7 @@
         :loading="loading"
         @loading="loading = $event"
     >
-        <div slot="notification-content" v-if="!reward.loading">
+        <div slot="notification-content" v-if="reward && !reward.loading">
             <p>
                 <strong>{{ notification.account.firstName }}</strong> is claiming a reward in
                 <strong>{{ notification.pool.name }}</strong>
@@ -26,4 +26,4 @@
     </base-notification>
 </template>
 
-<script src="./NotificationRewardClaim.ts" lang="ts"></script>
+<script src="./NotificationRewardPoll.ts" lang="ts"></script>

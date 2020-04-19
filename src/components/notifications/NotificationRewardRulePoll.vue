@@ -5,7 +5,7 @@
         :loading="loading"
         @loading="loading = $event"
     >
-        <div slot="notification-content" v-if="!reward.loading">
+        <div slot="notification-content" v-if="!rule.loading">
             <p>
                 <strong>{{ notification.account.firstName }}</strong> has started a new Reward Rule Proposal in 
                 <strong>{{ notification.pool.name }}</strong>

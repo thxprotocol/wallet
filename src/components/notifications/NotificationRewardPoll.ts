@@ -8,7 +8,7 @@ import { Reward } from '@/models/Reward';
 import { IRewardPools } from '@/models/RewardPool';
 
 @Component({
-    name: 'NotificationRewardClaim',
+    name: 'NotificationRewardPoll',
     components: {
         'b-button': BButton,
         'b-button-group': BButtonGroup,
@@ -21,15 +21,16 @@ import { IRewardPools } from '@/models/RewardPool';
         }),
     },
 })
-export default class NotificationRewardClaim extends Vue {
+export default class NotificationRewardPoll extends Vue {
     private loading: boolean = false;
     private account!: Account;
     private rewardPools!: IRewardPools;
 
     @Prop() private notification!: Notification;
-
-    get reward() {
-        return this.rewardPools[this.notification.pool.address].rewards[this.notification.metadata.reward];
+    
+    get reward(): Reward | null {
+        const r = this.rewardPools[this.notification.pool.address].rewards[this.notification.metadata.reward];
+        return r || null;
     }
 
     private async approve() {

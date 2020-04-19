@@ -1,14 +1,16 @@
 import { mapGetters } from 'vuex';
 import { Component, Vue } from 'vue-property-decorator';
 import NotificationMembershipRequest from '@/components/notifications/NotificationMembershipRequest.vue';
-import NotificationRewardClaim from '@/components/notifications/NotificationRewardClaim.vue';
+import NotificationRewardPoll from '@/components/notifications/NotificationRewardPoll.vue';
+import NotificationRewardRulePoll from '@/components/notifications/NotificationRewardRulePoll.vue';
 import { Notification } from '@/models/Notification';
 
 @Component({
     name: 'notifications',
     components: {
         'notification-membership-request': NotificationMembershipRequest,
-        'notification-reward-claim': NotificationRewardClaim,
+        'notification-reward-claim': NotificationRewardPoll,
+        'notification-reward-rule-poll': NotificationRewardRulePoll,
     },
     computed: {
         ...mapGetters({
