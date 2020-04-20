@@ -16,6 +16,7 @@
                     Rule: <strong>#{{ reward.rule }}</strong>
                 </p>
             </blockquote>
+            <base-poll @start="$timer.start('update')" :now="now" :poll="reward" />
         </div>
         <div slot="notification-footer">
             <b-button-group class="w-100">

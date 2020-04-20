@@ -8,11 +8,11 @@ import BasePoll from '@/components/BasePoll.vue';
 @Component({
     name: 'CReward',
     timers: {
-        update: { 
-            time: 5000, 
+        update: {
+            time: 5000,
             repeat: true,
             autostart: false,
-        }
+        },
     },
     components: {
         'b-modal': BModal,
@@ -36,14 +36,13 @@ export default class CReward extends Vue {
         },
     };
     private showDetails: boolean = false;
-    private $timer!: any;
-    
+
     @Prop() private reward!: Reward;
     @Prop() private pool!: RewardPool;
 
     public async created() {
         await this.reward.update();
-        
+
         this.loading = false;
         this.showDetails = this.reward.state === 'Pending' || this.reward.state === 'Approved';
         this.now = await this.$network.now();
@@ -51,9 +50,9 @@ export default class CReward extends Vue {
 
     private async update() {
         this.now = await this.$network.now();
-        
+
         await this.reward.update();
-        
+
         if (this.now > this.reward.endTime) {
             this.$timer.stop('update');
         }

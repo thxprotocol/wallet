@@ -265,16 +265,32 @@ export class RewardPool extends RewardPoolEvents {
             .send({ from: this.account })
             .then(async (tx: any) => {
                 const id = tx.events.RewardPollCreated.returnValues.id;
-                const snap = await firebase.database().ref(`/pools/${this.address}/notificatons`).push();
 
-                return firebase.database().ref(`/pools/${this.address}/notifications/${snap.key}`).set({
-                    address,
+                return await this.createNotification(true, address, {
                     reward: id,
-                    public: false,
                     component: 'notification-reward-claim',
-                    timestamp: firebase.database.ServerValue.TIMESTAMP,
                 });
             });
+    }
+
+    public async requestMembership(address: string, message: string, pool: RewardPool) {
+        return await this.createNotification(false, address, {
+            component: 'notification-membership-request',
+            message: message ? message : null,
+        });
+    }
+
+    public async createNotification(needsManagerRole: boolean, from: string, data: any) {
+        const snap = await firebase.database().ref(`/pools/${this.address}/notificatons`).push();
+        const payload = {
+            public: needsManagerRole,
+            address: from,
+            timestamp: firebase.database.ServerValue.TIMESTAMP,
+        };
+        return await firebase
+            .database()
+            .ref(`/pools/${this.address}/notifications/${snap.key}`)
+            .set({ ...payload, ...data });
     }
 
     public async addManager(address: string) {
@@ -318,7 +334,15 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async addRewardRulePoll(rule: any, proposedAmount: BN) {
-        return await this.callPoolMethod(this.contract.methods.startRulePoll(rule.id, proposedAmount.toString()));
+        const snap = await firebase.database().ref(`/pools/${this.address}/notificatons`).push();
+
+        await this.callPoolMethod(this.contract.methods.startRulePoll(rule.id, proposedAmount.toString()));
+
+        return await this.createNotification(false, this.account, {
+            rule: rule.id,
+            proposedAmount: new BN(proposedAmount).div(TOKEN_MULTIPLIER).toString(),
+            component: 'notification-reward-rule-poll',
+        });
     }
 
     public async countRewards() {

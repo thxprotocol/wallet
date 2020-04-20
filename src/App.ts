@@ -58,14 +58,15 @@ export default class App extends Vue {
                     this.coinService.listen();
 
                     this.userRef.child('notifications').on('child_added', async (s: any) => {
-                        if (!s.val().removed) {
+                        const isRemoved = s.val().removed;
+                        if (!isRemoved) {
                             const pool: RewardPool = await this.poolService.getRewardPool(s.val().pool);
                             const snap = await firebase
                                 .database()
                                 .ref(`pools/${pool.address}/notifications/${s.key}`)
                                 .once('value');
 
-                            this.addNotification(pool, snap);
+                            this.addNotification(pool, snap, isRemoved);
                         }
                     });
 
@@ -108,11 +109,11 @@ export default class App extends Vue {
         });
     }
 
-    private async addNotification(pool: RewardPool, snap: any) {
+    private async addNotification(pool: RewardPool, snap: any, removed: boolean) {
         const address = snap.val().address;
         const member = await this.$users.getMemberByAddress(address);
         const account: Account = new Account(member.uid);
-        const notification: Notification = new Notification(pool, address, snap.key, account, snap.val());
+        const notification: Notification = new Notification(pool, address, snap.key, account, removed, snap.val());
 
         this.$store.commit('setNotification', notification);
     }

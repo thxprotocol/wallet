@@ -26,8 +26,6 @@ export class Reward extends BasePoll {
     }
 
     public async update() {
-        this.loading = true;
-
         const id = await this.contract.methods.id().call({ from: this.owner });
         const rule = await this.contract.methods.rule().call({ from: this.owner });
         const state = await this.contract.methods.state().call({ from: this.owner });

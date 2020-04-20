@@ -10,11 +10,11 @@ import BasePoll from '@/components/BasePoll.vue';
 @Component({
     name: 'CRewardRule',
     timers: {
-        update: { 
-            time: 5000, 
+        update: {
+            time: 5000,
             repeat: true,
             autostart: false,
-        }
+        },
     },
     components: {
         'b-overlay': BOverlay,
@@ -35,7 +35,6 @@ export default class CRewardRule extends Vue {
     private error: string = '';
     private now: number = Math.floor(new Date().getTime() / 1000);
     private showDetails: boolean = true;
-    private $timer!: any;
 
     @Prop() private rule!: RewardRule;
     @Prop() private pool!: RewardPool;
@@ -48,15 +47,15 @@ export default class CRewardRule extends Vue {
         }
     }
 
-    private async update() {        
+    private async update() {
         this.now = await this.$network.now();
-        
+
         if (this.rule.poll) {
             await this.rule.poll.updateBasePoll();
-            
+
             if (this.now > this.rule.poll.endTime) {
                 this.$timer.stop('update');
-            }    
+            }
         }
     }
 
@@ -97,14 +96,12 @@ export default class CRewardRule extends Vue {
     private async tryToFinalize() {
         if (this.rule.poll) {
             this.rule.poll.loading = true;
-            this.pool
-                .tryToFinalize(this.rule.poll)
-                .catch((err: string) => {
-                    this.error = err;
-                    if (this.rule.poll) {
-                        this.rule.poll.loading = false;
-                    }
-                });
+            this.pool.tryToFinalize(this.rule.poll).catch((err: string) => {
+                this.error = err;
+                if (this.rule.poll) {
+                    this.rule.poll.loading = false;
+                }
+            });
         }
     }
 }

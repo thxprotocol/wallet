@@ -5,18 +5,26 @@
         :loading="loading"
         @loading="loading = $event"
     >
-        <div slot="notification-content" v-if="!rule.loading">
-            <p>
-                <strong>{{ notification.account.firstName }}</strong> has started a new Reward Rule Proposal in 
-                <strong>{{ notification.pool.name }}</strong>
-            </p>
+        <div slot="notification-content" v-if="rewardRule">
             <blockquote class="blockquote">
                 <p>
-                    Rule: <strong>#{{ rule.title }}</strong>
-                    Current: <strong>#{{ rule.amount }}</strong>
-                    Proposal: <strong>#{{ rule.proposedAmount }}</strong>
+                    Pool: <strong>{{ notification.pool.name }}</strong>
+                    <br />
+                    Rule: <strong>{{ rewardRule.title }} ({{ rewardRule.id }})</strong>
+                    <br />
+                    Amount: <strong>#{{ rewardRule.amount }}</strong>
+                    <br />
+                    Proposal: <strong>{{ notification.metadata.proposedAmount }}</strong>
+                    <br />
+                    By: <strong>{{ notification.account.firstName }} {{ notification.account.lastName }}</strong>
                 </p>
             </blockquote>
+            <base-poll
+                v-if="rewardRule && rewardRule.poll"
+                @start="$timer.start('update')"
+                :now="now"
+                :poll="rewardRule.poll"
+            />
         </div>
         <div slot="notification-footer">
             <b-button-group class="w-100">

@@ -2,7 +2,6 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { RewardPool } from '@/models/RewardPool';
 import BaseModal from './BaseModal.vue';
 import { BButton, BAlert } from 'bootstrap-vue';
-import PoolService from '@/services/PoolService';
 
 @Component({
     name: 'ModalMembershipRequest',
@@ -17,7 +16,6 @@ export default class ModalMembershipRequest extends Vue {
     private error: string = '';
     private loading: boolean = false;
     private input: string = '';
-    private poolService: PoolService = new PoolService();
 
     private async cancel() {
         this.error = '';
@@ -27,7 +25,7 @@ export default class ModalMembershipRequest extends Vue {
 
     private async request() {
         this.loading = true;
-        this.poolService
+        this.pool
             .requestMembership(this.$network.extdev.account, this.input, this.pool)
             .then(() => {
                 this.loading = false;

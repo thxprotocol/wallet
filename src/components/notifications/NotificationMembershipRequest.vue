@@ -7,12 +7,16 @@
     >
         <div slot="notification-content">
             <p>
-                <strong>{{ notification.account.firstName }} {{ notification.account.lastName }}</strong> is requesting
-                membership for pool
-                <strong>{{ notification.pool.name }}</strong>
+                {{ notification.metadata.message }}
             </p>
             <blockquote class="blockquote">
-                {{ notification.account.firstName }}: {{ notification.metadata.message }}
+                First name: <strong>{{ notification.account.firstName }}</strong>
+                <br />
+                Last name: <strong>{{ notification.account.lastName }}</strong>
+                <br />
+                E-mail: <strong>{{ notification.account.email }}</strong>
+                <br />
+                Pool: <strong>{{ notification.pool.name }}</strong>
             </blockquote>
         </div>
         <div slot="notification-footer">

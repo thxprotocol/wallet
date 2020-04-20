@@ -48,7 +48,7 @@ export interface IBasePoll {
     yesCounter: number;
     noCounter: number;
     totalVoted: number;
-    
+
     updateBasePoll(): void;
 }
 

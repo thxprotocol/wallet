@@ -7,6 +7,7 @@ import firebase from 'firebase/app';
 
 declare module 'vue/types/vue' {
     interface Vue {
+        $timer;
         $network: NetworkService;
         $state: StateService;
         $pools: PoolService;

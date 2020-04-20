@@ -1,36 +1,43 @@
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import { Notification } from '@/models/Notification';
+import { Component } from 'vue-property-decorator';
 import { BButton, BButtonGroup } from 'bootstrap-vue';
 import BaseNotification from '@/components/notifications/BaseNotification.vue';
-import { Account } from '@/models/Account';
-import { mapGetters } from 'vuex';
 import { Reward } from '@/models/Reward';
-import { IRewardPools } from '@/models/RewardPool';
+import BaseNotificationClass from '@/components/notifications/BaseNotificationClass';
+import BasePoll from '@/components/BasePoll.vue';
 
 @Component({
     name: 'NotificationRewardPoll',
+    timers: {
+        update: {
+            time: 5000,
+            repeat: true,
+            autostart: false,
+        },
+    },
     components: {
         'b-button': BButton,
         'b-button-group': BButtonGroup,
         'base-notification': BaseNotification,
-    },
-    computed: {
-        ...mapGetters({
-            account: 'account',
-            rewardPools: 'rewardPools',
-        }),
+        'base-poll': BasePoll,
     },
 })
-export default class NotificationRewardPoll extends Vue {
-    private loading: boolean = false;
-    private account!: Account;
-    private rewardPools!: IRewardPools;
-
-    @Prop() private notification!: Notification;
+export default class NotificationRewardPoll extends BaseNotificationClass {
+    private now: number = Math.floor(new Date().getTime() / 1000);
 
     get reward(): Reward | null {
-        const r = this.rewardPools[this.notification.pool.address].rewards[this.notification.metadata.reward];
-        return r || null;
+        return this.pool && this.pool.rewards.length ? this.pool.rewards[this.notification.metadata.reward] : null;
+    }
+
+    private async update() {
+        if (this.reward) {
+            this.now = await this.$network.now();
+
+            await this.reward.update();
+
+            if (this.now > this.reward.endTime) {
+                this.$timer.stop('update');
+            }
+        }
     }
 
     private async approve() {
@@ -55,10 +62,5 @@ export default class NotificationRewardPoll extends Vue {
                     this.loading = false;
                 });
         }
-    }
-
-    private async remove() {
-        await this.$users.removeNotification(this.account.uid, this.notification.key);
-        this.loading = false;
     }
 }
