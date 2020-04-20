@@ -260,33 +260,21 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async createReward(ruleId: number, address: string) {
-        if (this.isMember) {
-            return this.contract.methods
-                .createReward(ruleId, address)
-                .send({ from: this.account })
-                .then(async (tx: any) => {
-                    const id = tx.events.RewardPollCreated.returnValues.id;
-
-                    return await this.createNotification(true, address, {
-                        reward: id,
-                        component: 'notification-reward-claim',
-                    });
-                });
-        } else {
+        if (!this.isMember) {
             await this.requestMembership(address, '');
-
-            return this.contract.methods
-                .createReward(ruleId, address)
-                .send({ from: this.account })
-                .then(async (tx: any) => {
-                    const id = tx.events.RewardPollCreated.returnValues.id;
-
-                    return await this.createNotification(true, address, {
-                        reward: id,
-                        component: 'notification-reward-claim',
-                    });
-                });
         }
+
+        return this.contract.methods
+            .createReward(ruleId, address)
+            .send({ from: this.account })
+            .then(async (tx: any) => {
+                const id = tx.events.RewardPollCreated.returnValues.id;
+
+                return await this.createNotification(true, address, {
+                    reward: id,
+                    component: 'notification-reward-claim',
+                });
+            });
     }
 
     public async requestMembership(address: string, message: string = '') {
