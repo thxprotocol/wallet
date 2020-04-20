@@ -77,19 +77,27 @@ export default class App extends Vue {
 
                     poolRef.on('child_added', async (s: any) => {
                         const pool: RewardPool = await this.poolService.getRewardPool(s.key);
-                        const notificationRef = firebase.database().ref(`pools/${pool.address}/notifications`);
+
+                        await pool.checkMemberships();
+
+                        if (pool.isMember) {
+                            firebase.database().ref(`/pools/${s.key}/members/${user.uid}`).update({ uid: user.uid });
+                        }
+
+                        if (pool.isManager) {
+                            firebase.database().ref(`/pools/${s.key}/managers/${user.uid}`).update({ uid: user.uid });
+                        }
 
                         this.$store.commit('addRewardPool', pool);
-
-                        notificationRef.on('child_added', async (snap: any) => {
-                            if (!_.has(this.account.notifications, snap.key)) {
-                                this.addNotification(pool, snap);
-                            }
-                        });
                     });
 
                     poolRef.on('child_removed', async (s: any) => {
                         const pool = await this.poolService.getRewardPool(s.key);
+
+                        await pool.checkMemberships();
+
+                        firebase.database().ref(`/pools/${s.key}/members/${user.uid}`).remove();
+                        firebase.database().ref(`/pools/${s.key}/managers/${user.uid}`).remove();
 
                         this.$store.commit('removeRewardPool', pool);
                     });
@@ -106,13 +114,9 @@ export default class App extends Vue {
         const account: Account = new Account(member.uid);
         const notification: Notification = new Notification(pool, address, snap.key, account, snap.val());
 
-        if (
-            notification.metadata.public && pool.isMember || 
-            !notification.metadata.public && pool.isManager
-        ) {
-            this.$store.commit('setNotification', notification);    
+        if ((notification.metadata.public && pool.isMember) || (!notification.metadata.public && pool.isManager)) {
+            this.$store.commit('setNotification', notification);
         }
-        
     }
 
     private setOnline() {
