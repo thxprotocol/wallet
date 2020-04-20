@@ -1,6 +1,6 @@
 <template>
     <base-modal
-        :id="'ModalRewardGive'"
+        id="modalRewardGive"
         @error="error = $event"
         :error="error"
         :title="'Give a reward'"

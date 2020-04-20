@@ -28,7 +28,7 @@ export default class ModalRewardGive extends Vue {
     private async cancel() {
         this.input.beneficiary = '';
 
-        this.$bvModal.hide('ModalRewardGive');
+        this.$bvModal.hide('modalRewardGive');
     }
 
     private createReward(id: number, beneficiary: string) {
@@ -37,7 +37,7 @@ export default class ModalRewardGive extends Vue {
             .createReward(id, beneficiary)
             .then(() => {
                 this.loading = false;
-                this.$bvModal.hide('ModalRewardGive');
+                this.$bvModal.hide('modalRewardGive');
             })
             .catch((e: string) => {
                 this.error = e;
