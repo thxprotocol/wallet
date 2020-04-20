@@ -27,7 +27,7 @@ export default class NotificationRewardPoll extends Vue {
     private rewardPools!: IRewardPools;
 
     @Prop() private notification!: Notification;
-    
+
     get reward(): Reward | null {
         const r = this.rewardPools[this.notification.pool.address].rewards[this.notification.metadata.reward];
         return r || null;
