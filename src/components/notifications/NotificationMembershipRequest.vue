@@ -1,10 +1,5 @@
 <template>
-    <base-notification
-        title="Membership Requested"
-        :notification="notification"
-        :loading="loading"
-        @loading="loading = $event"
-    >
+    <base-notification title="Membership Requested" :notification="notification">
         <div slot="notification-content">
             <p>
                 {{ notification.metadata.message }}

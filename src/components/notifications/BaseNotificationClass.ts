@@ -7,14 +7,7 @@ import { IRewardPools } from '@/models/RewardPool';
 import { mapGetters } from 'vuex';
 
 @Component({
-    name: 'NotificationRewardPoll',
-    timers: {
-        update: {
-            time: 5000,
-            repeat: true,
-            autostart: false,
-        },
-    },
+    name: 'BaseNotificationClass',
     components: {
         'b-button': BButton,
         'b-button-group': BButtonGroup,
