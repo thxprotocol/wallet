@@ -6,17 +6,21 @@
         @loading="loading = $event"
     >
         <div slot="notification-content" v-if="rewardRule">
+            <p>
+                <strong>{{ notification.account.firstName }} {{ notification.account.lastName }}</strong> proposed a new
+                reward rule size.
+            </p>
             <blockquote class="blockquote">
                 <p>
                     Pool: <strong>{{ notification.pool.name }}</strong>
                     <br />
                     Rule: <strong>{{ rewardRule.title }} ({{ rewardRule.id }})</strong>
                     <br />
-                    Amount: <strong>#{{ rewardRule.amount }}</strong>
-                    <br />
-                    Proposal: <strong>{{ notification.metadata.proposedAmount }}</strong>
-                    <br />
-                    By: <strong>{{ notification.account.firstName }} {{ notification.account.lastName }}</strong>
+
+                    Proposal:
+                    <strong>
+                        <del>{{ rewardRule.amount }} THX</del> &#x2192; {{ notification.metadata.proposedAmount }} THX
+                    </strong>
                 </p>
             </blockquote>
             <base-poll

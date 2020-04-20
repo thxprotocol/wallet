@@ -26,12 +26,16 @@ firebase.initializeApp(config.firebase[process.env.NODE_ENV as any]);
 firebase.auth().onAuthStateChanged((user: firebase.User | any = firebase.auth().currentUser) => {
     if (user) {
         const state: StateService = new StateService(user.uid);
+        const stateService: StateService = new StateService(user.uid);
+        const poolService = new PoolService();
+        const userService = new UserService();
+        const networkService = new NetworkService(stateService.extdevPrivateKey, stateService.rinkebyPrivateKey);
 
         Vue.prototype.$user = user;
-        Vue.prototype.$users = new UserService();
-        Vue.prototype.$pools = new PoolService();
-        Vue.prototype.$state = state;
-        Vue.prototype.$network = new NetworkService(state.extdevPrivateKey, state.rinkebyPrivateKey);
+        Vue.prototype.$users = userService;
+        Vue.prototype.$pools = poolService;
+        Vue.prototype.$state = stateService;
+        Vue.prototype.$network = networkService;
 
         if (!state.rinkebyPrivateKey) {
             console.warn(

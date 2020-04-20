@@ -25,7 +25,9 @@ export default class NotificationRewardRulePoll extends BaseNotificationClass {
     private now: number = Math.floor(new Date().getTime() / 1000);
 
     get rewardRule(): RewardRule | null {
-        return this.pool && this.pool.rewards.length ? this.pool.rewardRules[this.notification.metadata.rule] : null;
+        return this.pool && this.pool.rewardRules.length
+            ? this.pool.rewardRules[this.notification.metadata.rule]
+            : null;
     }
 
     private async update() {
