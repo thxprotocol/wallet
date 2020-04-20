@@ -156,15 +156,15 @@ a,
 .region-content {
     flex: 1 auto;
     display: block;
-    margin: 1rem;
-    border-radius: 5px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
     background-color: white;
     padding: 1rem;
-    width: calc(100% - 4rem);
+    width: 100%;
     overflow: hidden auto;
     overflow-x: hidden;
     overflow-y: auto;
-    height: calc(100% + 1rem);
+    height: calc(100% + 2rem);
     box-shadow: 0 -10px 15px rgba(0, 0, 0, 0.2);
 }
 
