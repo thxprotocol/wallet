@@ -27,7 +27,7 @@ export default class Login extends Vue {
                 this.loading = false;
                 this.$router.push((this.$route.query.redirect as any) || '/account');
             })
-            .catch(err => {
+            .catch((err) => {
                 this.loading = false;
                 if (typeof err !== 'undefined') {
                     this.error = err.message;

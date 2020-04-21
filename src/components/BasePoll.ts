@@ -14,12 +14,12 @@ import { IBasePoll } from '@/models/BasePoll';
 export default class BasePoll extends Vue {
     @Prop() private poll!: IBasePoll;
     @Prop() private now!: number;
-    
+
     private async mounted() {
         if (this.poll) {
             await this.poll.updateBasePoll();
-        
-            if (this.now < this.poll.endTime) {    
+
+            if (this.now < this.poll.endTime) {
                 this.$emit('start');
             }
         }

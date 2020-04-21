@@ -8,7 +8,6 @@
             header-tag="header"
             class="mb-2 w-100"
         >
-        
             <div class="alert alert-danger" v-if="error">
                 {{ error }}
             </div>
@@ -62,7 +61,7 @@
                                 <del>{{ rule.amount }} THX</del> &#x2192;
                                 <strong>{{ rule.poll.proposedAmount }} THX</strong>
                             </div>
-                            <base-poll v-if="rule.poll" @start="$timer.start('update')" :now="now" :poll="rule.poll" /></base-poll>
+                            <base-poll v-if="rule.poll" @start="$timer.start('update')" :now="now" :poll="rule.poll" />
                         </div>
                     </template>
                 </template>

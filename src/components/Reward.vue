@@ -31,7 +31,7 @@
             </template>
 
             <div :class="{ disabled: now > reward.endTime || disabled }" v-if="showDetails">
-                <base-poll @start="$timer.start('update')" :now="now" :poll="reward" /></base-poll>
+                <base-poll @start="$timer.start('update')" :now="now" :poll="reward" />
             </div>
 
             <template slot="footer">

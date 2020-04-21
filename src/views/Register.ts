@@ -44,11 +44,7 @@ export default class Register extends Vue {
                     lastName: this.lastName,
                 };
 
-                firebase
-                    .database()
-                    .ref('users')
-                    .child(user.uid)
-                    .set(user);
+                firebase.database().ref('users').child(user.uid).set(user);
 
                 this.loading = false;
                 this.$router.replace('/account');

@@ -1,11 +1,5 @@
 <template>
-    <base-modal
-        id="modalRewardGive"
-        @error="error = $event"
-        :error="error"
-        :title="'Give a reward'"
-        :loading="loading"
-    >
+    <base-modal id="modalRewardGive" @error="error = $event" :error="error" :title="'Give a reward'" :loading="loading">
         <template slot="content">
             <input v-model="input.beneficiary" type="text" class="form-control" />
             <small v-if="input.beneficiary === $network.extdev.account" class="text-muted">
