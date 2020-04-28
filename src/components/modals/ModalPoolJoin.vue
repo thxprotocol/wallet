@@ -1,7 +1,7 @@
 <template>
     <base-modal
         id="ModalPoolJoin"
-        @error="error = $event"
+        @reset="error = ''"
         :error="error"
         centered
         title="Join a reward pool"

@@ -12,6 +12,5 @@ declare module 'vue/types/vue' {
         $state: StateService;
         $pools: PoolService;
         $users: UserService;
-        $user: firebase.User;
     }
 }

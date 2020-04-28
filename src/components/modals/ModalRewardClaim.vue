@@ -1,7 +1,7 @@
 <template>
     <base-modal
         :id="'modalRewardClaim'"
-        @error="error = $event"
+        @reset="error = ''"
         :error="error"
         :title="'Claim a reward'"
         :loading="loading"

@@ -1,6 +1,6 @@
 <template>
-    <b-modal :id="id" :title="title" centered @hidden="$emit('error', '')">
-        <b-alert variant="danger" dismissible show v-if="error" @dismissed="$emit('error', '')">{{ error }}</b-alert>
+    <b-modal :id="id" :title="title" centered @hidden="$emit('reset')">
+        <b-alert variant="danger" dismissible show v-if="error" @dismissed="$emit('reset')">{{ error }}</b-alert>
         <slot name="content"> </slot>
         <template v-slot:modal-footer="{ ok, cancel }">
             <b-overlay :show="loading" no-wrap></b-overlay>

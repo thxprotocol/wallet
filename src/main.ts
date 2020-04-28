@@ -25,24 +25,22 @@ let app: any;
 firebase.initializeApp(config.firebase[process.env.NODE_ENV as any]);
 firebase.auth().onAuthStateChanged((user: firebase.User | any = firebase.auth().currentUser) => {
     if (user) {
-        const state: StateService = new StateService(user.uid);
         const stateService: StateService = new StateService(user.uid);
         const poolService = new PoolService();
         const userService = new UserService();
         const networkService = new NetworkService(stateService.extdevPrivateKey, stateService.rinkebyPrivateKey);
 
-        Vue.prototype.$user = user;
         Vue.prototype.$users = userService;
         Vue.prototype.$pools = poolService;
         Vue.prototype.$state = stateService;
         Vue.prototype.$network = networkService;
 
-        if (!state.rinkebyPrivateKey) {
+        if (!stateService.rinkebyPrivateKey) {
             console.warn(
                 'It looks like you misconfigured your rinkeby private key. Provide it through the accounts page.',
             );
         }
-        if (!state.extdevPrivateKey) {
+        if (!stateService.extdevPrivateKey) {
             console.warn(
                 'It looks like you misconfigured your extdev private key. Provide it through the accounts page.',
             );

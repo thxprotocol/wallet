@@ -2,7 +2,7 @@
     <base-modal
         id="modalMembershipRequest"
         title="Request Membership"
-        @error="error = $event"
+        @reset="error = ''"
         :error="error"
         :loading="loading"
     >

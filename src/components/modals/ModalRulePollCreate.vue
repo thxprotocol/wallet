@@ -1,7 +1,7 @@
 <template>
     <base-modal
         :id="'modalRulePollCreate'"
-        @error="error = $event"
+        @reset="error = ''"
         :error="error"
         :title="'Create Rule Poll'"
         :loading="loading"
