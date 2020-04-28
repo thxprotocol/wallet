@@ -16,7 +16,7 @@
         </template>
         <template slot="footer">
             <b-button variant="link" @click="cancel()">Cancel</b-button>
-            <b-button variant="danger" :disabled="loading" @click="invalidate()">Invalidate</b-button>
+            <b-button variant="danger" v-if="data" :disabled="loading" @click="invalidate()">Invalidate</b-button>
         </template>
     </base-modal>
 </template>
