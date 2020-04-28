@@ -1,7 +1,7 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { RewardPool } from '@/models/RewardPool';
 import BaseModal from './BaseModal.vue';
-import { BButton, BAlert } from 'bootstrap-vue';
+import { BButton } from 'bootstrap-vue';
 
 @Component({
     name: 'ModalMembershipRequest',
