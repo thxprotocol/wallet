@@ -2,6 +2,7 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import { Vue } from 'vue-property-decorator';
 import { Account } from '@/models/Account';
+import { RewardPool } from '@/models/RewardPool';
 
 export default class UserService extends Vue {
     public async getMemberByAddress(address: string) {
@@ -29,9 +30,13 @@ export default class UserService extends Vue {
         });
     }
 
-    public async connectSlack(account: Account, slack: string) {
+    public async connectSlack(account: Account, slack: string, pool: RewardPool) {
         await firebase.database().ref(`users/${account.uid}`).update({
             slack,
+        });
+        await firebase.database().ref(`slack/${slack}`).set({
+            rewardPool: pool.address,
+            uid: account.uid,
         });
     }
 

@@ -2,7 +2,6 @@ import { mapGetters } from 'vuex';
 import { Component, Vue } from 'vue-property-decorator';
 import { BSpinner, BAlert } from 'bootstrap-vue';
 import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
-import PoolService from '@/services/PoolService';
 import { RewardPool } from '@/models/RewardPool';
 import { RewardRule } from '@/models/RewardRule';
 import UserService from '@/services/UserService';
@@ -36,7 +35,6 @@ export default class Camera extends Vue {
     private pool!: RewardPool;
     private rule: RewardRule | null = null;
     private error: string = '';
-    private poolService: PoolService = new PoolService();
     private userService: UserService = new UserService();
 
     private repaint() {
@@ -51,17 +49,14 @@ export default class Camera extends Vue {
             try {
                 if (this.data.pool && this.data.rule >= 0) {
                     const valid = await this.isValid();
+                    this.pool = await this.$pools.getRewardPool(this.data.pool);
 
                     if (valid) {
-                        this.pool = await this.poolService.getRewardPool(this.data.pool);
                         this.rule = await this.pool.getRewardRule(this.data.rule);
-
-                        await firebase.database().ref(`/pools/${this.pool.address}/rewards/${this.data.key}`).remove();
                     } else {
                         throw { message: 'Your QR code is not valid.' };
                     }
                 } else if (this.data.pool && this.data.slack) {
-                    this.pool = await this.poolService.getRewardPool(this.data.pool);
                     this.slack = this.data.slack;
                 } else {
                     throw { message: 'An error occured while decoding your QR code.' };
@@ -85,7 +80,7 @@ export default class Camera extends Vue {
         this.loading = true;
         if (this.pool && this.account) {
             this.userService
-                .connectSlack(this.account, this.data.slack)
+                .connectSlack(this.account, this.data.slack, this.pool)
                 .then(() => {
                     this.$router.push(`/account`);
                     this.loading = false;
@@ -104,7 +99,9 @@ export default class Camera extends Vue {
         if (this.pool && this.rule) {
             this.pool
                 .createReward(this.rule.id, this.$network.extdev.account)
-                .then(() => {
+                .then(async () => {
+                    await firebase.database().ref(`/pools/${this.pool.address}/rewards/${this.data.key}`).remove();
+
                     this.$router.push(`/pools/${this.pool.address}`);
                     this.loading = false;
                 })

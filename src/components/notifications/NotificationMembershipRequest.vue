@@ -15,10 +15,13 @@
             </blockquote>
         </div>
         <div slot="notification-footer">
-            <b-button-group class="w-100">
+            <b-button-group class="w-100" v-if="!isMember">
                 <b-button variant="success" @click="grant()">Grant</b-button>
                 <b-button variant="danger" @click="decline()">Decline</b-button>
             </b-button-group>
+            <b-alert variant="info" v-else class="m-0">
+                A membership for this user is already granted.
+            </b-alert>
         </div>
     </base-notification>
 </template>

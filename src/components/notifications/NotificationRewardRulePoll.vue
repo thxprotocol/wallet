@@ -31,10 +31,13 @@
             />
         </div>
         <div slot="notification-footer">
-            <b-button-group class="w-100">
+            <b-button-group class="w-100" v-if="rewardRule && rewardRule.poll && now < rewardRule.poll.endTime">
                 <b-button variant="success" @click="approve()">Approve</b-button>
                 <b-button variant="danger" @click="decline()">Decline</b-button>
             </b-button-group>
+            <b-alert variant="info" v-else show class="m-0">
+                This poll has ended and voting is no longer possible.
+            </b-alert>
         </div>
     </base-notification>
 </template>

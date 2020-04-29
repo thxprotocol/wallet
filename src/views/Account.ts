@@ -69,6 +69,12 @@ export default class AccountDetail extends Vue {
         }
     }
 
+    public mounted() {
+        if (!this.$state.extdevPrivateKey || !this.$state.rinkebyPrivateKey) {
+            this.$bvModal.show('modalConnectNetwork');
+        }
+    }
+
     public onFileChange(e: any) {
         const name = `${this.account.uid}.jpg`;
         const files = e.target.files || e.dataTransfer.files;
@@ -117,7 +123,7 @@ export default class AccountDetail extends Vue {
 
         this.loading = false;
 
-        (this.$refs['modal-connect'] as any).hide();
+        this.$bvModal.hide('modalConnectNetwork');
 
         window.setTimeout(() => {
             window.location.reload();

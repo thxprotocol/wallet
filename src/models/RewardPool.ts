@@ -260,12 +260,6 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async createReward(ruleId: number, address: string) {
-        const isMember = await this.hasMemberRole(address);
-
-        if (!isMember) {
-            await this.requestMembership(address, '');
-        }
-
         return this.contract.methods
             .createReward(ruleId, address)
             .send({ from: this.account })

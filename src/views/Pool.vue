@@ -43,7 +43,7 @@
                             <b-list-group>
                                 <component
                                     v-for="(ev, key) in stream"
-                                    :key="ev.hash + ev.component"
+                                    :key="ev.hash + ev.component + key"
                                     :ev="ev"
                                     :pool="pool"
                                     :is="ev.component"

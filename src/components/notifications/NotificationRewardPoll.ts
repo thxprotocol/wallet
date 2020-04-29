@@ -1,5 +1,5 @@
 import { Component } from 'vue-property-decorator';
-import { BButton, BButtonGroup } from 'bootstrap-vue';
+import { BButton, BButtonGroup, BAlert } from 'bootstrap-vue';
 import BaseNotification from '@/components/notifications/BaseNotification.vue';
 import { Reward } from '@/models/Reward';
 import BaseNotificationClass from '@/components/notifications/BaseNotificationClass';
@@ -19,6 +19,7 @@ import BasePoll from '@/components/BasePoll.vue';
         'b-button-group': BButtonGroup,
         'base-notification': BaseNotification,
         'base-poll': BasePoll,
+        'b-alert': BAlert,
     },
 })
 export default class NotificationRewardPoll extends BaseNotificationClass {
@@ -26,6 +27,27 @@ export default class NotificationRewardPoll extends BaseNotificationClass {
 
     get reward(): Reward | null {
         return this.pool && this.pool.rewards.length ? this.pool.rewards[this.notification.metadata.reward] : null;
+    }
+
+    get isMember(): boolean | null {
+        return (
+            this.pool &&
+            this.pool.members.find((m) => {
+                return (this.reward && this.reward.beneficiaryAddress === m.address) || false;
+            })
+        );
+    }
+
+    private async invite() {
+        this.loading = true;
+        if (this.reward) {
+            this.notification.pool
+                .addMember(this.reward.beneficiaryAddress)
+                .then(() => this.remove())
+                .catch(() => {
+                    this.loading = false;
+                });
+        }
     }
 
     private async update() {

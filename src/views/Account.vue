@@ -146,7 +146,7 @@
                 </div>
             </div>
 
-            <button class="btn btn-secondary mb-3 btn-block" @click="showModal('modal-connect')">
+            <button class="btn btn-secondary mb-3 btn-block" v-b-modal="'modalConnectNetwork'">
                 <span v-if="$network.extdev">Reconnect Network</span>
                 <span v-else>Connect Network</span>
             </button>
@@ -154,7 +154,7 @@
                 Reset Network Connection
             </button>
 
-            <b-modal title="Setup network connection" centered ref="modal-connect">
+            <b-modal title="Setup network connection" centered id="modalConnectNetwork">
                 <p>
                     Generate private keys for the Loom and Rinkeby network. The private keys will be stored on this
                     device only and used to verify transactions.
