@@ -156,17 +156,17 @@
 
             <b-modal title="Setup network connection" centered ref="modal-connect">
                 <p>
-                    Add private keys for the loom sidechain and the parent Rinkeby network. These keys will only be
-                    stored on your device and used to verify transactions.
+                    Generate private keys for the Loom and Rinkeby network. The private keys will be stored on this
+                    device only and used to verify transactions.
                 </p>
                 <div class="alert alert-warning">
-                    <strong
-                        >Make sure to store your private keys safely and not only on this device. We can not recover
-                        your keys!</strong
-                    >
+                    <strong>
+                        Make sure to store your private keys safely and not only on this device. We can not recover your
+                        keys!
+                    </strong>
                 </div>
                 <div class="form-group">
-                    <label>Loom private key:</label>
+                    <label>Loom Network Private key:</label>
                     <div class="input-group">
                         <input
                             v-model="input.extdevPrivateKey"
@@ -175,12 +175,14 @@
                             placeholder="Paste or create your Loom private key"
                         />
                         <div class="input-group-append">
-                            <span @click="createExtdevKey()" class="input-group-text btn btn-link">Create new key</span>
+                            <span @click="createExtdevKey()" class="input-group-text btn btn-link">
+                                Generate Private Key
+                            </span>
                         </div>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Rinkeby private key:</label>
+                    <label>Rinkeby Network Private key:</label>
                     <div class="input-group">
                         <input
                             v-model="input.rinkebyPrivateKey"
@@ -189,9 +191,9 @@
                             placeholder="Paste or create your Rinkeby private key"
                         />
                         <div class="input-group-append">
-                            <span @click="createRinkebyKey()" class="input-group-text btn btn-link"
-                                >Create new key</span
-                            >
+                            <span @click="createRinkebyKey()" class="input-group-text btn btn-link">
+                                Generate Private Key
+                            </span>
                         </div>
                     </div>
                 </div>

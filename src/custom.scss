@@ -430,3 +430,19 @@ a,
 .bg-blue {
     background-color: $blue !important;
 }
+
+.section-login .form {
+    .form-control {
+        background-color: $black;
+        border-radius: 0;
+        border: 0;
+        border-bottom: 1px solid $yellow;
+        padding-left: 0;
+        padding-right: 0;
+
+        &:focus {
+            box-shadow: none;
+            color: white;
+        }
+    }
+}

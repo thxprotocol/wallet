@@ -19,7 +19,7 @@
                 <input required type="password" v-model="password" class="form-control" placeholder="******" />
             </div>
             <div class="form-group">
-                <button class="btn btn-primary btn-block btn-inverse" type="submit">Login</button>
+                <button class="btn btn-primary btn-block btn-inverse mt-4" type="submit">Login</button>
             </div>
             <p>You don't have an account? You can <router-link to="/register">register one!</router-link></p>
         </form>
