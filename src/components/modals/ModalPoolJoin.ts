@@ -11,7 +11,7 @@ import PoolService from '@/services/PoolService';
         'b-button': BButton,
         'base-modal': BaseModal,
     },
-    computed: mapGetters({
+    computed: mapGetters('account', {
         account: 'account',
     }),
 })

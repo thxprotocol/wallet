@@ -20,7 +20,7 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
         'profile-picture': ProfilePicture,
     },
     computed: {
-        ...mapGetters({
+        ...mapGetters('account', {
             account: 'account',
         }),
     },
@@ -74,13 +74,13 @@ export default class AccountDetail extends Vue {
         const files = e.target.files || e.dataTransfer.files;
 
         if (this.account) {
-            this.account.setPicture(name, files);
+            this.$store.dispatch('account/setPicture', { name, files });
         }
     }
 
     public async removeImage() {
         if (this.account) {
-            this.account.removePicture();
+            this.$store.dispatch('account/removePicture');
         }
     }
 

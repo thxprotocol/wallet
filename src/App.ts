@@ -17,38 +17,18 @@ import _ from 'lodash';
         Header,
         Footer,
     },
-    computed: {
-        ...mapGetters({
-            account: 'account',
-        }),
-    },
 })
 export default class App extends Vue {
     private poolService: PoolService = new PoolService();
     private coinService: CoinService = new CoinService();
     private userRef!: firebase.database.Reference;
-    private account!: Account;
 
     public async created() {
         firebase.auth().onAuthStateChanged((user: firebase.User | any) => {
             if (user) {
                 this.userRef = firebase.database().ref(`users/${user.uid}`);
 
-                this.getAccount(user.uid);
-
                 window.addEventListener('focus', this.setOnline);
-
-                this.userRef.on('child_added', (s: any) => {
-                    this.$store.commit('updateAccount', { prop: s.key, val: s.val() });
-                });
-
-                this.userRef.on('child_changed', (s: any) => {
-                    this.$store.commit('updateAccount', { prop: s.key, val: s.val() });
-                });
-
-                this.userRef.on('child_removed', (s: any) => {
-                    this.$store.commit('updateAccount', { prop: s.key, val: null });
-                });
 
                 if (this.$network.extdev) {
                     const poolRef = firebase.database().ref(`users/${user.uid}/pools`);
@@ -121,13 +101,6 @@ export default class App extends Vue {
     private setOnline() {
         return this.userRef.child('online').set(true);
     }
-
-    private getAccount(uid: string) {
-        const account = new Account(uid);
-
-        this.$store.commit('addAccount', account);
-    }
-
     private async getBalances() {
         const extdevBalance = await this.coinService.getExtdevBalance(this.$network.extdev.account);
         const rinkebyBalance = await this.coinService.getRinkebyBalance(this.$network.rinkeby.account.address);

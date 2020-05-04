@@ -14,8 +14,10 @@ import { mapGetters } from 'vuex';
         'base-notification': BaseNotification,
     },
     computed: {
-        ...mapGetters({
+        ...mapGetters('account', {
             account: 'account',
+        }),
+        ...mapGetters({
             rewardPools: 'rewardPools',
         }),
     },

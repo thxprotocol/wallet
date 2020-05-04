@@ -15,6 +15,8 @@ import { ModalPlugin } from 'bootstrap-vue';
 import UserService from '@/services/UserService';
 import PoolService from '@/services/PoolService';
 
+import AccountStore from '@/store/modules/account';
+
 Vue.use(VueTimers);
 Vue.config.productionTip = false;
 Vue.use(VueMoment);
@@ -22,9 +24,11 @@ Vue.use(ModalPlugin);
 
 let app: any;
 
-firebase.initializeApp(config.firebase[process.env.NODE_ENV as any]);
+firebase.initializeApp(config.firebase[process.env.NODE_ENV as string]);
+
 firebase.auth().onAuthStateChanged((user: firebase.User | any = firebase.auth().currentUser) => {
     if (user) {
+        AccountStore.init(user);
         const stateService: StateService = new StateService(user.uid);
         const poolService = new PoolService();
         const userService = new UserService();

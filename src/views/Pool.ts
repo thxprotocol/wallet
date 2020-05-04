@@ -51,9 +51,11 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
         'modal-membership-request': ModalMembershipRequest,
     },
     computed: {
+        ...mapGetters('account', {
+            account: 'account',
+        }),
         ...mapGetters({
             rewardPools: 'rewardPools',
-            account: 'account',
         }),
     },
 })

@@ -20,9 +20,11 @@ import 'firebase/database';
         'qrcode-capture': QrcodeCapture,
     },
     computed: {
+        ...mapGetters('account', {
+            account: 'account',
+        }),
         ...mapGetters({
             rewardPools: 'rewardPools',
-            account: 'account',
         }),
     },
 })

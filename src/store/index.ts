@@ -1,86 +1,62 @@
 import Vuex from 'vuex';
 import { Vue } from 'vue-property-decorator';
-import { Account } from '@/models/Account';
-import { IRewardPools, RewardPool } from '@/models/RewardPool';
+import { RewardPool } from '@/models/RewardPool';
 import { Notification } from '@/models/Notification';
+import { vuexfireMutations } from 'vuexfire';
 import BN from 'bn.js';
 
 Vue.use(Vuex);
 
-export interface State {
-    account: Account | null;
-    rewardPools: IRewardPools;
-    notifications: { [key: string]: Notification };
-    balance: {
-        eth: BN;
-        token: BN;
-        tokenRinkeby: BN;
-    };
-}
-
-const state: State = {
-    account: null,
-    rewardPools: {},
-    notifications: {},
-    balance: {
-        eth: new BN(0),
-        token: new BN(0),
-        tokenRinkeby: new BN(0),
-    },
-};
-
 const getters = {
-    tokenRinkebyBalance: (store: State) => {
+    tokenRinkebyBalance: (store: any) => {
         return store.balance.tokenRinkeby;
     },
-    tokenBalance: (store: State) => {
+    tokenBalance: (store: any) => {
         return store.balance.token;
     },
-    ethRinkebyBalance: (store: State) => {
+    ethRinkebyBalance: (store: any) => {
         return store.balance.eth;
     },
-    account: (store: State) => {
-        return store.account;
-    },
-    rewardPools: (store: State) => {
+    rewardPools: (store: any) => {
         return store.rewardPools;
     },
-    notifications: (store: State) => {
+    notifications: (store: any) => {
         return store.notifications;
     },
 };
 
 const mutations = {
-    updateBalance: (store: State, options: { type: string; balance: BN }) => {
+    updateBalance: (store: any, options: { type: string; balance: BN }) => {
         (store.balance as any)[options.type] = options.balance;
     },
-    addRewardPool: (store: State, pool: RewardPool) => {
+    addRewardPool: (store: any, pool: RewardPool) => {
         Vue.set(store.rewardPools, pool.address, pool);
     },
-    removeRewardPool: (store: State, address: string) => {
+    removeRewardPool: (store: any, address: string) => {
         Vue.delete(store.rewardPools, address);
     },
-    setNotification: (store: State, notification: Notification) => {
+    setNotification: (store: any, notification: Notification) => {
         Vue.set(store.notifications, notification.key, notification);
     },
-    deleteNotification: (store: State, key: string) => {
+    deleteNotification: (store: any, key: string) => {
         Vue.delete(store.notifications, key);
     },
-    addAccount: (store: State, account: Account) => {
-        Vue.set(store, 'account', account);
-    },
-    updateAccount: (store: State, options: { prop: string; val: any }) => {
-        if (store.account) {
-            Vue.set(store.account, options.prop, options.val);
-        }
-    },
+    ...vuexfireMutations,
 };
 
 const actions = {};
 const modules = {};
 
 export default new Vuex.Store({
-    state,
+    state: {
+        rewardPools: {},
+        notifications: {},
+        balance: {
+            eth: new BN(0),
+            token: new BN(0),
+            tokenRinkeby: new BN(0),
+        },
+    },
     getters,
     mutations,
     actions,

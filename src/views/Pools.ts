@@ -16,10 +16,14 @@ import ModalPoolJoin from '@/components/modals/ModalPoolJoin.vue';
         'modal-pool-create': ModalPoolCreate,
         'modal-pool-join': ModalPoolJoin,
     },
-    computed: mapGetters({
-        rewardPools: 'rewardPools',
-        account: 'account',
-    }),
+    computed: {
+        ...mapGetters('account', {
+            account: 'account',
+        }),
+        ...mapGetters({
+            rewardPools: 'rewardPools',
+        }),
+    },
 })
 export default class Pools extends Vue {
     public loading: boolean = false;

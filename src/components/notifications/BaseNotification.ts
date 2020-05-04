@@ -13,7 +13,7 @@ import { mapGetters } from 'vuex';
         'profile-picture': ProfilePicture,
     },
     computed: {
-        ...mapGetters({
+        ...mapGetters('account', {
             account: 'account',
         }),
     },

@@ -9,7 +9,7 @@ import { mapGetters } from 'vuex';
     },
     computed: {
         ...mapGetters({
-            account: 'account',
+            account: 'account/account',
             ethRinkebyBalance: 'ethRinkebyBalance',
             tokenRinkebyBalance: 'tokenRinkebyBalance',
             tokenBalance: 'tokenBalance',
