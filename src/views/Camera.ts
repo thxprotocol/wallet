@@ -45,19 +45,22 @@ export default class Camera extends Vue {
         if (decodedString.length > 0) {
             this.data = JSON.parse(decodedString);
             this.error = '';
-
+            debugger;
             try {
-                if (this.data.pool && this.data.rule >= 0) {
-                    const valid = await this.isValid();
+                if (this.data.pool) {
                     this.pool = await this.$pools.getRewardPool(this.data.pool);
 
-                    if (valid) {
-                        this.rule = await this.pool.getRewardRule(this.data.rule);
-                    } else {
-                        throw { message: 'Your QR code is not valid.' };
+                    if (this.data.rule >= 0) {
+                        const valid = await this.isValid();
+
+                        if (valid) {
+                            this.rule = await this.pool.getRewardRule(this.data.rule);
+                        } else {
+                            throw { message: 'Your QR code is not valid.' };
+                        }
+                    } else if (this.data.slack) {
+                        this.slack = this.data.slack;
                     }
-                } else if (this.data.pool && this.data.slack) {
-                    this.slack = this.data.slack;
                 } else {
                     throw { message: 'An error occured while decoding your QR code.' };
                 }
