@@ -47,7 +47,7 @@ export default class Register extends Vue {
                 firebase.database().ref('users').child(user.uid).set(user);
 
                 this.loading = false;
-                this.$router.replace('/account/connect');
+                this.$router.replace('/account');
             })
             .catch((err: string) => {
                 if (typeof err !== 'undefined') {
