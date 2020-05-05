@@ -52,7 +52,7 @@ export default class Camera extends Vue {
 
                     if (this.data.rule >= 0) {
                         const valid = await this.isValid();
-                        debugger;
+
                         if (valid) {
                             this.rule = await this.pool.getRewardRule(this.data.rule);
                         } else {
