@@ -45,14 +45,14 @@ export default class Camera extends Vue {
         if (decodedString.length > 0) {
             this.data = JSON.parse(decodedString);
             this.error = '';
-            debugger;
+
             try {
                 if (this.data.pool) {
                     this.pool = await this.$pools.getRewardPool(this.data.pool);
 
                     if (this.data.rule >= 0) {
                         const valid = await this.isValid();
-
+                        debugger;
                         if (valid) {
                             this.rule = await this.pool.getRewardRule(this.data.rule);
                         } else {
@@ -120,6 +120,7 @@ export default class Camera extends Vue {
     private async init(promise: any) {
         try {
             await promise;
+            this.hasStream = true;
         } catch (error) {
             if (error.name === 'NotAllowedError') {
                 this.error = 'Camera error: user denied camera access permisson';
