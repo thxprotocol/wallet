@@ -25,8 +25,12 @@ import BasePoll from '@/components/BasePoll.vue';
 export default class NotificationRewardPoll extends BaseNotificationClass {
     private now: number = Math.floor(new Date().getTime() / 1000);
 
-    get reward(): Reward | null {
-        return this.pool && this.pool.rewards.length ? this.pool.rewards[this.notification.metadata.reward] : null;
+    get reward(): Reward | undefined {
+        return this.pool && this.pool.rewards.length
+            ? this.pool.rewards.find((r: Reward) => {
+                  return r.id === parseInt(this.notification.metadata.reward, 10);
+              })
+            : undefined;
     }
 
     get isMember(): boolean | null {

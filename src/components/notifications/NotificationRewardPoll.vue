@@ -2,7 +2,7 @@
     <base-notification
         title="Reward Claimed"
         :notification="notification"
-        :loading="loading"
+        :loading="reward && reward.loading"
         @loading="loading = $event"
     >
         <div slot="notification-content" v-if="reward && !reward.loading">
