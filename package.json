@@ -10,8 +10,8 @@
         "build:prod": "vue-cli-service build --mode production",
         "contracts:compile:abi": "solc --overwrite --optimize ./contracts/*.sol -o ./src/contracts --abi",
         "contracts:compile:bin": "solc --overwrite --optimize ./contracts/*.sol -o ./src/contracts --bin",
-        "deploy:prod": "NETWORK=extdev vue-cli-service build --mode production; firebase use thx-wallet-prod; firebase deploy --only functions; aws s3 sync ./dist s3://wallet.thxprotocol.com --delete --acl public-read",
-        "deploy:dev": "NETWORK=extdev vue-cli-service build --mode development; firebase use thx-wallet-dev; firebase deploy --only functions,hosting",
+        "deploy:prod": "NETWORK=extdev vue-cli-service build --mode production; firebase deploy --only functions:production; aws s3 sync ./dist s3://wallet.thxprotocol.com --delete --acl public-read",
+        "deploy:dev": "NETWORK=extdev vue-cli-service build --mode development; firebase deploy --only functions:development,hosting:development",
         "test:unit": "vue-cli-service test:unit",
         "test:e2e": "vue-cli-service test:e2e",
         "lint": "vue-cli-service lint"
