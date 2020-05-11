@@ -1,5 +1,6 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
+import 'firebase/storage';
 
 export class ProfilePictureData {
     public name: string;
