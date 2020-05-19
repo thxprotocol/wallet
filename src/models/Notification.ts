@@ -28,7 +28,7 @@ export class Notification {
 
 class NotificationMetadata {
     public message!: string;
-    public reward!: number;
+    public reward!: string;
     public rule!: number;
     public title!: string;
     public timestamp!: number;

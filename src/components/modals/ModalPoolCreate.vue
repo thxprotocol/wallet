@@ -11,7 +11,7 @@
             <div class="alert alert-danger" v-if="error">
                 {{ error }}
             </div>
-            <input v-model="input.poolName" type="text" class="form-control" placeholder="Volunteers united" />
+            <input v-model="input.poolName" type="text" class="form-control" placeholder="Volunteers United" />
         </template>
         <template slot="footer">
             <b-button variant="link" @click="cancel()">

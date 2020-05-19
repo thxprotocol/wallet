@@ -1,5 +1,5 @@
 import { Component } from 'vue-property-decorator';
-import { BButton, BButtonGroup } from 'bootstrap-vue';
+import { BButton, BButtonGroup, BAlert } from 'bootstrap-vue';
 import BaseNotification from '@/components/notifications/BaseNotification.vue';
 import BaseNotificationClass from '@/components/notifications/BaseNotificationClass';
 
@@ -9,6 +9,7 @@ import BaseNotificationClass from '@/components/notifications/BaseNotificationCl
         'b-button': BButton,
         'b-button-group': BButtonGroup,
         'base-notification': BaseNotification,
+        'b-alert': BAlert,
     },
 })
 export default class NotificationMembershipRequest extends BaseNotificationClass {

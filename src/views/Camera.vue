@@ -5,7 +5,7 @@
             <span v-html="error"></span>
         </div>
 
-        <div v-if="rule && pool" class="d-flex w-100 h-100 align-items-center justify-content-center bg-yellow">
+        <div class="d-flex w-100 h-100 align-items-center justify-content-center bg-yellow" v-if="rule && pool">
             <div v-if="loading">
                 <b-spinner></b-spinner>
             </div>
@@ -17,13 +17,11 @@
                 <p class="lead">
                     for applying to rule <strong>{{ rule.title }}</strong>
                 </p>
-                <button class="btn btn-primary btn-block btn-lg mt-4" @click="claim()">
-                    Claim {{ rule.amount }} THX
-                </button>
+                <button class="btn btn-primary btn-lg mt-4" @click="claim()">Claim {{ rule.amount }} THX</button>
             </div>
         </div>
 
-        <div v-if="slack && pool" class="d-flex w-100 h-100 align-items-center justify-content-center bg-yellow">
+        <div class="d-flex w-100 h-100 align-items-center justify-content-center bg-yellow" v-if="slack && pool">
             <div v-if="loading">
                 <b-spinner></b-spinner>
             </div>
@@ -34,15 +32,27 @@
                 <p class="lead">
                     with Slack ID <strong>{{ slack }}</strong>
                 </p>
-                <button class="btn btn-primary btn-block btn-lg mt-4" @click="connect()">
+                <button class="btn btn-primary btn-lg mt-4" @click="connect()">
                     Connect Account
                 </button>
             </div>
         </div>
 
-        <qrcode-stream class="ui-video" @init="init" @decode="onDecode" :track="repaint"></qrcode-stream>
+        <qrcode-stream
+            :class="hasStream ? 'ui-video' : 'd-none'"
+            @init="init"
+            @decode="onDecode"
+            :track="repaint"
+        ></qrcode-stream>
+        <qrcode-capture
+            id="uploadBtn"
+            class="d-none"
+            :capture="false"
+            :multiple="false"
+            @decode="onDecode"
+        ></qrcode-capture>
 
-        <template v-if="!loading && !rule && !slack">
+        <template v-if="hasStream && !loading && !rule && !slack">
             <div class="ui-camera">
                 <span></span>
                 <span></span>
@@ -51,10 +61,36 @@
             </div>
 
             <div class="ui-file">
-                <qrcode-capture :capture="false" :multiple="false" @decode="onDecode"></qrcode-capture>
-                <small>Upload QR code image if the camera does not work on your device.</small>
+                <label for="uploadBtn">
+                    <span class="btn btn-primary btn-lg mt-4">
+                        Upload Picture
+                    </span>
+                </label>
             </div>
         </template>
+
+        <div
+            class="d-flex w-100 h-100 align-items-center justify-content-center bg-yellow"
+            v-if="!hasStream && !loading && !rule && !slack"
+        >
+            <div v-if="loading">
+                <b-spinner></b-spinner>
+            </div>
+            <div v-else class="text-center">
+                <h1>
+                    Submit a QR code
+                </h1>
+                <p class="lead">
+                    Make sure that you are connected to the network.
+                </p>
+
+                <label for="uploadBtn">
+                    <span class="btn btn-primary btn-lg mt-4">
+                        Upload Picture
+                    </span>
+                </label>
+            </div>
+        </div>
     </article>
 </template>
 <style lang="scss">
@@ -100,7 +136,6 @@
 .wrapper + .ui-camera {
     display: block;
 }
-
 .ui-camera span {
     display: block;
     width: 20px;

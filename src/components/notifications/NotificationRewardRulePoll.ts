@@ -1,5 +1,5 @@
 import { Component } from 'vue-property-decorator';
-import { BButton, BButtonGroup } from 'bootstrap-vue';
+import { BButton, BButtonGroup, BAlert } from 'bootstrap-vue';
 import BaseNotification from '@/components/notifications/BaseNotification.vue';
 import { RewardRule } from '@/models/RewardRule';
 import BaseNotificationClass from '@/components/notifications/BaseNotificationClass';
@@ -19,6 +19,7 @@ import BasePoll from '@/components/BasePoll.vue';
         'b-button-group': BButtonGroup,
         'base-notification': BaseNotification,
         'base-poll': BasePoll,
+        'b-alert': BAlert,
     },
 })
 export default class NotificationRewardRulePoll extends BaseNotificationClass {
