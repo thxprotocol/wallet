@@ -1,6 +1,4 @@
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import firebase from 'firebase/app';
-import 'firebase/auth';
+import { Component, Vue } from 'vue-property-decorator';
 import { BSpinner } from 'bootstrap-vue';
 import { VueRouter } from 'vue-router/types/router';
 
@@ -19,13 +17,11 @@ export default class Login extends Vue {
 
     public login() {
         this.loading = true;
-
-        return firebase
-            .auth()
-            .signInWithEmailAndPassword(this.email, this.password)
+        this.$store
+            .dispatch('account/login', { email: this.email, password: this.password })
             .then(() => {
                 this.loading = false;
-                this.$router.push((this.$route.query.redirect as any) || '/account');
+                this.$router.push((this.$route.query.redirect as string) || '/account');
             })
             .catch((err) => {
                 this.loading = false;

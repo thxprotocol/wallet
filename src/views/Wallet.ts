@@ -13,7 +13,7 @@ import _ from 'lodash';
     },
     computed: {
         ...mapGetters({
-            rewardPools: 'rewardPools',
+            rewardPools: 'pools/allWithMembership',
         }),
     },
 })

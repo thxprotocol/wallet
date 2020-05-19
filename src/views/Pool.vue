@@ -83,7 +83,7 @@
                             <ul class="list list-group mb-2">
                                 <li
                                     class="list-group-item d-flex justify-content-between align-items-center p-2"
-                                    v-for="m in rewardPools[$route.params.id].members"
+                                    v-for="m in pool.members"
                                     v-if="m.isMember"
                                     :key="m.address"
                                 >

@@ -17,7 +17,7 @@ export default class CoinService extends Vue {
                     to: rinkebyAddress,
                 })
                 .on('data', async () => {
-                    this.$store.commit('updateBalance', {
+                    this.$store.commit('balance/update', {
                         type: 'tokenRinkeby',
                         balance: await this.getRinkebyBalance(rinkebyAddress),
                     });
@@ -28,7 +28,7 @@ export default class CoinService extends Vue {
                     from: rinkebyAddress,
                 })
                 .on('data', async () => {
-                    this.$store.commit('updateBalance', {
+                    this.$store.commit('balance/update', {
                         type: 'tokenRinkeby',
                         balance: await this.getRinkebyBalance(rinkebyAddress),
                     });
@@ -43,7 +43,7 @@ export default class CoinService extends Vue {
                     to: extdevAddress,
                 })
                 .on('data', async () => {
-                    this.$store.commit('updateBalance', {
+                    this.$store.commit('balance/update', {
                         type: 'token',
                         balance: await this.getExtdevBalance(extdevAddress),
                     });
@@ -54,7 +54,7 @@ export default class CoinService extends Vue {
                     from: extdevAddress,
                 })
                 .on('data', async () => {
-                    this.$store.commit('updateBalance', {
+                    this.$store.commit('balance/update', {
                         type: 'token',
                         balance: await this.getExtdevBalance(extdevAddress),
                     });

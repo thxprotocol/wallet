@@ -1,62 +1,35 @@
 import Vuex from 'vuex';
 import { Vue } from 'vue-property-decorator';
-import { RewardPool } from '@/models/RewardPool';
-import { Notification } from '@/models/Notification';
 import { vuexfireMutations } from 'vuexfire';
-import BN from 'bn.js';
+import { config } from 'vuex-module-decorators';
+// Set rawError to true by default on all @Action decorators
+config.rawError = true;
+
+import NotificationsModule from './modules/notifications';
+import AccountStore from './modules/account';
+import MembersModule from './modules/members';
+import PoolsModule from './modules/pools';
+import BalanceModule from './modules/balance';
 
 Vue.use(Vuex);
 
-const getters = {
-    tokenRinkebyBalance: (store: any) => {
-        return store.balance.tokenRinkeby;
-    },
-    tokenBalance: (store: any) => {
-        return store.balance.token;
-    },
-    ethRinkebyBalance: (store: any) => {
-        return store.balance.eth;
-    },
-    rewardPools: (store: any) => {
-        return store.rewardPools;
-    },
-    notifications: (store: any) => {
-        return store.notifications;
-    },
-};
-
 const mutations = {
-    updateBalance: (store: any, options: { type: string; balance: BN }) => {
-        (store.balance as any)[options.type] = options.balance;
-    },
-    addRewardPool: (store: any, pool: RewardPool) => {
-        Vue.set(store.rewardPools, pool.address, pool);
-    },
-    removeRewardPool: (store: any, address: string) => {
-        Vue.delete(store.rewardPools, address);
-    },
-    setNotification: (store: any, notification: Notification) => {
-        Vue.set(store.notifications, notification.key, notification);
-    },
-    deleteNotification: (store: any, key: string) => {
-        Vue.delete(store.notifications, key);
-    },
     ...vuexfireMutations,
 };
 
 const actions = {};
-const modules = {};
+const getters = {};
+
+const modules = {
+    notifications: NotificationsModule,
+    account: AccountStore,
+    members: MembersModule,
+    pools: PoolsModule,
+    balance: BalanceModule,
+};
 
 export default new Vuex.Store({
-    state: {
-        rewardPools: {},
-        notifications: {},
-        balance: {
-            eth: new BN(0),
-            token: new BN(0),
-            tokenRinkeby: new BN(0),
-        },
-    },
+    state: {},
     getters,
     mutations,
     actions,

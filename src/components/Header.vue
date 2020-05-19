@@ -19,10 +19,10 @@
 
         <div class="account_balance">
             <p>
-                <span class="font-size-l">{{ tokenBalance }} THX</span>
+                <span class="font-size-l">{{ token }} THX</span>
             </p>
             <p>
-                <span>{{ tokenRinkebyBalance }} THX</span> | <span>{{ ethBalance }} ETH</span>
+                <span>{{ tokenRinkeby }} THX</span> | <span>{{ eth }} ETH</span>
             </p>
         </div>
     </header>

@@ -10,7 +10,7 @@ import { mapGetters } from 'vuex';
     },
     computed: {
         ...mapGetters({
-            notifications: 'notifications',
+            notificationCount: 'notifications/count',
         }),
     },
 })
@@ -22,13 +22,9 @@ export default class Footer extends Vue {
         camera: require('../assets/qrcode.svg'),
         pools: require('../assets/community.svg'),
     };
-    private notifications!: { [key: string]: Notification };
+    private notificationCount!: number;
 
     get routes(): any {
         return (this.$router as any).options.routes.filter((item: any) => item.visible);
-    }
-
-    get notificationCount(): number {
-        return Object.keys(this.notifications).length;
     }
 }

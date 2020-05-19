@@ -1,17 +1,12 @@
-import { Component, Prop, Vue } from 'vue-property-decorator';
-import firebase from 'firebase/app';
-import 'firebase/auth';
+import { Component, Vue } from 'vue-property-decorator';
 
 @Component({
     name: 'logout',
 })
 export default class Logout extends Vue {
     public mounted() {
-        firebase
-            .auth()
-            .signOut()
-            .then(() => {
-                this.$router.replace('login');
-            });
+        this.$store.dispatch('account/logout').then(() => {
+            this.$router.replace('login');
+        });
     }
 }

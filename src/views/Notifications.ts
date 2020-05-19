@@ -14,12 +14,12 @@ import { Notification } from '@/models/Notification';
     },
     computed: {
         ...mapGetters({
-            notifications: 'notifications',
+            notifications: 'notifications/allResolved',
         }),
     },
 })
 export default class Notifications extends Vue {
     public error: string = '';
     public loading: any = false;
-    private notifications!: { [key: string]: Notification };
+    private notifications!: Notification[];
 }

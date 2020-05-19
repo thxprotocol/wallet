@@ -21,7 +21,7 @@ import ModalPoolJoin from '@/components/modals/ModalPoolJoin.vue';
             account: 'account',
         }),
         ...mapGetters({
-            rewardPools: 'rewardPools',
+            rewardPools: 'pools/allWithMembership',
         }),
     },
 })

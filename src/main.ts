@@ -1,34 +1,34 @@
 import { Vue } from 'vue-property-decorator';
+
 import VueTimers from 'vue-timers';
 import VueMoment from 'vue-moment';
+import { ModalPlugin } from 'bootstrap-vue';
+
 import App from './App.vue';
-import firebase from 'firebase/app';
-import 'firebase/auth';
+
 import router from './router';
 import store from './store';
+
 import StateService from './services/StateService';
 import NetworkService from './services/NetworkService';
-import config from './config.json';
-import './registerServiceWorker';
-import './custom.scss';
-import { ModalPlugin } from 'bootstrap-vue';
 import UserService from '@/services/UserService';
 import PoolService from '@/services/PoolService';
 
-import AccountStore from '@/store/modules/account';
+import firebase from '@/firebase';
+
+import './registerServiceWorker';
+import './custom.scss';
+
+Vue.config.productionTip = false;
 
 Vue.use(VueTimers);
-Vue.config.productionTip = false;
 Vue.use(VueMoment);
 Vue.use(ModalPlugin);
 
 let app: any;
 
-firebase.initializeApp(config.firebase[process.env.NODE_ENV as string]);
-
-firebase.auth().onAuthStateChanged((user: firebase.User | any = firebase.auth().currentUser) => {
+firebase.auth.onAuthStateChanged((user: firebase.User | any) => {
     if (user) {
-        AccountStore.init(user);
         const stateService: StateService = new StateService(user.uid);
         const poolService = new PoolService();
         const userService = new UserService();

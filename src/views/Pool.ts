@@ -54,9 +54,6 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
         ...mapGetters('account', {
             account: 'account',
         }),
-        ...mapGetters({
-            rewardPools: 'rewardPools',
-        }),
     },
 })
 export default class PoolDetail extends Vue {
@@ -74,24 +71,23 @@ export default class PoolDetail extends Vue {
         },
     };
     public clipboard: any = null;
-    private rewardPools!: IRewardPools;
     private account!: Account;
     private coinService: CoinService = new CoinService();
     private poolService: PoolService = new PoolService();
 
     get stream() {
         const id = this.$route.params.id;
-        return _.orderBy(this.rewardPools[id].events, 'blockTime', 'desc');
+        return _.orderBy(this.pool.events, 'blockTime', 'desc');
     }
 
     get rewardRules() {
         const id = this.$route.params.id;
-        return _.orderBy(this.rewardPools[id].rewardRules, 'id', 'desc');
+        return _.orderBy(this.pool.rewardRules, 'id', 'desc');
     }
 
     get claimableRewards() {
         const id = this.$route.params.id;
-        const filtered = this.rewardPools[id].rewards.filter((r: Reward) => {
+        const filtered = this.pool.rewards.filter((r: Reward) => {
             return (
                 r.state &&
                 (r.state === 'Approved' || r.state === 'Pending') &&
@@ -103,7 +99,7 @@ export default class PoolDetail extends Vue {
 
     get archivedRewards() {
         const id = this.$route.params.id;
-        const filtered = this.rewardPools[id].rewards.filter((r: Reward) => {
+        const filtered = this.pool.rewards.filter((r: Reward) => {
             return (
                 r.state &&
                 (r.state === 'Withdrawn' || r.state === 'Rejected') &&
@@ -114,17 +110,17 @@ export default class PoolDetail extends Vue {
     }
 
     get pool(): RewardPool {
-        return this.rewardPools[this.$route.params.id];
+        return this.$store.getters['pools/find'](this.$route.params.id);
     }
 
     get poolMembers(): string {
-        return _.orderBy(this.rewardPools[this.$route.params.id].members, 'connected', 'desc');
+        return _.orderBy(this.pool.members, 'connected', 'desc');
     }
 
     private mounted() {
         const address = this.$route.params.id;
 
-        if (!this.rewardPools[address] && this.account) {
+        if (!this.pool && this.account) {
             this.poolService
                 .join(this.account.uid, address)
                 .then(() => {

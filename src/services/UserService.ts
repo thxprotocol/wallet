@@ -1,9 +1,8 @@
 import firebase from 'firebase/app';
 import 'firebase/database';
-import { Vue } from 'vue-property-decorator';
 import { Account } from '@/models/Account';
 
-export default class UserService extends Vue {
+export default class UserService {
     public async getMemberByAddress(address: string) {
         const snap: any = await firebase.database().ref(`wallets/${address.toLowerCase()}`).once('value');
         const wallet = snap.val();

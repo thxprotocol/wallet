@@ -1,5 +1,4 @@
-import firebase from 'firebase/app';
-import 'firebase/database';
+import firebase from '@/firebase';
 
 export class ProfilePictureData {
     public name: string;
@@ -12,7 +11,8 @@ export class ProfilePictureData {
 }
 
 export class Account {
-    public uid!: string;
+    public uid: string;
+    public address: string;
     public firstName: string = '';
     public lastName: string = '';
     public initials: string = '';
@@ -22,12 +22,12 @@ export class Account {
     public online: boolean = false;
     public notifications: { [key: string]: { pool: string; removed: boolean } } = {};
 
-    constructor(uid: string) {
+    constructor(uid: string, address: string = '') {
         this.uid = uid;
         this.picture = null;
+        this.address = address;
 
-        firebase
-            .database()
+        firebase.db
             .ref(`users/${this.uid}`)
             .once('value')
             .then((s: any) => {
