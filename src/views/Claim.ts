@@ -23,28 +23,26 @@ export default class Claim extends Vue {
     private poolService: PoolService = new PoolService();
 
     private async mounted() {
-        if (this.$route.params.rule && this.$route.params.pool && this.$route.params.address) {
+        if (this.$route.params.rule && this.$route.params.pool) {
             const rewardsRef = firebase.database().ref(`pools/${this.$route.params.pool}/rewards`);
 
             this.data = {
                 rule: parseInt(this.$route.params.rule, 10),
                 pool: this.$route.params.pool,
-                address: this.$route.params.address,
+                key: rewardsRef.push().key,
             };
 
             rewardsRef.child(this.data.key).set(this.data);
 
-            rewardsRef.child(this.data.key).on('child_added', (s: any) => {
-                if (s.key === 'hash') {
-                    this.isClaimed = true;
-                }
+            rewardsRef.on('child_removed', (s: any) => {
+                this.isClaimed = s.key === this.data.key;
             });
 
             rewardsRef.child(this.data.key).onDisconnect().remove();
 
             this.startConfetti();
 
-            if (this.$state.extdevPrivateKey) {
+            if (this.$network.extdev) {
                 try {
                     this.pool = await this.poolService.getRewardPool(this.data.pool);
                     this.rule = await this.pool.getRewardRule(this.data.rule);
@@ -57,6 +55,23 @@ export default class Claim extends Vue {
         } else {
             console.log(this.error);
             this.error = 'Your have tried a faulty URL. Please use another one.';
+        }
+    }
+
+    private claim() {
+        if (this.pool && this.rule) {
+            this.pool
+                .createReward(this.rule.id, this.$network.extdev.account)
+                .then(async () => {
+                    await firebase.database().ref(`/pools/${this.data.pool}/rewards/${this.data.key}`).remove();
+
+                    this.$router.push(`/pools/${this.data.pool}`);
+                })
+                .catch((err: any) => {
+                    if (err) {
+                        this.error = err.message;
+                    }
+                });
         }
     }
 

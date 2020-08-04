@@ -109,12 +109,12 @@ const routes: any = [
     },
     {
         name: 'claim',
-        path: '/claim/:pool/:rule/:key',
+        path: '/claim/:pool/:rule',
         component: Claim,
         meta: {
             header: false,
             footer: false,
-            requiresAuth: true,
+            requiresAuth: false,
         },
     },
 ];

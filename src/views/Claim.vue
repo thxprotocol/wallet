@@ -6,31 +6,35 @@
                 <div class="col-md-6 offset-md-3 p-3 text-center">
                     <div class="card card-light">
                         <div class="card-body">
-                            <div class="alert alert-danger" v-if="error">
-                                {{ error }}
-                            </div>
+                            <div class="alert alert-danger" v-if="error">{{ error }}</div>
 
-                            <template v-if="!isClaimed && !$state.extdevPrivateKey">
+                            <template v-if="!isClaimed && !$network.extdev">
                                 <canvas ref="canvas" class="qrcode"></canvas>
                                 <h1>Congratulations!</h1>
                                 <p class="lead">You have earned a reward.</p>
                                 <p>
-                                    Open your <a href="https://wallet.thxproject.com" target="_blank">THX Wallet</a> on
+                                    Open your
+                                    <a
+                                        href="https://wallet.thxprotocol.com/"
+                                        target="_blank"
+                                    >THX Wallet</a> on
                                     a device with a camera and claim your reward by scanning this QR code.
                                 </p>
                             </template>
 
-                            <template v-if="!isClaimed && $state.extdevPrivateKey && rule">
+                            <template v-if="!isClaimed && $network.extdev && rule">
                                 <h1>
                                     You are rewarded
                                     <span>{{ rule.amount }} THX!</span>
                                 </h1>
                                 <p class="lead">
-                                    for applying to rule <strong>{{ rule.title }}</strong>
+                                    for applying to rule
+                                    <strong>{{ rule.title }}</strong>
                                 </p>
-                                <button class="btn btn-primary btn-block btn-lg mt-4" @click="claim()">
-                                    Claim {{ rule.amount }} THX
-                                </button>
+                                <button
+                                    class="btn btn-primary btn-block btn-lg mt-4"
+                                    @click="claim()"
+                                >Claim {{ rule.amount }} THX</button>
                             </template>
 
                             <template v-if="isClaimed">
@@ -50,8 +54,8 @@
                                 <h1>Well done!</h1>
                                 <p class="lead">You have claimed your reward.</p>
                                 <p>
-                                    A pool manager will review your claim before<br />
-                                    your reward can be withdrawn.
+                                    A pool manager will review your claim before
+                                    <br />your reward can be withdrawn.
                                 </p>
                             </template>
                         </div>
