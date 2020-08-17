@@ -371,13 +371,13 @@
                     <b-button
                         size="sm"
                         v-bind:class="{ disabled: loading }"
-                        class="btn btn-link"
+                        variant="link"
                         @click="onResume()"
                     >Resume withdrawals</b-button>
                     <b-button
                         size="sm"
                         v-bind:class="{ disabled: loading }"
-                        class="btn btn-primary"
+                        variant="primary"
                         @click="onWithdraw()"
                     >Withdraw {{ input.withdrawToGateway }} THX</b-button>
                 </template>
