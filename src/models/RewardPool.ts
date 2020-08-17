@@ -21,8 +21,8 @@ import { Reward } from '@/models/Reward';
 import { RewardRule, RewardRulePoll } from '@/models/RewardRule';
 import _ from 'lodash';
 import BN from 'bn.js';
-import REWARD_ABI from '@/contracts/Reward.abi';
-import REWARD_RULE_POLL_ABI from '@/contracts/RulePoll.abi';
+import REWARD_ABI from '@/contracts/RewardPoll.abi';
+import REWARD_RULE_POLL_ABI from '@/contracts/RewardRulePoll.abi';
 import UserService from '@/services/UserService';
 
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
