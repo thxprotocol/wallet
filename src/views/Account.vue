@@ -4,9 +4,7 @@
             <div class="d-flex" v-if="account">
                 <label v-if="!account.picture" class="text-center">
                     <div class="account-picture account-picture-sm bg-yellow mr-3">
-                        <span>
-                            {{ account.initials }}
-                        </span>
+                        <span>{{ account.initials }}</span>
                     </div>
                     <br />
                     <input type="file" @change="onFileChange" class="d-none" />
@@ -31,15 +29,16 @@
             <b-alert v-if="txHash" dismissible show variant="info">
                 <small>Track your transaction:</small>
                 <div class="text-muted list-item-text-overflow">
-                    <a :href="`https://rinkeby.etherscan.io/tx/${txHash}`">
-                        {{ txHash }}
-                    </a>
+                    <a :href="`https://rinkeby.etherscan.io/tx/${txHash}`">{{ txHash }}</a>
                 </div>
             </b-alert>
 
-            <b-alert v-if="alert" dismissible show :variant="alert.variant ? alert.variant : 'info'">
-                {{ alert.text }}
-            </b-alert>
+            <b-alert
+                v-if="alert"
+                dismissible
+                show
+                :variant="alert.variant ? alert.variant : 'info'"
+            >{{ alert.text }}</b-alert>
 
             <div class="card clearfix mb-3 d-block">
                 <div class="card-body" v-if="account">
@@ -56,15 +55,33 @@
                         </div>
                         <div class="form-group">
                             <label>E-mail:</label>
-                            <input type="text" class="form-control" :value="account.email" readonly disabled />
+                            <input
+                                type="text"
+                                class="form-control"
+                                :value="account.email"
+                                readonly
+                                disabled
+                            />
                         </div>
                         <div class="form-group">
                             <label>UID:</label>
-                            <input type="text" class="form-control" :value="account.uid" readonly disabled />
+                            <input
+                                type="text"
+                                class="form-control"
+                                :value="account.uid"
+                                readonly
+                                disabled
+                            />
                         </div>
                         <div class="form-group" v-if="account.slack">
                             <label>Slack ID:</label>
-                            <input type="text" class="form-control" :value="account.slack" readonly disabled />
+                            <input
+                                type="text"
+                                class="form-control"
+                                :value="account.slack"
+                                readonly
+                                disabled
+                            />
                         </div>
                     </b-overlay>
                 </div>
@@ -79,37 +96,48 @@
             <div class="card mb-3" v-if="$network.rinkeby && $network.rinkeby.account">
                 <div class="card-header pl-3 pr-3 pt-2 pb-2">
                     <div>
-                        <strong>Rinkeby Network</strong><br />
-                        <small
-                            >{{ $network.rinkeby.account.address }}
-                            <a class="text-primary" @click="copyClipboard($network.rinkeby.account.address)"
-                                >({{ clipboard === $network.rinkeby.account.address ? 'Copied!' : 'Copy' }})</a
-                            ></small
-                        >
+                        <strong>Rinkeby Network</strong>
+                        <br />
+                        <small>
+                            {{ $network.rinkeby.account.address }}
+                            <a
+                                class="text-primary"
+                                @click="copyClipboard($network.rinkeby.account.address)"
+                            >({{ clipboard === $network.rinkeby.account.address ? 'Copied!' : 'Copy' }})</a>
+                        </small>
                     </div>
                 </div>
                 <div class="card-body">
                     <ul class="list-bullets">
                         <li>
-                            <button class="btn btn-link" @click="showModal('modal-gateway-deposit')">
-                                Deposit THX
-                            </button>
+                            <button
+                                class="btn btn-link"
+                                @click="showModal('modal-gateway-deposit')"
+                            >Deposit THX</button>
                         </li>
                         <li>
-                            <button class="btn btn-link" @click="showModal('modal-transfer-coin-rinkeby')">
-                                Transfer THX
-                            </button>
+                            <button
+                                class="btn btn-link"
+                                @click="showModal('modal-transfer-coin-rinkeby')"
+                            >Transfer THX</button>
                         </li>
                         <li>
-                            <button class="btn btn-link" @click="showModal('modal-transfer-ether')">
-                                Transfer ETH
-                            </button>
+                            <button
+                                class="btn btn-link"
+                                @click="showModal('modal-transfer-ether')"
+                            >Transfer ETH</button>
                         </li>
                         <li v-if="isRinkebyMinter">
-                            <button class="btn btn-link" @click="showModal('modal-add-minter')">Add minter role</button>
+                            <button
+                                class="btn btn-link"
+                                @click="showModal('modal-add-minter')"
+                            >Add minter role</button>
                         </li>
                         <li v-if="isRinkebyMinter">
-                            <button class="btn btn-link" @click="showModal('modal-mint-rinkeby')">Mint tokens</button>
+                            <button
+                                class="btn btn-link"
+                                @click="showModal('modal-mint-rinkeby')"
+                            >Mint tokens</button>
                         </li>
                     </ul>
                 </div>
@@ -118,29 +146,36 @@
             <div class="card mb-3" v-if="$network.extdev && $network.extdev.account">
                 <div class="card-header pl-3 pr-3 pt-2 pb-2">
                     <div>
-                        <strong>Loom Network</strong><br />
-                        <small
-                            >{{ $network.extdev.account }}
-                            <a class="text-primary" @click="copyClipboard($network.extdev.account)">
-                                ({{ clipboard === $network.extdev.account ? 'Copied!' : 'Copy' }})
-                            </a>
+                        <strong>Loom Network</strong>
+                        <br />
+                        <small>
+                            {{ $network.extdev.account }}
+                            <a
+                                class="text-primary"
+                                @click="copyClipboard($network.extdev.account)"
+                            >({{ clipboard === $network.extdev.account ? 'Copied!' : 'Copy' }})</a>
                         </small>
                     </div>
                 </div>
                 <div class="card-body">
                     <ul class="list-bullets">
                         <li>
-                            <button class="btn btn-link" @click="showModal('modal-gateway-withdraw')">
-                                Withdraw THX
-                            </button>
+                            <button
+                                class="btn btn-link"
+                                @click="showModal('modal-gateway-withdraw')"
+                            >Withdraw THX</button>
                         </li>
                         <li>
-                            <button class="btn btn-link" @click="showModal('modal-transfer-coin-extdev')">
-                                Transfer THX
-                            </button>
+                            <button
+                                class="btn btn-link"
+                                @click="showModal('modal-transfer-coin-extdev')"
+                            >Transfer THX</button>
                         </li>
                         <li v-if="isExtdevMinter">
-                            <button class="btn btn-link" @click="showModal('modal-mint-extdev')">Mint tokens</button>
+                            <button
+                                class="btn btn-link"
+                                @click="showModal('modal-mint-extdev')"
+                            >Mint tokens</button>
                         </li>
                     </ul>
                 </div>
@@ -150,9 +185,11 @@
                 <span v-if="$network.extdev">Reconnect Network</span>
                 <span v-else>Connect Network</span>
             </button>
-            <button v-if="$network.extdev" @click="reset()" class="btn btn-link btn-block text-danger">
-                Reset Network Connection
-            </button>
+            <button
+                v-if="$network.extdev"
+                @click="reset()"
+                class="btn btn-link btn-block text-danger"
+            >Reset Network Connection</button>
 
             <b-modal title="Setup network connection" centered id="modalConnectNetwork">
                 <p>
@@ -175,9 +212,10 @@
                             placeholder="Paste or create your Loom private key"
                         />
                         <div class="input-group-append">
-                            <span @click="createExtdevKey()" class="input-group-text btn btn-link">
-                                Generate Private Key
-                            </span>
+                            <span
+                                @click="createExtdevKey()"
+                                class="input-group-text btn btn-link"
+                            >Generate Private Key</span>
                         </div>
                     </div>
                 </div>
@@ -191,9 +229,10 @@
                             placeholder="Paste or create your Rinkeby private key"
                         />
                         <div class="input-group-append">
-                            <span @click="createRinkebyKey()" class="input-group-text btn btn-link">
-                                Generate Private Key
-                            </span>
+                            <span
+                                @click="createRinkebyKey()"
+                                class="input-group-text btn btn-link"
+                            >Generate Private Key</span>
                         </div>
                     </div>
                 </div>
@@ -204,8 +243,7 @@
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
                         @click="onCreateAccountsFromPrivateKey()"
-                        >Connect</b-button
-                    >
+                    >Connect</b-button>
                 </template>
             </b-modal>
 
@@ -231,14 +269,18 @@
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
                         @click="onAddMinter()"
-                        >Connect Accounts</b-button
-                    >
+                    >Connect Accounts</b-button>
                 </template>
             </b-modal>
 
             <b-modal title="Mint tokens for Rinkeby account" centered ref="modal-mint-rinkeby">
                 <template v-if="!loading">
-                    <input v-model="input.mintForAccount" type="number" class="form-control" min="0" />
+                    <input
+                        v-model="input.mintForAccount"
+                        type="number"
+                        class="form-control"
+                        min="0"
+                    />
                 </template>
 
                 <template v-if="loading">
@@ -253,14 +295,18 @@
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
                         @click="onMintRinkebyCoin()"
-                        >Mint {{ input.mintForAccount }} THX
-                    </b-button>
+                    >Mint {{ input.mintForAccount }} THX</b-button>
                 </template>
             </b-modal>
 
             <b-modal title="Mint tokens for Loom account" centered ref="modal-mint-extdev">
                 <template v-if="!loading">
-                    <input v-model="input.mintForLoomAccount" type="number" class="form-control" min="0" />
+                    <input
+                        v-model="input.mintForLoomAccount"
+                        type="number"
+                        class="form-control"
+                        min="0"
+                    />
                 </template>
 
                 <template v-if="loading">
@@ -275,14 +321,18 @@
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
                         @click="onMintExtdevCoin()"
-                        >Mint {{ input.mintForLoomAccount }} THX
-                    </b-button>
+                    >Mint {{ input.mintForLoomAccount }} THX</b-button>
                 </template>
             </b-modal>
 
             <b-modal title="Deposit THX" centered ref="modal-gateway-deposit">
                 <template v-if="!loading">
-                    <input v-model="input.depositToGateway" type="number" class="form-control" min="0" />
+                    <input
+                        v-model="input.depositToGateway"
+                        type="number"
+                        class="form-control"
+                        min="0"
+                    />
                 </template>
 
                 <template v-if="loading">
@@ -297,14 +347,18 @@
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
                         @click="onDeposit()"
-                        >Deposit {{ input.depositToGateway }} THX
-                    </b-button>
+                    >Deposit {{ input.depositToGateway }} THX</b-button>
                 </template>
             </b-modal>
 
             <b-modal title="Withdraw THX" centered ref="modal-gateway-withdraw">
                 <template v-if="!loading">
-                    <input v-model="input.withdrawToGateway" type="number" class="form-control" min="0" />
+                    <input
+                        v-model="input.withdrawToGateway"
+                        type="number"
+                        class="form-control"
+                        min="0"
+                    />
                 </template>
 
                 <template v-if="loading">
@@ -317,10 +371,15 @@
                     <b-button
                         size="sm"
                         v-bind:class="{ disabled: loading }"
+                        class="btn btn-link"
+                        @click="onResume()"
+                    >Resume withdrawals</b-button>
+                    <b-button
+                        size="sm"
+                        v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
                         @click="onWithdraw()"
-                        >Withdraw {{ input.withdrawToGateway }} THX
-                    </b-button>
+                    >Withdraw {{ input.withdrawToGateway }} THX</b-button>
                 </template>
             </b-modal>
 
@@ -356,8 +415,7 @@
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
                         @click="onTransferExtdevCoin()"
-                        >Transfer {{ input.transferTokens }} THX</b-button
-                    >
+                    >Transfer {{ input.transferTokens }} THX</b-button>
                 </template>
             </b-modal>
 
@@ -393,8 +451,7 @@
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
                         @click="onTransferRinkebyCoin()"
-                        >Transfer {{ input.transferRinkebyCoinAmount }} THX</b-button
-                    >
+                    >Transfer {{ input.transferRinkebyCoinAmount }} THX</b-button>
                 </template>
             </b-modal>
 
@@ -430,8 +487,7 @@
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
                         @click="onTransferEther()"
-                        >Transfer {{ input.transferEtherAmount }} ETH</b-button
-                    >
+                    >Transfer {{ input.transferEtherAmount }} ETH</b-button>
                 </template>
             </b-modal>
         </main>

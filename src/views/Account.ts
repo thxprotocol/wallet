@@ -148,6 +148,20 @@ export default class AccountDetail extends Vue {
             });
     }
 
+    public async onResume() {
+        this.loading = true;
+        try {
+            await this.$network.resumeWithdrawal();
+            this.loading = false;
+        } catch (e) {
+            this.alert = {
+                text: e,
+                type: 'danger',
+            };
+            this.loading = false;
+        }
+    }
+
     public onWithdraw() {
         this.loading = true;
         this.$network
