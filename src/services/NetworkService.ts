@@ -439,6 +439,10 @@ export default class NetworkService {
         try {
             const extdev = this.loadExtdevAccount();
             const rinkeby = this.loadRinkebyAccount();
+
+            // Resume potential withdrawals
+            await this.resumeWithdrawal();
+
             const actualAmount = new BN(amount).mul(TOKEN_MULTIPLIER);
             const rinkebyNetworkId = await rinkeby.web3js.eth.net.getId();
             const extdevNetworkId = await extdev.web3js.eth.net.getId();
