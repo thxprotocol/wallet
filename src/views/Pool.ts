@@ -191,19 +191,18 @@ export default class PoolDetail extends Vue {
 
         if (parseInt(balance.toString(), 10) >= parseInt(amount.toString(), 10)) {
             this.loading = true;
+            try {
+                await this.coinService.approveDeposit(this.pool.address, amount.toString());
+                await this.pool.addDeposit(amount);
 
-            this.pool
-                .addDeposit(amount)
-                .then(() => {
-                    (this.$refs.modalDeposit as BModal).hide();
+                (this.$refs.modalDeposit as BModal).hide();
 
-                    this.input.poolDeposit = 0;
-                    this.loading = false;
-                })
-                .catch((err: string) => {
-                    this.loading = false;
-                    this.error = err;
-                });
+                this.input.poolDeposit = 0;
+                this.loading = false;
+            } catch (err) {
+                this.loading = false;
+                this.error = err;
+            }
         } else {
             this.error = 'Your balance is not sufficient.';
         }

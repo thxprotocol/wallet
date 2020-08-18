@@ -6,17 +6,13 @@ const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export class RewardPoolEvents {
     public eventTypes: string[] = [
+        'Withdrawn',
         'Deposited',
-        'ManagerAdded',
-        'ManagerRemoved',
-        'MemberAdded',
-        'MemberRemoved',
+        'RewardRulePollCreated',
+        'RewardRulePollFinished',
+        'RewardRuleUpdated',
         'RewardPollCreated',
         'RewardPollFinished',
-        'RulePollCreated',
-        'RulePollFinished',
-        'RuleStateChanged',
-        'Withdrawn',
     ];
 }
 

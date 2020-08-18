@@ -38,7 +38,6 @@ export default class ModalPoolCreate extends Vue {
 
     private create() {
         this.loading = true;
-        this.loading = true;
         this.poolService
             .createAndJoin(this.account.uid, this.input.poolName)
             .then(() => {

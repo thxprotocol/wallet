@@ -52,20 +52,14 @@ export class RewardPool extends RewardPoolEvents {
         this.network = network;
         this.account = network.extdev.account;
 
+        this.getName();
+        this.getMembers();
         this.updateBalance();
         this.checkMemberships();
         this.getRewardRules();
         this.getRewards();
         this.getTransactions();
-        this.getMembers();
         this.getStream(); // Do this last since it uses other data
-
-        this.contract.methods
-            .name()
-            .call({ from: this.account })
-            .then((name: string) => {
-                this.name = name;
-            });
 
         for (const event of this.eventTypes) {
             this.contract.events[event]().on('data', (e: any) => {
@@ -77,14 +71,25 @@ export class RewardPool extends RewardPoolEvents {
         }
     }
 
+    public async getName() {
+        const snap = await firebase.database().ref(`/pools/${this.address}/name`).once('value');
+
+        this.name = snap.val();
+    }
+
+    public async setName(_name: string) {
+        return await firebase.database().ref(`/pools/${this.address}/name`).set(_name);
+    }
+
     public async getMembers() {
-        let i = 0;
+        const memberRole = await this.contract.methods.MEMBER_ROLE().call({ from: this.account });
+        const count = await this.contract.methods.getRoleMemberCount(memberRole).call({ from: this.account });
 
         this.members.splice(0);
 
-        while (i !== 20) {
+        for (let i = 0; i < count; i++) {
             try {
-                const address = await this.contract.methods.members(i).call({ from: this.account });
+                const address = await this.contract.methods.getRoleMember(memberRole, i).call({ from: this.account });
                 const member = await this.getMember(address);
                 const exists = this.members.find((m) => {
                     return member.address === m.address;
@@ -94,10 +99,8 @@ export class RewardPool extends RewardPoolEvents {
                     this.members.push(member);
                 }
             } catch (e) {
-                // Ignore errors when retreiving non existant members.
+                console.error(e);
             }
-
-            i++;
         }
     }
 
@@ -346,33 +349,31 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async countRewards() {
-        return await this.contract.methods.countRewards().call({
+        return await this.contract.methods.getRewardCount().call({
             from: this.account,
         });
     }
 
     public async countRewardRules() {
-        return await this.contract.methods.countRules().call({
+        return await this.contract.methods.getRewardRuleCount().call({
             from: this.account,
         });
     }
 
     public async countRewardsOf(account: string) {
-        return await this.contract.methods.countRewardsOf(account).call({
+        return await this.contract.methods.getRewardCountOf(account).call({
             from: this.account,
         });
     }
 
     public async countDeposits(address: string) {
-        return await this.contract.methods.countDeposits(address).call({
+        return await this.contract.methods.getDepositCountOf(address).call({
             from: this.account,
         });
     }
 
     public async countWithdrawels(address: string) {
-        return await this.contract.methods.countWithdrawels(address).call({
-            from: this.account,
-        });
+        return await this.countRewardsOf(address);
     }
 
     public async getRewardRule(id: number) {
@@ -426,7 +427,7 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async addRewardRule(rule: any) {
-        const tx = await this.callPoolMethod(this.contract.methods.createRule());
+        const tx = await this.callPoolMethod(this.contract.methods.addRewardRule());
         const id = tx.events.RuleStateChanged.returnValues.id;
         const state = tx.events.RuleStateChanged.returnValues.state;
 

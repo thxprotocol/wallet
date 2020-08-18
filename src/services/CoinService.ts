@@ -62,6 +62,13 @@ export default class CoinService extends Vue {
         }
     }
 
+    public async approveDeposit(address: string, amount: string) {
+        const extdevContract: any = await this.$network.getExtdevCoinContract();
+        const extdevAddress = this.$network.extdev.account;
+
+        return await extdevContract.methods.approve(address, amount).send({ from: extdevAddress });
+    }
+
     public async getEthBalance(address: string) {
         const balance = await this.$network.rinkeby.web3js.eth.getBalance(address);
 
