@@ -1,7 +1,7 @@
 import BN from 'bn.js';
 import UserService from '@/services/UserService';
 
-const RULE_STATE = ['Pending', 'Approved', 'Rejected', 'Withdrawn'];
+const RULE_STATE = ['Disabled', 'Enabled'];
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export class RewardPoolEvents {
@@ -13,6 +13,10 @@ export class RewardPoolEvents {
         'RewardRuleUpdated',
         'RewardPollCreated',
         'RewardPollFinished',
+        'MemberAdded',
+        'MemberRemoved',
+        'ManagerAdded',
+        'ManagerRemoved',
     ];
 }
 
@@ -97,7 +101,7 @@ export class RulePollFinishedEvent extends TransactionEvent {
         super(data, blockTime);
 
         this.rule = parseInt(data.event.id, 10);
-        this.approved = data.event.approved;
+        this.approved = data.event.agree;
         this.component = 'rulepollfinished-event';
     }
 }

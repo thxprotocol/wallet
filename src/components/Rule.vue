@@ -20,9 +20,9 @@
                         <small
                             class="badge badge-xs"
                             :class="{
-                                'badge-success': rule.state === 'Active',
+                                'badge-success': rule.state === 'Enabled',
                                 'badge-danger': rule.state === 'Disabled',
-                                'badge-light': rule.state !== 'Active' && rule.state !== 'Disabled',
+                                'badge-light': rule.state !== 'Enabled' && rule.state !== 'Disabled',
                             }"
                         >{{ rule.state }}</small>
                     </div>
@@ -54,7 +54,7 @@
                         <strong>You are not a member of this pool and can not join the poll.</strong>
                     </div>
 
-                    <template v-if="rule.hasPollAddress && rule.poll">
+                    <template v-if="rule.poll && !rule.poll.finalized">
                         <hr class="dotted" />
                         <div class="position-relative" :class="{ disabled: rule.poll.loading }">
                             <b-overlay :show="rule.poll.loading" no-wrap></b-overlay>
@@ -74,45 +74,43 @@
                     </template>
                 </template>
 
-                <template slot="footer">
-                    <template v-if="!rule.hasPollAddress && pool.isMember">
+                <template slot="footer" v-if="pool.isMember">
+                    <template v-if="rule.poll && rule.poll.finalized">
                         <button
                             v-b-modal="'modalRulePollCreate'"
                             :class="{ disabled: rule.loading }"
                             class="btn btn-link btn-block"
                         >Change reward size</button>
                     </template>
-                    <template v-if="rule.hasPollAddress && rule.poll && pool.isMember">
-                        <div class="row" v-if="now < rule.poll.endTime">
-                            <div class="col-md-6" v-if="!rule.poll.hasVoted">
+                    <template v-if="rule.poll && !rule.poll.finalized">
+                        <div class="row" v-if="now < rule.poll.endTime && !rule.poll.hasVoted">
+                            <div class="col-md-6">
                                 <button
                                     @click="vote(true)"
                                     :class="{ disabled: rule.poll.loading }"
                                     class="btn btn-success btn-block mb-2"
                                 >Approve</button>
                             </div>
-                            <div class="col-md-6" v-if="!rule.poll.hasVoted">
+                            <div class="col-md-6">
                                 <button
                                     @click="vote(false)"
                                     :class="{ disabled: rule.poll.loading }"
                                     class="btn btn-danger btn-block"
                                 >Reject</button>
                             </div>
-                            <div class="col-md-12" v-if="rule.poll.hasVoted">
-                                <button
-                                    @click="revokeVote()"
-                                    :class="{ disabled: rule.poll.loading }"
-                                    class="btn btn-link btn-block"
-                                >Revoke your vote</button>
-                            </div>
                         </div>
-                        <template v-if="now > rule.poll.endTime">
-                            <button
-                                @click="tryToFinalize()"
-                                :class="{ disabled: rule.loading }"
-                                class="btn btn-link btn-block"
-                            >Finalize Poll</button>
-                        </template>
+                        <button
+                            v-if="rule.poll.hasVoted"
+                            @click="revokeVote()"
+                            :class="{ disabled: rule.poll.loading }"
+                            class="btn btn-link btn-block"
+                        >Revoke your vote</button>
+                        <button
+                            v-if="now > rule.poll.endTime"
+                            @click="tryToFinalize()"
+                            :class="{ disabled: rule.loading }"
+                            class="btn btn-link btn-block"
+                        >Finalize Poll</button>
                     </template>
                 </template>
             </template>

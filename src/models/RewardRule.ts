@@ -1,7 +1,7 @@
 import BN from 'bn.js';
 import { BasePoll } from './BasePoll';
 
-const RULE_STATE = ['Active', 'Disabled'];
+const RULE_STATE = ['Disabled', 'Enabled'];
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
 export interface IRewardRules {
@@ -21,7 +21,7 @@ export class RewardRule {
     constructor(data: any, meta: any) {
         this.id = parseInt(data.id, 10);
         this.state = RULE_STATE[parseInt(data.state, 10)];
-        this.created = parseInt(data.created, 10);
+        this.created = parseInt(data.updated, 10);
         this.pollAddress = data.poll;
         this.amount = new BN(data.amount).div(TOKEN_MULTIPLIER);
 
@@ -49,7 +49,7 @@ export class RewardRulePoll extends BasePoll {
 
     public async update() {
         this.loading = true;
-        this.proposedAmount = new BN(await this.contract.methods.proposedAmount().call({ from: this.owner })).div(
+        this.proposedAmount = new BN(await this.contract.methods.proposal().call({ from: this.owner })).div(
             TOKEN_MULTIPLIER,
         );
 

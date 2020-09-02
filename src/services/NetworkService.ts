@@ -26,7 +26,8 @@ const RINKEBY_GATEWAY_ADDRESS = '0x9c67fD4eAF0497f9820A3FBf782f81D6b6dC4Baa';
 const EXTDEV_GATEWAY_ADDRESS = '0xC6e1421720C7F62455C053BC8326633D68c01C00';
 const EXTDEV_CHAIN_ID = 'extdev-plasma-us1';
 const RINKEBY_COIN_ADDRESS = '0xa3b7af43e248593cC391fd856e306c6B18bFD00c';
-const COIN_ADDRESS = '0xF3B67034C7239D777F8935d34Af6e1c209a4cDAA';
+// const COIN_ADDRESS = '0xF3B67034C7239D777F8935d34Af6e1c209a4cDAA';
+const COIN_ADDRESS = '0x3FbD08A84b2C9998b07910a7da4B35A1D8957150';
 const INFURA_API_KEY = Config.infura.key;
 const TOKEN_MULTIPLIER = new BN(10).pow(new BN(18));
 
@@ -340,16 +341,20 @@ export default class NetworkService {
     public async isExtdevMinter(web3js: any, accountAddress: string) {
         const contract = await this.getExtdevCoinContract();
         const addr = accountAddress.toLowerCase();
-        const isMinter = await contract.methods.isMinter(addr).call({
+        const minterRole = await contract.methods.MINTER_ROLE().call({ from: addr });
+
+        return await contract.methods.hasRole(minterRole, addr).call({
             from: addr,
         });
-        return isMinter;
     }
 
     public async isRinkebyMinter(web3js: any, accountAddress: string) {
         const contract = await this.getRinkebyCoinContract();
-        const isMinter = await contract.methods.isMinter(accountAddress).call();
-        return isMinter;
+        const minterRole = await contract.methods.MINTER_ROLE().call({ from: accountAddress });
+
+        return await contract.methods.hasRole(minterRole, accountAddress).call({
+            from: accountAddress,
+        });
     }
 
     public async transferExtdevCoin(receiver: string, amount: BN) {

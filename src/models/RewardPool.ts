@@ -153,7 +153,7 @@ export class RewardPool extends RewardPoolEvents {
         }
 
         for (let i = 0; i < wLength; i++) {
-            const w = await this.withdrawelOf(this.account, i);
+            const w = await this.withdrawalOf(this.account, i);
             this.transactions.push(new Withdrawel(w, this));
         }
     }
@@ -234,15 +234,15 @@ export class RewardPool extends RewardPoolEvents {
         this.updateBalance();
     }
 
-    public onRulePollCreated(data: any) {
+    public onRewardRulePollCreated(data: any) {
         this.updateRule(data);
     }
 
-    public onRulePollFinished(data: any) {
+    public onRewardRulePollFinished(data: any) {
         this.updateRule(data);
     }
 
-    public onRuleStateChanged(data: any) {
+    public onRewardRuleUpdated(data: any) {
         this.updateRule(data);
     }
 
@@ -321,7 +321,9 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async voteForRule(rule: RewardRule, agree: boolean) {
-        return await this.callPoolMethod(this.contract.methods.voteForRule(rule.id, agree));
+        if (rule.poll) {
+            return await this.callPoolMethod(rule.poll.contract.methods.vote(this.address, agree));
+        }
     }
 
     public async revokeVoteForReward(reward: Reward) {
@@ -339,7 +341,7 @@ export class RewardPool extends RewardPoolEvents {
     public async addRewardRulePoll(rule: any, proposedAmount: BN) {
         const snap = await firebase.database().ref(`/pools/${this.address}/notificatons`).push();
 
-        await this.callPoolMethod(this.contract.methods.startRulePoll(rule.id, proposedAmount.toString()));
+        await this.callPoolMethod(this.contract.methods.updateRewardRule(rule.id, proposedAmount.toString()));
 
         return await this.createNotification(false, this.account, {
             rule: rule.id,
@@ -360,8 +362,8 @@ export class RewardPool extends RewardPoolEvents {
         });
     }
 
-    public async countRewardsOf(account: string) {
-        return await this.contract.methods.getRewardCountOf(account).call({
+    public async countWithdrawalsOf(account: string) {
+        return await this.contract.methods.getWithdrawalCount(account).call({
             from: this.account,
         });
     }
@@ -373,11 +375,11 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async countWithdrawels(address: string) {
-        return await this.countRewardsOf(address);
+        return await this.countWithdrawalsOf(address);
     }
 
     public async getRewardRule(id: number) {
-        const data = await this.contract.methods.rules(id).call({ from: this.account });
+        const data = await this.contract.methods.rewardRules(id).call({ from: this.account });
         const snap = await firebase.database().ref(`pools/${this.address}/rules/${id}`).once('value');
         const meta = snap.val();
 
@@ -406,13 +408,13 @@ export class RewardPool extends RewardPoolEvents {
     }
 
     public async depositOf(address: string, index: number) {
-        return await this.contract.methods.deposits(address, index).call({
+        return await this.contract.methods.depositsOf(address, index).call({
             from: this.account,
         });
     }
 
-    public async withdrawelOf(address: string, index: number) {
-        return await this.contract.methods.withdrawels(address, index).call({
+    public async withdrawalOf(address: string, index: number) {
+        return await this.contract.methods.withdrawals(address, index).call({
             from: this.account,
         });
     }
@@ -426,15 +428,19 @@ export class RewardPool extends RewardPoolEvents {
         return poll;
     }
 
-    public async addRewardRule(rule: any) {
-        const tx = await this.callPoolMethod(this.contract.methods.addRewardRule());
-        const id = tx.events.RuleStateChanged.returnValues.id;
-        const state = tx.events.RuleStateChanged.returnValues.state;
+    public async addRewardRule(rule: any, amount: string) {
+        await this.callPoolMethod(this.contract.methods.setMinRewardRulePollTokensPerc(0));
+        await this.callPoolMethod(this.contract.methods.setRewardRulePollDuration(rule.pollDuration));
+
+        const tx = await this.callPoolMethod(this.contract.methods.addRewardRule(amount));
+
+        const id = tx.events.RewardRulePollCreated.returnValues.id;
+        const account = tx.events.RewardRulePollCreated.returnValues.account;
 
         return await firebase.database().ref(`pools/${this.address}/rules/${id}`).set({
             title: rule.title,
             description: rule.description,
-            state,
+            account,
         });
     }
 
@@ -553,13 +559,13 @@ export class RewardPool extends RewardPoolEvents {
         if (type === 'Withdrawn') {
             eventModel = new WithdrawelEvent(data, data.blockTime);
         }
-        if (type === 'RuleStateChanged') {
+        if (type === 'RewardRuleUpdated') {
             eventModel = new RuleStateChangedEvent(data, data.blockTime);
         }
-        if (type === 'RulePollCreated') {
+        if (type === 'RewardRulePollCreated') {
             eventModel = new RulePollCreatedEvent(data, data.blockTime);
         }
-        if (type === 'RulePollFinished') {
+        if (type === 'RewardRulePollFinished') {
             eventModel = new RulePollFinishedEvent(data, data.blockTime);
         }
         if (type === 'RewardPollCreated') {
@@ -621,7 +627,7 @@ class Transaction {
 
     constructor(data: any) {
         this.amount = new BN(data.amount).div(TOKEN_MULTIPLIER).toString();
-        this.created = parseInt(data.created, 10);
+        this.created = parseInt(data.timestamp, 10);
     }
 }
 
@@ -631,7 +637,7 @@ export class Deposit extends Transaction {
 
     constructor(data: any, pool: RewardPool) {
         super(data);
-        this.sender = data.sender;
+        this.sender = data.member;
         this.pool = pool;
     }
 }

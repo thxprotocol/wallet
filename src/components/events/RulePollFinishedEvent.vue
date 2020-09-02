@@ -5,17 +5,14 @@
             <div class="d-flex w-100">
                 <span class="flex-grow-1">
                     <strong>{{ rule.title }}</strong>
-                    <span v-if="ev.approved" class="badge badge-success ml-1">
-                        Approved
-                    </span>
-                    <span v-if="!ev.approved" class="badge badge-danger ml-1">
-                        Rejected
-                    </span>
+                    <span v-if="ev.approved" class="badge badge-success ml-1">Approved</span>
+                    <span v-if="!ev.approved" class="badge badge-danger ml-1">Rejected</span>
                 </span>
                 <small class="flex-shrink-0">{{ ev.blockTime | moment("D/M/'YY HH:mm") }}</small>
             </div>
             <small v-if="ev.approved" class="text-muted">
-                Rule changed to <strong>{{ rule.amount }} THX</strong>.
+                Rule changed to
+                <strong>{{ rule.amount }} THX</strong>.
             </small>
         </div>
     </b-list-group-item>

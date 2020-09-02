@@ -209,11 +209,12 @@ export default class PoolDetail extends Vue {
     }
 
     private addRewardRule(rule: any) {
+        const amount = new BN(rule.amount).mul(TOKEN_MULTIPLIER).toString();
         this.loading = true;
 
         if (this.pool) {
             this.pool
-                .addRewardRule(rule)
+                .addRewardRule(rule, amount)
                 .then(() => {
                     (this.$refs.modalCreateRule as BModal).hide();
                     this.input.rule.title = '';

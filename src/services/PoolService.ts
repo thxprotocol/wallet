@@ -4,8 +4,6 @@ import REWARD_POOL_ABI from '@/contracts/RewardPool.abi';
 import REWARD_POOL_BIN from '@/contracts/RewardPool.bin';
 import firebase from 'firebase/app';
 import 'firebase/database';
-import { Contract } from 'loom-js';
-import { ConsolidateDelegationsRequest } from 'loom-js/dist/proto/dposv3_pb';
 
 export default class PoolService extends Vue {
     public async getRewardPool(address: string) {

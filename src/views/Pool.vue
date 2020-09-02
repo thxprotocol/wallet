@@ -6,10 +6,8 @@
                     style="top: 1rem; right: 1rem;"
                     class="btn btn-primary btn-sm position-absolute"
                     @click="$refs.modalDeposit.show()"
-                >
-                    Deposit
-                </button>
-                <strong class="font-size-xl"> {{ pool.balance }} THX </strong>
+                >Deposit</button>
+                <strong class="font-size-xl">{{ pool.balance }} THX</strong>
                 <p>{{ pool.name }}</p>
                 <div class="d-flex mt-3">
                     <profile-picture
@@ -26,17 +24,16 @@
             <div class="row">
                 <div class="col-12">
                     <b-tabs content-class="mt-4" justified>
-                        <div class="alert alert-danger" v-if="error">
-                            {{ error }}
-                        </div>
+                        <div class="alert alert-danger" v-if="error">{{ error }}</div>
                         <div v-if="!pool.isMember" class="alert alert-warning">
                             <p>
                                 You are not a member of this pool. Make sure to contact manager for this pool obtain a
                                 membership.
                             </p>
-                            <button class="btn btn-block btn-success" v-b-modal="'modalMembershipRequest'">
-                                Request membership
-                            </button>
+                            <button
+                                class="btn btn-block btn-success"
+                                v-b-modal="'modalMembershipRequest'"
+                            >Request membership</button>
                         </div>
 
                         <b-tab title="Stream" active>
@@ -52,15 +49,18 @@
                         </b-tab>
 
                         <b-tab title="Rules">
-                            <rule v-for="(rule, key) in rewardRules" :key="key" :rule="rule" :pool="pool" />
+                            <rule
+                                v-for="(rule, key) in rewardRules"
+                                :key="key"
+                                :rule="rule"
+                                :pool="pool"
+                            />
 
                             <button
                                 v-if="pool.isManager"
                                 class="btn btn-primary btn-block"
                                 @click="$refs.modalCreateRule.show()"
-                            >
-                                Add new rule
-                            </button>
+                            >Add new rule</button>
                         </b-tab>
 
                         <b-tab title="Rewards">
@@ -101,31 +101,26 @@
                                                 class="ml-1 text-primary"
                                                 @click="updateRole(m.address, 'Manager', false)"
                                             >
-                                                <small>
-                                                    Promote
-                                                </small>
+                                                <small>Promote</small>
                                             </a>
-                                            <span v-if="m.isManager" class="ml-1 text-muted">
-                                                Manager
-                                            </span>
+                                            <span v-if="m.isManager" class="ml-1 text-muted">Manager</span>
                                             <a
                                                 v-if="m.isManager && m.address === $network.extdev.account"
                                                 class="ml-1 text-primary"
                                                 @click="updateRole(m.address, 'Manager', true)"
                                             >
-                                                <small>
-                                                    Revoke
-                                                </small>
+                                                <small>Revoke</small>
                                             </a>
                                         </div>
                                         <div class="d-flex">
-                                            <small class="text-muted list-item-text-overflow">
-                                                {{ m.address }}
-                                            </small>
+                                            <small
+                                                class="text-muted list-item-text-overflow"
+                                            >{{ m.address }}</small>
                                             <small>
-                                                <a class="text-primary" @click="copyClipboard(m.address)">
-                                                    ({{ clipboard === m.address ? 'Copied!' : 'Copy' }})
-                                                </a>
+                                                <a
+                                                    class="text-primary"
+                                                    @click="copyClipboard(m.address)"
+                                                >({{ clipboard === m.address ? 'Copied!' : 'Copy' }})</a>
                                             </small>
                                         </div>
                                     </div>
@@ -135,23 +130,19 @@
                                 v-if="pool.isMember"
                                 class="btn btn-primary btn-block"
                                 @click="$refs.modalAddMember.show()"
-                            >
-                                Invite Member
-                            </button>
+                            >Invite Member</button>
                             <button
                                 v-if="pool.isMember"
                                 class="btn btn-link text-danger btn-block"
                                 @click="$refs.modalRemoveMember.show()"
-                            >
-                                Leave
-                            </button>
+                            >Leave</button>
                         </b-tab>
                     </b-tabs>
                 </div>
             </div>
 
             <b-modal ref="modalCreateRule" centered title="Suggest a reward rule">
-                <div class="" v-if="!loading">
+                <div class v-if="!loading">
                     <div class="form-group">
                         <label for="title">Title:</label>
                         <input
@@ -163,6 +154,27 @@
                         />
                     </div>
                     <div class="form-group">
+                        <label for="amount">Amount:</label>
+                        <input
+                            id="amount"
+                            v-model="input.rule.amount"
+                            type="number"
+                            class="form-control"
+                            placeholder="0"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label for="duration">Poll Duration ({{input.rule.pollDuration}} seconds):</label>
+                        <input
+                            id="duration"
+                            v-model="input.rule.pollDuration"
+                            type="range"
+                            min="0"
+                            max="600"
+                            class="form-control"
+                        />
+                    </div>
+                    <div class="form-group">
                         <label for="description">Description:</label>
                         <textarea
                             class="form-control"
@@ -171,24 +183,19 @@
                             id="description"
                             v-model="input.rule.description"
                             placeholder="When filling all fields of your public profile you will receive the reward."
-                        >
-                        </textarea>
+                        ></textarea>
                     </div>
                 </div>
                 <p v-if="loading" class="d-flex w-100 justify-content-center">
                     <b-spinner></b-spinner>
                 </p>
                 <template v-slot:modal-footer="{ ok, cancel }">
-                    <button class="btn btn-link" @click="$refs.modalCreateRule.hide()">
-                        Cancel
-                    </button>
+                    <button class="btn btn-link" @click="$refs.modalCreateRule.hide()">Cancel</button>
                     <button
                         @click="addRewardRule(input.rule)"
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
-                    >
-                        Suggest Rule
-                    </button>
+                    >Suggest Rule</button>
                 </template>
             </b-modal>
 
@@ -204,32 +211,24 @@
                     <b-spinner></b-spinner>
                 </p>
                 <template v-slot:modal-footer="{ ok, cancel }">
-                    <button class="btn btn-link" @click="$refs.modalAddMember.hide()">
-                        Cancel
-                    </button>
+                    <button class="btn btn-link" @click="$refs.modalAddMember.hide()">Cancel</button>
                     <button
                         @click="updateRole(input.memberAddress, 'Member', false)"
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
-                    >
-                        Add Member
-                    </button>
+                    >Add Member</button>
                 </template>
             </b-modal>
 
             <b-modal ref="modalRemoveMember" centered title="Remove a member from this reward pool">
                 <strong>Are you sure you want to leave this reward pool?</strong>
                 <template v-slot:modal-footer="{ ok, cancel }">
-                    <button class="btn btn-link" @click="$refs.modalRemoveMember.hide()">
-                        Cancel
-                    </button>
+                    <button class="btn btn-link" @click="$refs.modalRemoveMember.hide()">Cancel</button>
                     <button
                         @click="updateRole(input.memberAddress, 'Member', true)"
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-danger"
-                    >
-                        Leave
-                    </button>
+                    >Leave</button>
                 </template>
             </b-modal>
 
@@ -245,20 +244,20 @@
                     <b-spinner></b-spinner>
                 </p>
                 <template v-slot:modal-footer="{ ok, cancel }">
-                    <button class="btn btn-link" @click="$refs.modalAddManager.hide()">
-                        Cancel
-                    </button>
+                    <button class="btn btn-link" @click="$refs.modalAddManager.hide()">Cancel</button>
                     <button
                         @click="updateRole(input.managerAddress, 'Manager', false)"
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
-                    >
-                        Add Manager
-                    </button>
+                    >Add Manager</button>
                 </template>
             </b-modal>
 
-            <b-modal ref="modalRemoveManager" centered title="Remove a manager from the reward pool">
+            <b-modal
+                ref="modalRemoveManager"
+                centered
+                title="Remove a manager from the reward pool"
+            >
                 <input
                     v-if="!loading"
                     v-model="input.managerAddress"
@@ -270,34 +269,36 @@
                     <b-spinner></b-spinner>
                 </p>
                 <template v-slot:modal-footer="{ ok, cancel }">
-                    <button class="btn btn-link" @click="$refs.modalRemoveManager.hide()">
-                        Cancel
-                    </button>
+                    <button class="btn btn-link" @click="$refs.modalRemoveManager.hide()">Cancel</button>
                     <button
                         @click="updateRole(input.managerAddress, 'Manager', true)"
                         v-bind:class="{ disabled: loading }"
                         class="btn btn-primary"
-                    >
-                        Add Manager
-                    </button>
+                    >Add Manager</button>
                 </template>
             </b-modal>
 
             <b-modal ref="modalDeposit" centered title="Deposit THX to the reward pool">
                 <p>
-                    Reward Pool balance: <strong>{{ this.pool.balance }} THX</strong>
+                    Reward Pool balance:
+                    <strong>{{ this.pool.balance }} THX</strong>
                 </p>
-                <input v-if="!loading" v-model="input.poolDeposit" type="number" class="form-control" />
+                <input
+                    v-if="!loading"
+                    v-model="input.poolDeposit"
+                    type="number"
+                    class="form-control"
+                />
                 <p v-if="loading" class="d-flex w-100 justify-content-center">
                     <b-spinner></b-spinner>
                 </p>
                 <template v-slot:modal-footer="{ ok, cancel }">
-                    <button class="btn btn-link" @click="$refs.modalDeposit.hide()">
-                        Cancel
-                    </button>
-                    <button @click="deposit()" v-bind:class="{ disabled: loading }" class="btn btn-primary">
-                        Deposit {{ input.poolDeposit }} THX
-                    </button>
+                    <button class="btn btn-link" @click="$refs.modalDeposit.hide()">Cancel</button>
+                    <button
+                        @click="deposit()"
+                        v-bind:class="{ disabled: loading }"
+                        class="btn btn-primary"
+                    >Deposit {{ input.poolDeposit }} THX</button>
                 </template>
             </b-modal>
 
