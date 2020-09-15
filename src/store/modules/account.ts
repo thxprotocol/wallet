@@ -56,6 +56,7 @@ class AccountModule extends VuexModule {
                 this.context.commit('authenticate', true);
             })
             .catch((e: AxiosError) => {
+                console.error(e);
                 this.context.commit('authenticate', false);
             });
     }
@@ -68,6 +69,7 @@ class AccountModule extends VuexModule {
                 this.context.commit('reset');
             })
             .catch((e: AxiosError) => {
+                console.error(e);
                 this.context.commit('reset');
             });
     }
