@@ -2,8 +2,8 @@
     <div class="hello">
         <h1>{{ msg }}</h1>
         <p>
-            For a guide and recipes on how to configure / customize this project,
-            <br />check out the
+            For a guide and recipes on how to configure / customize this project,<br />
+            check out the
             <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
         </p>
         <h3>Installed CLI Plugins</h3>
@@ -50,10 +50,10 @@
             </li>
             <li>
                 <a
-                    href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-unit-jest"
+                    href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-unit-mocha"
                     target="_blank"
                     rel="noopener"
-                    >unit-jest</a
+                    >unit-mocha</a
                 >
             </li>
             <li>
@@ -115,15 +115,11 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from 'vue-class-component';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 
-@Options({
-    props: {
-        msg: String,
-    },
-})
+@Component
 export default class HelloWorld extends Vue {
-    msg!: string;
+    @Prop() private msg!: string;
 }
 </script>
 

@@ -1,30 +1,44 @@
 <template>
-    <div id="nav">
-        <router-link to="/">Home</router-link> |
-        <router-link to="/about">About</router-link>
+    <div id="app" class="container mt-3 mb-3">
+        <b-button block v-if="isAuthenticated" @click="logout()">Logout</b-button>
+        <hr />
+        <router-view />
     </div>
-    <router-view />
 </template>
 
-<style lang="scss">
-#app {
-    font-family: Avenir, Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-align: center;
-    color: #2c3e50;
-}
+<script lang="ts">
+import { BButton } from 'bootstrap-vue';
+import { Component, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
-#nav {
-    padding: 30px;
+@Component({
+    components: {
+        'b-button': BButton,
+    },
+    computed: mapGetters('account', ['account', 'isAuthenticated']),
+})
+export default class Home extends Vue {
+    account!: Account;
+    isAuthenticated!: boolean;
 
-    a {
-        font-weight: bold;
-        color: #2c3e50;
-
-        &.router-link-exact-active {
-            color: #42b983;
-        }
+    async logout() {
+        await this.$store.dispatch('account/logout');
+        this.$router.push('/login');
     }
+}
+</script>
+
+<style lang="scss">
+@import 'node_modules/bootstrap/scss/bootstrap';
+@import 'node_modules/bootstrap-vue/src/index.scss';
+@import url('https://fonts.googleapis.com/css?family=Exo+2:200,400,400i,700,700i,900,900i');
+
+$yellow: #fde542;
+$blue: #039be5;
+
+h1,
+h2,
+h3 {
+    font-family: 'Exo 2';
 }
 </style>
