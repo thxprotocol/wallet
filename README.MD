@@ -1,93 +1,41 @@
-# THX Wallet v0.1.2-alpha
+# wallet
 
-## Description
-
-This repository holds the source for the THX Wallet project built with VueJS.
-
-## Index
-
-1. Prerequisites
-2. Install
-3. Config
-4. Deployment
-5. Contract Compilation
-6. Testing
-7. References
-
-## 1. Prerequisites
-
--   node v12.16.0
--   nvm 0.35.2
--   yarn 1.22.0
--   firebase-cli 7.13.0
--   solc 0.6.4
-
-## 2. Install
-
-1. `yarn;`
-2. `git submodule init;`
-3. `git submodule update;`
-4. `touch ./src/config.json;`
-5. `yarn serve;`
-
-## 3. Config
-
-Populate the `./config.json` file with your credentials following this schema:
+## Project setup
 
 ```
-{
-    "firebase": {
-        "production": {
-            "apiKey": "",
-            "authDomain": "",
-            "databaseURL": "",
-            "projectId": "",
-            "storageBucket": "",
-            "messagingSenderId": "",
-            "appId": ""
-        },
-        "development": {
-            "apiKey": "",
-            "authDomain": "",
-            "databaseURL": "",
-            "projectId": "",
-            "storageBucket": "",
-            "messagingSenderId": "",
-            "appId": ""
-        }
-    },
-    "infura": {
-        "key": ""
-    }
+yarn install
 ```
 
-## 4. Deployment
-
-These commands will switch the connected Firebase Database, build the app accordingly and deploy the compiled files to the specified Firebase hosting environment (development or production).
+### Compiles and hot-reloads for development
 
 ```
-yarn deploy:dev;
-yarn deploy:prod;
+yarn serve
 ```
 
-## 5. Contract Compilation
+### Compiles and minifies for production
 
 ```
-yarn contracts:compile:abi;
-yarn contracts:compile:bin;
+yarn build
 ```
 
-## 6. Testing
+### Run your unit tests
 
 ```
-Sheer emptiness...
+yarn test:unit
 ```
 
-## 7. References
+### Run your end-to-end tests
 
--   [Firebase Realtime Database](https://firebase.google.com/docs/database/)
--   [Truffle Migrations](https://www.trufflesuite.com/docs/truffle/getting-started/running-migrations)
--   [Loom Transfer Gateway](https://loomx.io/developers/en/transfer-gateway.html#overview)
--   [Solidity](https://solidity.readthedocs.io/en/v0.6.4/)
--   [Web3.js](https://web3js.readthedocs.io/en/v1.2.6/)
--   [OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-solidity.git)
+```
+yarn test:e2e
+```
+
+### Lints and fixes files
+
+```
+yarn lint
+```
+
+### Customize configuration
+
+See [Configuration Reference](https://cli.vuejs.org/config/).

@@ -1,14 +1,14 @@
 .DS_Store
 node_modules
 /dist
-/openzeppelin
-/build/contracts
-command
-/src/config.json
-.firebase
+
+/tests/e2e/reports/
+selenium-debug.log
+chromedriver.log
+geckodriver.log
+
 
 # local env files
-.env
 .env.local
 .env.*.local
 
@@ -16,7 +16,7 @@ command
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-firebase-debug.log
+pnpm-debug.log*
 
 # Editor directories and files
 .idea
@@ -25,20 +25,4 @@ firebase-debug.log
 *.ntvs*
 *.njsproj
 *.sln
-*.sw*
-
-# Loom files and folders
-receipts_db
-evm.db
-chaindata
-app.db
-genesis.json
-loom
-loom_private_key
-loom_public_key
-rinkeby_private_key
-rinkeby_account
-extdev_private_key
-extdev_public_key
-extdev_private_key_new
-extdev_public_key_new
+*.sw?

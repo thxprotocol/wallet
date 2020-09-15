@@ -1,72 +1,95 @@
 {
-    "name": "thx_wallet",
-    "version": "0.1.2",
+    "name": "wallet",
+    "version": "0.1.0",
     "private": true,
     "scripts": {
-        "truffle": "truffle",
-        "serve": "vue-cli-service serve --mode development; firebase use thx-wallet-dev; ",
-        "build": "vue-cli-service build --mode development; firebase use thx-wallet-dev;",
-        "build:dev": "vue-cli-service build --mode development",
-        "build:prod": "vue-cli-service build --mode production",
-        "contracts:compile:abi": "solc --overwrite --optimize ./contracts/*.sol -o ./src/contracts --abi",
-        "contracts:compile:bin": "solc --overwrite --optimize ./contracts/*.sol -o ./src/contracts --bin",
-        "deploy:prod": "NETWORK=extdev vue-cli-service build --mode production; firebase deploy --only functions:production; aws s3 sync ./dist s3://wallet.thxprotocol.com --delete --acl public-read",
-        "deploy:dev": "NETWORK=extdev vue-cli-service build --mode development; firebase deploy --only functions:development,hosting:development",
+        "serve": "vue-cli-service serve",
+        "build": "vue-cli-service build",
         "test:unit": "vue-cli-service test:unit",
         "test:e2e": "vue-cli-service test:e2e",
         "lint": "vue-cli-service lint"
     },
     "dependencies": {
-        "@types/lodash": "^4.14.149",
-        "axios": "^0.19.2",
-        "bootstrap": "^4.3.1",
-        "bootstrap-vue": "^2.9.0",
-        "core-js": "^3.1.2",
-        "ethereum-input-data-decoder": "^0.3.0",
-        "firebase": "^6.2.4",
-        "lodash": "^4.17.14",
-        "loom-js": "1.70.0",
-        "loom-truffle-provider": "^0.11.0",
-        "register-service-worker": "^1.6.2",
-        "vue": "^2.6.10",
-        "vue-class-component": "^7.0.2",
-        "vue-moment": "^4.0.0",
-        "vue-property-decorator": "^8.1.0",
-        "vue-qrcode-reader": "^2.0.4",
-        "vue-router": "^3.0.6",
-        "vue-timers": "^2.0.4",
-        "vuex": "^3.0.1",
-        "web3": "1.2.1"
+        "core-js": "^3.6.5",
+        "register-service-worker": "^1.7.1",
+        "vue": "^3.0.0-0",
+        "vue-class-component": "^8.0.0-0",
+        "vue-router": "^4.0.0-0",
+        "vuex": "^4.0.0-0"
     },
     "devDependencies": {
-        "@types/chai": "^4.1.0",
-        "@types/mocha": "^5.2.4",
-        "@vue/cli-plugin-babel": "^4.0.0",
-        "@vue/cli-plugin-e2e-nightwatch": "^4.0.0",
-        "@vue/cli-plugin-pwa": "^4.0.0",
-        "@vue/cli-plugin-typescript": "^4.0.0",
-        "@vue/cli-plugin-unit-mocha": "^4.0.0",
-        "@vue/cli-service": "^4.0.0",
-        "@vue/test-utils": "1.0.0-beta.29",
-        "chai": "^4.1.2",
-        "chromedriver": "77",
-        "geckodriver": "^1.16.2",
-        "json-loader": "^0.5.7",
-        "prettier": "^2.0.2",
-        "raw-loader": "^4.0.0",
-        "sass": "^1.19.0",
-        "sass-loader": "^8.0.0",
-        "tslint-config-prettier": "^1.18.0",
-        "typescript": "~3.5.3",
-        "vue-template-compiler": "^2.6.10"
+        "@types/jest": "^24.0.19",
+        "@typescript-eslint/eslint-plugin": "^2.33.0",
+        "@typescript-eslint/parser": "^2.33.0",
+        "@vue/cli-plugin-babel": "~4.5.0",
+        "@vue/cli-plugin-e2e-nightwatch": "~4.5.0",
+        "@vue/cli-plugin-eslint": "~4.5.0",
+        "@vue/cli-plugin-pwa": "~4.5.0",
+        "@vue/cli-plugin-router": "~4.5.0",
+        "@vue/cli-plugin-typescript": "~4.5.0",
+        "@vue/cli-plugin-unit-jest": "~4.5.0",
+        "@vue/cli-plugin-vuex": "~4.5.0",
+        "@vue/cli-service": "~4.5.0",
+        "@vue/compiler-sfc": "^3.0.0-0",
+        "@vue/eslint-config-prettier": "^6.0.0",
+        "@vue/eslint-config-typescript": "^5.0.2",
+        "@vue/test-utils": "^2.0.0-0",
+        "chromedriver": "85",
+        "eslint": "^6.7.2",
+        "eslint-plugin-prettier": "^3.1.3",
+        "eslint-plugin-vue": "^7.0.0-0",
+        "geckodriver": "^1.20.0",
+        "node-sass": "^4.12.0",
+        "prettier": "^1.19.1",
+        "sass-loader": "^8.0.2",
+        "typescript": "~3.9.3",
+        "vue-jest": "^5.0.0-0"
     },
-    "postcss": {
-        "plugins": {
-            "autoprefixer": {}
-        }
+    "eslintConfig": {
+        "root": true,
+        "env": {
+            "node": true
+        },
+        "extends": [
+            "plugin:vue/vue3-essential",
+            "eslint:recommended",
+            "@vue/typescript/recommended",
+            "@vue/prettier",
+            "@vue/prettier/@typescript-eslint"
+        ],
+        "parserOptions": {
+            "ecmaVersion": 2020
+        },
+        "rules": {},
+        "overrides": [
+            {
+                "files": [
+                    "**/__tests__/*.{j,t}s?(x)",
+                    "**/tests/unit/**/*.spec.{j,t}s?(x)"
+                ],
+                "env": {
+                    "jest": true
+                }
+            }
+        ]
+    },
+    "prettier": {
+        "tabWidth": 4,
+        "singleQuote": true,
+        "bracketSpacing": true,
+        "printWidth": 120,
+        "trailingComma": "all",
+        "quoteProps": "consistent"
     },
     "browserslist": [
         "> 1%",
-        "last 2 versions"
-    ]
+        "last 2 versions",
+        "not dead"
+    ],
+    "jest": {
+        "preset": "@vue/cli-plugin-unit-jest/presets/typescript-and-babel",
+        "transform": {
+            "^.+\\.vue$": "vue-jest"
+        }
+    }
 }
