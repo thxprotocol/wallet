@@ -1,5 +1,11 @@
 <template>
     <div id="app" class="container mt-3 mb-3">
+        Ether: {{ ethBalance }}
+        <br />
+        Root: {{ rootBalance }}
+        <br />
+        Child: {{ childBalance }}
+        <hr />
         <b-button block v-if="isAuthenticated" @click="logout()">Logout</b-button>
         <hr />
         <router-view />
@@ -15,11 +21,21 @@ import { mapGetters } from 'vuex';
     components: {
         'b-button': BButton,
     },
-    computed: mapGetters('account', ['account', 'isAuthenticated']),
+    computed: {
+        ...mapGetters('account', ['account', 'isAuthenticated']),
+        ...mapGetters('balance', ['rootBalance', 'childBalance', 'ethBalance']),
+    },
 })
 export default class Home extends Vue {
     account!: Account;
     isAuthenticated!: boolean;
+    rootBalance!: string;
+    childBalance!: string;
+    ethBalance!: string;
+
+    async created() {
+        await this.$store.dispatch('balance/init');
+    }
 
     async logout() {
         await this.$store.dispatch('account/logout');

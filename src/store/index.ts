@@ -6,6 +6,7 @@ import { config } from 'vuex-module-decorators';
 config.rawError = true;
 
 import AccountStore from './modules/account';
+import BalanceStore from './modules/balance';
 
 Vue.use(Vuex);
 
@@ -14,6 +15,7 @@ const actions = {};
 const getters = {};
 const modules = {
     account: AccountStore,
+    balance: BalanceStore,
 };
 
 export default new Vuex.Store({

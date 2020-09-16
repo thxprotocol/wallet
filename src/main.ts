@@ -5,12 +5,15 @@ import router from './router';
 import store from './store';
 import axios from 'axios';
 import { ModalPlugin } from 'bootstrap-vue';
+import { maticPOSClient } from './network';
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = process.env.VUE_APP_API_URL;
 
 Vue.config.productionTip = false;
 Vue.use(ModalPlugin);
+
+Vue.prototype.$bridge = maticPOSClient;
 
 new Vue({
     router,
