@@ -73,46 +73,14 @@ export default class Home extends Vue {
 
     async withdraw() {
         this.busy.withdrawal = true;
-
-        try {
-            const txBurn = await this.$bridge.burnERC20(config.child.DERC20, this.childBalance, {
-                from: config.user.address,
-            });
-            const txExit = await this.$bridge.exitERC20(txBurn.transactionHash, { from: config.user.address });
-
-            this.busy.withdrawal = false;
-        } catch (err) {
-            console.error(err);
-            this.busy.withdrawal = false;
-        }
+        await this.$store.dispatch('balance/withdraw', this.childBalance);
         this.busy.withdrawal = false;
     }
 
     async deposit() {
         this.busy.deposit = true;
-
-        try {
-            const txApprove = await this.$bridge.approveERC20ForDeposit(config.root.DERC20, this.rootBalance, {
-                from: config.user.address,
-            });
-            console.log(txApprove.transactionHash);
-
-            const txDeposit = await this.$bridge.depositERC20ForUser(
-                config.root.DERC20,
-                config.user.address,
-                this.rootBalance,
-                {
-                    from: config.user.address,
-                    gasPrice: '10000000000',
-                },
-            );
-            console.log(txDeposit.transactionHash);
-
-            this.busy.deposit = false;
-        } catch (err) {
-            console.error(err);
-            this.busy.deposit = false;
-        }
+        await this.$store.dispatch('balance/deposit', this.rootBalance);
+        this.busy.deposit = false;
     }
 
     onDecode(decoded: string) {

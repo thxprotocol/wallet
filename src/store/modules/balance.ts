@@ -1,7 +1,7 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import Web3 from 'web3';
 import { TOKEN_ABI } from '@/utils/contracts';
-import { config } from '@/network';
+import { config, maticPOSClient } from '@/network';
 
 const from = config.user.address;
 
@@ -45,6 +45,42 @@ class BalanceModule extends VuexModule {
         const childBalance = await childTokenContract.methods.balanceOf(from).call({ from });
 
         this.context.commit('update', { network: 'child', balance: childBalance });
+    }
+
+    @Action
+    async withdraw(balance: string) {
+        try {
+            const txBurn = await maticPOSClient.burnERC20(config.child.DERC20, balance, {
+                from: config.user.address,
+            });
+            const txExit = await maticPOSClient.exitERC20(txBurn.transactionHash, { from: config.user.address });
+
+            return txExit;
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    @Action
+    async deposit(balance: string) {
+        try {
+            await maticPOSClient.approveERC20ForDeposit(config.root.DERC20, balance, {
+                from: config.user.address,
+            });
+            const txDeposit = await maticPOSClient.depositERC20ForUser(
+                config.root.DERC20,
+                config.user.address,
+                balance,
+                {
+                    from: config.user.address,
+                    gasPrice: '10000000000',
+                },
+            );
+
+            return txDeposit;
+        } catch (err) {
+            console.error(err);
+        }
     }
 }
 
