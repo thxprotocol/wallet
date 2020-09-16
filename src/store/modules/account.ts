@@ -1,8 +1,6 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 
-axios.defaults.withCredentials = true;
-
 interface AuthObject {
     email: string;
     password: string;
@@ -50,7 +48,7 @@ class AccountModule extends VuexModule {
     @Action
     init() {
         return axios
-            .get('http://localhost:8088/v1/account')
+            .get('/account')
             .then((r: AxiosResponse) => {
                 this.context.commit('update', r.data);
                 this.context.commit('authenticate', true);
@@ -64,7 +62,7 @@ class AccountModule extends VuexModule {
     @Action
     logout() {
         axios
-            .get('http://localhost:8088/v1/logout')
+            .get('/logout')
             .then(() => {
                 this.context.commit('reset');
             })
@@ -76,7 +74,7 @@ class AccountModule extends VuexModule {
 
     @Action
     login({ email, password }: AuthObject) {
-        return axios.post('http://localhost:8088/v1/login', { email, password });
+        return axios.post('/login', { email, password });
     }
 }
 

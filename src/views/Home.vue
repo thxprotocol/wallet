@@ -2,8 +2,18 @@
     <div class="home">
         <b-spinner v-if="!ready"></b-spinner>
         <qrcode-stream @init="init" @decode="onDecode" :track="repaint"></qrcode-stream>
-        <qrcode-capture :capture="false" :multiple="false" @decode="onDecode"></qrcode-capture>
-        <br />
+        <qrcode-capture
+            id="qrcode-capture"
+            class="d-none"
+            :capture="false"
+            :multiple="false"
+            @decode="onDecode"
+        ></qrcode-capture>
+        <hr />
+        <label for="qrcode-capture" class="d-block">
+            <span class="btn btn-primary btn-block">Upload</span>
+        </label>
+        <hr />
         <code>
             {{ result }}
         </code>
@@ -11,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { BAlert, BSpinner } from 'bootstrap-vue';
+import { BAlert, BButton, BSpinner } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 
@@ -19,6 +29,7 @@ import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
     components: {
         'b-alert': BAlert,
         'b-spinner': BSpinner,
+        'b-button': BButton,
         'qrcode-stream': QrcodeStream,
         'qrcode-capture': QrcodeCapture,
     },
