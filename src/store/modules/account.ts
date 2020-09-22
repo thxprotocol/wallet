@@ -1,5 +1,6 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import axios, { AxiosError, AxiosResponse } from 'axios';
+import { config } from '../../network';
 
 interface AuthObject {
     email: string;
@@ -11,6 +12,7 @@ class Account {
     password = '';
     profile = {};
     email = '';
+    address = '';
 }
 
 @Module({ namespaced: true })
@@ -32,6 +34,7 @@ class AccountModule extends VuexModule {
         this._account.email = email;
         this._account.password = password;
         this._account.profile = profile;
+        this._account.address = config.user.address;
     }
 
     @Mutation
