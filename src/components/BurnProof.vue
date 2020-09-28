@@ -13,25 +13,10 @@
 </template>
 
 <script lang="ts">
-import { MaticPOSClient } from '@maticnetwork/maticjs';
-import {
-    BLink,
-    BAlert,
-    BButton,
-    BCard,
-    BCardText,
-    BFormInput,
-    BInputGroup,
-    BInputGroupAppend,
-    BSpinner,
-    BListGroupItem,
-    BListGroup,
-} from 'bootstrap-vue';
+import { BLink, BAlert, BButton, BSpinner, BListGroupItem, BListGroup } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 import { mapGetters } from 'vuex';
 import { Account, Profile } from '@/store/modules/account';
-import { TransactionObject } from 'web3/eth/types';
 
 @Component({
     components: {

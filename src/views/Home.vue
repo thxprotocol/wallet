@@ -69,7 +69,6 @@ import {
     BModal,
     BOverlay,
     BSpinner,
-    BListGroupItem,
     BListGroup,
 } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';

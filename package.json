@@ -74,7 +74,8 @@
             "ecmaVersion": 2020
         },
         "rules": {
-            "no-debugger": "off"
+            "no-debugger": "off",
+            "@typescript-eslint/no-explicit-any": "off"
         },
         "overrides": [
             {
