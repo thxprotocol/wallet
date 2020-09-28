@@ -7,12 +7,22 @@ interface AuthObject {
     password: string;
 }
 
-class Account {
+export class Profile {
+    firstName = '';
+    lastName = '';
+    gender = '';
+    location = '';
+    picture = '';
+    assetPools: string[] = [];
+    burnProof: string[] = [];
+}
+
+export class Account {
+    address = '';
+    email = '';
     createdAt = 0;
     password = '';
-    profile = {};
-    email = '';
-    address = '';
+    profile = new Profile();
 }
 
 @Module({ namespaced: true })
@@ -29,12 +39,12 @@ class AccountModule extends VuexModule {
     }
 
     @Mutation
-    update({ createdAt, email, password, profile }: Account) {
-        this._account.createdAt = createdAt;
+    set({ createdAt, email, password, profile }: Account) {
+        this._account.address = config.user.address;
         this._account.email = email;
+        this._account.createdAt = createdAt;
         this._account.password = password;
         this._account.profile = profile;
-        this._account.address = config.user.address;
     }
 
     @Mutation
@@ -49,22 +59,22 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    init() {
-        return axios
-            .get('/account')
-            .then((r: AxiosResponse) => {
-                this.context.commit('update', r.data);
-                this.context.commit('authenticate', true);
-            })
-            .catch((e: AxiosError) => {
-                console.error(e);
-                this.context.commit('authenticate', false);
-            });
+    async init() {
+        try {
+            const r = await axios.get('/account');
+
+            this.context.commit('set', r.data);
+            this.context.commit('authenticate', true);
+
+            return r;
+        } catch (err) {
+            this.context.commit('authenticate', false);
+        }
     }
 
     @Action
     logout() {
-        axios
+        return axios
             .get('/logout')
             .then(() => {
                 this.context.commit('reset');
@@ -78,6 +88,13 @@ class AccountModule extends VuexModule {
     @Action
     login({ email, password }: AuthObject) {
         return axios.post('/login', { email, password });
+    }
+
+    @Action
+    async updateProfile(data: Profile) {
+        await axios.post('/account/profile', data);
+
+        return await this.context.dispatch('init');
     }
 }
 

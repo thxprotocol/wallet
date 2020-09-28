@@ -1,14 +1,17 @@
 <template>
     <div id="app" class="container mt-3 mb-3">
-        <div class="row">
-            <div class="col-md-6">
-                <span>{{ account.address }}</span>
+        <div class="row" v-if="isAuthenticated">
+            <div class="col-md-12">
+                <div v-if="account">
+                    Account address:<br />
+                    <code>{{ account.address }}</code>
+                </div>
                 <h2 class="h2">Root Network</h2>
                 ETH: {{ rootETH | fromWei }}
                 <br />
                 ERC20: {{ rootERC20 }}
             </div>
-            <div class="col-md-6">
+            <div class="col-md-12">
                 <h2 class="h2">Child Network</h2>
                 ERC20: {{ childERC20 }}
                 <br />
@@ -44,7 +47,9 @@ export default class Home extends Vue {
     ethBalance!: string;
 
     async created() {
-        await this.$store.dispatch('balance/init');
+        await this.$store.dispatch('balance/init').catch(() => {
+            this.$store.commit('account/authenticate', false);
+        });
     }
 
     async logout() {
@@ -66,5 +71,13 @@ h1,
 h2,
 h3 {
     font-family: 'Exo 2';
+}
+
+.text-overflow {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    overflow: hidden;
+    width: 100%;
 }
 </style>

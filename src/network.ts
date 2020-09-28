@@ -38,7 +38,7 @@ export async function checkInclusion(txHash: string) {
     const web3 = new Web3(config.root.RPC);
     const childWeb3 = new Web3(config.child.RPC);
     const txDetails = await childWeb3.eth.getTransactionReceipt(txHash);
-    debugger;
+
     return new Promise((resolve, reject) => {
         web3.eth.subscribe(
             'logs',
