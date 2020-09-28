@@ -1,7 +1,6 @@
 <template>
     <div class="home">
-        <b-spinner v-if="busy.qrcode"></b-spinner>
-        <qrcode-stream @init="busy.qrcode = false" @decode="onDecode" :track="true"></qrcode-stream>
+        <qrcode-stream @decode="onDecode" :track="true"></qrcode-stream>
         <qrcode-capture
             id="qrcode-capture"
             class="d-none"
@@ -104,7 +103,6 @@ export default class Home extends Vue {
     $bridge!: MaticPOSClient;
     result = {};
     busy = {
-        qrcode: true,
         deposit: false,
         burn: false,
         exit: false,

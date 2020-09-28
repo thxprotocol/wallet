@@ -9,10 +9,10 @@
         "test:e2e": "vue-cli-service test:e2e",
         "lint": "vue-cli-service lint",
         "contracts:compile": "npm run compile:pool:abi; npm run compile:pool:bin; npm run compile:token:abi; npm run compile:token:bin",
-        "compile:pool:abi": "solc @openzeppelin=/Users/peterpolman/Sites/thx/wallet/contracts/node_modules/@openzeppelin ./contracts/contracts/RewardPool.sol -o ./src/contracts --abi --overwrite --optimize",
-        "compile:pool:bin": "solc @openzeppelin=/Users/peterpolman/Sites/thx/wallet/contracts/node_modules/@openzeppelin ./contracts/contracts/RewardPool.sol -o ./src/contracts --bin --overwrite --optimize ",
-        "compile:token:abi": "solc @openzeppelin=/Users/peterpolman/Sites/thx/wallet/contracts/node_modules/@openzeppelin ./contracts/contracts/THXToken*.sol -o ./src/contracts --abi --overwrite --optimize",
-        "compile:token:bin": "solc @openzeppelin=/Users/peterpolman/Sites/thx/wallet/contracts/node_modules/@openzeppelin ./contracts/contracts/THXToken*.sol -o ./src/contracts --bin --overwrite --optimize "
+        "compile:pool:abi": "solc @openzeppelin=$(pwd)/contracts/node_modules/@openzeppelin ./contracts/contracts/AssetPool.sol -o ./src/contracts --abi --overwrite --optimize",
+        "compile:pool:bin": "solc @openzeppelin=$(pwd)/contracts/node_modules/@openzeppelin ./contracts/contracts/AssetPool.sol -o ./src/contracts --bin --overwrite --optimize ",
+        "compile:token:abi": "solc @openzeppelin=$(pwd)/contracts/node_modules/@openzeppelin ./contracts/contracts/THXToken.sol -o ./src/contracts --abi --overwrite --optimize",
+        "compile:token:bin": "solc @openzeppelin=$(pwd)/contracts/node_modules/@openzeppelin ./contracts/contracts/THXToken.sol -o ./src/contracts --bin --overwrite --optimize "
     },
     "dependencies": {
         "axios": "^0.20.0",
