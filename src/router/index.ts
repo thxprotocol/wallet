@@ -18,6 +18,14 @@ const routes: Array<RouteConfig> = [
         name: 'Login',
         component: () => import('../views/Login.vue'),
     },
+    {
+        path: '/wallet',
+        name: 'Wallet',
+        component: () => import('../views/Wallet.vue'),
+        meta: {
+            requiresAuth: true,
+        },
+    },
 ];
 
 const router = new VueRouter({

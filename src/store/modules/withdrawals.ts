@@ -27,7 +27,7 @@ class WithdrawalModule extends VuexModule {
         const hash = web3.utils.soliditySha3(ADDRESS, agree, nonce, result.contractAddress) || '';
         const sig = web3.eth.accounts.sign(hash, PRIVATE_KEY);
 
-        return await axios(`${API_URL}/withdrawals/${result.contractAddress}/${result.method}`, {
+        return await axios(`${API_URL}/withdrawals/${result.contractAddress}/vote`, {
             method: 'post',
             headers: {
                 AssetPool: assetPoolAddress,
@@ -35,6 +35,34 @@ class WithdrawalModule extends VuexModule {
             data: {
                 voter: ADDRESS,
                 agree,
+                nonce,
+                sig: sig['signature'],
+            },
+        });
+    }
+
+    @Action
+    async revokeVote(result: QR) {
+        const nonce =
+            parseInt(
+                await withdrawPollContract(result.contractAddress)
+                    .methods.getLatestNonce(ADDRESS)
+                    .call({ from }),
+                10,
+            ) + 1;
+        const assetPoolAddress = await withdrawPollContract(result.contractAddress)
+            .methods.pool()
+            .call({ from });
+        const hash = web3.utils.soliditySha3(ADDRESS, nonce, result.contractAddress) || '';
+        const sig = web3.eth.accounts.sign(hash, PRIVATE_KEY);
+
+        return await axios(`${API_URL}/withdrawals/${result.contractAddress}/vote`, {
+            method: 'delete',
+            headers: {
+                AssetPool: assetPoolAddress,
+            },
+            data: {
+                voter: ADDRESS,
                 nonce,
                 sig: sig['signature'],
             },

@@ -1,27 +1,12 @@
 <template>
-    <div id="app" class="container mt-3 mb-3">
-        <div class="row" v-if="isAuthenticated">
-            <div class="col-md-12">
-                <div v-if="account">
-                    Account address:<br />
-                    <code>{{ account.address }}</code>
-                </div>
-                <h2 class="h2">Root Network</h2>
-                ETH: {{ rootETH | fromWei }}
-                <br />
-                ERC20: {{ rootERC20 }}
-            </div>
-            <div class="col-md-12">
-                <h2 class="h2">Child Network</h2>
-                ERC20: {{ childERC20 }}
-                <br />
-                MATIC: {{ childMATIC | fromWei }}
-            </div>
+    <div id="app" class="d-flex flex-column h-100">
+        <!-- <b-button block v-if="isAuthenticated" @click="logout()">Logout</b-button> -->
+        <div class="flex-grow-1">
+            <router-view />
         </div>
-        <hr />
-        <b-button block v-if="isAuthenticated" @click="logout()">Logout</b-button>
-        <hr />
-        <router-view />
+        <div class="flex-grow-0">
+            <navbar />
+        </div>
     </div>
 </template>
 
@@ -29,10 +14,12 @@
 import { BButton } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
+import Navbar from '@/components/Navbar.vue';
 
 @Component({
     components: {
         'b-button': BButton,
+        'navbar': Navbar,
     },
     computed: {
         ...mapGetters('account', ['account', 'isAuthenticated']),
@@ -79,5 +66,13 @@ h3 {
     display: block;
     overflow: hidden;
     width: 100%;
+}
+
+.text-overflow-200 {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    overflow: hidden;
+    width: 100px;
 }
 </style>

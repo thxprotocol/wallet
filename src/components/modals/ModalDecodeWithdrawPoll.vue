@@ -12,11 +12,26 @@
     >
         <template v-slot:default>
             <div class="w-100 text-center" v-if="busy">
-                <b-spinner variant="primary" />
+                <b-spinner variant="dark" />
             </div>
             <template v-else>
-                <code class="text-white" v-if="tx">{{ tx }}</code>
-                <code class="text-white" v-if="err">{{ err }}</code>
+                <div v-if="result.method === 'vote'">
+                    <p class="text-white h4 mb-3">
+                        You have cast your <strong>{{ result.params.agree ? 'yes' : 'no' }}</strong> vote for
+                        <strong>{{ result.contract }}</strong>
+                        <small class="text-overflow-200">{{ result.contractAddress }}</small>
+                    </p>
+                </div>
+                <div v-if="result.method === 'revokeVote'">
+                    <p class="text-white h4 mb-3">
+                        You have revoked your vote for <strong>{{ result.contract }}</strong>
+                        <small class="text-overflow-200">{{ result.contractAddress }}</small>
+                    </p>
+                </div>
+                <small class="h-20">
+                    <code class="text-white" v-if="tx">{{ tx }}</code>
+                    <code class="text-white" v-if="err">{{ err }}</code>
+                </small>
             </template>
         </template>
         <template v-slot:modal-footer="{ ok }">
@@ -47,26 +62,29 @@ export default class ModalDecodeWithdrawPoll extends Vue {
     account!: Account;
     busy = true;
     variant = 'light';
-
     tx: Transaction | null = null;
     err = '';
 
     @Prop() result!: QR;
 
     onShown() {
-        this.$store
-            .dispatch('withdrawals/vote', this.result)
-            .then((tx: Transaction) => {
-                this.tx = tx;
-                this.variant = 'success';
-            })
-            .catch((err: string) => {
-                this.err = err.toString();
-                this.variant = 'danger';
-            })
-            .finally(() => {
-                this.busy = false;
-            });
+        const allowedMethods = ['vote', 'revokeVote'];
+
+        if (allowedMethods.includes(this.result.method)) {
+            this.$store
+                .dispatch('withdrawals/' + this.result.method, this.result)
+                .then((tx: Transaction) => {
+                    this.tx = tx;
+                    this.variant = 'success';
+                })
+                .catch((err: string) => {
+                    this.err = err.toString();
+                    this.variant = 'danger';
+                })
+                .finally(() => {
+                    this.busy = false;
+                });
+        }
     }
 }
 </script>
