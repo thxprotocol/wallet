@@ -4,7 +4,7 @@ import './registerServiceWorker';
 import router from './router';
 import store from './store';
 import axios from 'axios';
-import { ModalPlugin } from 'bootstrap-vue';
+import { ModalPlugin, ToastPlugin } from 'bootstrap-vue';
 import Web3 from 'web3';
 
 // Set Axios default config
@@ -14,6 +14,7 @@ axios.defaults.baseURL = process.env.VUE_APP_API_URL;
 // Set Vue default config and attach plugins
 Vue.config.productionTip = false;
 Vue.use(ModalPlugin);
+Vue.use(ToastPlugin);
 
 // Set custom filters
 Vue.filter('fromWei', (value: string) => {

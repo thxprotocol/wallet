@@ -1,6 +1,6 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import axios, { AxiosError } from 'axios';
-import { config } from '../../network';
+import { ADDRESS } from '@/utils/secrets';
 
 interface AuthObject {
     email: string;
@@ -40,7 +40,7 @@ class AccountModule extends VuexModule {
 
     @Mutation
     set({ createdAt, email, password, profile }: Account) {
-        this._account.address = config.user.address;
+        this._account.address = ADDRESS;
         this._account.email = email;
         this._account.createdAt = createdAt;
         this._account.password = password;

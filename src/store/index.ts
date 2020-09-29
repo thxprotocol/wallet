@@ -7,6 +7,7 @@ config.rawError = true;
 
 import AccountStore from './modules/account';
 import BalanceStore from './modules/balance';
+import WithdrawalStore from './modules/withdrawals';
 
 Vue.use(Vuex);
 
@@ -16,6 +17,7 @@ const getters = {};
 const modules = {
     account: AccountStore,
     balance: BalanceStore,
+    withdrawals: WithdrawalStore,
 };
 
 export default new Vuex.Store({

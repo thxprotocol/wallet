@@ -1,5 +1,6 @@
 <template>
     <div class="home">
+        <modal-decode-withdraw-poll :result="result" />
         <qrcode-stream @decode="onDecode" :track="true"></qrcode-stream>
         <qrcode-capture
             id="qrcode-capture"
@@ -47,10 +48,6 @@
                 </b-list-group>
             </div>
         </div>
-        <b-modal id="modalDecode" title="Result" :show="show">
-            <p>Click the button to toggle the overlay:</p>
-            <code>{{ result }}</code>
-        </b-modal>
     </div>
 </template>
 
@@ -65,7 +62,6 @@ import {
     BFormInput,
     BInputGroup,
     BInputGroupAppend,
-    BModal,
     BOverlay,
     BSpinner,
     BListGroup,
@@ -75,14 +71,22 @@ import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 import { mapGetters } from 'vuex';
 import { Account, Profile } from '@/store/modules/account';
 import BurnProof from '@/components/BurnProof.vue';
+import ModalDecodeWithdrawPoll from '@/components/modals/ModalDecodeWithdrawPoll.vue';
+
+interface QR {
+    contractAddress: string;
+    contract: string;
+    method: string;
+    params: any;
+}
 
 @Component({
     components: {
+        'modal-decode-withdraw-poll': ModalDecodeWithdrawPoll,
         'burn-proof': BurnProof,
         'b-alert': BAlert,
         'b-link': BLink,
         'b-spinner': BSpinner,
-        'b-modal': BModal,
         'b-button': BButton,
         'b-overlay': BOverlay,
         'b-list-group': BListGroup,
@@ -101,7 +105,7 @@ import BurnProof from '@/components/BurnProof.vue';
 })
 export default class Home extends Vue {
     $bridge!: MaticPOSClient;
-    result = {};
+    result: QR | null = null;
     busy = {
         deposit: false,
         burn: false,
@@ -115,10 +119,6 @@ export default class Home extends Vue {
     amountDeposit = 0;
     amountBurn = 0;
     account!: Account;
-
-    get show() {
-        return this.result !== {};
-    }
 
     async deposit(amount: number) {
         this.busy.deposit = true;
@@ -149,7 +149,10 @@ export default class Home extends Vue {
     onDecode(decoded: string) {
         if (decoded.length) {
             this.result = JSON.parse(decoded);
-            this.$bvModal.show('modalDecode');
+
+            if (this.result) {
+                this.$bvModal.show(`modalDecode${this.result.contract}`);
+            }
         }
     }
 }

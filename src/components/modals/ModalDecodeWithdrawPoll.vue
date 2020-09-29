@@ -1,52 +1,72 @@
 <template>
-    <b-modal id="modalDecode" title="Result" :show="show">
-        <p>Click the button to toggle the overlay:</p>
-        <code>{{ result }}</code>
+    <b-modal
+        id="modalDecodeWithdrawPoll"
+        class="text-white"
+        show
+        @shown="onShown"
+        centered
+        scrollable
+        hide-header
+        :body-bg-variant="variant"
+        :footer-bg-variant="variant"
+    >
+        <template v-slot:default>
+            <div class="w-100 text-center" v-if="busy">
+                <b-spinner variant="primary" />
+            </div>
+            <template v-else>
+                <code class="text-white" v-if="tx">{{ tx }}</code>
+                <code class="text-white" v-if="err">{{ err }}</code>
+            </template>
+        </template>
+        <template v-slot:modal-footer="{ ok }">
+            <b-button class="mt-3" block variant="dark" @click="ok()">
+                Close
+            </b-button>
+        </template>
     </b-modal>
 </template>
 
 <script lang="ts">
-import { BLink, BAlert, BButton, BSpinner, BListGroupItem, BListGroup } from 'bootstrap-vue';
+import { BLink, BAlert, BButton, BSpinner, BModal } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-import { Account, Profile } from '@/store/modules/account';
+import { QR } from '@/utils/network';
+import { Transaction } from 'web3/eth/types';
 
 @Component({
+    name: 'ModalDecodeWithdrawPoll',
     components: {
         'b-alert': BAlert,
         'b-link': BLink,
+        'b-modal': BModal,
         'b-spinner': BSpinner,
         'b-button': BButton,
-        'b-list-group': BListGroup,
-        'b-list-group-item': BListGroupItem,
-    },
-    computed: {
-        ...mapGetters('account', ['account']),
     },
 })
 export default class ModalDecodeWithdrawPoll extends Vue {
     account!: Account;
-    busy = false;
+    busy = true;
+    variant = 'light';
 
-    @Prop() txHash!: string;
+    tx: Transaction | null = null;
+    err = '';
 
-    async removeBurnProof(txHash: string) {
-        const data: Profile = this.account.profile;
-        const index = data.burnProof.indexOf(txHash);
+    @Prop() result!: QR;
 
-        data.burnProof.splice(index, 1);
-
-        await this.$store.dispatch('account/updateProfile', data);
-    }
-
-    async exit(txHash: string) {
-        this.busy = true;
-
-        const tx = await this.$store.dispatch('balance/exit', txHash);
-        console.log(tx);
-        await this.removeBurnProof(txHash);
-
-        this.busy = false;
+    onShown() {
+        this.$store
+            .dispatch('withdrawals/vote', this.result)
+            .then((tx: Transaction) => {
+                this.tx = tx;
+                this.variant = 'success';
+            })
+            .catch((err: string) => {
+                this.err = err.toString();
+                this.variant = 'danger';
+            })
+            .finally(() => {
+                this.busy = false;
+            });
     }
 }
 </script>

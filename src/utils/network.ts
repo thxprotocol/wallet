@@ -1,10 +1,21 @@
 import Matic from '@maticnetwork/maticjs';
 import HDWalletProvider from '@truffle/hdwallet-provider';
 import Web3 from 'web3';
+import { WITHDRAW_POLL_ABI } from './contracts';
+import { INFURA_KEY, MATIC_ADDRESS, PRIVATE_KEY } from './secrets';
+
+export interface QR {
+    contractAddress: string;
+    contract: string;
+    method: string;
+    params: {
+        agree: boolean;
+    };
+}
 
 export const config = {
     root: {
-        RPC: 'wss://goerli.infura.io/ws/v3/' + process.env.VUE_APP_INFURA_KEY,
+        RPC: 'wss://goerli.infura.io/ws/v3/' + INFURA_KEY,
         POSRootChainManager: '0xBbD7cBFA79faee899Eaf900F13C9065bF03B1A74',
         RootChainProxyAddress: '0x2890bA17EfE978480615e330ecB65333b880928e',
         DERC20: '0x655F2166b0709cd575202630952D71E2bB0d61Af',
@@ -14,24 +25,26 @@ export const config = {
     child: {
         RPC: 'https://rpc-mumbai.matic.today',
         DERC20: '0xfe4F5145f6e09952a5ba9e956ED0C25e3Fa4c7F1',
-        MATIC: process.env.VUE_APP_MATIC_ADDRESS || '',
+        MATIC: MATIC_ADDRESS || '',
         MaticWETH: '0x714550C2C1Ea08688607D86ed8EeF4f5E4F22323',
     },
-    user: {
-        privateKey: process.env.VUE_APP_USER_PRIVATE_KEY || '',
-        address: process.env.VUE_APP_USER_ADDRESS || '',
-    },
 };
+const web3 = new Web3(config.child.RPC);
 
+export function withdrawPollContract(address: string) {
+    return new web3.eth.Contract(WITHDRAW_POLL_ABI as any, address);
+}
+
+export const account = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY);
 export const maticPOSClient = new Matic.MaticPOSClient({
     network: 'testnet',
     version: 'mumbai',
-    parentProvider: new HDWalletProvider(config.user.privateKey, config.root.RPC),
-    maticProvider: new HDWalletProvider(config.user.privateKey, config.child.RPC),
+    parentProvider: new HDWalletProvider(PRIVATE_KEY, config.root.RPC),
+    maticProvider: new HDWalletProvider(PRIVATE_KEY, config.child.RPC),
     posRootChainManager: config.root.POSRootChainManager,
     posERC20Predicate: config.root.posERC20Predicate,
-    parentDefaultOptions: { from: config.user.address },
-    maticDefaultOptions: { from: config.user.address },
+    parentDefaultOptions: { from: account.address },
+    maticDefaultOptions: { from: account.address },
 });
 
 export async function checkInclusion(txHash: string) {
