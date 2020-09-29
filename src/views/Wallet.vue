@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="container mt-3">
         <h2>Root Network</h2>
         <p class="text-muted">Ethereum Goerli</p>
         ETH: <code>{{ rootETH | fromWei }}</code>
@@ -34,7 +34,15 @@
         </b-input-group>
         <hr />
         <div v-if="account.profile.burnProof.length">
-            <h2>Burn proofs:</h2>
+            <h3>Burn proof</h3>
+            <p>
+                This will list your burn transactions. The proof is used to unlock the tokens in the root network. Start
+                this process by exitting the proof.
+            </p>
+            <b-alert show variant="warning">
+                <strong>Warning!</strong> Only remove your burn proof when you are sure your funds are unlocked in the
+                root network.
+            </b-alert>
             <b-list-group class="mt-3">
                 <burn-proof v-for="txHash of account.profile.burnProof" :txHash="txHash" :key="txHash" />
             </b-list-group>
@@ -43,7 +51,7 @@
 </template>
 
 <script lang="ts">
-import { BButton, BFormInput, BInputGroup, BInputGroupAppend, BListGroup } from 'bootstrap-vue';
+import { BAlert, BButton, BFormInput, BInputGroup, BInputGroupAppend, BListGroup } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BurnProof from '@/components/BurnProof.vue';
@@ -52,6 +60,7 @@ import { Account, Profile } from '@/store/modules/account';
 @Component({
     components: {
         'burn-proof': BurnProof,
+        'b-alert': BAlert,
         'b-button': BButton,
         'b-list-group': BListGroup,
         'b-input-group': BInputGroup,

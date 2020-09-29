@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="container mt-3">
         <h1>Hi {{ account.profile.firstName }}!</h1>
         <hr />
         <h2>Account address</h2>

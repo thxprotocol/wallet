@@ -1,10 +1,11 @@
 <template>
-    <div class="h-100">
+    <div class="h-100 d-flex align-items-center justify-content-center">
         <modal-decode-base-poll :result="result" />
-        <qrcode-stream @decode="onDecode" :track="true"></qrcode-stream>
+        <b-spinner variant="dark" />
+        <qrcode-stream @decode="onDecode" track></qrcode-stream>
         <qrcode-capture
             id="qrcode-capture"
-            class="d-none"
+            hidden
             :capture="false"
             :multiple="false"
             @decode="onDecode"
@@ -17,6 +18,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 import ModalDecodeBasePoll from '@/components/modals/ModalDecodeBasePoll.vue';
+import { BSpinner } from 'bootstrap-vue';
 
 interface QR {
     contractAddress: string;
@@ -30,10 +32,12 @@ interface QR {
         'modal-decode-base-poll': ModalDecodeBasePoll,
         'qrcode-stream': QrcodeStream,
         'qrcode-capture': QrcodeCapture,
+        'b-spinner': BSpinner,
     },
 })
 export default class Home extends Vue {
     result: QR | null = null;
+    busy = true;
 
     onDecode(decoded: string) {
         if (decoded.length) {
@@ -47,6 +51,13 @@ export default class Home extends Vue {
 }
 </script>
 <style>
+.wrapper {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
 .btn-upload {
     position: fixed;
     width: auto;
