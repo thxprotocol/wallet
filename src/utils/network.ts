@@ -31,7 +31,7 @@ export const config = {
 };
 const web3 = new Web3(config.child.RPC);
 
-export function withdrawPollContract(address: string) {
+export function basePollContract(address: string) {
     return new web3.eth.Contract(WITHDRAW_POLL_ABI as any, address);
 }
 

@@ -1,6 +1,6 @@
 <template>
     <b-modal
-        id="modalDecodeWithdrawPoll"
+        id="modalDecodeBasePoll"
         class="text-white"
         show
         @shown="onShown"
@@ -49,7 +49,7 @@ import { QR } from '@/utils/network';
 import { Transaction } from 'web3/eth/types';
 
 @Component({
-    name: 'ModalDecodeWithdrawPoll',
+    name: 'ModalDecodeBasePoll',
     components: {
         'b-alert': BAlert,
         'b-link': BLink,
@@ -58,7 +58,7 @@ import { Transaction } from 'web3/eth/types';
         'b-button': BButton,
     },
 })
-export default class ModalDecodeWithdrawPoll extends Vue {
+export default class ModalDecodeBasePoll extends Vue {
     account!: Account;
     busy = true;
     variant = 'light';
@@ -72,7 +72,7 @@ export default class ModalDecodeWithdrawPoll extends Vue {
 
         if (allowedMethods.includes(this.result.method)) {
             this.$store
-                .dispatch('withdrawals/' + this.result.method, this.result)
+                .dispatch(`polls/${this.result.method}`, this.result)
                 .then((tx: Transaction) => {
                     this.tx = tx;
                     this.variant = 'success';

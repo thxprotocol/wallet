@@ -1,6 +1,6 @@
 <template>
     <div class="h-100">
-        <modal-decode-withdraw-poll :result="result" />
+        <modal-decode-base-poll :result="result" />
         <qrcode-stream @decode="onDecode" :track="true"></qrcode-stream>
         <qrcode-capture
             id="qrcode-capture"
@@ -16,7 +16,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
-import ModalDecodeWithdrawPoll from '@/components/modals/ModalDecodeWithdrawPoll.vue';
+import ModalDecodeBasePoll from '@/components/modals/ModalDecodeBasePoll.vue';
 
 interface QR {
     contractAddress: string;
@@ -27,7 +27,7 @@ interface QR {
 
 @Component({
     components: {
-        'modal-decode-withdraw-poll': ModalDecodeWithdrawPoll,
+        'modal-decode-base-poll': ModalDecodeBasePoll,
         'qrcode-stream': QrcodeStream,
         'qrcode-capture': QrcodeCapture,
     },
