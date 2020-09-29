@@ -47,10 +47,6 @@ export default class Home extends Vue {
 }
 </script>
 <style>
-html,
-body {
-    height: 100%;
-}
 .btn-upload {
     position: fixed;
     width: auto;

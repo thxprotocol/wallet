@@ -1,5 +1,5 @@
 <template>
-    <div class="login">
+    <div class="container">
         <h1>Login</h1>
         <p v-if="isAuthenticated">You are already logged in. <router-link to="/">Return home</router-link></p>
         <form v-on:submit.prevent="submit" v-if="!isAuthenticated">

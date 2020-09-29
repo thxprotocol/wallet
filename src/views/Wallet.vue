@@ -1,57 +1,43 @@
 <template>
     <div class="container">
-        <div class="row">
-            <div class="col-md-12">
-                <div v-if="account">
-                    Account address:<br />
-                    <code>{{ account.address }}</code>
-                </div>
-                <h2 class="h2">Root Network</h2>
-                ETH: {{ rootETH | fromWei }}
-                <br />
-                ERC20: {{ rootERC20 }}
-            </div>
-            <div class="col-md-12">
-                <h2 class="h2">Child Network</h2>
-                ERC20: {{ childERC20 }}
-                <br />
-                MATIC: {{ childMATIC | fromWei }}
-            </div>
-            <div class="col-12">
-                <b-input-group class="mt-3">
-                    <b-form-input type="number" v-model="amountDeposit"></b-form-input>
-                    <b-input-group-append>
-                        <b-button
-                            style="width: 100px;"
-                            :disabled="busy.deposit"
-                            @click="deposit(amountDeposit)"
-                            variant="primary"
-                        >
-                            Deposit
-                        </b-button>
-                    </b-input-group-append>
-                </b-input-group>
-            </div>
-            <div class="col-12">
-                <b-input-group class="mt-3">
-                    <b-form-input type="number" v-model="amountBurn"></b-form-input>
-                    <b-input-group-append>
-                        <b-button
-                            style="width: 100px;"
-                            :disabled="busy.burn"
-                            @click="burn(amountBurn)"
-                            variant="primary"
-                        >
-                            Withdraw
-                        </b-button>
-                    </b-input-group-append>
-                </b-input-group>
-            </div>
-            <div class="col-md-12">
-                <b-list-group class="mt-3">
-                    <burn-proof v-for="txHash of account.profile.burnProof" :txHash="txHash" :key="txHash" />
-                </b-list-group>
-            </div>
+        <h2>Root Network</h2>
+        <p class="text-muted">Ethereum Goerli</p>
+        ETH: <code>{{ rootETH | fromWei }}</code>
+        <br />
+        ERC20: <code>{{ rootERC20 }}</code>
+        <b-input-group class="mt-3">
+            <b-form-input type="number" v-model="amountDeposit"></b-form-input>
+            <b-input-group-append>
+                <b-button
+                    style="width: 100px;"
+                    :disabled="busy.deposit"
+                    @click="deposit(amountDeposit)"
+                    variant="primary"
+                >
+                    Deposit
+                </b-button>
+            </b-input-group-append>
+        </b-input-group>
+        <hr />
+        <h2>Child Network</h2>
+        <p class="text-muted">Matic Mumbai</p>
+        ERC20: <code>{{ childERC20 }}</code>
+        <br />
+        MATIC: <code>{{ childMATIC | fromWei }}</code>
+        <b-input-group class="mt-3">
+            <b-form-input type="number" v-model="amountBurn"></b-form-input>
+            <b-input-group-append>
+                <b-button style="width: 100px;" :disabled="busy.burn" @click="burn(amountBurn)" variant="primary">
+                    Withdraw
+                </b-button>
+            </b-input-group-append>
+        </b-input-group>
+        <hr />
+        <div v-if="account.profile.burnProof.length">
+            <h2>Burn proofs:</h2>
+            <b-list-group class="mt-3">
+                <burn-proof v-for="txHash of account.profile.burnProof" :txHash="txHash" :key="txHash" />
+            </b-list-group>
         </div>
     </div>
 </template>

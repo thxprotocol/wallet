@@ -1,6 +1,5 @@
 <template>
     <div id="app" class="d-flex flex-column h-100">
-        <!-- <b-button block v-if="isAuthenticated" @click="logout()">Logout</b-button> -->
         <div class="flex-grow-1">
             <router-view />
         </div>
@@ -28,20 +27,11 @@ import Navbar from '@/components/Navbar.vue';
 })
 export default class Home extends Vue {
     account!: Account;
-    isAuthenticated!: boolean;
-    rootBalance!: string;
-    childBalance!: string;
-    ethBalance!: string;
 
     async created() {
         await this.$store.dispatch('balance/init').catch(() => {
             this.$store.commit('account/authenticate', false);
         });
-    }
-
-    async logout() {
-        await this.$store.dispatch('account/logout');
-        this.$router.push('/login');
     }
 }
 </script>
@@ -53,6 +43,11 @@ export default class Home extends Vue {
 
 $yellow: #fde542;
 $blue: #039be5;
+
+html,
+body {
+    height: 100%;
+}
 
 h1,
 h2,
