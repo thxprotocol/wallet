@@ -62,39 +62,44 @@ class AccountModule extends VuexModule {
     async init() {
         try {
             const r = await axios.get('/account');
-
             this.context.commit('set', r.data);
             this.context.commit('authenticate', true);
-
             return r;
         } catch (err) {
+            console.error(err);
             this.context.commit('authenticate', false);
         }
     }
 
     @Action
-    logout() {
-        return axios
-            .get('/logout')
-            .then(() => {
-                this.context.commit('reset');
-            })
-            .catch((e: AxiosError) => {
-                console.error(e);
-                this.context.commit('reset');
-            });
+    async logout() {
+        try {
+            await axios.get('/logout');
+            this.context.commit('reset');
+        } catch (e) {
+            console.error(e);
+            this.context.commit('reset');
+        }
     }
 
     @Action
-    login({ email, password }: AuthObject) {
-        return axios.post('/login', { email, password });
+    async login({ email, password }: AuthObject) {
+        try {
+            return await axios.post('/login', { email, password });
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     @Action
     async updateProfile(data: Profile) {
-        await axios.post('/account/profile', data);
+        try {
+            await axios.post('/account/profile', data);
 
-        return await this.context.dispatch('init');
+            return await this.context.dispatch('init');
+        } catch (err) {
+            console.error(err);
+        }
     }
 }
 

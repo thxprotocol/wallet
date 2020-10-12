@@ -3,7 +3,7 @@
         id="modalDecodeBasePoll"
         class="text-white"
         show
-        @shown="onShown"
+        @show="onShow"
         centered
         scrollable
         hide-header
@@ -28,10 +28,10 @@
                         <small class="text-overflow-200">{{ result.contractAddress }}</small>
                     </p>
                 </div>
-                <small class="h-20">
+                <!-- <small class="h-20">
                     <code class="text-white" v-if="tx">{{ tx }}</code>
                     <code class="text-white" v-if="err">{{ err }}</code>
-                </small>
+                </small> -->
             </template>
         </template>
         <template v-slot:modal-footer="{ ok }">
@@ -67,23 +67,22 @@ export default class ModalDecodeBasePoll extends Vue {
 
     @Prop() result!: QR;
 
-    onShown() {
+    async onShow() {
         const allowedMethods = ['vote', 'revokeVote'];
 
+        this.variant = 'light';
+        this.busy = true;
+
         if (allowedMethods.includes(this.result.method)) {
-            this.$store
-                .dispatch(`polls/${this.result.method}`, this.result)
-                .then((tx: Transaction) => {
-                    this.tx = tx;
-                    this.variant = 'success';
-                })
-                .catch((err: string) => {
-                    this.err = err.toString();
-                    this.variant = 'danger';
-                })
-                .finally(() => {
-                    this.busy = false;
-                });
+            try {
+                this.tx = await this.$store.dispatch(`polls/${this.result.method}`, this.result);
+                this.variant = 'success';
+            } catch (err) {
+                this.err = err.toString();
+                this.variant = 'danger';
+            } finally {
+                this.busy = false;
+            }
         }
     }
 }

@@ -35,14 +35,13 @@ export default class Login extends Vue {
     isAuthenticated!: boolean;
 
     async submit() {
-        await this.$store
-            .dispatch('account/login', { email: this.email, password: this.password })
-            .then(async () => {
-                this.$router.push('/');
-            })
-            .catch(e => {
-                console.log(e);
-            });
+        try {
+            await this.$store.dispatch('account/login', { email: this.email, password: this.password });
+            await this.$store.dispatch('account/init');
+            this.$router.push('/');
+        } catch (e) {
+            console.log(e);
+        }
     }
 }
 </script>
