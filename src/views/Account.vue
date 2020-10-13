@@ -5,14 +5,14 @@
         <h2>Account address</h2>
         <b-list-group>
             <b-list-group-item>
-                {{ account.address }}
+                <small>{{ account.address }}</small>
             </b-list-group-item>
         </b-list-group>
         <hr />
         <h2>Asset Pools</h2>
         <b-list-group>
             <b-list-group-item :key="key" v-for="(assetPool, key) of account.profile.assetPools">
-                {{ assetPool }}
+                <small>{{ assetPool }}</small>
             </b-list-group-item>
         </b-list-group>
         <hr />
@@ -38,11 +38,15 @@ import { mapGetters } from 'vuex';
     },
 })
 export default class Account extends Vue {
-    isAuthenticated!: boolean;
-
-    async logout() {
-        await this.$store.dispatch('account/logout');
-        this.$router.push('/login');
+    logout() {
+        this.$store
+            .dispatch('account/logout')
+            .then(() => {
+                this.$router.push('/login');
+            })
+            .catch(e => {
+                console.log(e);
+            });
     }
 }
 </script>

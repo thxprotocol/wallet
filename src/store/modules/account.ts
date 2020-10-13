@@ -1,5 +1,5 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { ADDRESS } from '@/utils/secrets';
 
 interface AuthObject {
@@ -60,46 +60,64 @@ class AccountModule extends VuexModule {
 
     @Action
     async init() {
-        try {
-            const r = await axios.get('/account');
-            this.context.commit('set', r.data);
-            this.context.commit('authenticate', true);
-            return r;
-        } catch (err) {
-            console.error(err);
-            this.context.commit('authenticate', false);
-        }
+        return new Promise(resolve => {
+            axios
+                .get('/account')
+                .then((r: AxiosResponse) => {
+                    this.context.commit('set', r.data);
+                    this.context.commit('authenticate', true);
+                    resolve({ auth: true });
+                })
+                .catch(() => {
+                    this.context.commit('authenticate', false);
+                    resolve({ auth: false });
+                });
+        });
     }
 
     @Action
     async logout() {
-        try {
-            await axios.get('/logout');
-            this.context.commit('reset');
-        } catch (e) {
-            console.error(e);
-            this.context.commit('reset');
-        }
+        return new Promise((resolve, reject) => {
+            axios
+                .get('/logout')
+                .then((r: AxiosResponse) => {
+                    this.context.commit('reset');
+                    resolve(r);
+                })
+                .catch((err: AxiosError) => {
+                    this.context.commit('reset');
+                    reject(err);
+                });
+        });
     }
 
     @Action
     async login({ email, password }: AuthObject) {
-        try {
-            return await axios.post('/login', { email, password });
-        } catch (err) {
-            console.error(err);
-        }
+        return new Promise((resolve, reject) => {
+            axios
+                .post('/login', { email, password })
+                .then((r: AxiosResponse) => {
+                    resolve(r);
+                })
+                .catch((err: AxiosError) => {
+                    reject(err);
+                });
+        });
     }
 
     @Action
     async updateProfile(data: Profile) {
-        try {
-            await axios.post('/account/profile', data);
-
-            return await this.context.dispatch('init');
-        } catch (err) {
-            console.error(err);
-        }
+        return new Promise((resolve, reject) => {
+            axios
+                .post('/account/profile', data)
+                .then((r: AxiosResponse) => {
+                    this.context.dispatch('init');
+                    resolve(r);
+                })
+                .catch((err: AxiosError) => {
+                    reject(err);
+                });
+        });
     }
 }
 

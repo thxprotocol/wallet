@@ -19,11 +19,6 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/Login.vue'),
     },
     {
-        path: '/logout',
-        name: 'Logout',
-        component: () => import('../views/Logout.vue'),
-    },
-    {
         path: '/wallet',
         name: 'Wallet',
         component: () => import('../views/Wallet.vue'),
@@ -48,12 +43,16 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
-    await store.dispatch('account/init');
+    try {
+        const { auth } = await store.dispatch('account/init');
 
-    if (requiresAuth && !store.getters['account/isAuthenticated']) {
-        next('/login');
-    } else {
-        return next();
+        if (requiresAuth && !auth) {
+            next('/login');
+        } else {
+            return next();
+        }
+    } catch (err) {
+        console.error(err);
     }
 });
 

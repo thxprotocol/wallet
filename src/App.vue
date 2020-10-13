@@ -3,7 +3,7 @@
         <div class="flex-grow-1">
             <router-view />
         </div>
-        <div class="flex-grow-0">
+        <div class="flex-grow-0" v-if="isAuthenticated">
             <navbar />
         </div>
     </div>
