@@ -98,15 +98,14 @@ class BalanceModule extends VuexModule {
 
     @Action
     async exit(txHash: string) {
-        try {
-            const result = await checkInclusion(txHash);
-
-            if (result) {
-                return await maticPOSClient.exitERC20(txHash, { from });
-            }
-        } catch (err) {
-            return err;
-        }
+        return new Promise((resolve, reject) => {
+            checkInclusion(txHash)
+                .then(() => maticPOSClient.exitERC20(txHash, { from }))
+                .then(tx => resolve(tx))
+                .catch(err => {
+                    reject(err);
+                });
+        });
     }
 
     @Action
