@@ -42,7 +42,7 @@ export default class Login extends Vue {
     async submit() {
         try {
             await this.$store.dispatch('account/login', { email: this.email, password: this.password });
-            await this.$store.dispatch('account/init');
+            await this.$store.dispatch('account/init', this.password);
             this.$router.push('/');
         } catch (e) {
             console.log(e);

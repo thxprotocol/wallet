@@ -16,8 +16,8 @@
                 <b-form-input size="lg" v-model="privateKey" placeholder="Enter a private key" />
             </template>
         </template>
-        <template v-slot:modal-footer="{ ok }">
-            <b-button class="mt-3" block variant="success" @click="ok()">
+        <template v-slot:modal-footer>
+            <b-button class="mt-3" block variant="success" @click="set()">
                 Update
             </b-button>
         </template>
@@ -26,7 +26,9 @@
 
 <script lang="ts">
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
+import { ethers } from 'ethers';
 import { Component, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
     name: 'ModalSetPrivateKey',
@@ -42,10 +44,20 @@ import { Component, Vue } from 'vue-property-decorator';
 export default class ModalSetPrivateKey extends Vue {
     busy = false;
     privateKey = '';
+    error = '';
 
-    async ok() {
+    async set() {
         this.busy = true;
-        debugger;
+
+        try {
+            const account = new ethers.Wallet(this.privateKey);
+
+            localStorage.setItem('thx:wallet:privatekey', this.privateKey);
+
+            await this.$store.dispatch('account/update', { address: account.address });
+        } catch (e) {
+            this.error = e.toString();
+        }
     }
 
     async onShow() {

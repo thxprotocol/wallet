@@ -1,6 +1,6 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { account } from '@/utils/network';
+import { decryptString } from '@/utils/decrypt';
 
 interface AuthObject {
     email: string;
@@ -8,6 +8,7 @@ interface AuthObject {
 }
 
 export class Account {
+    privateKey = '';
     address = '';
     email = '';
     firstName = '';
@@ -30,8 +31,8 @@ class AccountModule extends VuexModule {
     }
 
     @Mutation
-    set({ email, firstName, lastName, assetPools, burnProofs }: Account) {
-        this._account.address = account.address;
+    set({ address, email, firstName, lastName, assetPools, burnProofs }: Account) {
+        this._account.address = address;
         this._account.email = email;
         this._account.firstName = firstName;
         this._account.lastName = lastName;
@@ -50,12 +51,21 @@ class AccountModule extends VuexModule {
         this._isAuthenticated = false;
     }
 
+    @Mutation
+    decryptPrivateKey({ encrypted, password }: { encrypted: string; password: string }) {
+        const decrypted = decryptString(encrypted, password);
+        localStorage.setItem('thx:wallet:privatekey', decrypted);
+    }
+
     @Action
-    async init() {
+    async init(password = '') {
         return new Promise(resolve => {
             axios
                 .get('/account')
                 .then((r: AxiosResponse) => {
+                    if (r.data.privateKey && password.length) {
+                        this.context.commit('decryptPrivateKey', { encrypted: r.data.privateKey, password });
+                    }
                     this.context.commit('set', r.data);
                     this.context.commit('authenticate', true);
                     resolve({ auth: true });
@@ -74,12 +84,10 @@ class AccountModule extends VuexModule {
                 .get('/logout')
                 .then((r: AxiosResponse) => {
                     this.context.commit('reset');
-                    debugger;
                     resolve(r);
                 })
                 .catch((err: AxiosError) => {
                     this.context.commit('reset');
-                    debugger;
                     reject(err);
                 });
         });
@@ -100,7 +108,7 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    async updateProfile(data: Account) {
+    async update(data: Account) {
         return new Promise((resolve, reject) => {
             axios
                 .patch('/account', data)

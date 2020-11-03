@@ -104,7 +104,7 @@ export default class Wallet extends Vue {
 
             data.burnProofs.push(tx.transactionHash);
 
-            await this.$store.dispatch('account/updateProfile', data);
+            await this.$store.dispatch('account/update', data);
         }
         this.busy.burn = false;
     }

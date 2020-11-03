@@ -14,6 +14,7 @@ import { BButton } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import Navbar from '@/components/Navbar.vue';
+import crypto from 'crypto';
 
 @Component({
     components: {

@@ -43,7 +43,7 @@ export default class BurnProof extends Vue {
 
         data.burnProofs.splice(index, 1);
 
-        await this.$store.dispatch('account/updateProfile', data);
+        await this.$store.dispatch('account/update', data);
     }
 
     async exit(txHash: string) {
