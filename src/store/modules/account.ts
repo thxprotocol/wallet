@@ -1,6 +1,6 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { ADDRESS } from '@/utils/secrets';
+import { account } from '@/utils/network';
 
 interface AuthObject {
     email: string;
@@ -31,7 +31,7 @@ class AccountModule extends VuexModule {
 
     @Mutation
     set({ email, firstName, lastName, assetPools, burnProofs }: Account) {
-        this._account.address = ADDRESS;
+        this._account.address = account.address;
         this._account.email = email;
         this._account.firstName = firstName;
         this._account.lastName = lastName;
@@ -74,10 +74,12 @@ class AccountModule extends VuexModule {
                 .get('/logout')
                 .then((r: AxiosResponse) => {
                     this.context.commit('reset');
+                    debugger;
                     resolve(r);
                 })
                 .catch((err: AxiosError) => {
                     this.context.commit('reset');
+                    debugger;
                     reject(err);
                 });
         });

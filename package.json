@@ -11,18 +11,14 @@
         "test:unit": "vue-cli-service test:unit",
         "test:e2e": "vue-cli-service test:e2e",
         "lint": "vue-cli-service lint",
-        "contracts:compile": "npm run compile:pool:abi; npm run compile:pool:bin; npm run compile:token:abi; npm run compile:token:bin",
-        "compile:pool:abi": "solc --abi @openzeppelin=$(pwd)/contracts/node_modules/@openzeppelin ./contracts/contracts/AssetPool.sol -o ./src/contracts --overwrite --optimize",
-        "compile:pool:bin": "solc --bin @openzeppelin=$(pwd)/contracts/node_modules/@openzeppelin ./contracts/contracts/AssetPool.sol -o ./src/contracts --overwrite --optimize ",
-        "compile:token:abi": "solc --abi @openzeppelin=$(pwd)/contracts/node_modules/@openzeppelin ./contracts/contracts/THXToken.sol -o ./src/contracts --overwrite --optimize",
-        "compile:token:bin": "solc --bin @openzeppelin=$(pwd)/contracts/node_modules/@openzeppelin ./contracts/contracts/THXToken.sol -o ./src/contracts --overwrite --optimize "
+        "copy-contracts": "cd ./contracts; yarn; yarn buidler compile; cp -r ./artifacts ../src; cd ../"
     },
     "dependencies": {
         "axios": "^0.20.0",
         "bootstrap-vue": "^2.17.0",
         "core-js": "^3.6.5",
+        "ethers": "^5.0.19",
         "register-service-worker": "^1.7.1",
-        "solc": "^0.6.4",
         "vue": "^2.6.11",
         "vue-class-component": "^7.2.3",
         "vue-property-decorator": "^8.4.2",

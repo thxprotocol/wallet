@@ -16,19 +16,25 @@
             </b-list-group-item>
         </b-list-group>
         <hr />
-        <b-button block v-if="isAuthenticated" variant="link" @click="logout()">
+        <b-button block variant="link" v-b-modal="'modalSetPrivateKey'">
+            Update Private Key
+        </b-button>
+        <b-button block variant="link" @click="logout()">
             Logout
         </b-button>
+        <modal-set-private-key />
     </div>
 </template>
 
 <script lang="ts">
+import ModalSetPrivateKey from '@/components/modals/ModalSetPrivateKey.vue';
 import { BButton, BListGroup, BListGroupItem } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 
 @Component({
     components: {
+        'modal-set-private-key': ModalSetPrivateKey,
         'b-button': BButton,
         'b-list-group': BListGroup,
         'b-list-group-item': BListGroupItem,

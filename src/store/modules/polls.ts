@@ -1,70 +1,53 @@
 import { Module, VuexModule, Action } from 'vuex-module-decorators';
 import Web3 from 'web3';
-import { ADDRESS, API_URL, PRIVATE_KEY } from '@/utils/secrets';
-import { config, QR, basePollContract } from '@/utils/network';
+import { ADDRESS, API_URL, GAS_STATION_ADDRESS } from '@/utils/secrets';
+import { QR, gasStation, account } from '@/utils/network';
 import axios from 'axios';
+import { ethers } from 'ethers';
+import * as BASE_POLL from '../../artifacts/BasePoll.json';
 
-const from = ADDRESS;
-const web3 = new Web3(config.child.RPC);
-
-web3.defaultAccount = from;
+const web3 = new Web3();
 
 @Module({ namespaced: true })
 class BasePollModule extends VuexModule {
     @Action
     async vote(result: QR) {
-        const nonce =
-            parseInt(
-                await basePollContract(result.contractAddress)
-                    .methods.getLatestNonce(ADDRESS)
-                    .call({ from }),
-                10,
-            ) + 1;
-        const assetPoolAddress = await basePollContract(result.contractAddress)
-            .methods.pool()
-            .call({ from });
-        const agree = !!+result.params.agree;
-        const hash = web3.utils.soliditySha3(ADDRESS, agree, nonce, result.contractAddress) || '';
-        const sig = web3.eth.accounts.sign(hash, PRIVATE_KEY);
+        const nonce = parseInt(await gasStation.getLatestNonce(ADDRESS), 10) + 1;
+        const contractInterface = new ethers.utils.Interface(BASE_POLL.abi);
+        const call = contractInterface.encodeFunctionData('vote', [result.params.agree]);
+        const hash = web3.utils.soliditySha3(call, result.contractAddress, GAS_STATION_ADDRESS, nonce) || '';
+        const sig = await account.signMessage(ethers.utils.arrayify(hash));
 
         return await axios(`${API_URL}/polls/${result.contractAddress}/vote`, {
             method: 'post',
             headers: {
-                AssetPool: assetPoolAddress,
+                AssetPool: result.assetPoolAddress,
             },
             data: {
-                voter: ADDRESS,
-                agree,
+                call,
                 nonce,
-                sig: sig['signature'],
+                sig,
             },
         });
     }
 
     @Action
     async revokeVote(result: QR) {
-        const nonce =
-            parseInt(
-                await basePollContract(result.contractAddress)
-                    .methods.getLatestNonce(ADDRESS)
-                    .call({ from }),
-                10,
-            ) + 1;
-        const assetPoolAddress = await basePollContract(result.contractAddress)
-            .methods.pool()
-            .call({ from });
-        const hash = web3.utils.soliditySha3(ADDRESS, nonce, result.contractAddress) || '';
-        const sig = web3.eth.accounts.sign(hash, PRIVATE_KEY);
+        const nonce = parseInt(await gasStation.getLatestNonce(ADDRESS), 10) + 1;
+        const contractInterface = new ethers.utils.Interface(BASE_POLL.abi);
+        const call = contractInterface.encodeFunctionData('revokeVote', []);
+        const hash = web3.utils.soliditySha3(call, result.contractAddress, GAS_STATION_ADDRESS, nonce) || '';
+        const sig = await account.signMessage(ethers.utils.arrayify(hash));
 
-        return await axios(`${API_URL}/polls/${result.contractAddress}/vote`, {
+        return await axios(`${API_URL}/polls/${result.assetPoolAddress}/vote`, {
             method: 'delete',
             headers: {
-                AssetPool: assetPoolAddress,
+                AssetPool: result.assetPoolAddress,
             },
             data: {
-                voter: ADDRESS,
+                call,
                 nonce,
-                sig: sig['signature'],
+                sig,
             },
         });
     }
