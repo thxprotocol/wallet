@@ -1,6 +1,6 @@
 <template>
     <div class="container mt-3">
-        <h1>Hi {{ account.profile.firstName }}!</h1>
+        <h1>Hi {{ account.firstName }}!</h1>
         <hr />
         <h2>Account address</h2>
         <b-list-group>
@@ -11,7 +11,7 @@
         <hr />
         <h2>Asset Pools</h2>
         <b-list-group>
-            <b-list-group-item :key="key" v-for="(assetPool, key) of account.profile.assetPools">
+            <b-list-group-item :key="key" v-for="(assetPool, key) of account.assetPools">
                 <small>{{ assetPool }}</small>
             </b-list-group-item>
         </b-list-group>

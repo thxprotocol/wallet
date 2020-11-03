@@ -16,7 +16,7 @@
 import { BLink, BAlert, BButton, BSpinner, BListGroupItem, BListGroup } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { Account, Profile } from '@/store/modules/account';
+import { Account } from '@/store/modules/account';
 
 @Component({
     components: {
@@ -38,10 +38,10 @@ export default class BurnProof extends Vue {
     @Prop() txHash!: string;
 
     async removeBurnProof(txHash: string) {
-        const data: Profile = this.account.profile;
-        const index = data.burnProof.indexOf(txHash);
+        const data: Account = this.account;
+        const index = data.burnProofs.indexOf(txHash);
 
-        data.burnProof.splice(index, 1);
+        data.burnProofs.splice(index, 1);
 
         await this.$store.dispatch('account/updateProfile', data);
     }

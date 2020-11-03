@@ -29,7 +29,8 @@ export const config = {
         MaticWETH: '0x714550C2C1Ea08688607D86ed8EeF4f5E4F22323',
     },
 };
-const web3 = new Web3(config.child.RPC);
+// const web3 = new Web3(config.child.RPC);
+const web3 = new Web3('http://localhost:7546');
 
 export function basePollContract(address: string) {
     return new web3.eth.Contract(WITHDRAW_POLL_ABI as any, address);

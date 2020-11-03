@@ -33,7 +33,7 @@
             </b-input-group-append>
         </b-input-group>
         <hr />
-        <div v-if="account.profile.burnProof.length">
+        <div v-if="account.burnProofs.length">
             <h3>Burn proof</h3>
             <p>
                 This will list your burn transactions. The proof is used to unlock the tokens in the root network. Start
@@ -44,7 +44,7 @@
                 root network.
             </b-alert>
             <b-list-group class="mt-3">
-                <burn-proof v-for="txHash of account.profile.burnProof" :txHash="txHash" :key="txHash" />
+                <burn-proof v-for="txHash of account.burnProof" :txHash="txHash" :key="txHash" />
             </b-list-group>
         </div>
     </div>
@@ -55,7 +55,7 @@ import { BAlert, BButton, BFormInput, BInputGroup, BInputGroupAppend, BListGroup
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BurnProof from '@/components/BurnProof.vue';
-import { Account, Profile } from '@/store/modules/account';
+import { Account } from '@/store/modules/account';
 
 @Component({
     components: {
@@ -100,9 +100,9 @@ export default class Wallet extends Vue {
         console.log(tx);
 
         if (tx.transactionHash) {
-            const data: Profile = this.account.profile;
+            const data = this.account;
 
-            data.burnProof.push(tx.transactionHash);
+            data.burnProofs.push(tx.transactionHash);
 
             await this.$store.dispatch('account/updateProfile', data);
         }

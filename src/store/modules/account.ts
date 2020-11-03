@@ -7,22 +7,13 @@ interface AuthObject {
     password: string;
 }
 
-export class Profile {
-    firstName = '';
-    lastName = '';
-    gender = '';
-    location = '';
-    picture = '';
-    assetPools: string[] = [];
-    burnProof: string[] = [];
-}
-
 export class Account {
     address = '';
     email = '';
-    createdAt = 0;
-    password = '';
-    profile = new Profile();
+    firstName = '';
+    lastName = '';
+    assetPools: string[] = [];
+    burnProofs: string[] = [];
 }
 
 @Module({ namespaced: true })
@@ -39,12 +30,13 @@ class AccountModule extends VuexModule {
     }
 
     @Mutation
-    set({ createdAt, email, password, profile }: Account) {
+    set({ email, firstName, lastName, assetPools, burnProofs }: Account) {
         this._account.address = ADDRESS;
         this._account.email = email;
-        this._account.createdAt = createdAt;
-        this._account.password = password;
-        this._account.profile = profile;
+        this._account.firstName = firstName;
+        this._account.lastName = lastName;
+        this._account.assetPools = assetPools;
+        this._account.burnProofs = burnProofs;
     }
 
     @Mutation
@@ -106,10 +98,10 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    async updateProfile(data: Profile) {
+    async updateProfile(data: Account) {
         return new Promise((resolve, reject) => {
             axios
-                .post('/account/profile', data)
+                .patch('/account', data)
                 .then((r: AxiosResponse) => {
                     this.context.dispatch('init');
                     resolve(r);
