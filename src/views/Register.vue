@@ -76,6 +76,7 @@ import {
 } from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
 import { ethers } from 'ethers';
+import { PRIVATE_KEY } from '@/utils/network';
 
 @Component({
     components: {
@@ -94,19 +95,14 @@ import { ethers } from 'ethers';
     },
 })
 export default class Register extends Vue {
+    privateKey = PRIVATE_KEY;
     backupStatus = false;
     isAuthenticated!: boolean;
     firstName = '';
     lastName = '';
     email = '';
-    privateKey = '';
     password = '';
     confirmPassword = '';
-
-    generateRandomPrivateKey() {
-        const wallet = ethers.Wallet.createRandom();
-        this.privateKey = wallet.privateKey;
-    }
 
     async submit() {
         const address = (await this.getAddressForPrivateKey(this.privateKey)) || '';

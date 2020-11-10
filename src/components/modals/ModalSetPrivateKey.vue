@@ -65,8 +65,13 @@ export default class ModalSetPrivateKey extends Vue {
             localStorage.setItem('thx:wallet:privatekey', this.privateKey);
 
             await this.$store.dispatch('account/update', { address: account.address });
+            await this.$store.dispatch('account/init');
+
+            this.$bvModal.hide('modalSetPrivateKey');
         } catch (e) {
             this.error = e.toString();
+        } finally {
+            this.busy = false;
         }
     }
 

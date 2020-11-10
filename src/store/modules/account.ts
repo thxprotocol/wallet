@@ -123,12 +123,10 @@ class AccountModule extends VuexModule {
 
     @Action
     async signup(payload: SignupRequest) {
-        debugger;
         return new Promise((resolve, reject) => {
             axios
                 .post('/signup', payload)
                 .then((r: AxiosResponse) => {
-                    debugger;
                     resolve(r);
                 })
                 .catch((err: AxiosError) => {
@@ -143,7 +141,6 @@ class AccountModule extends VuexModule {
             axios
                 .patch('/account', data)
                 .then((r: AxiosResponse) => {
-                    this.context.dispatch('init');
                     resolve(r);
                 })
                 .catch((err: AxiosError) => {

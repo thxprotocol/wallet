@@ -3,7 +3,7 @@ import Matic from '@maticnetwork/maticjs';
 import HDWalletProvider from '@truffle/hdwallet-provider';
 import { ethers } from 'ethers';
 import { WITHDRAW_POLL_ABI } from './contracts';
-import { CHILD_RPC, GAS_STATION_ADDRESS, INFURA_KEY, MATIC_ADDRESS, PRIVATE_KEY, ROOT_RPC } from './secrets';
+import { CHILD_RPC, GAS_STATION_ADDRESS, INFURA_KEY, MATIC_ADDRESS, ROOT_RPC } from './secrets';
 
 import * as GAS_STATION from '../artifacts/GasStation.json';
 
@@ -33,8 +33,11 @@ export const config = {
     },
 };
 
+const wallet = ethers.Wallet.createRandom();
 const provider = new ethers.providers.JsonRpcProvider(CHILD_RPC);
-export const account = new ethers.Wallet(PRIVATE_KEY, provider);
+
+export const PRIVATE_KEY = wallet.privateKey;
+export const account = new ethers.Wallet(localStorage.getItem('thx:wallet:privatekey') || PRIVATE_KEY, provider);
 export const gasStation = new ethers.Contract(GAS_STATION_ADDRESS, GAS_STATION.abi, provider.getSigner());
 export function basePollContract(address: string) {
     return new ethers.Contract(address, WITHDRAW_POLL_ABI, account);
