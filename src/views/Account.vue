@@ -19,7 +19,7 @@
         <b-button block variant="link" v-b-modal="'modalSetPrivateKey'">
             Update Private Key
         </b-button>
-        <b-button block variant="link" @click="logout()">
+        <b-button class="btn-rounded" block variant="link" @click="logout()">
             Logout
         </b-button>
         <modal-set-private-key />

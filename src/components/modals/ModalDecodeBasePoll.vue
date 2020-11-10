@@ -35,7 +35,7 @@
             </template>
         </template>
         <template v-slot:modal-footer="{ ok }">
-            <b-button class="mt-3" block variant="dark" @click="ok()">
+            <b-button class="mt-3 btn-rounded" block variant="dark" @click="ok()">
                 Close
             </b-button>
         </template>

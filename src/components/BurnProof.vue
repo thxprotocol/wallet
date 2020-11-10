@@ -3,10 +3,10 @@
         <code class="text-overflow">
             {{ txHash }}
         </code>
-        <b-button :disabled="busy" variant="primary" @click="exit(txHash)" size="sm">
+        <b-button class="btn-rounded" :disabled="busy" variant="primary" @click="exit(txHash)" size="sm">
             Exit
         </b-button>
-        <b-button class="ml-1" :disabled="busy" variant="danger" @click="removeBurnProof(txHash)" size="sm">
+        <b-button class="ml-1 btn-rounded" :disabled="busy" variant="danger" @click="removeBurnProof(txHash)" size="sm">
             Remove
         </b-button>
     </b-list-group-item>
@@ -27,9 +27,7 @@ import { Account } from '@/store/modules/account';
         'b-list-group': BListGroup,
         'b-list-group-item': BListGroupItem,
     },
-    computed: {
-        ...mapGetters('account', ['account']),
-    },
+    computed: mapGetters('account', ['account']),
 })
 export default class BurnProof extends Vue {
     account!: Account;

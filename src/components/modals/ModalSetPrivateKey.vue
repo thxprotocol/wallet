@@ -17,7 +17,7 @@
             </template>
         </template>
         <template v-slot:modal-footer>
-            <b-button class="mt-3" block variant="success" @click="set()">
+            <b-button class="mt-3 btn-rounded" block variant="success" @click="set()">
                 Update
             </b-button>
         </template>
@@ -29,6 +29,7 @@ import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-
 import { ethers } from 'ethers';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
+import { Account } from '../../store/modules/account';
 
 @Component({
     name: 'ModalSetPrivateKey',
@@ -40,11 +41,20 @@ import { mapGetters } from 'vuex';
         'b-spinner': BSpinner,
         'b-button': BButton,
     },
+    computed: mapGetters('account', ['account']),
 })
 export default class ModalSetPrivateKey extends Vue {
     busy = false;
-    privateKey = '';
+    account!: Account;
     error = '';
+
+    get privateKey() {
+        return this.account.privateKey;
+    }
+
+    set privateKey(pKey: string) {
+        this.$store.commit('account/updatePrivateKey', pKey);
+    }
 
     async set() {
         this.busy = true;

@@ -1,9 +1,5 @@
-import ethers from 'ethers';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import { ERC20_ABI } from '@/utils/contracts';
 import { account, checkInclusion, config, maticPOSClient } from '@/utils/network';
-import Web3 from 'web3';
-import { ROOT_RPC } from '@/utils/secrets';
 
 interface Balance {
     type: string;

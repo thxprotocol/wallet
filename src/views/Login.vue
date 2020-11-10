@@ -1,31 +1,42 @@
 <template>
     <div class="center-center h-100">
         <p v-if="isAuthenticated">You are already logged in. <router-link to="/">Return home</router-link></p>
-        <b-card bg-variant="light" v-if="!isAuthenticated">
-            <b-card-body>
-                <form v-on:submit.prevent="submit">
-                    <label>E-mail:</label>
-                    <b-form-input type="email" v-model="email" />
-                    <label>Password:</label>
-                    <b-form-input type="password" v-model="password" />
-                    <b-button block class="mt-3" variant="primary" type="submit">
-                        Submit
-                    </b-button>
-                </form>
-            </b-card-body>
+        <b-card bg-variant="light" footer-tag="footer" v-if="!isAuthenticated">
+            <h2 class="font-weight-bold mb-3">THX Login</h2>
+            <form v-on:submit.prevent="submit">
+                <b-form-group>
+                    <b-form-input type="email" placeholder="Enter e-mail" v-model="email" />
+                </b-form-group>
+                <b-form-group>
+                    <b-form-input type="password" placeholder="Enter password" v-model="password" />
+                </b-form-group>
+                <b-button block class="mt-3 btn-rounded" variant="primary" type="submit">
+                    Submit
+                </b-button>
+            </form>
+            <template #footer>
+                <b-button size="sm" variant="link" href="register">
+                    Forgot password?
+                </b-button>
+                <b-button size="sm" variant="link" href="register">
+                    Register
+                </b-button>
+            </template>
         </b-card>
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { BLink, BButton, BFormInput, BCardBody, BCard } from 'bootstrap-vue';
+import { BLink, BButton, BFormInput, BCardBody, BCard, BCardFooter, BFormGroup } from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
 
 @Component({
     components: {
         'b-card': BCard,
+        'b-form-group': BFormGroup,
         'b-card-body': BCardBody,
+        'b-card-footer': BCardFooter,
         'b-button': BButton,
         'b-form-input': BFormInput,
         'b-link': BLink,

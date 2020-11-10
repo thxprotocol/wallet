@@ -9,6 +9,7 @@
             <b-form-input type="number" v-model="amountDeposit"></b-form-input>
             <b-input-group-append>
                 <b-button
+                    class="btn-rounded"
                     style="width: 100px;"
                     :disabled="busy.deposit"
                     @click="deposit(amountDeposit)"
@@ -27,7 +28,13 @@
         <b-input-group class="mt-3">
             <b-form-input type="number" v-model="amountBurn"></b-form-input>
             <b-input-group-append>
-                <b-button style="width: 100px;" :disabled="busy.burn" @click="burn(amountBurn)" variant="primary">
+                <b-button
+                    class="btn-rounded"
+                    style="width: 100px;"
+                    :disabled="busy.burn"
+                    @click="burn(amountBurn)"
+                    variant="primary"
+                >
                     Withdraw
                 </b-button>
             </b-input-group-append>

@@ -7,6 +7,13 @@ interface AuthObject {
     password: string;
 }
 
+export class SignupRequest {
+    firstName!: string;
+    lastName!: string;
+    email!: string;
+    address!: string;
+}
+
 export class Account {
     privateKey = '';
     address = '';
@@ -38,6 +45,13 @@ class AccountModule extends VuexModule {
         this._account.lastName = lastName;
         this._account.assetPools = assetPools;
         this._account.burnProofs = burnProofs;
+        this._account.privateKey = localStorage.getItem('thx:wallet:privatekey') || '';
+    }
+
+    @Mutation
+    updatePrivateKey(pKey: string) {
+        this._account.privateKey = pKey;
+        localStorage.setItem('thx:wallet:privatekey', pKey);
     }
 
     @Mutation
@@ -99,6 +113,22 @@ class AccountModule extends VuexModule {
             axios
                 .post('/login', { email, password })
                 .then((r: AxiosResponse) => {
+                    resolve(r);
+                })
+                .catch((err: AxiosError) => {
+                    reject(err);
+                });
+        });
+    }
+
+    @Action
+    async signup(payload: SignupRequest) {
+        debugger;
+        return new Promise((resolve, reject) => {
+            axios
+                .post('/signup', payload)
+                .then((r: AxiosResponse) => {
+                    debugger;
                     resolve(r);
                 })
                 .catch((err: AxiosError) => {
