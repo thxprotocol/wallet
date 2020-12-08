@@ -6,6 +6,7 @@ import store from './store';
 import axios from 'axios';
 import { ModalPlugin, ToastPlugin } from 'bootstrap-vue';
 import Web3 from 'web3';
+import { ethers } from 'ethers';
 
 // Set Axios default config
 axios.defaults.withCredentials = true;
@@ -21,6 +22,11 @@ Vue.filter('fromWei', (value: string) => {
     if (!value) return '';
     value = value.toString();
     return new Web3().utils.fromWei(value);
+});
+
+// Set custom filters
+Vue.filter('fromBigNumber', (hex: string) => {
+    return ethers.utils.formatEther(hex);
 });
 
 new Vue({

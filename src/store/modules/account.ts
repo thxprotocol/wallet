@@ -138,8 +138,11 @@ class AccountModule extends VuexModule {
     @Action
     async update(data: Account) {
         return new Promise((resolve, reject) => {
-            axios
-                .patch('/account', data)
+            axios({
+                url: '/account',
+                method: 'patch',
+                data,
+            })
                 .then((r: AxiosResponse) => {
                     resolve(r);
                 })

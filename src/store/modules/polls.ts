@@ -12,7 +12,7 @@ const web3 = new Web3();
 class BasePollModule extends VuexModule {
     @Action
     async vote(result: QR) {
-        const nonce = parseInt(await gasStation.getLatestNonce(account.address), 10) + 1;
+        const nonce = parseInt(await gasStation.methods.getLatestNonce(account.address), 10) + 1;
         const contractInterface = new ethers.utils.Interface(BASE_POLL.abi);
         const call = contractInterface.encodeFunctionData('vote', [result.params.agree]);
         const hash = web3.utils.soliditySha3(call, result.contractAddress, GAS_STATION_ADDRESS, nonce) || '';
@@ -33,7 +33,7 @@ class BasePollModule extends VuexModule {
 
     @Action
     async revokeVote(result: QR) {
-        const nonce = parseInt(await gasStation.getLatestNonce(account.address), 10) + 1;
+        const nonce = parseInt(await gasStation.methods.getLatestNonce(account.address), 10) + 1;
         const contractInterface = new ethers.utils.Interface(BASE_POLL.abi);
         const call = contractInterface.encodeFunctionData('revokeVote', []);
         const hash = web3.utils.soliditySha3(call, result.contractAddress, GAS_STATION_ADDRESS, nonce) || '';

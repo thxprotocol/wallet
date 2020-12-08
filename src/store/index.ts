@@ -8,6 +8,7 @@ config.rawError = true;
 import AccountStore from './modules/account';
 import BalanceStore from './modules/balance';
 import BasePollStore from './modules/polls';
+import MembershipStore from './modules/memberships';
 
 Vue.use(Vuex);
 
@@ -18,6 +19,7 @@ const modules = {
     account: AccountStore,
     balance: BalanceStore,
     polls: BasePollStore,
+    memberships: MembershipStore,
 };
 
 export default new Vuex.Store({

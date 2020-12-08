@@ -1,11 +1,10 @@
 import Web3 from 'web3';
 import Matic from '@maticnetwork/maticjs';
 import HDWalletProvider from '@truffle/hdwallet-provider';
-import { ethers } from 'ethers';
-import { WITHDRAW_POLL_ABI } from './contracts';
-import { CHILD_RPC, GAS_STATION_ADDRESS, INFURA_KEY, MATIC_ADDRESS, ROOT_RPC } from './secrets';
+import { CHILD_RPC, GAS_STATION_ADDRESS, INFURA_KEY, ROOT_RPC, PRIVATE_KEY } from './secrets';
 
 import * as GAS_STATION from '../artifacts/GasStation.json';
+import * as WITHDRAW_POLL from '../artifacts/WithdrawPoll.json';
 
 export interface QR {
     assetPoolAddress: string;
@@ -28,34 +27,35 @@ export const config = {
     child: {
         RPC: CHILD_RPC,
         DERC20: '0xfe4F5145f6e09952a5ba9e956ED0C25e3Fa4c7F1',
-        MATIC: MATIC_ADDRESS,
         MaticWETH: '0x714550C2C1Ea08688607D86ed8EeF4f5E4F22323',
     },
 };
-
-const wallet = ethers.Wallet.createRandom();
-const provider = new ethers.providers.JsonRpcProvider(CHILD_RPC);
-
-export const PRIVATE_KEY = wallet.privateKey;
-export const account = new ethers.Wallet(localStorage.getItem('thx:wallet:privatekey') || PRIVATE_KEY, provider);
-export const gasStation = new ethers.Contract(GAS_STATION_ADDRESS, GAS_STATION.abi, provider.getSigner());
-export function basePollContract(address: string) {
-    return new ethers.Contract(address, WITHDRAW_POLL_ABI, account);
-}
+// const provider = new ethers.providers.JsonRpcProvider(CHILD_RPC);
+const web3 = new Web3();
+const randomWallet = web3.eth.accounts.create();
+export const randomPrivateKey = randomWallet.privateKey;
+export const account = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY || randomPrivateKey);
 export const maticPOSClient = new Matic.MaticPOSClient({
     network: 'testnet',
     version: 'mumbai',
-    parentProvider: new HDWalletProvider(PRIVATE_KEY, config.root.RPC),
-    maticProvider: new HDWalletProvider(PRIVATE_KEY, config.child.RPC),
+    parentProvider: new HDWalletProvider(account.privateKey, `${ROOT_RPC}/${INFURA_KEY}`),
+    maticProvider: new HDWalletProvider(account.privateKey, CHILD_RPC),
     posRootChainManager: config.root.POSRootChainManager,
     posERC20Predicate: config.root.posERC20Predicate,
     parentDefaultOptions: { from: account.address },
     maticDefaultOptions: { from: account.address },
 });
+export const gasStation = new web3.eth.Contract(GAS_STATION.abi as any, GAS_STATION_ADDRESS);
+
+export function basePollContract(address: string) {
+    return new web3.eth.Contract(WITHDRAW_POLL.abi as any, address);
+}
+
 export async function checkInclusion(txHash: string) {
-    const web3 = new Web3(config.root.RPC);
-    const childWeb3 = new Web3(config.child.RPC);
+    const web3 = new Web3(`${ROOT_RPC}/${INFURA_KEY}`);
+    const childWeb3 = maticPOSClient.web3Client.getMaticWeb3();
     const txDetails = await childWeb3.eth.getTransactionReceipt(txHash);
+    const block = txDetails.blockNumber;
 
     return new Promise((resolve, reject) => {
         web3.eth.subscribe(
@@ -63,20 +63,14 @@ export async function checkInclusion(txHash: string) {
             {
                 address: config.root.RootChainProxyAddress,
             },
-            async (error, result: any) => {
+            async (error, result) => {
                 if (error) {
                     reject(error);
                 }
-                console.log(result);
 
                 if (result.data) {
-                    const transaction: any = web3.eth.abi.decodeParameters(
-                        ['uint256', 'uint256', 'bytes32'],
-                        result.data,
-                    );
-                    console.log(transaction);
-
-                    if (txDetails.blockNumber <= transaction['1']) {
+                    const transaction = web3.eth.abi.decodeParameters(['uint256', 'uint256', 'bytes32'], result.data);
+                    if (block <= transaction['1']) {
                         resolve(result);
                     }
                 }
