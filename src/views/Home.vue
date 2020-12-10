@@ -1,6 +1,6 @@
 <template>
     <div class="h-100 d-flex align-items-center justify-content-center">
-        <modal-decode-base-poll :result="result" />
+        <modal-decode-qr @reset="reset()" :result="result" v-if="result" />
         <b-spinner variant="dark" />
         <qrcode-stream @decode="onDecode" track></qrcode-stream>
         <qrcode-capture
@@ -17,19 +17,13 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
-import ModalDecodeBasePoll from '@/components/modals/ModalDecodeBasePoll.vue';
 import { BSpinner } from 'bootstrap-vue';
-
-interface QR {
-    contractAddress: string;
-    contract: string;
-    method: string;
-    params: any;
-}
+import ModalDecodeQR from '@/components/modals/ModalDecodeQR.vue';
+import { QR } from '@/utils/gasStation';
 
 @Component({
     components: {
-        'modal-decode-base-poll': ModalDecodeBasePoll,
+        'modal-decode-qr': ModalDecodeQR,
         'qrcode-stream': QrcodeStream,
         'qrcode-capture': QrcodeCapture,
         'b-spinner': BSpinner,
@@ -39,13 +33,13 @@ export default class Home extends Vue {
     result: QR | null = null;
     busy = true;
 
+    reset() {
+        this.result = null;
+    }
+
     onDecode(decoded: string) {
         if (decoded.length) {
             this.result = JSON.parse(decoded);
-
-            if (this.result) {
-                this.$bvModal.show(`modalDecode${this.result.contract}`);
-            }
         }
     }
 }

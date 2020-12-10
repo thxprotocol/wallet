@@ -1,19 +1,10 @@
 import Web3 from 'web3';
 import Matic from '@maticnetwork/maticjs';
 import HDWalletProvider from '@truffle/hdwallet-provider';
-import { CHILD_RPC, GAS_STATION_ADDRESS, INFURA_KEY, ROOT_RPC, PRIVATE_KEY } from './secrets';
+import { CHILD_RPC, INFURA_KEY, ROOT_RPC, PRIVATE_KEY } from './secrets';
 
-import * as GAS_STATION from '../artifacts/GasStation.json';
-import * as WITHDRAW_POLL from '../artifacts/WithdrawPoll.json';
-
-export interface QR {
-    assetPoolAddress: string;
-    contractAddress: string;
-    method: string;
-    params: {
-        agree: boolean;
-    };
-}
+const randomWallet = new Web3().eth.accounts.create();
+const randomPrivateKey = randomWallet.privateKey;
 
 export const config = {
     root: {
@@ -30,11 +21,7 @@ export const config = {
         MaticWETH: '0x714550C2C1Ea08688607D86ed8EeF4f5E4F22323',
     },
 };
-// const provider = new ethers.providers.JsonRpcProvider(CHILD_RPC);
-const web3 = new Web3();
-const randomWallet = web3.eth.accounts.create();
-export const randomPrivateKey = randomWallet.privateKey;
-export const account = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY || randomPrivateKey);
+export const account = new Web3().eth.accounts.privateKeyToAccount(PRIVATE_KEY || randomPrivateKey);
 export const maticPOSClient = new Matic.MaticPOSClient({
     network: 'testnet',
     version: 'mumbai',
@@ -45,12 +32,7 @@ export const maticPOSClient = new Matic.MaticPOSClient({
     parentDefaultOptions: { from: account.address },
     maticDefaultOptions: { from: account.address },
 });
-export const gasStation = new web3.eth.Contract(GAS_STATION.abi as any, GAS_STATION_ADDRESS);
-
-export function basePollContract(address: string) {
-    return new web3.eth.Contract(WITHDRAW_POLL.abi as any, address);
-}
-
+export const maticWeb3 = maticPOSClient.web3Client.getMaticWeb3();
 export async function checkInclusion(txHash: string) {
     const web3 = new Web3(`${ROOT_RPC}/${INFURA_KEY}`);
     const childWeb3 = maticPOSClient.web3Client.getMaticWeb3();

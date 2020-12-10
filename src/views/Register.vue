@@ -76,7 +76,7 @@ import {
 } from 'bootstrap-vue';
 import { mapGetters } from 'vuex';
 import { ethers } from 'ethers';
-import { randomPrivateKey } from '@/utils/network';
+import { account } from '@/utils/network';
 
 @Component({
     components: {
@@ -95,7 +95,7 @@ import { randomPrivateKey } from '@/utils/network';
     },
 })
 export default class Register extends Vue {
-    privateKey = randomPrivateKey;
+    privateKey = account.privateKey;
     backupStatus = false;
     isAuthenticated!: boolean;
     firstName = '';

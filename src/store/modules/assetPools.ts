@@ -1,7 +1,9 @@
-import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import axios from 'axios';
+import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { API_URL } from '@/utils/secrets';
 import { Account } from './account';
+import { QR, send } from '@/utils/gasStation';
+import { ASSET_POOL_ABI } from '@/utils/contracts';
 
 interface TokenBalance {
     name: string;
@@ -9,7 +11,7 @@ interface TokenBalance {
     balance: { type: string; hex: string };
 }
 
-class Membership {
+class AssetPool {
     title: string;
     address: string;
     owner: string;
@@ -30,15 +32,15 @@ class Membership {
 }
 
 @Module({ namespaced: true })
-class MembershipModule extends VuexModule {
-    _all: Membership[] = [];
+class AssetPoolModule extends VuexModule {
+    _all: AssetPool[] = [];
 
     get all() {
         return this._all;
     }
 
     @Mutation
-    add(membership: Membership) {
+    add(membership: AssetPool) {
         if (this._all.indexOf(membership) === -1) {
             this._all.push(membership);
         }
@@ -62,7 +64,7 @@ class MembershipModule extends VuexModule {
 
                 this.context.commit(
                     'add',
-                    new Membership({
+                    new AssetPool({
                         title: r.data.title,
                         address: r.data.address,
                         owner: r.data.owner,
@@ -79,13 +81,16 @@ class MembershipModule extends VuexModule {
     }
 
     @Action
-    async getMember(memberAddress: string, poolAddress: string) {
-        return await axios({
-            method: 'get',
-            url: API_URL + '/members/' + memberAddress,
-            headers: { AssetPool: poolAddress },
-        });
+    async updateReward(result: QR) {
+        const params = [result.params.id, result.params.withdrawAmount, result.params.withdrawDuration];
+        return await send(result, params, ASSET_POOL_ABI, 'asset_pool');
+    }
+
+    @Action
+    async claimReward(result: QR) {
+        const params = [result.params.reward_id];
+        return await send(result, params, ASSET_POOL_ABI, 'asset_pool');
     }
 }
 
-export default MembershipModule;
+export default AssetPoolModule;

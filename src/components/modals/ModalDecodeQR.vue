@@ -1,9 +1,9 @@
 <template>
     <b-modal
-        id="modalDecodeBasePoll"
+        id="modalDecodeQR"
         class="text-white"
-        show
         @show="onShow"
+        @hidden="$emit('reset')"
         centered
         scrollable
         hide-header
@@ -15,7 +15,7 @@
                 <b-spinner variant="dark" />
             </div>
             <template v-else>
-                <div v-if="result.method === 'vote'">
+                <!-- <div v-if="result.method === 'vote'">
                     <p class="text-white h4 mb-3">
                         You have cast your <strong>{{ result.params.agree ? 'yes' : 'no' }}</strong> vote for
                         <strong>{{ result.contract }}</strong>
@@ -27,7 +27,7 @@
                         You have revoked your vote for <strong>{{ result.contract }}</strong>
                         <small class="text-overflow-200">{{ result.contractAddress }}</small>
                     </p>
-                </div>
+                </div> -->
                 <!-- <small class="h-20">
                     <code class="text-white" v-if="tx">{{ tx }}</code>
                     <code class="text-white" v-if="err">{{ err }}</code>
@@ -43,13 +43,13 @@
 </template>
 
 <script lang="ts">
+import { QR } from '@/utils/gasStation';
 import { BLink, BAlert, BButton, BSpinner, BModal } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { QR } from '@/utils/network';
 import { Transaction } from 'web3/eth/types';
 
 @Component({
-    name: 'ModalDecodeBasePoll',
+    name: 'ModalDecodeQR',
     components: {
         'b-alert': BAlert,
         'b-link': BLink,
@@ -58,31 +58,42 @@ import { Transaction } from 'web3/eth/types';
         'b-button': BButton,
     },
 })
-export default class ModalDecodeBasePoll extends Vue {
-    account!: Account;
+export default class ModalDecodeQR extends Vue {
+    error = '';
     busy = true;
     variant = 'light';
     tx: Transaction | null = null;
-    err = '';
 
     @Prop() result!: QR;
 
-    async onShow() {
-        const allowedMethods = ['vote', 'revokeVote'];
+    mounted() {
+        this.$bvModal.show('modalDecodeQR');
+    }
 
+    async onShow() {
         this.variant = 'light';
         this.busy = true;
 
-        if (allowedMethods.includes(this.result.method)) {
-            try {
-                this.tx = await this.$store.dispatch(`polls/${this.result.method}`, this.result);
-                this.variant = 'success';
-            } catch (err) {
-                this.err = err.toString();
-                this.variant = 'danger';
-            } finally {
-                this.busy = false;
+        try {
+            switch (this.result.contract) {
+                case 'AssetPool':
+                    if (['claimReward', 'updateReward'].includes(this.result.method)) {
+                        await this.$store.dispatch(`assetPools/${this.result.method}`, this.result);
+                        this.variant = 'success';
+                    }
+                    break;
+                case 'BasePoll':
+                    if (['vote', 'revokeVote', 'finalize'].includes(this.result.method)) {
+                        await this.$store.dispatch(`basePolls/${this.result.method}`, this.result);
+                        this.variant = 'success';
+                    }
+                    break;
             }
+        } catch (error) {
+            this.error = 'Decoding QR failed.';
+            this.variant = 'danger';
+        } finally {
+            this.busy = false;
         }
     }
 }

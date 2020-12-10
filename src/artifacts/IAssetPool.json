@@ -9,6 +9,25 @@
           "type": "address"
         }
       ],
+      "name": "isManager",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
       "name": "isMember",
       "outputs": [
         {
@@ -52,11 +71,6 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "_reward",
-          "type": "address"
-        },
-        {
-          "internalType": "address",
           "name": "_beneficiary",
           "type": "address"
         },
@@ -64,9 +78,14 @@
           "internalType": "uint256",
           "name": "_amount",
           "type": "uint256"
+        },
+        {
+          "internalType": "bool",
+          "name": "_agree",
+          "type": "bool"
         }
       ],
-      "name": "onWithdrawal",
+      "name": "onWithdrawalPollFinish",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
