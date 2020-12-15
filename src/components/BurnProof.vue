@@ -3,10 +3,10 @@
         <code class="text-overflow">
             {{ txHash }}
         </code>
-        <b-button :disabled="busy" variant="primary" @click="exit(txHash)" size="sm">
+        <b-button class="btn-rounded" :disabled="busy" variant="primary" @click="exit(txHash)" size="sm">
             Exit
         </b-button>
-        <b-button class="ml-1" :disabled="busy" variant="danger" @click="removeBurnProof(txHash)" size="sm">
+        <b-button class="ml-1 btn-rounded" :disabled="busy" variant="danger" @click="removeBurnProof(txHash)" size="sm">
             Remove
         </b-button>
     </b-list-group-item>
@@ -16,7 +16,7 @@
 import { BLink, BAlert, BButton, BSpinner, BListGroupItem, BListGroup } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { Account, Profile } from '@/store/modules/account';
+import { Account } from '@/store/modules/account';
 
 @Component({
     components: {
@@ -27,9 +27,7 @@ import { Account, Profile } from '@/store/modules/account';
         'b-list-group': BListGroup,
         'b-list-group-item': BListGroupItem,
     },
-    computed: {
-        ...mapGetters('account', ['account']),
-    },
+    computed: mapGetters('account', ['account']),
 })
 export default class BurnProof extends Vue {
     account!: Account;
@@ -38,12 +36,12 @@ export default class BurnProof extends Vue {
     @Prop() txHash!: string;
 
     async removeBurnProof(txHash: string) {
-        const data: Profile = this.account.profile;
-        const index = data.burnProof.indexOf(txHash);
+        const data: Account = this.account;
+        const index = data.burnProofs.indexOf(txHash);
 
-        data.burnProof.splice(index, 1);
+        data.burnProofs.splice(index, 1);
 
-        await this.$store.dispatch('account/updateProfile', data);
+        await this.$store.dispatch('account/update', data);
     }
 
     async exit(txHash: string) {

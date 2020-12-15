@@ -1,15 +1,5 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import Web3 from 'web3';
-import { ERC20_ABI } from '@/utils/contracts';
-import { checkInclusion, config, maticPOSClient } from '@/utils/network';
-import { ADDRESS } from '@/utils/secrets';
-
-const from = ADDRESS;
-const rootWeb3 = new Web3(config.root.RPC);
-const childWeb3 = new Web3(config.child.RPC);
-
-rootWeb3.defaultAccount = from;
-childWeb3.defaultAccount = from;
+import { account, checkInclusion, config, maticPOSClient } from '@/utils/network';
 
 interface Balance {
     type: string;
@@ -20,11 +10,9 @@ interface Balance {
 class BalanceModule extends VuexModule {
     _root: any = {
         eth: '',
-        matic: '',
         erc20: '',
     };
     _child: any = {
-        eth: '',
         matic: '',
         erc20: '',
     };
@@ -39,14 +27,6 @@ class BalanceModule extends VuexModule {
 
     get rootETH(): string {
         return this._root.eth;
-    }
-
-    get childETH(): string {
-        return this._child.eth;
-    }
-
-    get rootMATIC(): string {
-        return this._root.matic;
     }
 
     get childMATIC(): string {
@@ -66,19 +46,20 @@ class BalanceModule extends VuexModule {
     @Action
     async init() {
         await (async () => {
-            const erc20Contract = new rootWeb3.eth.Contract(ERC20_ABI as any, config.root.DERC20);
-            const erc20Balance = await erc20Contract.methods.balanceOf(ADDRESS).call({ from, gas: 6e6 });
-            const ethBalance = await rootWeb3.eth.getBalance(ADDRESS);
+            const web3 = maticPOSClient.web3Client.getParentWeb3();
+            const ethBalance = await web3.eth.getBalance(account.address);
+            const erc20Contract = maticPOSClient.getERC20TokenContract(config.root.DERC20, true);
+            const erc20Balance = await erc20Contract.methods.balanceOf(account.address).call();
 
             this.context.commit('updateRootBalance', { type: 'erc20', balance: erc20Balance });
             this.context.commit('updateRootBalance', { type: 'eth', balance: ethBalance });
         })();
 
         return await (async () => {
-            const erc20Contract = new childWeb3.eth.Contract(ERC20_ABI as any, config.child.DERC20);
-            const erc20Balance = await erc20Contract.methods.balanceOf(ADDRESS).call();
-            const maticContract = new childWeb3.eth.Contract(ERC20_ABI as any, config.child.MATIC);
-            const maticBalance = await maticContract.methods.balanceOf(ADDRESS).call();
+            const web3 = maticPOSClient.web3Client.getMaticWeb3();
+            const maticBalance = await web3.eth.getBalance(account.address);
+            const erc20Contract = maticPOSClient.getERC20TokenContract(config.child.DERC20);
+            const erc20Balance = await erc20Contract.methods.balanceOf(account.address).call();
 
             this.context.commit('updateChildBalance', { type: 'erc20', balance: erc20Balance });
             this.context.commit('updateChildBalance', { type: 'matic', balance: maticBalance });
@@ -89,7 +70,7 @@ class BalanceModule extends VuexModule {
     async burn(balance: string) {
         try {
             return await maticPOSClient.burnERC20(config.child.DERC20, balance, {
-                from,
+                from: account.address,
             });
         } catch (err) {
             return err;
@@ -97,10 +78,10 @@ class BalanceModule extends VuexModule {
     }
 
     @Action
-    async exit(txHash: string) {
+    async checkInclusionAndExit(txHash: string) {
         return new Promise((resolve, reject) => {
             checkInclusion(txHash)
-                .then(() => maticPOSClient.exitERC20(txHash, { from }))
+                .then(() => maticPOSClient.exitERC20(txHash, { from: account.address }))
                 .then(tx => resolve(tx))
                 .catch(err => {
                     reject(err);
@@ -109,14 +90,23 @@ class BalanceModule extends VuexModule {
     }
 
     @Action
+    async exit(txHash: string) {
+        try {
+            return await maticPOSClient.exitERC20(txHash, { from: account.address });
+        } catch (err) {
+            return err;
+        }
+    }
+
+    @Action
     async deposit(balance: string) {
         try {
-            await maticPOSClient.approveERC20ForDeposit(config.root.DERC20, balance, {
-                from,
+            const tx = await maticPOSClient.approveERC20ForDeposit(config.root.DERC20, balance, {
+                from: account.address,
             });
 
-            return await maticPOSClient.depositERC20ForUser(config.root.DERC20, ADDRESS, balance, {
-                from,
+            return await maticPOSClient.depositERC20ForUser(config.root.DERC20, account.address, balance, {
+                from: account.address,
                 gasPrice: 1e9,
             });
         } catch (err) {

@@ -1,6 +1,11 @@
 <template>
     <div id="app" class="d-flex flex-column h-100 ">
         <div class="flex-grow-1 overflow-auto">
+            <b-jumbotron bg-variant="primary" text-variant="white" v-if="$router.currentRoute.name">
+                <div class="container">
+                    <h1 class="display-4">{{ $router.currentRoute.name }}</h1>
+                </div>
+            </b-jumbotron>
             <router-view />
         </div>
         <div class="flex-grow-0" v-if="isAuthenticated">
@@ -10,13 +15,14 @@
 </template>
 
 <script lang="ts">
-import { BButton } from 'bootstrap-vue';
+import { BButton, BJumbotron } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import Navbar from '@/components/Navbar.vue';
 
 @Component({
     components: {
+        'b-jumbotron': BJumbotron,
         'b-button': BButton,
         'navbar': Navbar,
     },
@@ -27,6 +33,10 @@ import Navbar from '@/components/Navbar.vue';
 })
 export default class Home extends Vue {
     account!: Account;
+
+    get title() {
+        return this.$router.currentRoute.name;
+    }
 
     async created() {
         await this.$store.dispatch('balance/init').catch(() => {
@@ -88,7 +98,7 @@ h3 {
     justify-content: center;
 }
 
-.btn {
+.btn-rounded {
     border-radius: 25px;
 }
 </style>
