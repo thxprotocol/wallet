@@ -8,7 +8,7 @@
             </b-jumbotron>
             <router-view />
         </div>
-        <div class="flex-grow-0" v-if="isAuthenticated">
+        <div class="flex-grow-0">
             <navbar />
         </div>
     </div>
@@ -16,9 +16,10 @@
 
 <script lang="ts">
 import { BButton, BJumbotron } from 'bootstrap-vue';
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import Navbar from '@/components/Navbar.vue';
+import { Route } from 'vue-router';
 
 @Component({
     components: {
@@ -27,21 +28,15 @@ import Navbar from '@/components/Navbar.vue';
         'navbar': Navbar,
     },
     computed: {
-        ...mapGetters('account', ['account', 'isAuthenticated']),
+        ...mapGetters('account', ['account']),
         ...mapGetters('balance', ['rootETH', 'childETH', 'rootMATIC', 'childMATIC', 'rootERC20', 'childERC20']),
     },
 })
-export default class Home extends Vue {
+export default class App extends Vue {
     account!: Account;
 
     get title() {
         return this.$router.currentRoute.name;
-    }
-
-    async created() {
-        await this.$store.dispatch('balance/init').catch(() => {
-            this.$store.commit('account/authenticate', false);
-        });
     }
 }
 </script>

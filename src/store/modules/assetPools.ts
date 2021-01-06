@@ -41,42 +41,47 @@ class AssetPoolModule extends VuexModule {
 
     @Mutation
     add(membership: AssetPool) {
+        console.log(this._all.length, this._all.indexOf(membership), membership);
         if (this._all.indexOf(membership) === -1) {
             this._all.push(membership);
         }
     }
 
     @Action
-    async init(account: Account) {
-        for (const poolAddress of account.assetPools) {
-            try {
-                const r: any = await axios({
-                    method: 'get',
-                    url: API_URL + '/asset_pools/' + poolAddress,
-                    headers: { AssetPool: poolAddress },
-                });
+    async init({ assetPools, address }: { assetPools: string[]; address: string }) {
+        try {
+            for (const poolAddress of assetPools) {
+                try {
+                    const r: any = await axios({
+                        method: 'get',
+                        url: API_URL + '/asset_pools/' + poolAddress,
+                        headers: { AssetPool: poolAddress },
+                    });
 
-                const x = await axios({
-                    method: 'get',
-                    url: API_URL + '/members/' + account.address,
-                    headers: { AssetPool: poolAddress },
-                });
+                    const x = await axios({
+                        method: 'get',
+                        url: API_URL + '/members/' + address,
+                        headers: { AssetPool: poolAddress },
+                    });
 
-                this.context.commit(
-                    'add',
-                    new AssetPool({
-                        title: r.data.title,
-                        address: r.data.address,
-                        owner: r.data.owner,
-                        token: r.data.token,
-                        isMember: x.data.isMember,
-                        isManager: x.data.isManager,
-                        balance: x.data.token.balance.hex,
-                    }),
-                );
-            } catch (e) {
-                continue;
+                    this.context.commit(
+                        'add',
+                        new AssetPool({
+                            title: r.data.title,
+                            address: r.data.address,
+                            owner: r.data.owner,
+                            token: r.data.token,
+                            isMember: x.data.isMember,
+                            isManager: x.data.isManager,
+                            balance: x.data.token.balance.hex,
+                        }),
+                    );
+                } catch (e) {
+                    continue;
+                }
             }
+        } catch (e) {
+            return e;
         }
     }
 

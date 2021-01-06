@@ -1,6 +1,7 @@
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { decryptString } from '@/utils/decrypt';
+import { User, UserManager } from 'oidc-client';
 
 interface AuthObject {
     email: string;
@@ -24,45 +25,40 @@ export class Account {
     burnProofs: string[] = [];
 }
 
+const config: any = {
+    authority: process.env.VUE_APP_API_ROOT,
+    client_id: 'i-ZXH7aQAySfdElxCBemv', // eslint-disable-line @typescript-eslint/camelcase
+    client_secret: '4_DsySsW8EiNNwrDYA4LTsGvDgn7dsoiJy4ZdlGRxaIesbfkZM5f0tGZyk6hRJbeyDnNdCWweDjcfjZ47tB4tA', // eslint-disable-line @typescript-eslint/camelcase
+    redirect_uri: `${process.env.VUE_APP_BASE_URL}/signin-oidc`, // eslint-disable-line @typescript-eslint/camelcase
+    response_type: 'code', // eslint-disable-line @typescript-eslint/camelcase
+
+    id_token_signed_response_alg: 'RS256', // eslint-disable-line @typescript-eslint/camelcase
+    post_logout_redirect_uri: process.env.VUE_APP_BASE_URL, // eslint-disable-line @typescript-eslint/camelcase
+
+    silent_redirect_uri: `${process.env.VUE_APP_BASE_URL}/silent-renew`, // eslint-disable-line @typescript-eslint/camelcase
+    automaticSilentRenew: true,
+
+    loadUserInfo: true,
+    scope: 'openid profile email address privateKey admin',
+};
+
 @Module({ namespaced: true })
 class AccountModule extends VuexModule {
-    _account: Account = new Account();
-    _isAuthenticated = false;
+    userManager: UserManager = new UserManager(config);
+    _user!: User | null;
 
-    get isAuthenticated(): boolean {
-        return this._isAuthenticated;
-    }
-
-    get account(): Account {
-        return this._account;
+    get user() {
+        return this._user;
     }
 
     @Mutation
-    set({ address, email, firstName, lastName, assetPools, burnProofs }: Account) {
-        this._account.address = address;
-        this._account.email = email;
-        this._account.firstName = firstName;
-        this._account.lastName = lastName;
-        this._account.assetPools = assetPools;
-        this._account.burnProofs = burnProofs;
-        this._account.privateKey = localStorage.getItem('thx:wallet:privatekey') || '';
+    setUser(user: User) {
+        this._user = user;
     }
 
     @Mutation
     updatePrivateKey(pKey: string) {
-        this._account.privateKey = pKey;
         localStorage.setItem('thx:wallet:privatekey', pKey);
-    }
-
-    @Mutation
-    authenticate(state: boolean) {
-        this._isAuthenticated = state;
-    }
-
-    @Mutation
-    reset() {
-        this._account = new Account();
-        this._isAuthenticated = false;
     }
 
     @Mutation
@@ -71,54 +67,81 @@ class AccountModule extends VuexModule {
         localStorage.setItem('thx:wallet:privatekey', decrypted);
     }
 
+    // @Action
+    // async init(password = '') {
+    //     return new Promise(resolve => {
+    //         axios
+    //             .get('/account')
+    //             .then((r: AxiosResponse) => {
+    //                 if (r.data.privateKey && password.length) {
+    //                     this.context.commit('decryptPrivateKey', { encrypted: r.data.privateKey, password });
+    //                 }
+    //                 this.context.commit('set', r.data);
+    //                 this.context.commit('authenticate', true);
+    //                 resolve({ auth: true });
+    //             })
+    //             .catch(() => {
+    //                 this.context.commit('authenticate', false);
+    //                 resolve({ auth: false });
+    //             });
+    //     });
+    // }
+
     @Action
-    async init(password = '') {
-        return new Promise(resolve => {
-            axios
-                .get('/account')
-                .then((r: AxiosResponse) => {
-                    if (r.data.privateKey && password.length) {
-                        this.context.commit('decryptPrivateKey', { encrypted: r.data.privateKey, password });
-                    }
-                    this.context.commit('set', r.data);
-                    this.context.commit('authenticate', true);
-                    resolve({ auth: true });
-                })
-                .catch(() => {
-                    this.context.commit('authenticate', false);
-                    resolve({ auth: false });
-                });
-        });
+    async signinRedirect() {
+        try {
+            await this.userManager.clearStaleState();
+
+            return await this.userManager.signinRedirect();
+        } catch (e) {
+            return e;
+        }
     }
 
     @Action
-    async logout() {
-        return new Promise((resolve, reject) => {
-            axios
-                .get('/logout')
-                .then((r: AxiosResponse) => {
-                    this.context.commit('reset');
-                    resolve(r);
-                })
-                .catch((err: AxiosError) => {
-                    this.context.commit('reset');
-                    reject(err);
-                });
-        });
+    async signinRedirectCallback() {
+        try {
+            const user = await this.userManager.signinRedirectCallback();
+
+            this.context.commit('setUser', user);
+
+            return user;
+        } catch (e) {
+            return e;
+        }
     }
 
     @Action
-    async login({ email, password }: AuthObject) {
-        return new Promise((resolve, reject) => {
-            axios
-                .post('/login', { email, password })
-                .then((r: AxiosResponse) => {
-                    resolve(r);
-                })
-                .catch((err: AxiosError) => {
-                    reject(err);
-                });
-        });
+    async signoutRedirect() {
+        try {
+            await this.userManager.signoutRedirect({});
+
+            this.context.commit('setUser', null);
+        } catch (e) {
+            return e;
+        }
+    }
+
+    @Action
+    async getUser() {
+        try {
+            const user = await this.userManager.getUser();
+
+            this.context.commit('setUser', user);
+
+            return user;
+        } catch (e) {
+            return e;
+        }
+    }
+
+    @Action
+    async signinSilent() {
+        try {
+            return this.userManager.signinSilent();
+        } catch (e) {
+            return e;
+        }
     }
 
     @Action

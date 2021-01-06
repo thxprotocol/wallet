@@ -1,7 +1,6 @@
 <template>
     <div class="center-center h-100">
-        <p v-if="isAuthenticated">You are already logged in. <router-link to="/">Return home</router-link></p>
-        <b-card bg-variant="light" v-if="!isAuthenticated">
+        <b-card bg-variant="light">
             <b-card-body>
                 <form v-on:submit.prevent="submit">
                     <div class="form-group row">
@@ -90,14 +89,10 @@ import { account } from '@/utils/network';
         'b-input-group': BInputGroup,
         'b-input-group-append': BInputGroupAppend,
     },
-    computed: {
-        ...mapGetters('account', ['isAuthenticated']),
-    },
 })
 export default class Register extends Vue {
     privateKey = account.privateKey;
     backupStatus = false;
-    isAuthenticated!: boolean;
     firstName = '';
     lastName = '';
     email = '';

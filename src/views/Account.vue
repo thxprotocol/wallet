@@ -1,8 +1,10 @@
 <template>
     <div class="container mt-3">
+        {{ error }}
+        <b-alert show variant="danger" v-if="error">{{ error }}</b-alert>
         <label for="accountAddress">Account address:</label>
         <b-input-group>
-            <b-form-input id="accountAddress" readonly :value="account.address" />
+            <b-form-input id="accountAddress" readonly :value="user.profile.address" />
             <b-input-group-append>
                 <b-button variant="secondary" v-b-modal="'modalSetPrivateKey'">
                     Change
@@ -15,7 +17,7 @@
             <b-list-group-item
                 class="d-flex justify-content-between align-items-center"
                 :key="key"
-                v-for="(membership, key) of memberships"
+                v-for="(membership, key) of assetPools"
             >
                 <strong>{{ membership.title }}</strong>
                 <b-badge variant="primary" pill>
@@ -48,6 +50,7 @@ import {
     BListGroupItem,
     BSpinner,
 } from 'bootstrap-vue';
+import { User } from 'oidc-client';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { Account } from '../store/modules/account';
@@ -66,30 +69,36 @@ import { Account } from '../store/modules/account';
         'b-list-group-item': BListGroupItem,
     },
     computed: mapGetters({
-        account: 'account/account',
-        isAuthenticated: 'account/isAuthenticated',
-        memberships: 'memberships/all',
+        user: 'account/user',
+        assetPools: 'assetPools/all',
     }),
 })
 export default class AccountView extends Vue {
     busy = false;
-    account!: Account;
+    error = '';
+    user!: User;
 
     async created() {
         this.busy = true;
-        await this.$store.dispatch('memberships/init', this.account);
-        this.busy = false;
+
+        try {
+            await this.$store.dispatch('assetPools/init', {
+                assetPools: [this.user.profile.assetPools],
+                address: this.user.profile.address,
+            });
+        } catch (e) {
+            this.error = e;
+        } finally {
+            this.busy = false;
+        }
     }
 
-    logout() {
-        this.$store
-            .dispatch('account/logout')
-            .then(() => {
-                this.$router.push('/login');
-            })
-            .catch(e => {
-                console.log(e);
-            });
+    async logout() {
+        try {
+            await this.$store.dispatch('account/signoutRedirect');
+        } catch (e) {
+            return;
+        }
     }
 }
 </script>

@@ -1,6 +1,6 @@
+import store from '@/store';
 import Vue from 'vue';
 import VueRouter, { RouteConfig } from 'vue-router';
-import store from '../store';
 
 Vue.use(VueRouter);
 
@@ -14,7 +14,15 @@ const routes: Array<RouteConfig> = [
     },
     {
         path: '/login',
-        component: () => import('../views/Login.vue'),
+        component: () => import('../views/Signin.vue'),
+    },
+    {
+        path: '/signin-oidc',
+        component: () => import('../views/SigninRedirect.vue'),
+    },
+    {
+        path: '/silent-renew',
+        component: () => import('../views/SilentRenew.vue'),
     },
     {
         path: '/register',
@@ -40,6 +48,7 @@ const routes: Array<RouteConfig> = [
 ];
 
 const router = new VueRouter({
+    mode: 'history',
     routes,
 });
 
@@ -47,9 +56,9 @@ router.beforeEach(async (to, from, next) => {
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
     try {
-        const { auth } = await store.dispatch('account/init');
+        const user = await store.dispatch('account/getUser');
 
-        if (requiresAuth && !auth) {
+        if (requiresAuth && !user) {
             next('/login');
         } else {
             return next();
