@@ -42,11 +42,10 @@
         ]
     },
     "scripts": {
-        "deploy-prod": "vue-cli-service build --mode production; aws s3 sync ./dist s3://wallet.thx.network --delete --acl public-read",
-        "deploy-dev": "vue-cli-service build --mode development; aws s3 sync ./dist s3://dev.wallet.thx.network --delete --acl public-read",
-        "cache:invalidate": "aws cloudfront create-invalidation --distribution-id E11BI076MDF3AT --paths \"/*\"",
         "serve": "vue-cli-service serve --mode local",
         "build": "vue-cli-service build",
+        "build:staging": "vue-cli-service build --mode staging",
+        "build:production": "vue-cli-service build --mode production",
         "test:unit": "vue-cli-service test:unit",
         "test:e2e": "vue-cli-service test:e2e",
         "lint": "vue-cli-service lint",
