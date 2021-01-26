@@ -49,6 +49,7 @@ class AssetPoolModule extends VuexModule {
 
     @Action
     async init({ assetPools, address }: { assetPools: string[]; address: string }) {
+        debugger;
         try {
             for (const poolAddress of assetPools) {
                 try {

@@ -2,6 +2,8 @@ import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { decryptString } from '@/utils/decrypt';
 import { User, UserManager } from 'oidc-client';
+import { ethers } from 'ethers';
+import { encryptString } from '@/utils/encrypt';
 
 interface AuthObject {
     email: string;
@@ -27,8 +29,8 @@ export class Account {
 
 const config: any = {
     authority: process.env.VUE_APP_API_ROOT,
-    client_id: 'i-ZXH7aQAySfdElxCBemv', // eslint-disable-line @typescript-eslint/camelcase
-    client_secret: '4_DsySsW8EiNNwrDYA4LTsGvDgn7dsoiJy4ZdlGRxaIesbfkZM5f0tGZyk6hRJbeyDnNdCWweDjcfjZ47tB4tA', // eslint-disable-line @typescript-eslint/camelcase
+    client_id: process.env.VUE_APP_OIDC_CLIENT_ID, // eslint-disable-line @typescript-eslint/camelcase
+    client_secret: process.env.VUE_APP_OIDC_CLIENT_SECRET, // eslint-disable-line @typescript-eslint/camelcase
     redirect_uri: `${process.env.VUE_APP_BASE_URL}/signin-oidc`, // eslint-disable-line @typescript-eslint/camelcase
     response_type: 'code', // eslint-disable-line @typescript-eslint/camelcase
 
@@ -39,16 +41,38 @@ const config: any = {
     automaticSilentRenew: true,
 
     loadUserInfo: true,
-    scope: 'openid profile email address privateKey admin',
+    scope: 'openid user email offline_access',
 };
+
+export interface UserProfile {
+    privateKey: string;
+    address: string;
+    assetPools: string[];
+    burnProofs: string[];
+}
 
 @Module({ namespaced: true })
 class AccountModule extends VuexModule {
     userManager: UserManager = new UserManager(config);
-    _user!: User | null;
+    _user!: User;
+    _profile: UserProfile | null = null;
+    _password = '';
+    _privateKey = '';
 
     get user() {
         return this._user;
+    }
+
+    get password() {
+        return this._password;
+    }
+
+    get privateKey() {
+        return this._privateKey;
+    }
+
+    get profile() {
+        return this._profile;
     }
 
     @Mutation
@@ -57,35 +81,112 @@ class AccountModule extends VuexModule {
     }
 
     @Mutation
-    updatePrivateKey(pKey: string) {
-        localStorage.setItem('thx:wallet:privatekey', pKey);
+    setUserProfile(profile: UserProfile) {
+        this._profile = profile;
     }
 
     @Mutation
-    decryptPrivateKey({ encrypted, password }: { encrypted: string; password: string }) {
-        const decrypted = decryptString(encrypted, password);
-        localStorage.setItem('thx:wallet:privatekey', decrypted);
+    setPassword(password: string) {
+        this._password = password;
+        this._privateKey = decryptString(this._profile?.privateKey, password);
     }
 
-    // @Action
-    // async init(password = '') {
-    //     return new Promise(resolve => {
-    //         axios
-    //             .get('/account')
-    //             .then((r: AxiosResponse) => {
-    //                 if (r.data.privateKey && password.length) {
-    //                     this.context.commit('decryptPrivateKey', { encrypted: r.data.privateKey, password });
-    //                 }
-    //                 this.context.commit('set', r.data);
-    //                 this.context.commit('authenticate', true);
-    //                 resolve({ auth: true });
-    //             })
-    //             .catch(() => {
-    //                 this.context.commit('authenticate', false);
-    //                 resolve({ auth: false });
-    //             });
-    //     });
-    // }
+    @Action
+    async setPrivateKey({ pkey, pwd }: { pkey: string; pwd: string }) {
+        try {
+            const account = new ethers.Wallet(pkey);
+
+            if (ethers.utils.isAddress(account.address)) {
+                const encryptedKey = encryptString(pkey, pwd);
+                const r = await axios({
+                    method: 'PATCH',
+                    url: '/account',
+                    data: {
+                        address: account.address,
+                        privateKey: encryptedKey,
+                    },
+                });
+
+                if (r.status !== 200) {
+                    throw Error('PATCH /account failed.');
+                }
+
+                this.context.commit('setUserProfile', r.data);
+                this.context.commit('setPassword', pwd);
+            }
+        } catch (e) {
+            return e;
+        }
+    }
+
+    @Action
+    async getUser() {
+        try {
+            const user = await this.userManager.getUser();
+
+            this.context.commit('setUser', user);
+
+            return user;
+        } catch (e) {
+            return e;
+        }
+    }
+
+    @Action
+    async getProfile() {
+        try {
+            const r = await axios({
+                method: 'GET',
+                url: '/account',
+            });
+
+            if (r.status !== 200) {
+                throw Error('GET /account failed.');
+            }
+
+            this.context.commit('setUserProfile', r.data);
+        } catch (e) {
+            return e;
+        }
+    }
+
+    @Action
+    async signup(data: SignupRequest) {
+        try {
+            const r = await axios({
+                method: 'POST',
+                url: '/signup',
+                data,
+            });
+
+            if (r.status !== 201) {
+                throw Error('POST /signup failed.');
+            }
+
+            return r.data.address;
+        } catch (e) {
+            return e;
+        }
+    }
+
+    @Action
+    async update(data: UserProfile) {
+        try {
+            const r = await axios({
+                method: 'PATCH',
+                url: '/account',
+                data,
+            });
+
+            if (r.status !== 200) {
+                throw Error('PATCH /account failed.');
+            }
+
+            this.context.commit('setUserProfile', r.data);
+        } catch (e) {
+            return e;
+        }
+    }
 
     @Action
     async signinRedirect() {
@@ -123,56 +224,12 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    async getUser() {
-        try {
-            const user = await this.userManager.getUser();
-
-            this.context.commit('setUser', user);
-
-            return user;
-        } catch (e) {
-            return e;
-        }
-    }
-
-    @Action
     async signinSilent() {
         try {
             return this.userManager.signinSilent();
         } catch (e) {
             return e;
         }
-    }
-
-    @Action
-    async signup(payload: SignupRequest) {
-        return new Promise((resolve, reject) => {
-            axios
-                .post('/signup', payload)
-                .then((r: AxiosResponse) => {
-                    resolve(r);
-                })
-                .catch((err: AxiosError) => {
-                    reject(err);
-                });
-        });
-    }
-
-    @Action
-    async update(data: Account) {
-        return new Promise((resolve, reject) => {
-            axios({
-                url: '/account',
-                method: 'patch',
-                data,
-            })
-                .then((r: AxiosResponse) => {
-                    resolve(r);
-                })
-                .catch((err: AxiosError) => {
-                    reject(err);
-                });
-        });
     }
 }
 

@@ -7,18 +7,28 @@
             <b-alert show variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
-            <b-alert show variant="warning">
-                <strong>Create a secure backup of your private key elsewhere</strong>.</b-alert
-            >
-            <p>
-                This key is required to access your assets.
-                <strong>If you loose it, it can not be recovered.</strong> The wallet will only store your key on this
-                device.
-            </p>
-            <b-form-input size="lg" v-model="privateKey" placeholder="Enter a private key" />
+
+            <template v-if="!password">
+                <b-form-input size="lg" v-model="input.password" type="password" placeholder="Enter your password" />
+            </template>
+
+            <template v-else>
+                <b-alert show variant="warning">
+                    <strong>Create a secure backup of your private key elsewhere</strong>.
+                </b-alert>
+                <p>
+                    This key is required to access your assets.
+                    <strong>If you loose it, it can not be recovered.</strong> The wallet will only store your key on
+                    this device.
+                </p>
+                <b-form-input size="lg" v-model="input.privateKey" placeholder="Enter a private key" />
+            </template>
         </template>
         <template v-slot:modal-footer>
-            <b-button class="mt-3 btn-rounded" block variant="success" @click="set()">
+            <b-button v-if="!password" class="mt-3 btn-rounded" block variant="success" @click="set()">
+                Save
+            </b-button>
+            <b-button v-if="password" class="mt-3 btn-rounded" block variant="success" @click="update()">
                 Update
             </b-button>
         </template>
@@ -27,10 +37,9 @@
 
 <script lang="ts">
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
-import { ethers } from 'ethers';
+import { User } from 'oidc-client';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { Account } from '../../store/modules/account';
 
 @Component({
     name: 'ModalSetPrivateKey',
@@ -42,37 +51,56 @@ import { Account } from '../../store/modules/account';
         'b-spinner': BSpinner,
         'b-button': BButton,
     },
-    computed: mapGetters('account', ['account']),
+    computed: mapGetters({
+        user: 'account/user',
+        password: 'account/password',
+        privateKey: 'account/privateKey',
+    }),
 })
 export default class ModalSetPrivateKey extends Vue {
     busy = false;
     error = '';
-    privateKey = '';
+    input = {
+        password: '',
+        privateKey: '',
+    };
 
-    account!: Account;
+    // getters
+    user!: User;
+    password!: string;
+    privateKey!: string;
 
-    reset() {
-        this.privateKey = this.account.privateKey;
+    async reset() {
+        this.input.password = this.password;
+        this.input.privateKey = this.privateKey;
     }
 
     async set() {
         this.busy = true;
 
         try {
-            const account = new ethers.Wallet(this.privateKey);
+            await this.$store.dispatch('account/getProfile');
 
-            try {
-                localStorage.setItem('thx:wallet:privatekey', this.privateKey);
-
-                await this.$store.dispatch('account/update', { address: account.address });
-                await this.$store.dispatch('account/init');
-
-                this.$bvModal.hide('modalSetPrivateKey');
-            } catch (e) {
-                this.error = 'Account update failed.';
-            }
+            this.$store.commit('account/setPassword', this.input.password);
+            this.input.privateKey = this.privateKey;
         } catch (e) {
-            this.error = 'Please provide a valid private key.';
+            this.error = e;
+        } finally {
+            this.busy = false;
+        }
+    }
+
+    async update() {
+        this.busy = true;
+
+        try {
+            await this.$store.dispatch('account/setPrivateKey', {
+                pkey: this.input.privateKey,
+                pwd: this.password,
+            });
+            this.$bvModal.hide('modalSetPrivateKey');
+        } catch (e) {
+            this.error = e.toString();
         } finally {
             this.busy = false;
         }

@@ -1,5 +1,5 @@
 <template>
-    <div class="container mt-3">
+    <div class="container mt-3" v-if="profile">
         <div class="row">
             <div class="col-md-6">
                 <h2>Root Network</h2>
@@ -45,7 +45,7 @@
             </div>
         </div>
         <hr />
-        <div v-if="account.burnProofs.length">
+        <div v-if="profile.burnProofs.length">
             <h3>Burn proof</h3>
             <p>
                 This will list your burn transactions. The proof is used to unlock the tokens in the root network. Start
@@ -56,7 +56,7 @@
                 root network.
             </b-alert>
             <b-list-group class="mt-3">
-                <burn-proof v-for="txHash of account.burnProofs" :txHash="txHash" :key="txHash" />
+                <burn-proof v-for="txHash of profile.burnProofs" :txHash="txHash" :key="txHash" />
             </b-list-group>
         </div>
     </div>
@@ -79,10 +79,13 @@ import { Account } from '@/store/modules/account';
         'b-input-group-append': BInputGroupAppend,
         'b-form-input': BFormInput,
     },
-    computed: {
-        ...mapGetters('account', ['account']),
-        ...mapGetters('balance', ['childMATIC', 'rootERC20', 'childERC20', 'rootETH']),
-    },
+    computed: mapGetters({
+        profile: 'account/profile',
+        childMATIC: 'balance/childMATIC',
+        rootERC20: 'balance/rootERC20',
+        childERC20: 'balance/childERC20',
+        rootETH: 'balance/rootETH',
+    }),
 })
 export default class Wallet extends Vue {
     account!: Account;

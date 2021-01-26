@@ -1,5 +1,5 @@
 <template>
-    <b-modal id="modalSetPrivateKey" @show="reset()" centered scrollable title="Set a private key">
+    <b-modal id="modalAssetPool" @show="reset()" centered scrollable title="Set a private key">
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
@@ -20,7 +20,6 @@
 
 <script lang="ts">
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
-import { ethers } from 'ethers';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { Account } from '../../store/modules/account';
@@ -37,7 +36,7 @@ import { Account } from '../../store/modules/account';
     },
     computed: mapGetters('account', ['account']),
 })
-export default class ModalSetPrivateKey extends Vue {
+export default class ModalSetAssetPool extends Vue {
     busy = false;
     error = '';
 

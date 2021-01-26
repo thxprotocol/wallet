@@ -11,32 +11,40 @@
         <div class="flex-grow-0">
             <navbar />
         </div>
+        <modal-set-private-key />
     </div>
 </template>
 
 <script lang="ts">
 import { BButton, BJumbotron } from 'bootstrap-vue';
-import { Component, Vue, Watch } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { Component, Vue } from 'vue-property-decorator';
 import Navbar from '@/components/Navbar.vue';
-import { Route } from 'vue-router';
+import ModalSetPrivateKey from './components/modals/ModalSetPrivateKey.vue';
+import { mapGetters } from 'vuex';
 
 @Component({
     components: {
+        'modal-set-private-key': ModalSetPrivateKey,
         'b-jumbotron': BJumbotron,
         'b-button': BButton,
         'navbar': Navbar,
     },
-    computed: {
-        ...mapGetters('account', ['account']),
-        ...mapGetters('balance', ['rootETH', 'childETH', 'rootMATIC', 'childMATIC', 'rootERC20', 'childERC20']),
-    },
+    computed: mapGetters({
+        profile: 'account/profile',
+        privateKey: 'account/privateKey',
+    }),
 })
 export default class App extends Vue {
-    account!: Account;
+    privateKey!: string;
 
     get title() {
         return this.$router.currentRoute.name;
+    }
+
+    async mounted() {
+        if (!this.privateKey) {
+            this.$bvModal.show('modalSetPrivateKey');
+        }
     }
 }
 </script>

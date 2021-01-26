@@ -1,10 +1,9 @@
 <template>
-    <div class="container mt-3">
-        {{ error }}
+    <div class="container mt-3" v-if="profile">
         <b-alert show variant="danger" v-if="error">{{ error }}</b-alert>
         <label for="accountAddress">Account address:</label>
         <b-input-group>
-            <b-form-input id="accountAddress" readonly :value="user.profile.address" />
+            <b-form-input id="accountAddress" readonly :value="profile.address" />
             <b-input-group-append>
                 <b-button variant="secondary" v-b-modal="'modalSetPrivateKey'">
                     Change
@@ -34,13 +33,13 @@
         <b-button class="btn-rounded" block variant="link" @click="logout()">
             Logout
         </b-button>
-        <modal-set-private-key />
     </div>
 </template>
 
 <script lang="ts">
-import ModalSetPrivateKey from '@/components/modals/ModalSetPrivateKey.vue';
+import { UserProfile } from '@/store/modules/account';
 import {
+    BAlert,
     BBadge,
     BButton,
     BFormInput,
@@ -53,14 +52,13 @@ import {
 import { User } from 'oidc-client';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { Account } from '../store/modules/account';
 
 @Component({
     name: 'AccountView',
     components: {
-        'modal-set-private-key': ModalSetPrivateKey,
         'b-button': BButton,
         'b-badge': BBadge,
+        'b-alert': BAlert,
         'b-spinner': BSpinner,
         'b-input-group': BInputGroup,
         'b-input-group-append': BInputGroupAppend,
@@ -70,28 +68,32 @@ import { Account } from '../store/modules/account';
     },
     computed: mapGetters({
         user: 'account/user',
+        profile: 'account/profile',
         assetPools: 'assetPools/all',
     }),
 })
 export default class AccountView extends Vue {
     busy = false;
     error = '';
+
+    // getters
     user!: User;
+    profile!: UserProfile;
 
-    async created() {
-        this.busy = true;
+    // async init() {
+    //     this.busy = true;
 
-        try {
-            await this.$store.dispatch('assetPools/init', {
-                assetPools: [this.user.profile.assetPools],
-                address: this.user.profile.address,
-            });
-        } catch (e) {
-            this.error = e;
-        } finally {
-            this.busy = false;
-        }
-    }
+    //     try {
+    //         await this.$store.dispatch('assetPools/init', {
+    //             address: this.profile.address,
+    //             assetPools: this.profile.assetPools,
+    //         });
+    //     } catch (e) {
+    //         this.error = e.toString();
+    //     } finally {
+    //         this.busy = false;
+    //     }
+    // }
 
     async logout() {
         try {
