@@ -20,8 +20,8 @@
                 :key="key"
                 v-for="(membership, key) of assetPools"
             >
-                <strong>{{ membership.title }}</strong>
-                <b-badge variant="secondary" pill v-if="membership.isManager">
+                <strong class="mr-auto">{{ membership.title }}</strong>
+                <b-badge class="mr-3" variant="secondary" pill v-if="membership.isManager">
                     Manager
                 </b-badge>
                 <b-badge variant="primary" pill>

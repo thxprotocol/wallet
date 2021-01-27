@@ -4,6 +4,7 @@ import { decryptString } from '@/utils/decrypt';
 import { User, UserManager } from 'oidc-client';
 import { ethers } from 'ethers';
 import { encryptString } from '@/utils/encrypt';
+import { unregister } from 'register-service-worker';
 
 interface AuthObject {
     email: string;
@@ -195,11 +196,15 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    async signinRedirect() {
+    async signinRedirect(token = '') {
         try {
             await this.userManager.clearStaleState();
 
-            return await this.userManager.signinRedirect();
+            return await this.userManager.signinRedirect({
+                extraQueryParams: {
+                    authentication_token: token, // eslint-disable-line @typescript-eslint/camelcase
+                },
+            });
         } catch (e) {
             return e;
         }
@@ -246,7 +251,7 @@ class AccountModule extends VuexModule {
     @Action
     async signinSilent() {
         try {
-            return this.userManager.signinSilent();
+            return await this.userManager.signinSilent();
         } catch (e) {
             return e;
         }

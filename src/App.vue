@@ -1,6 +1,5 @@
 <template>
     <div id="app" class="d-flex flex-column h-100 ">
-        {{ $router.currentRoute.meta.requiresAuth }}
         <div class="flex-grow-1 overflow-auto" v-if="!busy || !$router.currentRoute.meta.requiresAuth">
             <b-jumbotron bg-variant="primary" text-variant="white" v-if="$router.currentRoute.name">
                 <div class="container">
@@ -41,10 +40,6 @@ export default class App extends Vue {
     error = '';
     privateKey!: string;
     profile!: UserProfile;
-
-    get title() {
-        return this.$router.currentRoute.name;
-    }
 
     async mounted() {
         this.busy = true;

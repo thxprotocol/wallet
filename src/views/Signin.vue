@@ -11,7 +11,8 @@ import { Component, Vue } from 'vue-property-decorator';
 export default class Login extends Vue {
     async mounted() {
         try {
-            await this.$store.dispatch('account/signinRedirect');
+            const token = this.$router.currentRoute.query.authentication_token;
+            await this.$store.dispatch('account/signinRedirect', token);
         } catch (e) {
             return;
         }
