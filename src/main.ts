@@ -1,12 +1,12 @@
 import Vue from 'vue';
 import App from './App.vue';
-import './registerServiceWorker';
 import router from './router';
 import store from './store';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { ModalPlugin, ToastPlugin } from 'bootstrap-vue';
 import Web3 from 'web3';
+import { ModalPlugin, ToastPlugin } from 'bootstrap-vue';
 import { ethers } from 'ethers';
+import './registerServiceWorker';
 
 // Set Axios default config
 axios.defaults.withCredentials = true;
@@ -23,11 +23,20 @@ axios.interceptors.request.use((req: AxiosRequestConfig) => {
     return req;
 });
 
+// Add a response interceptor
 axios.interceptors.response.use(
     (res: AxiosResponse) => res,
     async (error: AxiosError) => {
         if (error.response?.status === 401) {
-            await store.dispatch('account/signoutRedirect');
+            const user = await store.dispatch('account/getUser');
+            if (user) {
+                // Token expired or invalid, signout id_token_hint
+                await store.dispatch('account/signoutRedirect');
+            } else {
+                // id_token_hint not available, force signout and request signin
+                await store.dispatch('account/signout');
+                await store.dispatch('account/signinRedirect');
+            }
         }
         throw error;
     },

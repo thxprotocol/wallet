@@ -2,10 +2,13 @@ import axios from 'axios';
 import Web3 from 'web3';
 import { ethers } from 'ethers';
 import { account, maticWeb3 } from './network';
-import { API_URL, GAS_STATION_ADDRESS } from './secrets';
+import { API_URL } from './secrets';
 import * as GAS_STATION from '../artifacts/GasStation.json';
 
-export const gasStation = new maticWeb3.eth.Contract(GAS_STATION.abi as any, GAS_STATION_ADDRESS);
+export const gasStation = new maticWeb3.eth.Contract(
+    GAS_STATION.abi as any,
+    '0x43f5a4422cCE46b741F4e194E2B6dF9a8bAA2Dc0',
+);
 
 export interface QR {
     contract: string;
@@ -33,7 +36,8 @@ async function createCallSignature(
     const nonce = Number(await gasStation.methods.getLatestNonce(account.address).call()) + 1;
     const contractInterface = new ethers.utils.Interface(abi);
     const call = contractInterface.encodeFunctionData(method, params);
-    const hash = web3.utils.soliditySha3(call, contractAddress, GAS_STATION_ADDRESS, nonce) || '';
+    const hash =
+        web3.utils.soliditySha3(call, contractAddress, '0x43f5a4422cCE46b741F4e194E2B6dF9a8bAA2Dc0', nonce) || '';
     const sig = web3.eth.accounts.sign(hash, account.privateKey);
 
     return {

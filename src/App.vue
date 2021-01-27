@@ -1,6 +1,7 @@
 <template>
     <div id="app" class="d-flex flex-column h-100 ">
-        <div class="flex-grow-1 overflow-auto" v-if="!busy">
+        {{ $router.currentRoute.meta.requiresAuth }}
+        <div class="flex-grow-1 overflow-auto" v-if="!busy || !$router.currentRoute.meta.requiresAuth">
             <b-jumbotron bg-variant="primary" text-variant="white" v-if="$router.currentRoute.name">
                 <div class="container">
                     <h1 class="display-4">{{ $router.currentRoute.name }}</h1>
@@ -8,7 +9,7 @@
             </b-jumbotron>
             <router-view />
         </div>
-        <div class="flex-grow-0" v-if="!busy">
+        <div class="flex-grow-0" v-if="!busy || !$router.currentRoute.meta.requiresAuth">
             <navbar />
         </div>
         <modal-set-private-key @init="init()" />

@@ -1,10 +1,11 @@
 import Web3 from 'web3';
 import Matic from '@maticnetwork/maticjs';
 import HDWalletProvider from '@truffle/hdwallet-provider';
-import { CHILD_RPC, INFURA_KEY, ROOT_RPC, PRIVATE_KEY } from './secrets';
+import { CHILD_RPC, INFURA_KEY, ROOT_RPC } from './secrets';
 
 const randomWallet = new Web3().eth.accounts.create();
 const randomPrivateKey = randomWallet.privateKey;
+const PRIVATE_KEY = '';
 
 export const config = {
     root: {

@@ -1,5 +1,5 @@
+import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import axios, { AxiosError, AxiosResponse } from 'axios';
 import { decryptString } from '@/utils/decrypt';
 import { User, UserManager } from 'oidc-client';
 import { ethers } from 'ethers';
@@ -224,6 +224,20 @@ class AccountModule extends VuexModule {
             await this.userManager.signoutRedirect({});
 
             this.context.commit('setUser', null);
+        } catch (e) {
+            return e;
+        }
+    }
+
+    @Action
+    async signout() {
+        try {
+            await this.userManager.removeUser();
+            await this.userManager.clearStaleState();
+            await axios({
+                method: 'GET',
+                url: config.authority + '/session/end',
+            });
         } catch (e) {
             return e;
         }
