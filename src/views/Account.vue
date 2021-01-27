@@ -1,7 +1,9 @@
 <template>
     <div class="container mt-3" v-if="profile">
         <b-alert show variant="danger" v-if="error">{{ error }}</b-alert>
-        <label for="accountAddress">Account address:</label>
+        <h2 class="h4">
+            <label for="accountAddress">Wallet address</label>
+        </h2>
         <b-input-group>
             <b-form-input id="accountAddress" readonly :value="profile.address" />
             <b-input-group-append>
@@ -11,7 +13,7 @@
             </b-input-group-append>
         </b-input-group>
         <hr />
-        <h2>Asset Pools</h2>
+        <h2 class="h4">Memberships</h2>
         <b-list-group>
             <b-list-group-item
                 class="d-flex justify-content-between align-items-center"
@@ -19,6 +21,9 @@
                 v-for="(membership, key) of assetPools"
             >
                 <strong>{{ membership.title }}</strong>
+                <b-badge variant="secondary" pill v-if="membership.isManager">
+                    Manager
+                </b-badge>
                 <b-badge variant="primary" pill>
                     {{ membership.token.balance.hex | fromBigNumber }} {{ membership.token.symbol }}
                 </b-badge>
@@ -79,21 +84,6 @@ export default class AccountView extends Vue {
     // getters
     user!: User;
     profile!: UserProfile;
-
-    // async init() {
-    //     this.busy = true;
-
-    //     try {
-    //         await this.$store.dispatch('assetPools/init', {
-    //             address: this.profile.address,
-    //             assetPools: this.profile.assetPools,
-    //         });
-    //     } catch (e) {
-    //         this.error = e.toString();
-    //     } finally {
-    //         this.busy = false;
-    //     }
-    // }
 
     async logout() {
         try {

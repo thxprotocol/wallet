@@ -86,9 +86,13 @@ class AccountModule extends VuexModule {
     }
 
     @Mutation
-    setPassword(password: string) {
-        this._password = password;
-        this._privateKey = decryptString(this._profile?.privateKey, password);
+    setPassword({ pkey, pwd }: { pkey: string; pwd: string }) {
+        try {
+            this._privateKey = decryptString(pkey, pwd);
+            this._password = pwd;
+        } catch (e) {
+            throw Error(e);
+        }
     }
 
     @Action
@@ -145,6 +149,8 @@ class AccountModule extends VuexModule {
             }
 
             this.context.commit('setUserProfile', r.data);
+
+            return r.data;
         } catch (e) {
             return e;
         }

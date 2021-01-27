@@ -1,6 +1,6 @@
 <template>
     <div id="app" class="d-flex flex-column h-100 ">
-        <div class="flex-grow-1 overflow-auto">
+        <div class="flex-grow-1 overflow-auto" v-if="!busy">
             <b-jumbotron bg-variant="primary" text-variant="white" v-if="$router.currentRoute.name">
                 <div class="container">
                     <h1 class="display-4">{{ $router.currentRoute.name }}</h1>
@@ -8,10 +8,10 @@
             </b-jumbotron>
             <router-view />
         </div>
-        <div class="flex-grow-0">
+        <div class="flex-grow-0" v-if="!busy">
             <navbar />
         </div>
-        <modal-set-private-key />
+        <modal-set-private-key @init="init()" />
     </div>
 </template>
 
@@ -21,6 +21,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import Navbar from '@/components/Navbar.vue';
 import ModalSetPrivateKey from './components/modals/ModalSetPrivateKey.vue';
 import { mapGetters } from 'vuex';
+import { UserProfile } from './store/modules/account';
 
 @Component({
     components: {
@@ -35,15 +36,32 @@ import { mapGetters } from 'vuex';
     }),
 })
 export default class App extends Vue {
+    busy = false;
+    error = '';
     privateKey!: string;
+    profile!: UserProfile;
 
     get title() {
         return this.$router.currentRoute.name;
     }
 
     async mounted() {
+        this.busy = true;
         if (!this.privateKey) {
             this.$bvModal.show('modalSetPrivateKey');
+        }
+    }
+
+    async init() {
+        try {
+            await this.$store.dispatch('assetPools/init', {
+                address: this.profile.address,
+                assetPools: this.profile.assetPools,
+            });
+        } catch (e) {
+            this.error = e.toString();
+        } finally {
+            this.busy = false;
         }
     }
 }

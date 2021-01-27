@@ -25,9 +25,9 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/SilentRenew.vue'),
     },
     {
-        path: '/register',
-        name: 'Register',
-        component: () => import('../views/Register.vue'),
+        path: '/signup',
+        name: 'Signup',
+        component: () => import('../views/Signup.vue'),
     },
     {
         path: '/wallet',

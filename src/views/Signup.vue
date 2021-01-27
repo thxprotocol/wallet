@@ -73,9 +73,11 @@ import {
     BAlert,
     BFormCheckbox,
 } from 'bootstrap-vue';
-import { mapGetters } from 'vuex';
 import { ethers } from 'ethers';
 import { account } from '@/utils/network';
+import { UserProfile } from '@/store/modules/account';
+import { mapGetters } from 'vuex';
+import { User } from 'oidc-client';
 
 @Component({
     components: {
@@ -89,6 +91,9 @@ import { account } from '@/utils/network';
         'b-input-group': BInputGroup,
         'b-input-group-append': BInputGroupAppend,
     },
+    computed: mapGetters({
+        user: 'account/user',
+    }),
 })
 export default class Register extends Vue {
     privateKey = account.privateKey;
@@ -98,6 +103,15 @@ export default class Register extends Vue {
     email = '';
     password = '';
     confirmPassword = '';
+
+    // getters
+    user!: User;
+
+    mounted() {
+        if (this.user) {
+            this.$router.push('/account');
+        }
+    }
 
     async submit() {
         const address = (await this.getAddressForPrivateKey(this.privateKey)) || '';
@@ -123,8 +137,6 @@ export default class Register extends Vue {
     async getAddressForPrivateKey(privateKey: string) {
         try {
             const account = new ethers.Wallet(privateKey);
-
-            localStorage.setItem('thx:wallet:privatekey', this.privateKey);
 
             return await account.getAddress();
         } catch (e) {

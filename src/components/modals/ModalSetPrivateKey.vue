@@ -1,5 +1,15 @@
 <template>
-    <b-modal id="modalSetPrivateKey" @show="reset()" centered scrollable title="Set a private key">
+    <b-modal
+        id="modalSetPrivateKey"
+        @show="reset()"
+        @hidden="$emit('init')"
+        no-close-on-esc
+        no-close-on-backdrop
+        hide-header-close
+        centered
+        scrollable
+        title="Decrypt stored private key"
+    >
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
@@ -8,28 +18,62 @@
                 {{ error }}
             </b-alert>
 
-            <template v-if="!password">
-                <b-form-input size="lg" v-model="input.password" type="password" placeholder="Enter your password" />
-            </template>
+            <form @submit.prevent="set()" id="formPassword" v-if="!password">
+                <b-form-input
+                    autofocus
+                    size="lg"
+                    v-model="input.password"
+                    type="password"
+                    placeholder="Enter your password"
+                />
+            </form>
 
-            <template v-else>
+            <form @submit.prevent="update()" id="formPrivateKey" v-else>
                 <b-alert show variant="warning">
                     <strong>Create a secure backup of your private key elsewhere</strong>.
                 </b-alert>
                 <p>
                     This key is required to access your assets.
-                    <strong>If you loose it, it can not be recovered.</strong> The wallet will only store your key on
-                    this device.
+                    <strong>If you loose it, it can not be recovered.</strong>
                 </p>
-                <b-form-input size="lg" v-model="input.privateKey" placeholder="Enter a private key" />
-            </template>
+                <b-form-input autofocus size="lg" v-model="input.privateKey" placeholder="Enter a private key" />
+                <small v-if="input.privateKey.length && !validPrivateKey" class="text-danger">
+                    Please enter a valid private key.
+                </small>
+            </form>
         </template>
         <template v-slot:modal-footer>
-            <b-button v-if="!password" class="mt-3 btn-rounded" block variant="success" @click="set()">
+            <b-button
+                v-if="!password"
+                class="mt-3 btn-rounded"
+                block
+                variant="success"
+                form="formPassword"
+                type="submit"
+            >
                 Save
             </b-button>
-            <b-button v-if="password" class="mt-3 btn-rounded" block variant="success" @click="update()">
+            <b-button
+                v-if="password"
+                :disabled="!validPrivateKey"
+                class="mt-3 btn-rounded"
+                block
+                variant="success"
+                type="submit"
+                form="formPrivateKey"
+            >
                 Update
+            </b-button>
+            <b-button
+                v-if="password"
+                :disabled="!validPrivateKey"
+                class="mt-3"
+                block
+                variant="link"
+                type="submit"
+                @click="cancel()"
+            >
+                Close
             </b-button>
         </template>
     </b-modal>
@@ -37,6 +81,7 @@
 
 <script lang="ts">
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
+import { ethers } from 'ethers';
 import { User } from 'oidc-client';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
@@ -70,21 +115,39 @@ export default class ModalSetPrivateKey extends Vue {
     password!: string;
     privateKey!: string;
 
+    get validPrivateKey() {
+        try {
+            const account = new ethers.Wallet(this.input.privateKey);
+            return ethers.utils.isAddress(account.address);
+        } catch (e) {
+            return false;
+        }
+    }
+
     async reset() {
         this.input.password = this.password;
         this.input.privateKey = this.privateKey;
+    }
+
+    cancel() {
+        this.$bvModal.hide('modalSetPrivateKey');
     }
 
     async set() {
         this.busy = true;
 
         try {
-            await this.$store.dispatch('account/getProfile');
+            const { privateKey } = await this.$store.dispatch('account/getProfile');
 
-            this.$store.commit('account/setPassword', this.input.password);
+            this.$store.commit('account/setPassword', {
+                pkey: privateKey,
+                pwd: this.input.password,
+            });
+
             this.input.privateKey = this.privateKey;
+            this.error = '';
         } catch (e) {
-            this.error = e;
+            this.error = e.toString();
         } finally {
             this.busy = false;
         }

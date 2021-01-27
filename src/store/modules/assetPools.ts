@@ -41,15 +41,16 @@ class AssetPoolModule extends VuexModule {
 
     @Mutation
     add(membership: AssetPool) {
-        console.log(this._all.length, this._all.indexOf(membership), membership);
-        if (this._all.indexOf(membership) === -1) {
-            this._all.push(membership);
+        const index = this._all.findIndex(m => membership.address === m.address);
+        if (index > -1) {
+            this._all.splice(index, 1, membership);
+            return;
         }
+        this._all.push(membership);
     }
 
     @Action
     async init({ assetPools, address }: { assetPools: string[]; address: string }) {
-        debugger;
         try {
             for (const poolAddress of assetPools) {
                 try {
