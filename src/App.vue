@@ -33,13 +33,17 @@ import { UserProfile } from './store/modules/account';
     computed: mapGetters({
         profile: 'account/profile',
         privateKey: 'account/privateKey',
+        assetPools: 'assetPools/all',
     }),
 })
 export default class App extends Vue {
     busy = false;
     error = '';
+
+    // getters
     privateKey!: string;
     profile!: UserProfile;
+    assetPools!: any[];
 
     async mounted() {
         this.busy = true;
@@ -83,6 +87,10 @@ h2,
 h3 {
     font-family: 'Exo 2';
     font-size: 1.5rem;
+}
+
+.jumbotron {
+    padding: 1rem;
 }
 
 .text-overflow {

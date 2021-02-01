@@ -67,7 +67,7 @@ import { BAlert, BButton, BFormInput, BInputGroup, BInputGroupAppend, BListGroup
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BurnProof from '@/components/BurnProof.vue';
-import { Account } from '@/store/modules/account';
+import { Account, UserProfile } from '@/store/modules/account';
 
 @Component({
     components: {
@@ -88,7 +88,7 @@ import { Account } from '@/store/modules/account';
     }),
 })
 export default class Wallet extends Vue {
-    account!: Account;
+    profile!: UserProfile;
     busy = {
         deposit: false,
         burn: false,
@@ -98,27 +98,41 @@ export default class Wallet extends Vue {
     amountDeposit = 0;
     amountBurn = 0;
 
+    async mounted() {
+        debugger;
+        await this.$store.dispatch('balance/init', this.profile.address);
+    }
+
     async deposit(amount: string) {
         this.busy.deposit = true;
-
-        await this.$store.dispatch('balance/deposit', amount);
-
-        this.busy.deposit = false;
+        try {
+            await this.$store.dispatch('balance/deposit', amount);
+        } catch (e) {
+            console.error(e);
+            debugger;
+        } finally {
+            this.busy.deposit = false;
+        }
     }
 
     async burn(amount: number) {
         this.busy.burn = true;
+        try {
+            const tx = await this.$store.dispatch('balance/burn', amount);
 
-        const tx = await this.$store.dispatch('balance/burn', amount);
+            if (tx.transactionHash) {
+                const data = this.profile;
 
-        if (tx.transactionHash) {
-            const data = this.account;
+                data.burnProofs.push(tx.transactionHash);
 
-            data.burnProofs.push(tx.transactionHash);
-
-            await this.$store.dispatch('account/update', data);
+                await this.$store.dispatch('account/update', data);
+            }
+        } catch (e) {
+            console.error(e);
+            debugger;
+        } finally {
+            this.busy.burn = false;
         }
-        this.busy.burn = false;
     }
 }
 </script>
