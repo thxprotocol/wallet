@@ -44,7 +44,7 @@ class BalanceModule extends VuexModule {
     }
 
     @Action
-    async init(address: string) {
+    async init({ address, memberships }: { address: string; memberships: { [address: string]: string } }) {
         try {
             await (async () => {
                 const web3 = maticPOSClient.web3Client.getParentWeb3();
@@ -56,7 +56,7 @@ class BalanceModule extends VuexModule {
                 this.context.commit('updateRootBalance', { type: 'eth', balance: ethBalance });
             })();
 
-            return await (async () => {
+            await (async () => {
                 const web3 = maticPOSClient.web3Client.getMaticWeb3();
                 const maticBalance = await web3.eth.getBalance(address);
                 const erc20Contract = maticPOSClient.getERC20TokenContract(config.child.DERC20);
@@ -65,6 +65,7 @@ class BalanceModule extends VuexModule {
                 this.context.commit('updateChildBalance', { type: 'erc20', balance: erc20Balance });
                 this.context.commit('updateChildBalance', { type: 'matic', balance: maticBalance });
             })();
+            debugger;
         } catch (e) {
             return e;
         }

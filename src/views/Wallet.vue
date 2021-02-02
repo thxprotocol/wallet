@@ -67,8 +67,8 @@ import { BAlert, BButton, BFormInput, BInputGroup, BInputGroupAppend, BListGroup
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BurnProof from '@/components/BurnProof.vue';
-import { UserProfile } from '@/store/modules/account';
 import { Membership } from '@/store/modules/memberships';
+import { UserProfile } from '@/store/modules/account';
 
 @Component({
     components: {
@@ -81,6 +81,7 @@ import { Membership } from '@/store/modules/memberships';
         'b-form-input': BFormInput,
     },
     computed: mapGetters({
+        address: 'account/address',
         profile: 'account/profile',
         memberships: 'memberships/all',
         childMATIC: 'balance/childMATIC',
@@ -90,8 +91,6 @@ import { Membership } from '@/store/modules/memberships';
     }),
 })
 export default class Wallet extends Vue {
-    profile!: UserProfile;
-    memberships!: Membership[];
     busy = {
         deposit: false,
         burn: false,
@@ -101,11 +100,15 @@ export default class Wallet extends Vue {
     amountDeposit = 0;
     amountBurn = 0;
 
+    // getters
+    address!: string;
+    profile!: UserProfile;
+    memberships!: Membership[];
+
     async mounted() {
         try {
             await this.$store.dispatch('account/getProfile');
-            debugger;
-            await this.$store.dispatch('balance/init', this.memberships);
+            await this.$store.dispatch('balance/init', { address: this.address, memberships: this.memberships });
         } catch (e) {
             console.error(e);
             debugger;

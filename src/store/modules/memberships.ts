@@ -44,12 +44,13 @@ class MembershipModule extends VuexModule {
     }
 
     @Action
-    async init(memberships: { [assetPools: string]: string }) {
+    async init(memberships: { [address: string]: string }) {
+        debugger;
         try {
             for (const poolAddress in memberships) {
-                const address = memberships[poolAddress];
-
                 try {
+                    const address = memberships[poolAddress];
+
                     const r: any = await axios({
                         method: 'get',
                         url: '/asset_pools/' + poolAddress,

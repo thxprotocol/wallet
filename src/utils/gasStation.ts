@@ -7,7 +7,7 @@ import * as GAS_STATION from '../artifacts/GasStation.json';
 
 export const gasStation = new maticWeb3.eth.Contract(
     GAS_STATION.abi as any,
-    '0x43f5a4422cCE46b741F4e194E2B6dF9a8bAA2Dc0',
+    process.env.VUE_APP_ASSET_POOL_FACTORY_ADDRESS,
 );
 
 export interface QR {
@@ -59,11 +59,15 @@ export async function send(result: QR, params: any[], abi: any, url: string) {
         result.contractAddress,
     );
     return await axios({
-        url: `${API_URL}/gas_station/${url}`,
+        url: `${API_URL}/gas_station/call`,
         method: 'post',
         headers: {
             AssetPool: result.assetPoolAddress,
         },
-        data,
+        data: {
+            call,
+            nonce,
+            sig,
+        },
     });
 }

@@ -2,10 +2,7 @@ import Web3 from 'web3';
 import Matic from '@maticnetwork/maticjs';
 import HDWalletProvider from '@truffle/hdwallet-provider';
 import { CHILD_RPC, INFURA_KEY, ROOT_RPC } from './secrets';
-
-const randomWallet = new Web3().eth.accounts.create();
-const randomPrivateKey = randomWallet.privateKey;
-const PRIVATE_KEY = '';
+import { ethers, Signer } from 'ethers';
 
 export const config = {
     root: {
@@ -22,42 +19,45 @@ export const config = {
         MaticWETH: '0x714550C2C1Ea08688607D86ed8EeF4f5E4F22323',
     },
 };
-export const account = new Web3().eth.accounts.privateKeyToAccount(PRIVATE_KEY || randomPrivateKey);
-export const maticPOSClient = new Matic.MaticPOSClient({
-    network: 'testnet',
-    version: 'mumbai',
-    parentProvider: new HDWalletProvider(account.privateKey, `${ROOT_RPC}/${INFURA_KEY}`),
-    maticProvider: new HDWalletProvider(account.privateKey, CHILD_RPC),
-    posRootChainManager: config.root.POSRootChainManager,
-    posERC20Predicate: config.root.posERC20Predicate,
-    parentDefaultOptions: { from: account.address },
-    maticDefaultOptions: { from: account.address },
-});
-export const maticWeb3 = maticPOSClient.web3Client.getMaticWeb3();
-export async function checkInclusion(txHash: string) {
-    const web3 = new Web3(`${ROOT_RPC}/${INFURA_KEY}`);
-    const childWeb3 = maticPOSClient.web3Client.getMaticWeb3();
-    const txDetails = await childWeb3.eth.getTransactionReceipt(txHash);
-    const block = txDetails.blockNumber;
 
-    return new Promise((resolve, reject) => {
-        web3.eth.subscribe(
-            'logs',
-            {
-                address: config.root.RootChainProxyAddress,
-            },
-            async (error, result) => {
-                if (error) {
-                    reject(error);
-                }
+const solutionContract = (address: string, signer: Signer) =>
+    new ethers.Contract(address, ISolutionArtifact.abi, signer);
 
-                if (result.data) {
-                    const transaction = web3.eth.abi.decodeParameters(['uint256', 'uint256', 'bytes32'], result.data);
-                    if (block <= transaction['1']) {
-                        resolve(result);
-                    }
-                }
-            },
-        );
-    });
-}
+// export const maticPOSClient = new Matic.MaticPOSClient({
+//     network: 'testnet',
+//     version: 'mumbai',
+//     parentProvider: new HDWalletProvider(account.privateKey, `${ROOT_RPC}/${INFURA_KEY}`),
+//     maticProvider: new HDWalletProvider(account.privateKey, CHILD_RPC),
+//     posRootChainManager: config.root.POSRootChainManager,
+//     posERC20Predicate: config.root.posERC20Predicate,
+//     parentDefaultOptions: { from: account.address },
+//     maticDefaultOptions: { from: account.address },
+// });
+// export const maticWeb3 = maticPOSClient.web3Client.getMaticWeb3();
+// export async function checkInclusion(txHash: string) {
+//     const web3 = new Web3(`${ROOT_RPC}/${INFURA_KEY}`);
+//     const childWeb3 = maticPOSClient.web3Client.getMaticWeb3();
+//     const txDetails = await childWeb3.eth.getTransactionReceipt(txHash);
+//     const block = txDetails.blockNumber;
+
+//     return new Promise((resolve, reject) => {
+//         web3.eth.subscribe(
+//             'logs',
+//             {
+//                 address: config.root.RootChainProxyAddress,
+//             },
+//             async (error, result) => {
+//                 if (error) {
+//                     reject(error);
+//                 }
+
+//                 if (result.data) {
+//                     const transaction = web3.eth.abi.decodeParameters(['uint256', 'uint256', 'bytes32'], result.data);
+//                     if (block <= transaction['1']) {
+//                         resolve(result);
+//                     }
+//                 }
+//             },
+//         );
+//     });
+// }

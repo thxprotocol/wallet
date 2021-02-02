@@ -81,8 +81,8 @@ import { mapGetters } from 'vuex';
     computed: mapGetters({
         user: 'account/user',
         address: 'account/address',
-        privateKey: 'account/privateKey',
         profile: 'account/profile',
+        privateKey: 'account/privateKey',
         memberships: 'memberships/all',
     }),
 })
