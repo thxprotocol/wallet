@@ -16,9 +16,10 @@
         <h2 class="h4">Memberships</h2>
         <b-list-group>
             <b-list-group-item
+                v-b-modal="'modalAssetPool'"
                 class="d-flex justify-content-between align-items-center"
                 :key="key"
-                v-for="(membership, key) of assetPools"
+                v-for="(membership, key) of memberships"
             >
                 <strong class="mr-auto">{{ membership.title }}</strong>
                 <b-badge class="mr-3" variant="secondary" pill v-if="membership.isManager">
@@ -27,6 +28,7 @@
                 <b-badge variant="primary" pill>
                     {{ membership.token.balance.hex | fromBigNumber }} {{ membership.token.symbol }}
                 </b-badge>
+                <modal-asset-pool :assetPool="membership" />
             </b-list-group-item>
             <b-list-group-item class="text-center" v-if="busy">
                 <b-spinner variant="primary" />
@@ -54,6 +56,7 @@ import {
     BListGroupItem,
     BSpinner,
 } from 'bootstrap-vue';
+import ModalAssetPool from '@/components/modals/ModalAssetPool.vue';
 import { User } from 'oidc-client';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
@@ -61,6 +64,7 @@ import { mapGetters } from 'vuex';
 @Component({
     name: 'AccountView',
     components: {
+        'modal-asset-pool': ModalAssetPool,
         'b-button': BButton,
         'b-badge': BBadge,
         'b-alert': BAlert,
@@ -74,7 +78,7 @@ import { mapGetters } from 'vuex';
     computed: mapGetters({
         user: 'account/user',
         profile: 'account/profile',
-        assetPools: 'assetPools/all',
+        memberships: 'memberships/all',
     }),
 })
 export default class AccountView extends Vue {

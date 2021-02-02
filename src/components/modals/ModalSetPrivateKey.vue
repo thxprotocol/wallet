@@ -28,7 +28,7 @@
                 />
             </form>
 
-            <form @submit.prevent="update()" id="formPrivateKey" v-else>
+            <form @submit.prevent="update()" id="formPrivateKey" v-if="password && profile">
                 <b-alert show variant="warning">
                     <strong>Create a secure backup of your private key elsewhere</strong>.
                 </b-alert>
@@ -36,27 +36,17 @@
                     This key is required to access your assets.
                     <strong>If you loose it, it can not be recovered.</strong>
                 </p>
-                <b-form-input autofocus size="lg" v-model="input.privateKey" placeholder="Enter a private key" />
-                <small v-if="input.privateKey.length && !validPrivateKey" class="text-danger">
-                    Please enter a valid private key.
-                </small>
+                <base-input-private-key :value="input.privateKey" @validated="validPrivateKey = $event" />
             </form>
         </template>
         <template v-slot:modal-footer>
-            <b-button
-                v-if="!password"
-                class="mt-3 btn-rounded"
-                block
-                variant="success"
-                form="formPassword"
-                type="submit"
-            >
+            <b-button v-if="!password" class=" btn-rounded" block variant="success" form="formPassword" type="submit">
                 Save
             </b-button>
             <b-button
-                v-if="password"
+                v-if="profile"
                 :disabled="!validPrivateKey"
-                class="mt-3 btn-rounded"
+                class="btn-rounded"
                 block
                 variant="success"
                 type="submit"
@@ -64,15 +54,7 @@
             >
                 Update
             </b-button>
-            <b-button
-                v-if="password"
-                :disabled="!validPrivateKey"
-                class="mt-3"
-                block
-                variant="link"
-                type="submit"
-                @click="cancel()"
-            >
+            <b-button v-if="password" :disabled="!validPrivateKey" block variant="link" type="submit" @click="cancel()">
                 Close
             </b-button>
         </template>
@@ -81,7 +63,7 @@
 
 <script lang="ts">
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
-import { ethers } from 'ethers';
+import BaseInputPrivateKey from '@/components/InputPrivateKey.vue';
 import { User } from 'oidc-client';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
@@ -89,6 +71,7 @@ import { mapGetters } from 'vuex';
 @Component({
     name: 'ModalSetPrivateKey',
     components: {
+        'base-input-private-key': BaseInputPrivateKey,
         'b-form-input': BFormInput,
         'b-alert': BAlert,
         'b-link': BLink,
@@ -100,11 +83,13 @@ import { mapGetters } from 'vuex';
         user: 'account/user',
         password: 'account/password',
         privateKey: 'account/privateKey',
+        profile: 'account/profile',
     }),
 })
 export default class ModalSetPrivateKey extends Vue {
     busy = false;
     error = '';
+    validPrivateKey = false;
     input = {
         password: '',
         privateKey: '',
@@ -114,15 +99,6 @@ export default class ModalSetPrivateKey extends Vue {
     user!: User;
     password!: string;
     privateKey!: string;
-
-    get validPrivateKey() {
-        try {
-            const account = new ethers.Wallet(this.input.privateKey);
-            return ethers.utils.isAddress(account.address);
-        } catch (e) {
-            return false;
-        }
-    }
 
     async reset() {
         this.input.password = this.password;
@@ -137,10 +113,11 @@ export default class ModalSetPrivateKey extends Vue {
         this.busy = true;
 
         try {
-            const { privateKey } = await this.$store.dispatch('account/getProfile');
+            const { privateKey, privateKeys } = await this.$store.dispatch('account/getProfile');
 
             this.$store.commit('account/setPassword', {
                 pkey: privateKey,
+                keys: privateKeys,
                 pwd: this.input.password,
             });
 

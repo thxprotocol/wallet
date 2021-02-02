@@ -33,7 +33,7 @@ import { UserProfile } from './store/modules/account';
     computed: mapGetters({
         profile: 'account/profile',
         privateKey: 'account/privateKey',
-        assetPools: 'assetPools/all',
+        memberships: 'memberships/all',
     }),
 })
 export default class App extends Vue {
@@ -47,6 +47,7 @@ export default class App extends Vue {
 
     async mounted() {
         this.busy = true;
+
         if (!this.privateKey) {
             this.$bvModal.show('modalSetPrivateKey');
         }
@@ -54,10 +55,7 @@ export default class App extends Vue {
 
     async init() {
         try {
-            await this.$store.dispatch('assetPools/init', {
-                address: this.profile.address,
-                assetPools: this.profile.assetPools,
-            });
+            await this.$store.dispatch('memberships/init', this.profile.memberships);
         } catch (e) {
             this.error = e.toString();
         } finally {
@@ -91,6 +89,7 @@ h3 {
 
 .jumbotron {
     padding: 1rem;
+    border-radius: 0;
 }
 
 .text-overflow {

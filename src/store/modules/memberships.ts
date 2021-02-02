@@ -1,9 +1,5 @@
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import { API_URL } from '@/utils/secrets';
-import { Account } from './account';
-import { QR, send } from '@/utils/gasStation';
-import { ASSET_POOL_ABI } from '@/utils/contracts';
 
 interface TokenBalance {
     name: string;
@@ -11,36 +7,34 @@ interface TokenBalance {
     balance: { type: string; hex: string };
 }
 
-class AssetPool {
-    title: string;
+export class Membership {
     address: string;
-    owner: string;
-    token: TokenBalance;
+    title: string;
+    poolAddress: string;
+    poolToken: TokenBalance;
     isMember: string;
     isManager: string;
-    balance: string;
 
     constructor(data: any) {
-        this.title = data.title;
         this.address = data.address;
-        this.owner = data.owner;
-        this.token = data.token;
+        this.title = data.title;
+        this.poolAddress = data.poolAddress;
+        this.poolToken = data.poolToken;
         this.isMember = data.isMember;
         this.isManager = data.isManager;
-        this.balance = data.balance;
     }
 }
 
 @Module({ namespaced: true })
-class AssetPoolModule extends VuexModule {
-    _all: AssetPool[] = [];
+class MembershipModule extends VuexModule {
+    _all: Membership[] = [];
 
     get all() {
         return this._all;
     }
 
     @Mutation
-    add(membership: AssetPool) {
+    add(membership: Membership) {
         const index = this._all.findIndex(m => membership.address === m.address);
         if (index > -1) {
             this._all.splice(index, 1, membership);
@@ -50,32 +44,33 @@ class AssetPoolModule extends VuexModule {
     }
 
     @Action
-    async init({ assetPools, address }: { assetPools: string[]; address: string }) {
+    async init(memberships: { [assetPools: string]: string }) {
         try {
-            for (const poolAddress of assetPools) {
+            for (const poolAddress in memberships) {
+                const address = memberships[poolAddress];
+                debugger;
                 try {
                     const r: any = await axios({
                         method: 'get',
-                        url: API_URL + '/asset_pools/' + poolAddress,
+                        url: '/asset_pools/' + poolAddress,
                         headers: { AssetPool: poolAddress },
                     });
 
                     const x = await axios({
                         method: 'get',
-                        url: API_URL + '/members/' + address,
+                        url: '/members/' + address,
                         headers: { AssetPool: poolAddress },
                     });
 
                     this.context.commit(
                         'add',
-                        new AssetPool({
+                        new Membership({
+                            address,
                             title: r.data.title,
-                            address: r.data.address,
-                            owner: r.data.owner,
-                            token: r.data.token,
+                            poolAddress: r.data.address,
+                            poolToken: r.data.token,
                             isMember: x.data.isMember,
                             isManager: x.data.isManager,
-                            balance: x.data.token.balance.hex,
                         }),
                     );
                 } catch (e) {
@@ -87,17 +82,17 @@ class AssetPoolModule extends VuexModule {
         }
     }
 
-    @Action
-    async updateReward(result: QR) {
-        const params = [result.params.id, result.params.withdrawAmount, result.params.withdrawDuration];
-        return await send(result, params, ASSET_POOL_ABI, 'asset_pool');
-    }
+    // @Action
+    // async updateReward(result: QR) {
+    //     const params = [result.params.id, result.params.withdrawAmount, result.params.withdrawDuration];
+    //     return await send(result, params, ASSET_POOL_ABI, 'asset_pool');
+    // }
 
-    @Action
-    async claimReward(result: QR) {
-        const params = [result.params.reward_id];
-        return await send(result, params, ASSET_POOL_ABI, 'asset_pool');
-    }
+    // @Action
+    // async claimReward(result: QR) {
+    //     const params = [result.params.reward_id];
+    //     return await send(result, params, ASSET_POOL_ABI, 'asset_pool');
+    // }
 }
 
-export default AssetPoolModule;
+export default MembershipModule;

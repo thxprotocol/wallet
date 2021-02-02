@@ -4,7 +4,7 @@ import { decryptString } from '@/utils/decrypt';
 import { User, UserManager } from 'oidc-client';
 import { ethers } from 'ethers';
 import { encryptString } from '@/utils/encrypt';
-import { unregister } from 'register-service-worker';
+import TorusSdk, { TorusKey } from '@toruslabs/torus-direct-web-sdk';
 
 interface AuthObject {
     email: string;
@@ -47,9 +47,9 @@ const config: any = {
 
 export interface UserProfile {
     privateKey: string;
-    address: string;
-    assetPools: string[];
     burnProofs: string[];
+    memberships: { [poolAddress: string]: string };
+    privateKeys: { [address: string]: string };
 }
 
 @Module({ namespaced: true })
@@ -59,6 +59,7 @@ class AccountModule extends VuexModule {
     _profile: UserProfile | null = null;
     _password = '';
     _privateKey = '';
+    _privateKeys: { [address: string]: string } = {};
 
     get user() {
         return this._user;
@@ -70,6 +71,10 @@ class AccountModule extends VuexModule {
 
     get privateKey() {
         return this._privateKey;
+    }
+
+    get privateKeys() {
+        return this._privateKeys;
     }
 
     get profile() {
@@ -87,9 +92,13 @@ class AccountModule extends VuexModule {
     }
 
     @Mutation
-    setPassword({ pkey, pwd }: { pkey: string; pwd: string }) {
+    setPassword({ pkey, keys, pwd }: { pkey: string; keys: string[]; pwd: string }) {
         try {
             this._privateKey = decryptString(pkey, pwd);
+
+            for (const address in keys) {
+                this._privateKeys[address] = decryptString(keys[address], pwd);
+            }
             this._password = pwd;
         } catch (e) {
             throw Error(e);
@@ -153,6 +162,8 @@ class AccountModule extends VuexModule {
 
             return r.data;
         } catch (e) {
+            console.log(e);
+            debugger;
             return e;
         }
     }

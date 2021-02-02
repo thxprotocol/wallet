@@ -1,5 +1,5 @@
 <template>
-    <b-modal id="modalAssetPool" @show="reset()" centered scrollable title="Set a private key">
+    <b-modal id="modalAssetPool" @show="onShow()" centered scrollable title="Update asset pool membership">
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
@@ -7,11 +7,16 @@
             <b-alert show variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
-
-            <b-form-input readonly size="lg" v-model="privateKey" />
+            <div :key="membership.assetPool" v-for="membership of profile.memberships">
+                {{ membership.address }}
+                <base-input-private-key
+                    :value="profile.privateKeys[membership.address]"
+                    @validated="assetPool.privateKeyValid = $event"
+                />
+            </div>
         </template>
         <template v-slot:modal-footer>
-            <b-button class="mt-3 btn-rounded" block variant="success" @click="set()">
+            <b-button class="btn-rounded" block variant="success" @click="set()">
                 Update
             </b-button>
         </template>
@@ -19,30 +24,34 @@
 </template>
 
 <script lang="ts">
-import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
-import { Component, Vue } from 'vue-property-decorator';
+import { Membership } from '@/store/modules/memberships';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { Account } from '../../store/modules/account';
+import { UserProfile } from '../../store/modules/account';
+import BaseInputPrivateKey from '@/components/InputPrivateKey.vue';
+import { BButton } from 'bootstrap-vue';
 
 @Component({
     name: 'ModalAssetPool',
     components: {
-        'b-form-input': BFormInput,
-        'b-alert': BAlert,
-        'b-link': BLink,
-        'b-modal': BModal,
-        'b-spinner': BSpinner,
         'b-button': BButton,
+        'base-input-private-key': BaseInputPrivateKey,
     },
-    computed: mapGetters('account', ['account']),
+    computed: mapGetters({
+        profile: 'account/profile',
+        privateKey: 'account/privateKey',
+        assetPools: 'assetPools/all',
+    }),
 })
 export default class ModalSetAssetPool extends Vue {
     busy = false;
     error = '';
 
-    account!: Account;
+    profile!: UserProfile;
 
-    reset() {
+    @Prop() membership!: Membership;
+
+    onShow() {
         this.busy = false;
         // Ask store to fetch asset pool info
         // Display title
@@ -50,6 +59,10 @@ export default class ModalSetAssetPool extends Vue {
         // Display pool balance
         // Ask store to fetch member info for my account
         // Display account balance
+    }
+
+    set() {
+        debugger;
     }
 }
 </script>

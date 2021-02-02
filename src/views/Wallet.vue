@@ -67,7 +67,7 @@ import { BAlert, BButton, BFormInput, BInputGroup, BInputGroupAppend, BListGroup
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BurnProof from '@/components/BurnProof.vue';
-import { Account, UserProfile } from '@/store/modules/account';
+import { UserProfile } from '@/store/modules/account';
 
 @Component({
     components: {
@@ -99,8 +99,12 @@ export default class Wallet extends Vue {
     amountBurn = 0;
 
     async mounted() {
-        debugger;
-        await this.$store.dispatch('balance/init', this.profile.address);
+        try {
+            await this.$store.dispatch('balance/init', this.profile.memberships);
+        } catch (e) {
+            console.error(e);
+            debugger;
+        }
     }
 
     async deposit(amount: string) {
