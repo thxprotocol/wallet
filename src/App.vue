@@ -1,6 +1,6 @@
 <template>
     <div id="app" class="d-flex flex-column h-100 ">
-        <div class="flex-grow-1 overflow-auto" v-if="!busy || !$router.currentRoute.meta.requiresAuth">
+        <div class="flex-grow-1 overflow-auto">
             <b-jumbotron bg-variant="primary" text-variant="white" v-if="$router.currentRoute.name">
                 <div class="container">
                     <h1 class="display-4">{{ $router.currentRoute.name }}</h1>
@@ -8,10 +8,9 @@
             </b-jumbotron>
             <router-view />
         </div>
-        <div class="flex-grow-0" v-if="!busy || !$router.currentRoute.meta.requiresAuth">
+        <div class="flex-grow-0">
             <navbar />
         </div>
-        <modal-set-private-key @init="init()" />
     </div>
 </template>
 
@@ -19,50 +18,15 @@
 import { BButton, BJumbotron } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import Navbar from '@/components/Navbar.vue';
-import ModalSetPrivateKey from './components/modals/ModalSetPrivateKey.vue';
-import { mapGetters } from 'vuex';
-import { UserProfile } from './store/modules/account';
 
 @Component({
     components: {
-        'modal-set-private-key': ModalSetPrivateKey,
         'b-jumbotron': BJumbotron,
         'b-button': BButton,
         'navbar': Navbar,
     },
-    computed: mapGetters({
-        profile: 'account/profile',
-        privateKey: 'account/privateKey',
-        memberships: 'memberships/all',
-    }),
 })
-export default class App extends Vue {
-    busy = false;
-    error = '';
-
-    // getters
-    privateKey!: string;
-    profile!: UserProfile;
-    assetPools!: any[];
-
-    async mounted() {
-        this.busy = true;
-
-        if (!this.privateKey) {
-            this.$bvModal.show('modalSetPrivateKey');
-        }
-    }
-
-    async init() {
-        try {
-            await this.$store.dispatch('memberships/init', this.profile.memberships);
-        } catch (e) {
-            this.error = e.toString();
-        } finally {
-            this.busy = false;
-        }
-    }
-}
+export default class App extends Vue {}
 </script>
 
 <style lang="scss">
@@ -100,12 +64,12 @@ h3 {
     width: 100%;
 }
 
-.text-overflow-200 {
+.text-overflow-75 {
     text-overflow: ellipsis;
     white-space: nowrap;
     display: block;
     overflow: hidden;
-    width: 100px;
+    width: 75px;
 }
 
 .bg-yellow {

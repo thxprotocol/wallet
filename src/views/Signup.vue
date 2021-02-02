@@ -27,31 +27,7 @@
                         <b-form-input type="password" v-model="confirmPassword" />
                     </div>
                     <hr />
-                    <div class="form-group">
-                        <label>Private Key:</label>
-                        <b-input-group>
-                            <b-form-input v-model="privateKey" />
-                            <b-input-group-append>
-                                <b-button @click="generateRandomPrivateKey()">Generate</b-button>
-                            </b-input-group-append>
-                        </b-input-group>
-                    </div>
-                    <hr />
-                    <b-alert v-if="privateKey" variant="warning" show>
-                        <strong>Create a secure backup of your private key elsewhere</strong>.
-                    </b-alert>
-
-                    <b-form-checkbox id="checkbox-backupStatus" v-model="backupStatus" name="checkbox-backupStatus">
-                        I have made a secure backup of my private key.
-                    </b-form-checkbox>
-
-                    <b-button
-                        :disabled="!backupStatus || !privateKey"
-                        block
-                        class="mt-3 btn-rounded"
-                        variant="primary"
-                        type="submit"
-                    >
+                    <b-button block class="mt-3 btn-rounded" variant="primary" type="submit">
                         Submit
                     </b-button>
                 </form>
@@ -75,7 +51,6 @@ import {
 } from 'bootstrap-vue';
 import { ethers } from 'ethers';
 import { account } from '@/utils/network';
-import { UserProfile } from '@/store/modules/account';
 import { mapGetters } from 'vuex';
 import { User } from 'oidc-client';
 
@@ -96,7 +71,6 @@ import { User } from 'oidc-client';
     }),
 })
 export default class Register extends Vue {
-    privateKey = account.privateKey;
     backupStatus = false;
     firstName = '';
     lastName = '';
@@ -114,34 +88,18 @@ export default class Register extends Vue {
     }
 
     async submit() {
-        const address = (await this.getAddressForPrivateKey(this.privateKey)) || '';
-
-        if (ethers.utils.isAddress(address)) {
-            try {
-                await this.$store.dispatch('account/signup', {
-                    address,
-                    firstName: this.firstName,
-                    lastName: this.lastName,
-                    email: this.email,
-                    password: this.password,
-                    confirmPassword: this.confirmPassword,
-                });
-                this.$router.push('/');
-            } catch (e) {
-                console.error(e.toString());
-                this.$bvToast.toast('There was a problem with the request.', { title: 'Error: ', variant: 'danger' });
-            }
-        }
-    }
-
-    async getAddressForPrivateKey(privateKey: string) {
         try {
-            const account = new ethers.Wallet(privateKey);
-
-            return await account.getAddress();
+            await this.$store.dispatch('account/signup', {
+                firstName: this.firstName,
+                lastName: this.lastName,
+                email: this.email,
+                password: this.password,
+                confirmPassword: this.confirmPassword,
+            });
+            this.$router.push('/');
         } catch (e) {
             console.error(e.toString());
-            this.$bvToast.toast('Your private key is not valid', { title: 'Error: ', variant: 'danger' });
+            this.$bvToast.toast('There was a problem with the request.', { title: 'Error: ', variant: 'danger' });
         }
     }
 }

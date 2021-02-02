@@ -48,7 +48,7 @@ class MembershipModule extends VuexModule {
         try {
             for (const poolAddress in memberships) {
                 const address = memberships[poolAddress];
-                debugger;
+
                 try {
                     const r: any = await axios({
                         method: 'get',

@@ -68,6 +68,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BurnProof from '@/components/BurnProof.vue';
 import { UserProfile } from '@/store/modules/account';
+import { Membership } from '@/store/modules/memberships';
 
 @Component({
     components: {
@@ -81,6 +82,7 @@ import { UserProfile } from '@/store/modules/account';
     },
     computed: mapGetters({
         profile: 'account/profile',
+        memberships: 'memberships/all',
         childMATIC: 'balance/childMATIC',
         rootERC20: 'balance/rootERC20',
         childERC20: 'balance/childERC20',
@@ -89,6 +91,7 @@ import { UserProfile } from '@/store/modules/account';
 })
 export default class Wallet extends Vue {
     profile!: UserProfile;
+    memberships!: Membership[];
     busy = {
         deposit: false,
         burn: false,
@@ -100,7 +103,9 @@ export default class Wallet extends Vue {
 
     async mounted() {
         try {
-            await this.$store.dispatch('balance/init', this.profile.memberships);
+            await this.$store.dispatch('account/getProfile');
+            debugger;
+            await this.$store.dispatch('balance/init', this.memberships);
         } catch (e) {
             console.error(e);
             debugger;

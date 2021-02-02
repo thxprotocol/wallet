@@ -5,42 +5,26 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import TorusSdk, { TorusKey } from '@toruslabs/torus-direct-web-sdk';
-import { User } from 'oidc-client';
 
 @Component({
     components: {},
     computed: mapGetters({
-        user: 'account/user',
+        privateKey: 'account/privateKey',
     }),
 })
 export default class Redirect extends Vue {
-    user!: User;
+    privateKey!: string;
 
     async mounted() {
         try {
             await this.$store.dispatch('account/signinRedirectCallback');
+            await this.$store.dispatch('account/getPrivateKey');
 
-            if (this.user) {
-                const torus = new TorusSdk({
-                    baseUrl: `${location.origin}/serviceworker`,
-                    enableLogging: true,
-                    network: 'testnet', // details for test net
-                });
-                const torusKey: TorusKey = await torus.getTorusKey(
-                    'thx-email-password-testnet',
-                    this.user.profile.sub,
-                    { verifier_id: this.user.profile.sub }, // eslint-disable-line @typescript-eslint/camelcase
-                    this.user.id_token,
-                );
-                console.log(torusKey);
-                sessionStorage.setItem('thx:wallet:pkey', torusKey.privateKey);
-                debugger;
+            if (this.privateKey) {
+                this.$router.push('/');
             }
-            debugger;
-
-            this.$router.push('/');
         } catch (e) {
+            console.error(e);
             return;
         }
     }

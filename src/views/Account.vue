@@ -5,7 +5,7 @@
             <label for="accountAddress">Wallet address</label>
         </h2>
         <b-input-group>
-            <b-form-input id="accountAddress" readonly :value="profile.address" />
+            <b-form-input id="accountAddress" readonly :value="address" />
             <b-input-group-append>
                 <b-button variant="secondary" v-b-modal="'modalSetPrivateKey'">
                     Change
@@ -22,13 +22,16 @@
                 v-for="(membership, key) of memberships"
             >
                 <strong class="mr-auto">{{ membership.title }}</strong>
+                <b-badge class="mr-3 text-overflow-75" variant="secondary" pill v-if="membership.address !== address">
+                    {{ membership.address }}
+                </b-badge>
                 <b-badge class="mr-3" variant="secondary" pill v-if="membership.isManager">
                     Manager
                 </b-badge>
                 <b-badge variant="primary" pill>
-                    {{ membership.token.balance.hex | fromBigNumber }} {{ membership.token.symbol }}
+                    {{ membership.poolToken.balance.hex | fromBigNumber }} {{ membership.poolToken.symbol }}
                 </b-badge>
-                <modal-asset-pool :assetPool="membership" />
+                <modal-asset-pool :membership="membership" />
             </b-list-group-item>
             <b-list-group-item class="text-center" v-if="busy">
                 <b-spinner variant="primary" />
@@ -77,17 +80,32 @@ import { mapGetters } from 'vuex';
     },
     computed: mapGetters({
         user: 'account/user',
+        address: 'account/address',
+        privateKey: 'account/privateKey',
         profile: 'account/profile',
         memberships: 'memberships/all',
     }),
 })
 export default class AccountView extends Vue {
-    busy = false;
+    busy = true;
     error = '';
 
     // getters
     user!: User;
     profile!: UserProfile;
+    address!: string;
+
+    async mounted() {
+        this.busy = true;
+        try {
+            await this.$store.dispatch('account/getProfile');
+            await this.$store.dispatch('memberships/init', this.profile.memberships);
+        } catch (e) {
+            this.error = e.toString();
+        } finally {
+            this.busy = false;
+        }
+    }
 
     async logout() {
         try {

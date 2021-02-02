@@ -1,10 +1,8 @@
 import axios from 'axios';
+import TorusSdk, { TorusKey } from '@toruslabs/torus-direct-web-sdk';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import { decryptString } from '@/utils/decrypt';
 import { User, UserManager } from 'oidc-client';
 import { ethers } from 'ethers';
-import { encryptString } from '@/utils/encrypt';
-import TorusSdk, { TorusKey } from '@toruslabs/torus-direct-web-sdk';
 
 interface AuthObject {
     email: string;
@@ -57,24 +55,29 @@ class AccountModule extends VuexModule {
     userManager: UserManager = new UserManager(config);
     _user!: User;
     _profile: UserProfile | null = null;
-    _password = '';
     _privateKey = '';
-    _privateKeys: { [address: string]: string } = {};
+
+    get address(): string {
+        if (!this.privateKey) {
+            return '';
+        }
+        const wallet = new ethers.Wallet(this.privateKey);
+        if (ethers.utils.isAddress(wallet.address)) {
+            return wallet.address;
+        } else {
+            return '';
+        }
+    }
 
     get user() {
         return this._user;
     }
 
-    get password() {
-        return this._password;
-    }
-
     get privateKey() {
-        return this._privateKey;
-    }
-
-    get privateKeys() {
-        return this._privateKeys;
+        if (!this.user) {
+            return '';
+        }
+        return sessionStorage.getItem(`thx:wallet:user:${this.user.profile.sub}:key`);
     }
 
     get profile() {
@@ -91,44 +94,24 @@ class AccountModule extends VuexModule {
         this._profile = profile;
     }
 
-    @Mutation
-    setPassword({ pkey, keys, pwd }: { pkey: string; keys: string[]; pwd: string }) {
-        try {
-            this._privateKey = decryptString(pkey, pwd);
-
-            for (const address in keys) {
-                this._privateKeys[address] = decryptString(keys[address], pwd);
-            }
-            this._password = pwd;
-        } catch (e) {
-            throw Error(e);
-        }
-    }
-
     @Action
-    async setPrivateKey({ pkey, pwd }: { pkey: string; pwd: string }) {
+    async getPrivateKey() {
         try {
-            const account = new ethers.Wallet(pkey);
-
-            if (ethers.utils.isAddress(account.address)) {
-                const encryptedKey = encryptString(pkey, pwd);
-                const r = await axios({
-                    method: 'PATCH',
-                    url: '/account',
-                    data: {
-                        address: account.address,
-                        privateKey: encryptedKey,
-                    },
-                });
-
-                if (r.status !== 200) {
-                    throw Error('PATCH /account failed.');
-                }
-
-                this.context.commit('setUserProfile', r.data);
-                this.context.commit('setPassword', pwd);
-            }
+            const torus = new TorusSdk({
+                baseUrl: `${location.origin}/serviceworker`,
+                enableLogging: true,
+                network: 'testnet',
+            });
+            const torusKey: TorusKey = await torus.getTorusKey(
+                'thx-email-password-testnet',
+                this.user.profile.sub,
+                { verifier_id: this.user.profile.sub }, // eslint-disable-line @typescript-eslint/camelcase
+                this.user.access_token,
+            );
+            debugger;
+            sessionStorage.setItem(`thx:wallet:user:${this.user.profile.sub}:key`, `0x${torusKey.privateKey}`);
         } catch (e) {
+            console.error(e);
             return e;
         }
     }
@@ -162,8 +145,6 @@ class AccountModule extends VuexModule {
 
             return r.data;
         } catch (e) {
-            console.log(e);
-            debugger;
             return e;
         }
     }
