@@ -94,10 +94,12 @@ export default class AccountView extends Vue {
     user!: User;
     profile!: UserProfile;
     address!: string;
+    privateKey!: string;
 
     async mounted() {
         this.busy = true;
         try {
+            this.$store.commit('network/connect', this.privateKey);
             await this.$store.dispatch('account/getProfile');
             await this.$store.dispatch('memberships/init', this.profile.memberships);
         } catch (e) {

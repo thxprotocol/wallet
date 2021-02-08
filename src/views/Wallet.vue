@@ -83,11 +83,12 @@ import { UserProfile } from '@/store/modules/account';
     computed: mapGetters({
         address: 'account/address',
         profile: 'account/profile',
+        privateKey: 'account/privateKey',
         memberships: 'memberships/all',
-        childMATIC: 'balance/childMATIC',
-        rootERC20: 'balance/rootERC20',
-        childERC20: 'balance/childERC20',
-        rootETH: 'balance/rootETH',
+        childMATIC: 'network/childMATIC',
+        rootERC20: 'network/rootERC20',
+        childERC20: 'network/childERC20',
+        rootETH: 'network/rootETH',
     }),
 })
 export default class Wallet extends Vue {
@@ -102,13 +103,16 @@ export default class Wallet extends Vue {
 
     // getters
     address!: string;
+    privateKey!: string;
     profile!: UserProfile;
     memberships!: Membership[];
 
     async mounted() {
         try {
             await this.$store.dispatch('account/getProfile');
-            await this.$store.dispatch('balance/init', { address: this.address, memberships: this.memberships });
+            this.$store.commit('network/connect', this.privateKey);
+            await this.$store.dispatch('memberships/init', this.profile?.memberships);
+            await this.$store.dispatch('network/init', { address: this.address, memberships: this.memberships });
         } catch (e) {
             console.error(e);
             debugger;
@@ -118,7 +122,7 @@ export default class Wallet extends Vue {
     async deposit(amount: string) {
         this.busy.deposit = true;
         try {
-            await this.$store.dispatch('balance/deposit', amount);
+            await this.$store.dispatch('network/deposit', amount);
         } catch (e) {
             console.error(e);
             debugger;
@@ -130,7 +134,7 @@ export default class Wallet extends Vue {
     async burn(amount: number) {
         this.busy.burn = true;
         try {
-            const tx = await this.$store.dispatch('balance/burn', amount);
+            const tx = await this.$store.dispatch('network/burn', amount);
 
             if (tx.transactionHash) {
                 const data = this.profile;

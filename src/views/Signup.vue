@@ -49,8 +49,6 @@ import {
     BAlert,
     BFormCheckbox,
 } from 'bootstrap-vue';
-import { ethers } from 'ethers';
-import { account } from '@/utils/network';
 import { mapGetters } from 'vuex';
 import { User } from 'oidc-client';
 

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
+import { UserProfile } from './account';
 
 interface TokenBalance {
     name: string;
@@ -44,13 +45,10 @@ class MembershipModule extends VuexModule {
     }
 
     @Action
-    async init(memberships: { [address: string]: string }) {
-        debugger;
+    async init(profile: UserProfile) {
         try {
-            for (const poolAddress in memberships) {
+            for (const poolAddress of profile.memberships) {
                 try {
-                    const address = memberships[poolAddress];
-
                     const r: any = await axios({
                         method: 'get',
                         url: '/asset_pools/' + poolAddress,
@@ -59,14 +57,14 @@ class MembershipModule extends VuexModule {
 
                     const x = await axios({
                         method: 'get',
-                        url: '/members/' + address,
+                        url: '/members/' + profile.address,
                         headers: { AssetPool: poolAddress },
                     });
 
                     this.context.commit(
                         'add',
                         new Membership({
-                            address,
+                            address: profile.address,
                             title: r.data.title,
                             poolAddress: r.data.address,
                             poolToken: r.data.token,

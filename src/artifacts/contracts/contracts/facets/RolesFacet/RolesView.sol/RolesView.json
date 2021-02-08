@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "RolesView",
+  "sourceName": "contracts/contracts/facets/RolesFacet/RolesView.sol",
+  "abi": [],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220953ad616a7e41dc7a2467890dbc999266a6dac82af4393563cc8c898915bb36a64736f6c63430007040033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220953ad616a7e41dc7a2467890dbc999266a6dac82af4393563cc8c898915bb36a64736f6c63430007040033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

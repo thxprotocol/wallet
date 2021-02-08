@@ -3,6 +3,7 @@ import TorusSdk, { TorusKey } from '@toruslabs/torus-direct-web-sdk';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { User, UserManager } from 'oidc-client';
 import { ethers } from 'ethers';
+import { decryptString } from '@/utils/decrypt';
 
 interface AuthObject {
     email: string;
@@ -44,10 +45,10 @@ const config: any = {
 };
 
 export interface UserProfile {
+    address: string;
     privateKey: string;
     burnProofs: string[];
-    memberships: { [poolAddress: string]: string };
-    privateKeys: { [address: string]: string };
+    memberships: string[];
 }
 
 @Module({ namespaced: true })
@@ -55,7 +56,6 @@ class AccountModule extends VuexModule {
     userManager: UserManager = new UserManager(config);
     _user!: User;
     _profile: UserProfile | null = null;
-    _privateKey = '';
 
     get address(): string {
         if (!this.privateKey) {
@@ -108,7 +108,6 @@ class AccountModule extends VuexModule {
                 { verifier_id: this.user.profile.sub }, // eslint-disable-line @typescript-eslint/camelcase
                 this.user.access_token,
             );
-            debugger;
             sessionStorage.setItem(`thx:wallet:user:${this.user.profile.sub}:key`, `0x${torusKey.privateKey}`);
         } catch (e) {
             console.error(e);

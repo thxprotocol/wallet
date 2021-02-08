@@ -43,7 +43,7 @@
 </template>
 
 <script lang="ts">
-import { QR } from '@/utils/gasStation';
+import { QR } from '@/store/modules/network';
 import { BLink, BAlert, BButton, BSpinner, BModal } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Transaction } from 'web3/eth/types';
@@ -75,20 +75,7 @@ export default class ModalDecodeQR extends Vue {
         this.busy = true;
 
         try {
-            switch (this.result.contract) {
-                case 'AssetPool':
-                    if (['claimReward', 'updateReward'].includes(this.result.method)) {
-                        await this.$store.dispatch(`assetPools/${this.result.method}`, this.result);
-                        this.variant = 'success';
-                    }
-                    break;
-                case 'BasePoll':
-                    if (['vote', 'revokeVote', 'finalize'].includes(this.result.method)) {
-                        await this.$store.dispatch(`basePolls/${this.result.method}`, this.result);
-                        this.variant = 'success';
-                    }
-                    break;
-            }
+            await this.$store.dispatch(`network/signCall`, this.result);
         } catch (error) {
             this.error = 'Decoding QR failed.';
             this.variant = 'danger';

@@ -19,7 +19,6 @@ import { Component, Vue } from 'vue-property-decorator';
 import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 import { BSpinner } from 'bootstrap-vue';
 import ModalDecodeQR from '@/components/modals/ModalDecodeQR.vue';
-import { QR } from '@/utils/gasStation';
 
 @Component({
     components: {
@@ -30,7 +29,7 @@ import { QR } from '@/utils/gasStation';
     },
 })
 export default class Home extends Vue {
-    result: QR | null = null;
+    result: any | null = null;
     busy = true;
 
     reset() {

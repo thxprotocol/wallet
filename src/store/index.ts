@@ -6,8 +6,7 @@ import { config } from 'vuex-module-decorators';
 config.rawError = true;
 
 import AccountStore from './modules/account';
-import BalanceStore from './modules/balance';
-import BasePollStore from './modules/basePolls';
+import NetworkStore from './modules/network';
 import MembershipStore from './modules/memberships';
 
 Vue.use(Vuex);
@@ -17,8 +16,7 @@ const actions = {};
 const getters = {};
 const modules = {
     account: AccountStore,
-    balance: BalanceStore,
-    basePolls: BasePollStore,
+    network: NetworkStore,
     memberships: MembershipStore,
 };
 
