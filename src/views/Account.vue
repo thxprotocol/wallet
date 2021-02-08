@@ -101,7 +101,7 @@ export default class AccountView extends Vue {
         try {
             this.$store.commit('network/connect', this.privateKey);
             await this.$store.dispatch('account/getProfile');
-            await this.$store.dispatch('memberships/init', this.profile.memberships);
+            await this.$store.dispatch('memberships/init', this.profile);
         } catch (e) {
             this.error = e.toString();
         } finally {

@@ -26,9 +26,7 @@ import Navbar from '@/components/Navbar.vue';
         'navbar': Navbar,
     },
 })
-export default class App extends Vue {
-    error = '';
-}
+export default class App extends Vue {}
 </script>
 
 <style lang="scss">
