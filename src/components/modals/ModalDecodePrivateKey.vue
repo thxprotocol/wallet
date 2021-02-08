@@ -40,7 +40,7 @@
 import { UserProfile } from '@/store/modules/account';
 import { decryptString } from '@/utils/decrypt';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
-import { ethers, Wallet } from 'ethers';
+import { ethers } from 'ethers';
 import { User } from 'oidc-client';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';

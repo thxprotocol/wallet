@@ -139,7 +139,6 @@ class NetworkModule extends VuexModule {
             });
         } catch (e) {
             console.log(e);
-            debugger;
             return e;
         }
     }
@@ -176,8 +175,6 @@ class NetworkModule extends VuexModule {
                 },
             });
         } catch (e) {
-            console.log(e);
-            debugger;
             return e;
         }
     }
