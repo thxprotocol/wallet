@@ -1,5 +1,8 @@
 <template>
-    <div><modal-decode-private-key @init="init()" /></div>
+    <div class="center-center h-100">
+        <b-spinner variant="dark"></b-spinner>
+        <modal-decode-private-key @init="init()" />
+    </div>
 </template>
 
 <script lang="ts">
@@ -8,9 +11,10 @@ import { User } from 'oidc-client';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
+import { BSpinner } from 'bootstrap-vue';
 
 @Component({
-    components: { 'modal-decode-private-key': ModalDecodePrivateKey },
+    components: { 'b-spinner': BSpinner, 'modal-decode-private-key': ModalDecodePrivateKey },
     computed: mapGetters({
         privateKey: 'account/privateKey',
         profile: 'account/profile',

@@ -8,7 +8,7 @@
             </b-jumbotron>
             <router-view />
         </div>
-        <div class="flex-grow-0">
+        <div class="flex-grow-0" v-if="profile && !profile.privateKey">
             <navbar />
         </div>
     </div>
@@ -17,6 +17,7 @@
 <script lang="ts">
 import { BButton, BJumbotron } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 import Navbar from '@/components/Navbar.vue';
 
 @Component({
@@ -25,6 +26,9 @@ import Navbar from '@/components/Navbar.vue';
         'b-button': BButton,
         'navbar': Navbar,
     },
+    computed: mapGetters({
+        profile: 'account/profile',
+    }),
 })
 export default class App extends Vue {}
 </script>

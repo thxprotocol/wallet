@@ -3,7 +3,8 @@ import TorusSdk, { TorusKey } from '@toruslabs/torus-direct-web-sdk';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { User, UserManager } from 'oidc-client';
 import { ethers } from 'ethers';
-import { decryptString } from '@/utils/decrypt';
+
+const VUE_APP_TORUS_VERIFIER = process.env.VUE_APP_TORUS_VERIFIER || '';
 
 interface AuthObject {
     email: string;
@@ -103,7 +104,7 @@ class AccountModule extends VuexModule {
                 network: 'testnet',
             });
             const torusKey: TorusKey = await torus.getTorusKey(
-                'thx-email-password-testnet',
+                VUE_APP_TORUS_VERIFIER,
                 this.user.profile.sub,
                 { verifier_id: this.user.profile.sub }, // eslint-disable-line @typescript-eslint/camelcase
                 this.user.access_token,

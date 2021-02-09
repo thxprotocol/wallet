@@ -127,6 +127,7 @@ export default class ModalDecodePrivateKey extends Vue {
 
             if (isValidKey(decryptedPrivateKey)) {
                 await this.upgradeAddress(decryptedPrivateKey);
+                await this.$store.dispatch('account/getProfile');
                 this.$bvModal.hide('modalDecodePrivateKey');
             } else {
                 throw Error('Not a valid key');
