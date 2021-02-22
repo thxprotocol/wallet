@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css?family=Exo+2:200,400,400i,700,700i,900,900i');
+@import './scss/variables';
+
+// Required
+@import './node_modules/bootstrap/scss/functions';
+@import './node_modules/bootstrap/scss/variables';
+@import './node_modules/bootstrap/scss/mixins';
+
+// Optional
+@import './node_modules/bootstrap/scss/utilities';
+@import './node_modules/bootstrap/scss/root';
+@import './node_modules/bootstrap/scss/reboot';
+@import './node_modules/bootstrap/scss/type';
+
+// Defaults
+@import './node_modules/bootstrap/scss/card';
+@import './node_modules/bootstrap/scss/badge';
+@import './node_modules/bootstrap/scss/forms';
+@import './node_modules/bootstrap/scss/custom-forms';
+@import './node_modules/bootstrap/scss/list-group';
+@import './node_modules/bootstrap/scss/alert';
+@import './node_modules/bootstrap/scss/modal';
+@import './node_modules/bootstrap/scss/close';
+@import './node_modules/bootstrap/scss/tooltip';
+@import './node_modules/bootstrap/scss/transitions';
+@import './node_modules/bootstrap/scss/buttons';
+@import './node_modules/bootstrap/scss/spinners';
+@import './node_modules/bootstrap/scss/nav';
+@import './node_modules/bootstrap/scss/navbar';
+@import './node_modules/bootstrap/scss/media';
+@import './node_modules/bootstrap/scss/input-group';
+@import './node_modules/bootstrap/scss/grid';
+@import './node_modules/bootstrap/scss/code';
+
+// Custom
+@import './scss/custom-switch';
+@import './scss/buttons';
+@import './scss/nav';
+
+// Bootstrap Vue
+@import './node_modules/bootstrap-vue/src/index.scss';
+
+// @import 'node_modules/bootstrap-vue/src/index.scss';
+// @import url('https://fonts.googleapis.com/css?family=Exo+2:200,400,400i,700,700i,900,900i');
+// @import url('https://fonts.googleapis.com/css?family=Ubuntu:200,400,400i,700,700i,900,900i');
+
+// $yellow: #fde542;
+// $blue: #039be5;
+
+html,
+body {
+    height: 100%;
+}
+
+// h1,
+// h2,
+// h3 {
+//     font-family: 'Exo 2';
+//     font-size: 1.5rem;
+// }
+
+.jumbotron {
+    padding: 1rem;
+    border-radius: 0;
+}
+
+.text-overflow {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    overflow: hidden;
+    width: 100%;
+}
+
+.text-overflow-75 {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    overflow: hidden;
+    width: 75px;
+}
+
+.overflow-auto {
+    overflow: auto;
+}
+
+.center-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-rounded {
+    border-radius: 25px;
+}

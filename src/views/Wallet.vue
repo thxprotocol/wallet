@@ -111,8 +111,8 @@ export default class Wallet extends Vue {
         try {
             await this.$store.dispatch('account/getProfile');
             this.$store.commit('network/connect', this.privateKey);
-            await this.$store.dispatch('memberships/init', this.profile?.memberships);
-            await this.$store.dispatch('network/init', { address: this.address, memberships: this.memberships });
+            // await this.$store.dispatch('memberships/init', this.profile.address);
+            await this.$store.dispatch('network/init', this.address);
         } catch (e) {
             console.error(e);
             debugger;

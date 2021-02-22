@@ -8,7 +8,7 @@
         hide-header-close
         centered
         scrollable
-        title="Decrypt temporary account"
+        title="Decode and migrate your assets"
     >
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
@@ -17,7 +17,10 @@
             <b-alert show variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
-
+            <p>
+                Assets have been stored in your temporary account. Provide your password to transfer those assets to
+                this wallet.
+            </p>
             <form @submit.prevent="update()" id="formPassword">
                 <b-form-input
                     autofocus

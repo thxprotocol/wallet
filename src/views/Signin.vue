@@ -12,7 +12,9 @@ export default class Login extends Vue {
     async mounted() {
         try {
             const token = this.$router.currentRoute.query.authentication_token;
-            await this.$store.dispatch('account/signinRedirect', token);
+            const key = this.$router.currentRoute.query.secure_key;
+
+            await this.$store.dispatch('account/signinRedirect', { token, key });
         } catch (e) {
             return;
         }

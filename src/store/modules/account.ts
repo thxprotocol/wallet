@@ -6,11 +6,6 @@ import { ethers } from 'ethers';
 
 const VUE_APP_TORUS_VERIFIER = process.env.VUE_APP_TORUS_VERIFIER || '';
 
-interface AuthObject {
-    email: string;
-    password: string;
-}
-
 export class SignupRequest {
     firstName!: string;
     lastName!: string;
@@ -188,13 +183,14 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    async signinRedirect(token = '') {
+    async signinRedirect(payload: { token: string; key: string }) {
         try {
             await this.userManager.clearStaleState();
 
             return await this.userManager.signinRedirect({
                 extraQueryParams: {
-                    authentication_token: token, // eslint-disable-line @typescript-eslint/camelcase
+                    authentication_token: payload && payload.token ? payload.token.replace(/\s/g, '+') : '', // eslint-disable-line @typescript-eslint/camelcase
+                    secure_key: payload && payload.key ? payload.key.replace(/\s/g, '+') : '', // eslint-disable-line @typescript-eslint/camelcase
                 },
             });
         } catch (e) {
@@ -231,6 +227,7 @@ class AccountModule extends VuexModule {
         try {
             await this.userManager.removeUser();
             await this.userManager.clearStaleState();
+
             await axios({
                 method: 'GET',
                 url: config.authority + '/session/end',

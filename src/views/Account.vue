@@ -2,37 +2,24 @@
     <div class="container mt-3" v-if="profile">
         <b-alert show variant="danger" v-if="error">{{ error }}</b-alert>
         <h2 class="h4">
-            <label for="accountAddress">Wallet address</label>
+            <label for="accountAddress">Your Wallet</label>
         </h2>
         <b-input-group>
             <b-form-input id="accountAddress" readonly :value="address" />
             <b-input-group-append>
                 <b-button variant="secondary" v-b-modal="'modalSetPrivateKey'">
-                    Change
+                    Copy
                 </b-button>
             </b-input-group-append>
         </b-input-group>
         <hr />
-        <h2 class="h4">Memberships</h2>
+        <h2 class="h4">Your Pools</h2>
         <b-list-group>
-            <b-list-group-item
-                v-b-modal="'modalAssetPool'"
-                class="d-flex justify-content-between align-items-center"
+            <base-list-group-item-asset-pool
+                :poolAddress="poolAddress"
                 :key="key"
-                v-for="(membership, key) of memberships"
-            >
-                <strong class="mr-auto">{{ membership.title }}</strong>
-                <b-badge class="mr-3 text-overflow-75" variant="secondary" pill v-if="membership.address !== address">
-                    {{ membership.address }}
-                </b-badge>
-                <b-badge class="mr-3" variant="secondary" pill v-if="membership.isManager">
-                    Manager
-                </b-badge>
-                <b-badge variant="primary" pill>
-                    {{ membership.poolToken.balance.hex | fromBigNumber }} {{ membership.poolToken.symbol }}
-                </b-badge>
-                <modal-asset-pool :membership="membership" />
-            </b-list-group-item>
+                v-for="(poolAddress, key) of profile.memberships"
+            />
             <b-list-group-item class="text-center" v-if="busy">
                 <b-spinner variant="primary" />
             </b-list-group-item>
@@ -40,7 +27,7 @@
 
         <hr />
 
-        <b-button class="btn-rounded" block variant="link" @click="logout()">
+        <b-button variant="secondary" @click="logout()">
             Logout
         </b-button>
     </div>
@@ -59,15 +46,15 @@ import {
     BListGroupItem,
     BSpinner,
 } from 'bootstrap-vue';
-import ModalAssetPool from '@/components/modals/ModalAssetPool.vue';
 import { User } from 'oidc-client';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
+import BaseListGroupItemAssetPool from '@/components/BaseListGroupItemAssetPool.vue';
 
 @Component({
     name: 'AccountView',
     components: {
-        'modal-asset-pool': ModalAssetPool,
+        'base-list-group-item-asset-pool': BaseListGroupItemAssetPool,
         'b-button': BButton,
         'b-badge': BBadge,
         'b-alert': BAlert,
@@ -98,10 +85,10 @@ export default class AccountView extends Vue {
 
     async mounted() {
         this.busy = true;
+
         try {
             this.$store.commit('network/connect', this.privateKey);
             await this.$store.dispatch('account/getProfile');
-            await this.$store.dispatch('memberships/init', this.profile);
         } catch (e) {
             this.error = e.toString();
         } finally {

@@ -47,8 +47,8 @@ export default class Redirect extends Vue {
         }
     }
 
-    async init() {
-        this.$router.push('/');
+    init() {
+        this.$router.push('/account');
     }
 }
 </script>

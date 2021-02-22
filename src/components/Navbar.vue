@@ -1,10 +1,10 @@
 <template>
     <b-navbar type="dark" class="bg-dark">
         <b-navbar-nav justified class="w-100">
-            <b-nav-item to="/">
+            <b-nav-item to="/" disabled>
                 Scan
             </b-nav-item>
-            <b-nav-item to="/wallet">
+            <b-nav-item to="/wallet" disabled>
                 Wallet
             </b-nav-item>
             <b-nav-item to="/account">
@@ -24,9 +24,9 @@ import { mapGetters } from 'vuex';
         'b-nav-item': BNavItem,
         'b-navbar-nav': BNavbarNav,
     },
-    computed: {
-        ...mapGetters('account', ['account']),
-    },
+    computed: mapGetters({
+        account: 'account/account',
+    }),
 })
 export default class Navbar extends Vue {}
 </script>

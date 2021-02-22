@@ -212,7 +212,7 @@ class NetworkModule extends VuexModule {
     }
 
     @Action
-    async init({ address, memberships }: { address: string; memberships: { [address: string]: string } }) {
+    async init(address: string) {
         try {
             // Loop through the memberships and detect token contracts
             // Get balances for these tokens

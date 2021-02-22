@@ -10,6 +10,7 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/Home.vue'),
         meta: {
             requiresAuth: true,
+            disabled: true,
         },
     },
     {
@@ -30,11 +31,20 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/Signup.vue'),
     },
     {
+        path: '/pools/:address',
+        component: () => import('../views/Pool.vue'),
+        meta: {
+            requiresAuth: true,
+            disabled: false,
+        },
+    },
+    {
         path: '/wallet',
         name: 'Wallet',
         component: () => import('../views/Wallet.vue'),
         meta: {
             requiresAuth: true,
+            disabled: true,
         },
     },
     {
@@ -43,6 +53,7 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/Account.vue'),
         meta: {
             requiresAuth: true,
+            disabled: false,
         },
     },
 ];

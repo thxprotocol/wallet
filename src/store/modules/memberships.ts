@@ -1,3 +1,4 @@
+import { Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { UserProfile } from './account';
@@ -26,58 +27,64 @@ export class Membership {
     }
 }
 
+export interface IMemberships {
+    [poolAddress: string]: Membership;
+}
+
 @Module({ namespaced: true })
 class MembershipModule extends VuexModule {
-    _all: Membership[] = [];
+    _all: IMemberships = {};
 
     get all() {
         return this._all;
     }
 
     @Mutation
-    add(membership: Membership) {
-        const index = this._all.findIndex(m => membership.address === m.address);
-        if (index > -1) {
-            this._all.splice(index, 1, membership);
-            return;
-        }
-        this._all.push(membership);
+    set(membership: Membership) {
+        Vue.set(this._all, membership.poolAddress, membership);
     }
 
     @Action
-    async init(profile: UserProfile) {
+    async read({ profile, poolAddress }: { profile: UserProfile; poolAddress: string }) {
+        let title = '',
+            poolToken = null,
+            isMember = false,
+            isManager = false;
         try {
-            for (const poolAddress of profile.memberships) {
-                try {
-                    const r: any = await axios({
-                        method: 'get',
-                        url: '/asset_pools/' + poolAddress,
-                        headers: { AssetPool: poolAddress },
-                    });
+            const r = await axios({
+                method: 'get',
+                url: '/asset_pools/' + poolAddress,
+                headers: { AssetPool: poolAddress },
+            });
 
-                    const x = await axios({
-                        method: 'get',
-                        url: '/members/' + profile.address,
-                        headers: { AssetPool: poolAddress },
-                    });
+            title = r.data.title;
+            poolAddress = r.data.address;
+            poolToken = r.data.token;
 
-                    this.context.commit(
-                        'add',
-                        new Membership({
-                            address: profile.address,
-                            title: r.data.title,
-                            poolAddress: r.data.address,
-                            poolToken: r.data.token,
-                            isMember: x.data.isMember,
-                            isManager: x.data.isManager,
-                        }),
-                    );
-                } catch (e) {
-                    continue;
-                }
-            }
+            const x = await axios({
+                method: 'get',
+                url: '/members/' + profile.address,
+                headers: { AssetPool: poolAddress },
+            });
+
+            isMember = x.data.isMember;
+            isManager = x.data.isManager;
         } catch (e) {
-            return e;
+            // if (e.response.status !== 404) {
+            //     return;
+            // }
+        } finally {
+            this.context.commit(
+                'set',
+                new Membership({
+                    address: profile.address,
+                    title,
+                    poolAddress,
+                    poolToken,
+                    isMember,
+                    isManager,
+                }),
+            );
         }
     }
 

@@ -6,6 +6,7 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import Web3 from 'web3';
 import { ModalPlugin, ToastPlugin } from 'bootstrap-vue';
 import { ethers } from 'ethers';
+import './main.scss';
 import './registerServiceWorker';
 
 // Set Axios default config
