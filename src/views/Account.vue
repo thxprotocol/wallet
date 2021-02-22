@@ -1,13 +1,19 @@
 <template>
     <div class="container mt-3" v-if="profile">
         <b-alert show variant="danger" v-if="error">{{ error }}</b-alert>
+        <b-alert show variant="info" dismissible @dismissed="info = ''" v-if="info">{{ info }}</b-alert>
         <h2 class="h4">
             <label for="accountAddress">Your Wallet</label>
         </h2>
         <b-input-group>
             <b-form-input id="accountAddress" readonly :value="address" />
             <b-input-group-append>
-                <b-button variant="secondary" v-b-modal="'modalSetPrivateKey'">
+                <b-button
+                    variant="secondary"
+                    v-clipboard:copy="address"
+                    v-clipboard:success="onCopy"
+                    v-clipboard:error="onError"
+                >
                     Copy
                 </b-button>
             </b-input-group-append>
@@ -27,7 +33,7 @@
 
         <hr />
 
-        <b-button variant="secondary" @click="logout()">
+        <b-button block variant="secondary" @click="logout()">
             Logout
         </b-button>
     </div>
@@ -76,12 +82,21 @@ import BaseListGroupItemAssetPool from '@/components/BaseListGroupItemAssetPool.
 export default class AccountView extends Vue {
     busy = true;
     error = '';
+    info = '';
 
     // getters
     user!: User;
     profile!: UserProfile;
     address!: string;
     privateKey!: string;
+
+    onCopy(e: any) {
+        this.info = 'You just copied: ' + e.text;
+    }
+
+    onError() {
+        this.error = 'Failed to copy texts';
+    }
 
     async mounted() {
         this.busy = true;

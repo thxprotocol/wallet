@@ -28,7 +28,7 @@
                             <strong class="font-weight-bold mr-auto">
                                 {{ withdrawal.amount.hex | fromBigNumber }} {{ membership.poolToken.symbol }}
                             </strong>
-                            <b-button variant="primary">
+                            <b-button variant="primary" @click="withdraw(withdrawal.id)">
                                 Withdraw
                             </b-button>
                         </b-list-group-item>
@@ -36,6 +36,9 @@
                     <b-alert variant="info" show class="mb-3" v-else>
                         No earned rewards found for this pool.
                     </b-alert>
+                    <b-button block variant="secondary" to="/account">
+                        Back
+                    </b-button>
                 </div>
             </template>
         </template>
@@ -49,6 +52,7 @@ import { BAlert, BButton, BJumbotron, BListGroup, BListGroupItem, BSpinner } fro
 import { IMemberships } from '@/store/modules/memberships';
 import { UserProfile } from '@/store/modules/account';
 import { IWithdrawals } from '@/store/modules/withdrawals';
+import { Wallet } from 'ethers';
 
 @Component({
     name: 'PoolView',
@@ -64,6 +68,8 @@ import { IWithdrawals } from '@/store/modules/withdrawals';
         profile: 'account/profile',
         memberships: 'memberships/all',
         withdrawals: 'withdrawals/all',
+        wallet: 'network/wallet',
+        privateKey: 'account/privateKey',
     }),
 })
 export default class PoolView extends Vue {
@@ -74,9 +80,22 @@ export default class PoolView extends Vue {
     memberships!: IMemberships;
     withdrawals!: IWithdrawals;
     profile!: UserProfile;
+    wallet!: Wallet;
+    privateKey!: string;
 
     get membership() {
         return this.memberships[this.$route.params.address];
+    }
+
+    async withdraw(id: number) {
+        this.$store.commit('network/connect', this.privateKey);
+
+        this.$store.dispatch('network/signCall', {
+            poolAddress: this.$route.params.address,
+            name: 'withdrawPollFinalize',
+            args: [id],
+            signer: this.wallet,
+        });
     }
 
     async mounted() {
@@ -86,6 +105,7 @@ export default class PoolView extends Vue {
             if (!this.profile) {
                 await this.$store.dispatch('account/getProfile');
             }
+
             if (!this.membership) {
                 await this.$store.dispatch('memberships/read', {
                     profile: this.profile,

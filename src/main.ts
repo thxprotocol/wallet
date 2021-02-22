@@ -8,6 +8,7 @@ import { ModalPlugin, ToastPlugin } from 'bootstrap-vue';
 import { ethers } from 'ethers';
 import './main.scss';
 import './registerServiceWorker';
+import VueClipboard from 'vue-clipboard2';
 
 // Set Axios default config
 axios.defaults.withCredentials = true;
@@ -45,8 +46,13 @@ axios.interceptors.response.use(
 
 // Set Vue default config and attach plugins
 Vue.config.productionTip = false;
+
+// Sets a container to fix issues related to bootstrap modals
+VueClipboard.config.autoSetContainer = true;
+
 Vue.use(ModalPlugin);
 Vue.use(ToastPlugin);
+Vue.use(VueClipboard);
 
 // Set custom filters
 Vue.filter('fromWei', (value: string) => {

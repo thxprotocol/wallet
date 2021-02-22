@@ -4,7 +4,7 @@ import HDWalletProvider from '@truffle/hdwallet-provider';
 import ISolutionArtifact from '@/artifacts/contracts/contracts/interfaces/ISolution.sol/ISolution.json';
 import { CHILD_RPC, INFURA_KEY, ROOT_RPC } from '@/utils/secrets';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import { ethers, Wallet } from 'ethers';
+import { ethers, Signer, Wallet } from 'ethers';
 import axios from 'axios';
 
 const solutionContract = (address: string, signer: Wallet) =>
@@ -61,6 +61,10 @@ class NetworkModule extends VuexModule {
         matic: '',
         erc20: '',
     };
+
+    get wallet(): Wallet {
+        return this._wallet;
+    }
 
     get maticWeb3() {
         return this._client.web3Client.getMaticWeb3();
@@ -119,8 +123,27 @@ class NetworkModule extends VuexModule {
     @Action
     async signCall({ poolAddress, name, args, signer }: SignCallPayload) {
         try {
+            let nonce;
+
             const solution = solutionContract(poolAddress, signer);
-            const nonce = parseInt(await solution.getLatestNonce(signer.address)) + 1;
+
+            try {
+                const r = await axios({
+                    url: '/account/nonce',
+                    method: 'get',
+                    headers: {
+                        AssetPool: poolAddress,
+                    },
+                });
+
+                if (r.status !== 200) {
+                    throw Error('account/nonce READ failed.');
+                }
+                nonce = r.data.nonce;
+            } catch (e) {
+                return e;
+            }
+
             const call = solution.interface.encodeFunctionData(name, args);
             const hash = Web3.utils.soliditySha3(call, nonce) || '';
             const sig = await signer.signMessage(ethers.utils.arrayify(hash));
