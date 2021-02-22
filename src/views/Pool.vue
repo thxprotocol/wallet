@@ -3,44 +3,42 @@
         <div class="h-100 w-100 center-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
-        <template v-else>
-            <b-alert show variant="danger" v-if="error">
-                {{ error }}
-            </b-alert>
-            <template v-if="membership">
-                <b-jumbotron bg-variant="primary" text-variant="dark">
-                    <div class="container">
-                        <h1 class="display-4">
-                            <strong class="font-weight-bold">
-                                {{ membership.poolToken.balance.hex | fromBigNumber }}
-                            </strong>
-                            {{ membership.poolToken.symbol }}
-                        </h1>
-                    </div>
-                </b-jumbotron>
-                <div class="container mt-3">
-                    <b-list-group class="mb-3" v-if="withdrawals[this.$route.params.address]">
-                        <b-list-group-item
-                            class="d-flex align-items-center w-100"
-                            :key="key"
-                            v-for="(withdrawal, key) of withdrawals[this.$route.params.address]"
-                        >
-                            <strong class="font-weight-bold mr-auto">
-                                {{ withdrawal.amount.hex | fromBigNumber }} {{ membership.poolToken.symbol }}
-                            </strong>
-                            <b-button variant="primary" @click="withdraw(withdrawal.id)">
-                                Withdraw
-                            </b-button>
-                        </b-list-group-item>
-                    </b-list-group>
-                    <b-alert variant="info" show class="mb-3" v-else>
-                        No earned rewards found for this pool.
-                    </b-alert>
-                    <b-button block variant="secondary" to="/account">
-                        Back
-                    </b-button>
+        <template v-if="membership">
+            <b-jumbotron bg-variant="primary" text-variant="dark">
+                <div class="container">
+                    <h1 class="display-4">
+                        <strong class="font-weight-bold">
+                            {{ membership.poolToken.balance.hex | fromBigNumber }}
+                        </strong>
+                        {{ membership.poolToken.symbol }}
+                    </h1>
                 </div>
-            </template>
+            </b-jumbotron>
+            <div class="container mt-3">
+                <b-alert show dismissable variant="danger" v-if="error">
+                    {{ error }}
+                </b-alert>
+                <b-list-group class="mb-3" v-if="withdrawals[this.$route.params.address]">
+                    <b-list-group-item
+                        class="d-flex align-items-center w-100"
+                        :key="key"
+                        v-for="(withdrawal, key) of withdrawals[this.$route.params.address]"
+                    >
+                        <strong class="font-weight-bold mr-auto">
+                            {{ withdrawal.amount.hex | fromBigNumber }} {{ membership.poolToken.symbol }}
+                        </strong>
+                        <b-button variant="primary" @click="withdraw(withdrawal.id)">
+                            Withdraw
+                        </b-button>
+                    </b-list-group-item>
+                </b-list-group>
+                <b-alert variant="info" show class="mb-3" v-else>
+                    You have no open withdrawals for this pool.
+                </b-alert>
+                <b-button block variant="secondary" to="/account">
+                    Back
+                </b-button>
+            </div>
         </template>
     </div>
 </template>
@@ -88,14 +86,20 @@ export default class PoolView extends Vue {
     }
 
     async withdraw(id: number) {
-        this.$store.commit('network/connect', this.privateKey);
+        try {
+            const msg = await this.$store.dispatch('network/signCall', {
+                poolAddress: this.$route.params.address,
+                name: 'withdrawPollFinalize',
+                args: [id],
+                signer: this.wallet,
+            });
 
-        this.$store.dispatch('network/signCall', {
-            poolAddress: this.$route.params.address,
-            name: 'withdrawPollFinalize',
-            args: [id],
-            signer: this.wallet,
-        });
+            if (msg) {
+                throw msg;
+            }
+        } catch (e) {
+            this.error = e.toString();
+        }
     }
 
     async mounted() {
@@ -105,6 +109,8 @@ export default class PoolView extends Vue {
             if (!this.profile) {
                 await this.$store.dispatch('account/getProfile');
             }
+
+            this.$store.commit('network/connect', this.privateKey);
 
             if (!this.membership) {
                 await this.$store.dispatch('memberships/read', {

@@ -1,10 +1,10 @@
 import Web3 from 'web3';
 import Matic, { MaticPOSClient } from '@maticnetwork/maticjs';
 import HDWalletProvider from '@truffle/hdwallet-provider';
-import ISolutionArtifact from '@/artifacts/contracts/contracts/interfaces/ISolution.sol/ISolution.json';
+import ISolutionArtifact from '@/artifacts/contracts/contracts/IDefaultDiamond.sol/IDefaultDiamond.json';
 import { CHILD_RPC, INFURA_KEY, ROOT_RPC } from '@/utils/secrets';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import { ethers, Signer, Wallet } from 'ethers';
+import { ethers, Wallet } from 'ethers';
 import axios from 'axios';
 
 const solutionContract = (address: string, signer: Wallet) =>
@@ -125,8 +125,6 @@ class NetworkModule extends VuexModule {
         try {
             let nonce;
 
-            const solution = solutionContract(poolAddress, signer);
-
             try {
                 const r = await axios({
                     url: '/account/nonce',
@@ -144,11 +142,11 @@ class NetworkModule extends VuexModule {
                 return e;
             }
 
+            const solution = solutionContract(poolAddress, signer);
             const call = solution.interface.encodeFunctionData(name, args);
             const hash = Web3.utils.soliditySha3(call, nonce) || '';
             const sig = await signer.signMessage(ethers.utils.arrayify(hash));
-
-            await axios({
+            const r = await axios({
                 url: '/gas_station/call',
                 method: 'post',
                 headers: {
@@ -160,8 +158,11 @@ class NetworkModule extends VuexModule {
                     sig,
                 },
             });
+
+            if (r.status !== 200) {
+                throw Error('account/nonce READ failed.');
+            }
         } catch (e) {
-            console.log(e);
             return e;
         }
     }

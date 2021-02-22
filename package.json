@@ -50,7 +50,7 @@
         "test:unit": "vue-cli-service test:unit",
         "test:e2e": "vue-cli-service test:e2e",
         "lint": "vue-cli-service lint",
-        "copy-contracts": "cd ./contracts; yarn; yarn buidler compile; cp -r ./artifacts ../src; cd ../"
+        "build:contracts": "npx hardhat compile"
     },
     "dependencies": {
         "@toruslabs/torus-direct-web-sdk": "^3.5.7",
@@ -98,7 +98,7 @@
         "eslint-plugin-prettier": "^3.1.3",
         "eslint-plugin-vue": "^6.2.2",
         "geckodriver": "^1.20.0",
-        "hardhat": "^2.0.8",
+        "hardhat": "^2.0.10",
         "json-loader": "^0.5.7",
         "node-sass": "^4.12.0",
         "prettier": "^1.19.1",

@@ -5,6 +5,7 @@ import { UserProfile } from './account';
 
 interface TokenBalance {
     name: string;
+    address: string;
     symbol: string;
     balance: { type: string; hex: string };
 }

@@ -1,0 +1,10 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "RelayReceiver",
+  "sourceName": "contracts/contracts/TMP/RelayReceiver.sol",
+  "abi": [],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea2646970667358221220141e9cc0e47bd4af9a3013debb3a04d23da7c173673ea88809401dbd64c85dd564736f6c63430007040033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220141e9cc0e47bd4af9a3013debb3a04d23da7c173673ea88809401dbd64c85dd564736f6c63430007040033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

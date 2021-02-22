@@ -4,7 +4,7 @@ import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { UserProfile } from './account';
 
 interface WithdrawalData {
-    pollId: number;
+    id: number;
     amount: string;
     beneficiary: string;
     state: boolean;
@@ -18,8 +18,8 @@ class Withdrawal {
     state: boolean;
     poolAddress: string;
 
-    constructor({ pollId, amount, beneficiary, state, poolAddress }: WithdrawalData) {
-        this.id = pollId;
+    constructor({ id, amount, beneficiary, state, poolAddress }: WithdrawalData) {
+        this.id = id;
         this.amount = amount;
         this.beneficiary = beneficiary;
         this.state = state;
@@ -62,15 +62,13 @@ class WithdrawalModule extends VuexModule {
                 throw Error('Withdrawals READ failed.');
             }
 
-            for (const id of r.data.withdrawPolls) {
-                const x = await axios({
-                    method: 'get',
-                    url: `/withdrawals/${id}`,
-                    headers: { AssetPool: poolAddress },
-                });
-
-                this.context.commit('set', new Withdrawal({ ...x.data, poolAddress }));
+            for (const withdrawPoll of r.data.withdrawPolls) {
+                this.context.commit('set', new Withdrawal({ ...withdrawPoll, poolAddress }));
             }
+
+            // for (const withdrawn of r.data.withdrawn) {
+            //     this.context.commit('set', new Withdrawal({ ...withdrawn, poolAddress }));
+            // }
         } catch (e) {
             return e;
         }
