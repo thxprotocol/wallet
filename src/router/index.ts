@@ -10,7 +10,13 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/Home.vue'),
         meta: {
             requiresAuth: true,
-            disabled: true,
+        },
+    },
+    {
+        path: '/demo',
+        component: () => import('../views/Demo.vue'),
+        meta: {
+            requiresAuth: false,
         },
     },
     {
@@ -35,7 +41,6 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/Pool.vue'),
         meta: {
             requiresAuth: true,
-            disabled: false,
         },
     },
     {
@@ -44,7 +49,6 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/Wallet.vue'),
         meta: {
             requiresAuth: true,
-            disabled: true,
         },
     },
     {
@@ -53,7 +57,6 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/Account.vue'),
         meta: {
             requiresAuth: true,
-            disabled: false,
         },
     },
 ];

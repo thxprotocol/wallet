@@ -1,7 +1,7 @@
 <template>
     <b-navbar type="dark" class="bg-dark">
         <b-navbar-nav justified class="w-100">
-            <b-nav-item to="/" disabled>
+            <b-nav-item to="/">
                 Scan
             </b-nav-item>
             <b-nav-item to="/wallet" disabled>

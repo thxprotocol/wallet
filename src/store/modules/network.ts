@@ -10,6 +10,25 @@ import axios from 'axios';
 const solutionContract = (address: string, signer: Wallet) =>
     new ethers.Contract(address, ISolutionArtifact.abi, signer);
 
+async function getNonce(poolAddress: string) {
+    try {
+        const r = await axios({
+            url: '/account/nonce',
+            method: 'get',
+            headers: {
+                AssetPool: poolAddress,
+            },
+        });
+
+        if (r.status !== 200) {
+            throw Error('account/nonce READ failed.');
+        }
+        return r.data.nonce;
+    } catch (e) {
+        return e;
+    }
+}
+
 interface SignCallPayload {
     poolAddress: string;
     name: string;
@@ -18,17 +37,9 @@ interface SignCallPayload {
 }
 
 export interface QR {
-    contract: string;
-    assetPoolAddress: string;
-    contractAddress: string;
-    method: string;
-    params: {
-        agree: boolean;
-        reward_id: number;
-        id: number;
-        withdrawAmount: number;
-        withdrawDuration: number;
-    };
+    poolAddress: string;
+    name: string;
+    args: any[];
 }
 
 export const config = {
@@ -123,25 +134,7 @@ class NetworkModule extends VuexModule {
     @Action
     async signCall({ poolAddress, name, args, signer }: SignCallPayload) {
         try {
-            let nonce;
-
-            try {
-                const r = await axios({
-                    url: '/account/nonce',
-                    method: 'get',
-                    headers: {
-                        AssetPool: poolAddress,
-                    },
-                });
-
-                if (r.status !== 200) {
-                    throw Error('account/nonce READ failed.');
-                }
-                nonce = r.data.nonce;
-            } catch (e) {
-                return e;
-            }
-
+            const nonce = await getNonce(poolAddress);
             const solution = solutionContract(poolAddress, signer);
             const call = solution.interface.encodeFunctionData(name, args);
             const hash = Web3.utils.soliditySha3(call, nonce) || '';
@@ -162,8 +155,10 @@ class NetworkModule extends VuexModule {
             if (r.status !== 200) {
                 throw Error('account/nonce READ failed.');
             }
+
+            return r.data.tx;
         } catch (e) {
-            return e;
+            throw Error(e);
         }
     }
 

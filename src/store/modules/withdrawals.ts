@@ -11,7 +11,7 @@ interface WithdrawalData {
     poolAddress: string;
 }
 
-class Withdrawal {
+export class Withdrawal {
     id: number;
     amount: string;
     beneficiary: string;
@@ -47,6 +47,11 @@ class WithdrawalModule extends VuexModule {
             Vue.set(this._all, withdrawal.poolAddress, {});
         }
         Vue.set(this._all[withdrawal.poolAddress], withdrawal.id, withdrawal);
+    }
+
+    @Mutation
+    remove(withdrawal: Withdrawal) {
+        Vue.delete(this._all[withdrawal.poolAddress], withdrawal.id);
     }
 
     @Action

@@ -1,5 +1,5 @@
 <template>
-    <div class="h-100 d-flex align-items-center justify-content-center">
+    <div class="h-100 center-center">
         <modal-decode-qr @reset="reset()" :result="result" v-if="result" />
         <b-spinner variant="dark" />
         <qrcode-stream @decode="onDecode" track></qrcode-stream>
@@ -19,6 +19,8 @@ import { Component, Vue } from 'vue-property-decorator';
 import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 import { BSpinner } from 'bootstrap-vue';
 import ModalDecodeQR from '@/components/modals/ModalDecodeQR.vue';
+import { mapGetters } from 'vuex';
+import { UserProfile } from '@/store/modules/account';
 
 @Component({
     components: {
@@ -27,10 +29,31 @@ import ModalDecodeQR from '@/components/modals/ModalDecodeQR.vue';
         'qrcode-capture': QrcodeCapture,
         'b-spinner': BSpinner,
     },
+    computed: mapGetters({
+        profile: 'account/profile',
+    }),
 })
 export default class Home extends Vue {
     result: any | null = null;
     busy = true;
+    error = '';
+
+    // getters
+    profile!: UserProfile;
+
+    async mounted() {
+        this.busy = true;
+
+        try {
+            if (!this.profile) {
+                await this.$store.dispatch('account/getProfile');
+            }
+        } catch (e) {
+            this.error = e.toString();
+        } finally {
+            this.busy = false;
+        }
+    }
 
     reset() {
         this.result = null;

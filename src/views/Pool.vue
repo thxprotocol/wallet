@@ -3,7 +3,7 @@
         <div class="h-100 w-100 center-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
-        <template v-if="membership">
+        <template v-if="!busy && membership">
             <b-jumbotron bg-variant="primary" text-variant="dark">
                 <div class="container">
                     <h1 class="display-4">
@@ -18,7 +18,7 @@
                 <b-alert show dismissable variant="danger" v-if="error">
                     {{ error }}
                 </b-alert>
-                <b-list-group class="mb-3" v-if="withdrawals[this.$route.params.address]">
+                <b-list-group class="mb-3" v-if="hasWithdrawals">
                     <b-list-group-item
                         class="d-flex align-items-center w-100"
                         :key="key"
@@ -27,7 +27,7 @@
                         <strong class="font-weight-bold mr-auto">
                             {{ withdrawal.amount.hex | fromBigNumber }} {{ membership.poolToken.symbol }}
                         </strong>
-                        <b-button variant="primary" @click="withdraw(withdrawal.id)">
+                        <b-button variant="primary" @click="withdraw(withdrawal)">
                             Withdraw
                         </b-button>
                     </b-list-group-item>
@@ -49,7 +49,7 @@ import { mapGetters } from 'vuex';
 import { BAlert, BButton, BJumbotron, BListGroup, BListGroupItem, BSpinner } from 'bootstrap-vue';
 import { IMemberships } from '@/store/modules/memberships';
 import { UserProfile } from '@/store/modules/account';
-import { IWithdrawals } from '@/store/modules/withdrawals';
+import { IWithdrawals, Withdrawal } from '@/store/modules/withdrawals';
 import { Wallet } from 'ethers';
 
 @Component({
@@ -81,24 +81,30 @@ export default class PoolView extends Vue {
     wallet!: Wallet;
     privateKey!: string;
 
+    get hasWithdrawals() {
+        return (
+            this.withdrawals &&
+            this.withdrawals[this.$route.params.address] &&
+            Object.values(this.withdrawals[this.$route.params.address]).length
+        );
+    }
+
     get membership() {
         return this.memberships[this.$route.params.address];
     }
 
-    async withdraw(id: number) {
+    async withdraw(withdrawal: Withdrawal) {
         try {
-            const msg = await this.$store.dispatch('network/signCall', {
+            await this.$store.dispatch('network/signCall', {
                 poolAddress: this.$route.params.address,
                 name: 'withdrawPollFinalize',
-                args: [id],
+                args: [withdrawal.id],
                 signer: this.wallet,
             });
 
-            if (msg) {
-                throw msg;
-            }
+            this.$store.commit('withdrawals/remove', withdrawal);
         } catch (e) {
-            this.error = e.toString();
+            this.error = 'Error: Signed withdraw call reverted.';
         }
     }
 
@@ -109,9 +115,9 @@ export default class PoolView extends Vue {
             if (!this.profile) {
                 await this.$store.dispatch('account/getProfile');
             }
-
-            this.$store.commit('network/connect', this.privateKey);
-
+            if (!this.wallet) {
+                this.$store.commit('network/connect', this.privateKey);
+            }
             if (!this.membership) {
                 await this.$store.dispatch('memberships/read', {
                     profile: this.profile,

@@ -28,10 +28,10 @@
                         <small class="text-overflow-200">{{ result.contractAddress }}</small>
                     </p>
                 </div> -->
-                <!-- <small class="h-20">
+                <small class="h-20">
                     <code class="text-white" v-if="tx">{{ tx }}</code>
-                    <code class="text-white" v-if="err">{{ err }}</code>
-                </small> -->
+                    <code class="text-white" v-if="error">{{ error }}</code>
+                </small>
             </template>
         </template>
         <template v-slot:modal-footer="{ ok }">
@@ -45,7 +45,9 @@
 <script lang="ts">
 import { QR } from '@/store/modules/network';
 import { BLink, BAlert, BButton, BSpinner, BModal } from 'bootstrap-vue';
+import { Wallet } from 'ethers';
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 import { Transaction } from 'web3/eth/types';
 
 @Component({
@@ -57,12 +59,20 @@ import { Transaction } from 'web3/eth/types';
         'b-spinner': BSpinner,
         'b-button': BButton,
     },
+    computed: mapGetters({
+        privateKey: 'account/privateKey',
+        wallet: 'network/wallet',
+    }),
 })
 export default class ModalDecodeQR extends Vue {
     error = '';
     busy = true;
     variant = 'light';
     tx: Transaction | null = null;
+
+    // getters
+    wallet!: Wallet;
+    privateKey!: string;
 
     @Prop() result!: QR;
 
@@ -75,7 +85,14 @@ export default class ModalDecodeQR extends Vue {
         this.busy = true;
 
         try {
-            await this.$store.dispatch(`network/signCall`, this.result);
+            this.$store.commit('network/connect', this.privateKey);
+            this.tx = await this.$store.dispatch(`network/signCall`, {
+                poolAddress: this.result.poolAddress,
+                name: this.result.name,
+                args: this.result.args,
+                signer: this.wallet,
+            });
+            this.variant = 'success';
         } catch (error) {
             this.error = 'Decoding QR failed.';
             this.variant = 'danger';
