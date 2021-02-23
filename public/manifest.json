@@ -1,6 +1,6 @@
 {
-    "name": "THX",
     "short_name": "THX",
+    "name": "THX Web Wallet",
     "theme_color": "#FDE542",
     "background_color": "#FFFFFF",
     "display": "standalone",
