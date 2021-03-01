@@ -32,13 +32,15 @@
 @import './node_modules/bootstrap/scss/grid';
 @import './node_modules/bootstrap/scss/code';
 
+// Bootstrap Vue
+@import './node_modules/bootstrap-vue/src/index.scss';
+
 // Custom
 @import './scss/custom-switch';
 @import './scss/buttons';
 @import './scss/nav';
-
-// Bootstrap Vue
-@import './node_modules/bootstrap-vue/src/index.scss';
+@import './scss/navbar';
+@import './scss/jumbotron';
 
 // @import 'node_modules/bootstrap-vue/src/index.scss';
 // @import url('https://fonts.googleapis.com/css?family=Exo+2:200,400,400i,700,700i,900,900i');
@@ -50,18 +52,15 @@
 html,
 body {
     height: 100%;
+    background-color: $yellow;
+    overflow: hidden;
 }
 
-// h1,
-// h2,
-// h3 {
-//     font-family: 'Exo 2';
-//     font-size: 1.5rem;
-// }
-
-.jumbotron {
-    padding: 1rem;
-    border-radius: 0;
+.main-container {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    background-color: $light;
+    padding: 1rem 1rem 2rem 1rem;
 }
 
 .text-overflow {

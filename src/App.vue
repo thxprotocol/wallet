@@ -1,13 +1,13 @@
 <template>
     <div id="app" class="d-flex flex-column h-100 ">
-        <div class="flex-grow-1 overflow-auto">
-            <b-jumbotron bg-variant="primary" text-variant="dark" v-if="$router.currentRoute.name">
+        <div class="flex-grow-1 overflow-auto d-flex flex-column">
+            <b-jumbotron class="flex-grow-0" bg-variant="primary" text-variant="dark" v-if="$router.currentRoute.name">
                 <div class="container">
-                    <h1 class="display-4">{{ $router.currentRoute.name }}</h1>
+                    <h1 class="display-5 m-0">{{ $router.currentRoute.name }}</h1>
                 </div>
             </b-jumbotron>
 
-            <router-view />
+            <router-view class="main-container flex-grow-1" />
         </div>
         <div class="flex-grow-0" v-if="profile && !profile.privateKey">
             <navbar />

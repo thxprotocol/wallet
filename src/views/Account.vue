@@ -1,5 +1,5 @@
 <template>
-    <div class="container mt-3" v-if="profile">
+    <div class="container" v-if="profile">
         <b-alert show variant="danger" v-if="error">{{ error }}</b-alert>
         <b-alert show variant="info" dismissible @dismissed="info = ''" v-if="info">{{ info }}</b-alert>
         <h2 class="h4">

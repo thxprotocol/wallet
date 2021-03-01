@@ -1,14 +1,14 @@
 <template>
-    <b-navbar type="dark" class="bg-dark">
+    <b-navbar type="white" class="bg-light">
         <b-navbar-nav justified class="w-100">
-            <b-nav-item to="/">
-                Scan
-            </b-nav-item>
             <b-nav-item to="/wallet" disabled>
-                Wallet
+                <i class="fas fa-coins text-dark"></i>
+            </b-nav-item>
+            <b-nav-item to="/">
+                <i class="fas fa-qrcode text-dark"></i>
             </b-nav-item>
             <b-nav-item to="/account">
-                Account
+                <i class="fas fa-user-circle text-dark"></i>
             </b-nav-item>
         </b-navbar-nav>
     </b-navbar>
