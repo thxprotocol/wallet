@@ -1,7 +1,7 @@
 <template>
     <b-navbar type="white" class="bg-light">
         <b-navbar-nav justified class="w-100">
-            <b-nav-item to="/wallet" disabled>
+            <b-nav-item to="/wallet">
                 <i class="fas fa-coins text-dark"></i>
             </b-nav-item>
             <b-nav-item to="/">

@@ -1,4 +1,5 @@
 import Web3 from 'web3';
+import { Vue } from 'vue-property-decorator';
 import Matic, { MaticPOSClient } from '@maticnetwork/maticjs';
 import HDWalletProvider from '@truffle/hdwallet-provider';
 import ISolutionArtifact from '@/artifacts/contracts/contracts/IDefaultDiamond.sol/IDefaultDiamond.json';
@@ -117,18 +118,22 @@ class NetworkModule extends VuexModule {
 
     @Mutation
     connect(privateKey: string) {
-        this._provider = new ethers.providers.JsonRpcProvider(CHILD_RPC);
-        this._wallet = new ethers.Wallet(privateKey, this._provider);
-        this._client = new Matic.MaticPOSClient({
-            network: 'testnet',
-            version: 'mumbai',
-            parentProvider: new HDWalletProvider(this._wallet.privateKey, `${ROOT_RPC}/${INFURA_KEY}`),
-            maticProvider: new HDWalletProvider(this._wallet.privateKey, CHILD_RPC),
-            posRootChainManager: config.root.POSRootChainManager,
-            posERC20Predicate: config.root.posERC20Predicate,
-            parentDefaultOptions: { from: this._wallet.address },
-            maticDefaultOptions: { from: this._wallet.address },
-        });
+        Vue.set(this, '_provider', new ethers.providers.JsonRpcProvider(CHILD_RPC));
+        Vue.set(this, '_wallet', new ethers.Wallet(privateKey, this._provider));
+        Vue.set(
+            this,
+            '_client',
+            new Matic.MaticPOSClient({
+                network: 'testnet',
+                version: 'mumbai',
+                parentProvider: new HDWalletProvider(this._wallet.privateKey, `${ROOT_RPC}/${INFURA_KEY}`),
+                maticProvider: new HDWalletProvider(this._wallet.privateKey, CHILD_RPC),
+                posRootChainManager: config.root.POSRootChainManager,
+                posERC20Predicate: config.root.posERC20Predicate,
+                parentDefaultOptions: { from: this._wallet.address },
+                maticDefaultOptions: { from: this._wallet.address },
+            }),
+        );
     }
 
     @Action

@@ -7,7 +7,8 @@ interface WithdrawalData {
     id: number;
     amount: string;
     beneficiary: string;
-    state: boolean;
+    approved: boolean;
+    state: number;
     poolAddress: string;
 }
 
@@ -15,14 +16,16 @@ export class Withdrawal {
     id: number;
     amount: string;
     beneficiary: string;
-    state: boolean;
+    state: number;
+    approved: boolean;
     poolAddress: string;
 
-    constructor({ id, amount, beneficiary, state, poolAddress }: WithdrawalData) {
+    constructor({ id, amount, state, beneficiary, approved, poolAddress }: WithdrawalData) {
         this.id = id;
         this.amount = amount;
-        this.beneficiary = beneficiary;
         this.state = state;
+        this.beneficiary = beneficiary;
+        this.approved = approved;
         this.poolAddress = poolAddress;
     }
 }
@@ -67,13 +70,9 @@ class WithdrawalModule extends VuexModule {
                 throw Error('Withdrawals READ failed.');
             }
 
-            for (const withdrawPoll of r.data.withdrawPolls) {
-                this.context.commit('set', new Withdrawal({ ...withdrawPoll, poolAddress }));
+            for (const withdrawal of r.data) {
+                this.context.commit('set', new Withdrawal({ ...withdrawal, poolAddress }));
             }
-
-            // for (const withdrawn of r.data.withdrawn) {
-            //     this.context.commit('set', new Withdrawal({ ...withdrawn, poolAddress }));
-            // }
         } catch (e) {
             return e;
         }

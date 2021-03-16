@@ -4,16 +4,14 @@
             <b-spinner variant="dark" />
         </div>
         <template v-if="!busy && membership">
-            <b-jumbotron bg-variant="primary" text-variant="dark">
-                <div class="container">
-                    <h1 class="display-4">
-                        <strong class="font-weight-bold">
-                            {{ membership.poolToken.balance.hex | fromBigNumber }}
-                        </strong>
-                        {{ membership.poolToken.symbol }}
-                    </h1>
-                </div>
-            </b-jumbotron>
+            <div class="container">
+                <h1 class="display-4">
+                    <strong class="font-weight-bold">
+                        {{ membership.poolToken.balance }}
+                    </strong>
+                    {{ membership.poolToken.symbol }}
+                </h1>
+            </div>
             <div class="container mt-3">
                 <b-alert show dismissable variant="danger" v-if="error">
                     {{ error }}
@@ -21,13 +19,14 @@
                 <b-list-group class="mb-3" v-if="hasWithdrawals">
                     <b-list-group-item
                         class="d-flex align-items-center w-100"
+                        :class="{ 'border-success': withdrawal.approved && !withdrawal.state }"
                         :key="key"
                         v-for="(withdrawal, key) of withdrawals[this.$route.params.address]"
                     >
                         <strong class="font-weight-bold mr-auto">
-                            {{ withdrawal.amount.hex | fromBigNumber }} {{ membership.poolToken.symbol }}
+                            {{ withdrawal.amount }} {{ membership.poolToken.symbol }}
                         </strong>
-                        <b-button variant="primary" @click="withdraw(withdrawal)">
+                        <b-button variant="primary" :disabled="withdrawal.state === 1" @click="withdraw(withdrawal)">
                             Withdraw
                         </b-button>
                     </b-list-group-item>
@@ -46,7 +45,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { BAlert, BButton, BJumbotron, BListGroup, BListGroupItem, BSpinner } from 'bootstrap-vue';
+import { BAlert, BBadge, BButton, BJumbotron, BListGroup, BListGroupItem, BSpinner } from 'bootstrap-vue';
 import { IMemberships } from '@/store/modules/memberships';
 import { UserProfile } from '@/store/modules/account';
 import { IWithdrawals, Withdrawal } from '@/store/modules/withdrawals';
@@ -58,6 +57,7 @@ import { Wallet } from 'ethers';
         'b-jumbotron': BJumbotron,
         'b-alert': BAlert,
         'b-button': BButton,
+        'b-badge': BBadge,
         'b-spinner': BSpinner,
         'b-list-group': BListGroup,
         'b-list-group-item': BListGroupItem,
@@ -103,6 +103,11 @@ export default class PoolView extends Vue {
             });
 
             this.$store.commit('withdrawals/remove', withdrawal);
+
+            await this.$store.dispatch('withdrawals/init', {
+                profile: this.profile,
+                poolAddress: this.$route.params.address,
+            });
         } catch (e) {
             this.error = 'Error: Signed withdraw call reverted.';
         }

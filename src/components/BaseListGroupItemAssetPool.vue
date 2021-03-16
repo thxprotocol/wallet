@@ -21,7 +21,7 @@
         </b-badge>
 
         <b-badge variant="primary" pill v-if="membership.poolToken">
-            {{ membership.poolToken.balance.hex | fromBigNumber }} {{ membership.poolToken.symbol }}
+            {{ membership.poolToken.balance }} {{ membership.poolToken.symbol }}
         </b-badge>
     </b-list-group-item>
 </template>
