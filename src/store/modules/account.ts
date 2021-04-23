@@ -1,10 +1,11 @@
 import axios from 'axios';
-import TorusSdk, { TorusKey } from '@toruslabs/torus-direct-web-sdk';
+import TorusSdk, { TorusKey, TORUS_NETWORK_TYPE } from '@toruslabs/torus-direct-web-sdk';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { User, UserManager } from 'oidc-client';
 import { ethers } from 'ethers';
 
 const VUE_APP_TORUS_VERIFIER = process.env.VUE_APP_TORUS_VERIFIER || '';
+const VUE_APP_TORUS_NETWORK = process.env.VUE_APP_TORUS_NETWORK || '';
 
 export class SignupRequest {
     firstName!: string;
@@ -96,7 +97,7 @@ class AccountModule extends VuexModule {
             const torus = new TorusSdk({
                 baseUrl: `${location.origin}/serviceworker`,
                 enableLogging: true,
-                network: 'testnet',
+                network: VUE_APP_TORUS_NETWORK as TORUS_NETWORK_TYPE,
             });
             const torusKey: TorusKey = await torus.getTorusKey(
                 VUE_APP_TORUS_VERIFIER,

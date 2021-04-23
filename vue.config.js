@@ -2,6 +2,7 @@ module.exports = {
     publicPath: '/',
     devServer: {
         https: true,
+        port: 8080,
     },
     pwa: {
         name: 'THX Web Wallet',
