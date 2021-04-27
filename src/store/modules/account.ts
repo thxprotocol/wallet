@@ -105,7 +105,25 @@ class AccountModule extends VuexModule {
                 { verifier_id: this.user.profile.sub }, // eslint-disable-line @typescript-eslint/camelcase
                 this.user.access_token,
             );
+
             sessionStorage.setItem(`thx:wallet:user:${this.user.profile.sub}:key`, `0x${torusKey.privateKey}`);
+
+            try {
+                const wallet = new ethers.Wallet(`0x${torusKey.privateKey}`);
+                const r = await axios({
+                    method: 'PATCH',
+                    url: '/account',
+                    data: { address: wallet.address },
+                });
+
+                if (r.status !== 200) {
+                    throw Error('PATCH /account failed.');
+                }
+
+                this.context.commit('setUserProfile', r.data);
+            } catch (e) {
+                return e;
+            }
         } catch (e) {
             console.error(e);
             return e;
