@@ -15,7 +15,7 @@ export async function getPrivateKey(user: User) {
 
     const torus = new DirectWebSdk({
         baseUrl: `${location.origin}/serviceworker`,
-        enableLogging: true,
+        enableLogging: false,
         network: TORUS_NETWORK as TORUS_NETWORK_TYPE,
     });
 
