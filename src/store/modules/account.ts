@@ -4,6 +4,7 @@ import { User, UserManager } from 'oidc-client';
 import Web3 from 'web3';
 import { config } from '@/utils/oidc';
 import { getPrivateKey } from '@/utils/torus';
+import { isAddress } from 'web3-utils';
 
 const web3 = new Web3();
 
@@ -20,14 +21,14 @@ class AccountModule extends VuexModule {
     userManager: UserManager = new UserManager(config);
     _user!: User;
     _profile: UserProfile | null = null;
-    _privateKey!: string;
 
     get user() {
         return this._user;
     }
 
     get privateKey() {
-        return this._privateKey;
+        const encoded = sessionStorage.getItem(`thx:wallet:user:${this._user.profile.sub}`) as string;
+        return atob(encoded);
     }
 
     get profile() {
@@ -40,8 +41,8 @@ class AccountModule extends VuexModule {
     }
 
     @Mutation
-    setPrivateKey(privateKey: string) {
-        this._privateKey = privateKey;
+    setPrivateKey({ sub, privateKey }: { sub: string; privateKey: string }) {
+        sessionStorage.setItem(`thx:wallet:user:${sub}`, btoa(privateKey));
     }
 
     @Mutation
@@ -96,12 +97,24 @@ class AccountModule extends VuexModule {
             this.context.commit('setUserProfile', r.data);
 
             try {
-                const privateKey = await getPrivateKey(this.user);
-                const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+                let key;
+                const result = await getPrivateKey(this.user);
 
-                this.context.commit('setPrivateKey', privateKey);
+                if (result.error) {
+                    key = this.context.getters.privateKey;
+                } else {
+                    key = result.privateKey;
+                }
 
-                await this.context.dispatch('updateAccountAddress', account.address);
+                if (key) {
+                    const account = web3.eth.accounts.privateKeyToAccount(key);
+
+                    if (isAddress(account.address)) {
+                        this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey: key });
+
+                        await this.context.dispatch('updateAccountAddress', account.address);
+                    }
+                }
             } catch (e) {
                 return new Error('Unable to get private key.');
             }

@@ -10,13 +10,14 @@
             <p>
                 Transfer tokens from your THX Web Wallet to this asset pool.
             </p>
-            <form @submit.prevent="update()" id="formAmount">
-                <b-form-input autofocus size="lg" v-model="amount" type="number" placeholder="Specify the amount" />
+            <form @submit.prevent="update()" id="formTransfer">
+                <b-form-input autofocus size="lg" v-model="amount" type="number" placeholder="Amount to transfer" />
+                <b-form-input size="lg" v-model="address" type="text" placeholder="Address of the receiver" />
             </form>
         </template>
         <template v-slot:modal-footer>
-            <b-button class="mt-3 btn-rounded" block variant="success" form="formAmount" type="submit">
-                Deposit
+            <b-button class="mt-3 btn-rounded" block variant="success" form="formTransfer" type="submit">
+                Transfer
             </b-button>
         </template>
     </b-modal>
@@ -59,7 +60,7 @@ export default class BaseModalDepositPool extends Vue {
         this.busy = true;
 
         try {
-            this.$store.dispatch('network/deposit', {});
+            this.$store.dispatch('erc20/transfer', {});
         } catch (e) {
             this.error = e.toString();
         } finally {

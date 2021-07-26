@@ -63,7 +63,7 @@ export default class BaseListGroupItemAssetPool extends Vue {
     }
 
     onClick() {
-        this.$bvModal.show('modalDepositPool');
+        this.$bvModal.show(`modalDepositPool-${this.address}`);
     }
 
     async mounted() {

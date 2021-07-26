@@ -1,5 +1,11 @@
 <template>
-    <b-modal id="modalDepositPool" @show="getBalances()" scrollable title="Deposit assets to this pool">
+    <b-modal
+        :id="`modalDepositPool-${assetPool.address}`"
+        @show="getBalances()"
+        centered
+        scrollable
+        title="Deposit assets to this pool"
+    >
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
@@ -10,14 +16,19 @@
             <p>
                 Transfer tokens from your THX Web Wallet to this asset pool.
             </p>
-            <p>Pool Balance: {{ assetPool.poolToken.balance }}</p>
-            <p v-if="token">Your Balance: {{ token.balance }}</p>
+
+            <p v-if="token">
+                Pool Balance: <code>{{ assetPool.poolToken.balance }}</code>
+                <br />
+                Your Balance:
+                <code>{{ token.balance }}</code>
+            </p>
             <form @submit.prevent="deposit()" id="formAmount">
                 <b-form-input autofocus size="lg" v-model="amount" type="number" placeholder="Specify the amount" />
             </form>
         </template>
         <template v-slot:modal-footer>
-            <b-button class="mt-3 btn-rounded" block variant="success" form="formAmount" type="submit">
+            <b-button class="mt-3 btn-rounded" block variant="primary" form="formAmount" type="submit">
                 Deposit
             </b-button>
         </template>
@@ -88,7 +99,6 @@ export default class BaseModalDepositPool extends Vue {
         } catch (e) {
             this.error = 'Could not get pool token balances.';
             console.log(e);
-            debugger;
         }
     }
 
