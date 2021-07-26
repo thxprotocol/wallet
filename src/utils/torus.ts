@@ -3,7 +3,7 @@ import { User } from 'oidc-client';
 import { TORUS_NETWORK, TORUS_VERIFIER } from './secrets';
 
 export async function getPrivateKey(user: User) {
-    if (TORUS_VERIFIER == 'thx-email-password-testnet') {
+    if (TORUS_VERIFIER === 'thx-email-password-testnet') {
         return process.env.VUE_APP_TEST_KEY
             ? {
                   privateKey: process.env.VUE_APP_TEST_KEY,

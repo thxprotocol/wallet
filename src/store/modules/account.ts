@@ -101,7 +101,7 @@ class AccountModule extends VuexModule {
                 let key;
                 const result = await getPrivateKey(this.user);
 
-                if (result.error) {
+                if (result && result.error) {
                     key = this.context.getters.privateKey;
                 } else {
                     key = result.privateKey;
@@ -113,7 +113,9 @@ class AccountModule extends VuexModule {
                     if (isAddress(account.address)) {
                         this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey: key });
 
-                        await this.context.dispatch('updateAccountAddress', account.address);
+                        if (r.data.address !== account.address) {
+                            await this.context.dispatch('updateAccountAddress', account.address);
+                        }
                     }
                 }
             } catch (e) {
