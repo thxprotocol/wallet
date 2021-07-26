@@ -11,7 +11,7 @@
 <script lang="ts">
 import { NetworkProvider } from '@/utils/network';
 import { BDropdown, BDropdownItem } from 'bootstrap-vue';
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import Web3 from 'web3';
 
@@ -33,8 +33,15 @@ export default class BaseNetworkSelect extends Vue {
     web3!: Web3;
     privateKey!: string;
 
+    @Prop() npid!: NetworkProvider;
+
+    mounted() {
+        this.$store.commit('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
+    }
+
     onClick(npid: NetworkProvider) {
         this.$store.commit('network/setNetwork', { npid, privateKey: this.privateKey });
+        this.$emit('change', npid);
     }
 }
 </script>

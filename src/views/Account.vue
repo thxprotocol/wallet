@@ -26,9 +26,9 @@
             </b-list-group-item>
             <base-list-group-item-asset-pool
                 v-else
-                :address="address"
+                :address="pool.address"
                 :key="key"
-                v-for="(address, key) of profile.memberships"
+                v-for="(pool, key) of filteredPools"
             />
         </b-list-group>
 
@@ -54,11 +54,12 @@ import {
     BSpinner,
 } from 'bootstrap-vue';
 import { User } from 'oidc-client';
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BaseListGroupItemAssetPool from '@/components/BaseListGroupItemAssetPool.vue';
 import { NetworkProvider } from '@/utils/network';
 import Web3 from 'web3';
+import { AssetPool } from '@/store/modules/assetPools';
 
 @Component({
     name: 'AccountView',
@@ -86,13 +87,19 @@ export default class AccountView extends Vue {
     busy = true;
     error = '';
     info = '';
-    npid: NetworkProvider = NetworkProvider.Main;
 
     // getters
     user!: User;
     profile!: UserProfile;
     privateKey!: string;
+    assetPools!: { [address: string]: AssetPool };
     web3!: Web3;
+
+    @Prop() npid!: NetworkProvider;
+
+    get filteredPools() {
+        return Object.values(this.assetPools).filter((pool: AssetPool) => pool.network === this.npid);
+    }
 
     onCopy(e: any) {
         this.info = 'You just copied: ' + e.text;
@@ -107,11 +114,25 @@ export default class AccountView extends Vue {
 
         try {
             await this.$store.dispatch('account/getProfile');
+
             this.$store.commit('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
+
+            await this.getAssetPools();
         } catch (e) {
             this.error = e.toString();
         } finally {
             this.busy = false;
+        }
+    }
+
+    async getAssetPools() {
+        for (const address of this.profile.memberships) {
+            try {
+                await this.$store.dispatch('assetpools/get', { web3: this.web3, address });
+            } catch (e) {
+                console.dir(e);
+                debugger;
+            }
         }
     }
 

@@ -13,10 +13,12 @@
             <b-alert show variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
+            <b-alert show variant="warning" v-if="!sufficientBalance && token">
+                You do not have enough {{ token.symbol }} on this account.
+            </b-alert>
             <p>
                 Transfer tokens from your THX Web Wallet to this asset pool.
             </p>
-
             <p v-if="token">
                 Pool Balance: <code>{{ assetPool.poolToken.balance }}</code>
                 <br />
@@ -28,7 +30,14 @@
             </form>
         </template>
         <template v-slot:modal-footer>
-            <b-button class="mt-3 btn-rounded" block variant="primary" form="formAmount" type="submit">
+            <b-button
+                :disabled="!sufficientBalance"
+                class="mt-3 btn-rounded"
+                block
+                variant="primary"
+                form="formAmount"
+                type="submit"
+            >
                 Deposit
             </b-button>
         </template>
@@ -76,6 +85,10 @@ export default class BaseModalDepositPool extends Vue {
 
     get token() {
         return this.erc20[this.assetPool.poolToken.address];
+    }
+
+    get sufficientBalance() {
+        return Number(this.token?.balance) > 0;
     }
 
     async mounted() {

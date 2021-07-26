@@ -8,13 +8,12 @@
                             <h1 class="display-5 m-0">{{ $router.currentRoute.name }}</h1>
                         </div>
                         <div class="col-4">
-                            <base-network-select class="float-right" />
+                            <base-network-select :npid="npid" @change="onChangeNetwork($event)" class="float-right" />
                         </div>
                     </div>
                 </div>
             </header>
-
-            <router-view class="main-container flex-grow-1" />
+            <router-view :npid="npid" class="main-container flex-grow-1" />
         </div>
         <navbar class="flex-grow-0" v-if="profile && !profile.privateKey" />
     </div>
@@ -26,6 +25,8 @@ import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import Navbar from '@/components/Navbar.vue';
 import BaseNetworkSelect from './components/BaseNetworkSelect.vue';
+import { NetworkProvider } from './utils/network';
+import { UserProfile } from './store/modules/account';
 
 @Component({
     components: {
@@ -35,10 +36,22 @@ import BaseNetworkSelect from './components/BaseNetworkSelect.vue';
         'base-network-select': BaseNetworkSelect,
     },
     computed: mapGetters({
+        privateKey: 'account/privateKey',
         profile: 'account/profile',
     }),
 })
 export default class App extends Vue {
+    npid: NetworkProvider = NetworkProvider.Main;
+
+    // getters
+    profile!: UserProfile;
+    privateKey!: string;
+
+    onChangeNetwork(npid: NetworkProvider) {
+        this.npid = npid;
+        this.$store.commit('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
+    }
+
     created() {
         (function(w: any, d, s, l: any, i) {
             w[l] = w[l] || [];

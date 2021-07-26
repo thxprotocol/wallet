@@ -1,21 +1,25 @@
 <template>
     <div class="container" v-if="profile">
         <b-list-group v-if="web3">
-            <base-list-group-item-token :web3="web3" :address="token" :key="key" v-for="(token, key) in profile.erc20">
-                {{ token }}
-            </base-list-group-item-token>
+            <base-list-group-item-token
+                :web3="web3"
+                :address="token.address"
+                :key="token.address + token.network"
+                v-for="token in filteredTokens"
+            />
         </b-list-group>
     </div>
 </template>
 
 <script lang="ts">
 import { BAlert, BButton, BFormInput, BInputGroup, BInputGroupAppend, BListGroup } from 'bootstrap-vue';
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import BaseListGroupItemToken from '@/components/BaseListGroupItemToken.vue';
 import Web3 from 'web3';
 import { NetworkProvider } from '@/utils/network';
+import { ERC20Token } from '@/store/modules/erc20';
 
 @Component({
     components: {
@@ -36,11 +40,16 @@ import { NetworkProvider } from '@/utils/network';
 export default class Wallet extends Vue {
     busy = false;
     error = '';
-    npid: NetworkProvider = NetworkProvider.Main;
+
+    @Prop() npid!: NetworkProvider;
 
     web3!: Web3;
     profile!: UserProfile;
     privateKey!: string;
+
+    get filteredTokens() {
+        return Object.values(this.profile.erc20).filter((token: ERC20Token) => token.network === this.npid);
+    }
 
     async mounted() {
         this.busy = true;

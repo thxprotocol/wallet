@@ -1,12 +1,17 @@
 import Web3 from 'web3';
 import Artifacts from '@/utils/artifacts';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
-import { getERC20Contract, send } from '@/utils/network';
+import { getERC20Contract, NetworkProvider, send } from '@/utils/network';
 import Contract from 'web3/eth/contract';
 import { fromWei, toWei } from 'web3-utils';
 import { AssetPool } from './assetPools';
 import { UserProfile } from './account';
 import Vue from 'vue';
+
+export interface ERC20Token {
+    network: NetworkProvider;
+    address: string;
+}
 
 export class ERC20 {
     address!: string;

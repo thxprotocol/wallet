@@ -59,7 +59,6 @@ export default class BaseListGroupItemToken extends Vue {
             });
         } catch (e) {
             console.log(e);
-            debugger;
         }
     }
 }

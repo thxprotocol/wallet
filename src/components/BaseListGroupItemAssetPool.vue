@@ -65,16 +65,5 @@ export default class BaseListGroupItemAssetPool extends Vue {
     onClick() {
         this.$bvModal.show(`modalDepositPool-${this.address}`);
     }
-
-    async mounted() {
-        try {
-            await this.$store.dispatch('assetpools/get', { web3: this.web3, address: this.address });
-        } catch (e) {
-            console.dir(e);
-            debugger;
-        } finally {
-            this.busy = false;
-        }
-    }
 }
 </script>
