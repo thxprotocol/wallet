@@ -18,13 +18,13 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { QrcodeStream, QrcodeCapture } from 'vue-qrcode-reader';
 import { BSpinner } from 'bootstrap-vue';
-import ModalDecodeQR from '@/components/modals/ModalDecodeQR.vue';
+// import ModalDecodeQR from '@/components/modals/ModalDecodeQR.vue';
 import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 
 @Component({
     components: {
-        'modal-decode-qr': ModalDecodeQR,
+        // 'modal-decode-qr': ModalDecodeQR,
         'qrcode-stream': QrcodeStream,
         'qrcode-capture': QrcodeCapture,
         'b-spinner': BSpinner,

@@ -13,13 +13,6 @@ const routes: Array<RouteConfig> = [
         },
     },
     {
-        path: '/demo',
-        component: () => import('../views/Demo.vue'),
-        meta: {
-            requiresAuth: false,
-        },
-    },
-    {
         path: '/login',
         component: () => import('../views/Signin.vue'),
     },

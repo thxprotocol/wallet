@@ -1,0 +1,130 @@
+<template>
+    <b-modal id="modalDepositPool" @show="getBalances()" scrollable title="Deposit assets to this pool">
+        <div class="w-100 text-center" v-if="busy">
+            <b-spinner variant="dark" />
+        </div>
+        <template v-else>
+            <b-alert show variant="danger" v-if="error">
+                {{ error }}
+            </b-alert>
+            <p>
+                Transfer tokens from your THX Web Wallet to this asset pool.
+            </p>
+            <p>Pool Balance: {{ assetPool.poolToken.balance }}</p>
+            <p v-if="token">Your Balance: {{ token.balance }}</p>
+            <form @submit.prevent="deposit()" id="formAmount">
+                <b-form-input autofocus size="lg" v-model="amount" type="number" placeholder="Specify the amount" />
+            </form>
+        </template>
+        <template v-slot:modal-footer>
+            <b-button class="mt-3 btn-rounded" block variant="success" form="formAmount" type="submit">
+                Deposit
+            </b-button>
+        </template>
+    </b-modal>
+</template>
+
+<script lang="ts">
+import { UserProfile } from '@/store/modules/account';
+import { AssetPool } from '@/store/modules/assetPools';
+import { ERC20 } from '@/store/modules/erc20';
+import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
+import { Component, Prop, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
+import Web3 from 'web3';
+
+@Component({
+    name: 'ModalDepositPool',
+    components: {
+        'b-form-input': BFormInput,
+        'b-alert': BAlert,
+        'b-link': BLink,
+        'b-modal': BModal,
+        'b-spinner': BSpinner,
+        'b-button': BButton,
+    },
+    computed: mapGetters({
+        profile: 'account/profile',
+        privateKey: 'account/privateKey',
+        erc20: 'erc20/all',
+    }),
+})
+export default class BaseModalDepositPool extends Vue {
+    busy = false;
+    error = '';
+    amount = 0;
+    balance = '0';
+
+    // getters
+    profile!: UserProfile;
+    privateKey!: string;
+    erc20!: { [address: string]: ERC20 };
+
+    @Prop() web3!: Web3;
+    @Prop() assetPool!: AssetPool;
+
+    get token() {
+        return this.erc20[this.assetPool.poolToken.address];
+    }
+
+    async mounted() {
+        await this.getBalances();
+    }
+
+    async getBalances() {
+        try {
+            const tokenAddress = this.assetPool.poolToken.address;
+
+            await this.$store.dispatch('assetpools/get', {
+                web3: this.web3,
+                address: this.assetPool.address,
+            });
+
+            await this.$store.dispatch('erc20/get', {
+                web3: this.web3,
+                address: tokenAddress,
+                profile: this.profile,
+            });
+        } catch (e) {
+            this.error = 'Could not get pool token balances.';
+            console.log(e);
+            debugger;
+        }
+    }
+
+    async deposit() {
+        this.busy = true;
+
+        try {
+            const r = await this.$store.dispatch('erc20/approve', {
+                web3: this.web3,
+                assetPool: this.assetPool,
+                amount: this.amount,
+                privateKey: this.privateKey,
+            });
+
+            if (r.error) {
+                this.error = r.error;
+                return;
+            }
+
+            await this.$store.dispatch('assetpools/deposit', {
+                web3: this.web3,
+                assetPool: this.assetPool,
+                amount: this.amount,
+                privateKey: this.privateKey,
+            });
+
+            if (r.error) {
+                this.error = r.error;
+            }
+
+            await this.getBalances();
+        } catch (e) {
+            this.error = e.toString();
+        } finally {
+            this.busy = false;
+        }
+    }
+}
+</script>

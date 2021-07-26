@@ -1,28 +1,24 @@
 <template>
     <b-list-group-item
-        v-if="membership"
-        :to="`/pools/${membership.poolAddress}`"
+        v-if="assetPool"
         class="d-flex justify-content-between align-items-center"
-        :class="{ disabled: !membership.poolToken }"
+        :class="{ disabled: !assetPool.poolToken }"
     >
-        <div class="mr-auto d-flex align-items-center" v-if="membership.title">
-            <strong>{{ membership.title }}</strong>
-            <b-badge class="text-overflow-75 ml-3" variant="secondary" pill>
-                {{ membership.poolAddress }}
-            </b-badge>
+        <div class="mr-auto" v-if="assetPool.title">
+            <strong>{{ assetPool.title }}</strong
+            ><br />
+            <small class="text-muted">{{ address }}</small>
         </div>
 
         <div class="text-muted mr-auto" v-else>
-            {{ membership.poolAddress }}
+            {{ address }}
         </div>
 
-        <b-badge class="mr-3" variant="secondary" pill v-if="membership.isManager">
-            Manager
-        </b-badge>
-
-        <b-badge variant="primary" pill v-if="membership.poolToken">
-            {{ membership.poolToken.balance }} {{ membership.poolToken.symbol }}
-        </b-badge>
+        <div class="h3 mr-3 m-0" v-if="assetPool.poolToken">
+            {{ assetPool.poolToken.balance }} {{ assetPool.poolToken.symbol }}
+        </div>
+        <b-button variant="primary" v-on:click.prevent="onClick()">Deposit</b-button>
+        <base-modal-deposit-pool :assetPool="assetPool" :web3="web3" />
     </b-list-group-item>
 </template>
 
@@ -31,7 +27,9 @@ import { BLink, BAlert, BButton, BSpinner, BListGroupItem, BListGroup, BBadge } 
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
-import { IMemberships } from '@/store/modules/memberships';
+import { IAssetPools } from '@/store/modules/assetPools';
+import BaseModalDepositPool from '@/components/modals/ModalDepositPool.vue';
+import Web3 from 'web3';
 
 @Component({
     components: {
@@ -42,10 +40,12 @@ import { IMemberships } from '@/store/modules/memberships';
         'b-badge': BBadge,
         'b-list-group': BListGroup,
         'b-list-group-item': BListGroupItem,
+        'base-modal-deposit-pool': BaseModalDepositPool,
     },
     computed: mapGetters({
         profile: 'account/profile',
-        memberships: 'memberships/all',
+        assetPools: 'assetpools/all',
+        web3: 'network/web3',
     }),
 })
 export default class BaseListGroupItemAssetPool extends Vue {
@@ -53,19 +53,25 @@ export default class BaseListGroupItemAssetPool extends Vue {
 
     // getters
     profile!: UserProfile;
-    memberships!: IMemberships;
+    assetPools!: IAssetPools;
+    web3!: Web3;
 
-    @Prop() poolAddress!: string;
+    @Prop() address!: string;
 
-    get membership() {
-        return this.memberships[this.poolAddress];
+    get assetPool() {
+        return this.assetPools[this.address];
+    }
+
+    onClick() {
+        this.$bvModal.show('modalDepositPool');
     }
 
     async mounted() {
         try {
-            await this.$store.dispatch('memberships/read', { profile: this.profile, poolAddress: this.poolAddress });
+            await this.$store.dispatch('assetpools/get', { web3: this.web3, address: this.address });
         } catch (e) {
             console.dir(e);
+            debugger;
         } finally {
             this.busy = false;
         }

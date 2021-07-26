@@ -5,14 +5,14 @@ import store from './store';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import Web3 from 'web3';
 import { ModalPlugin, ToastPlugin } from 'bootstrap-vue';
-import { ethers } from 'ethers';
 import './main.scss';
 import './registerServiceWorker';
 import VueClipboard from 'vue-clipboard2';
+import { fromWei } from 'web3-utils';
 
 // Set Axios default config
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = process.env.VUE_APP_API_URL;
+axios.defaults.baseURL = process.env.VUE_APP_API_ROOT + '/v1';
 
 // Add a request interceptor
 axios.interceptors.request.use((req: AxiosRequestConfig) => {
@@ -63,7 +63,7 @@ Vue.filter('fromWei', (value: string) => {
 
 // Set custom filters
 Vue.filter('fromBigNumber', (hex: string) => {
-    return ethers.utils.formatEther(hex);
+    return fromWei(hex);
 });
 
 new Vue({

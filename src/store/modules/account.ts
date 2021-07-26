@@ -1,51 +1,18 @@
 import axios from 'axios';
-import TorusSdk, { TorusKey, TORUS_NETWORK_TYPE } from '@toruslabs/torus-direct-web-sdk';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { User, UserManager } from 'oidc-client';
-import { ethers } from 'ethers';
+import Web3 from 'web3';
+import { config } from '@/utils/oidc';
+import { getPrivateKey } from '@/utils/torus';
 
-const VUE_APP_TORUS_VERIFIER = process.env.VUE_APP_TORUS_VERIFIER || '';
-const VUE_APP_TORUS_NETWORK = process.env.VUE_APP_TORUS_NETWORK || '';
-
-export class SignupRequest {
-    firstName!: string;
-    lastName!: string;
-    email!: string;
-    address!: string;
-}
-
-export class Account {
-    privateKey = '';
-    address = '';
-    email = '';
-    firstName = '';
-    lastName = '';
-    assetPools: string[] = [];
-    burnProofs: string[] = [];
-}
-
-const config: any = {
-    authority: process.env.VUE_APP_API_ROOT,
-    client_id: process.env.VUE_APP_OIDC_CLIENT_ID, // eslint-disable-line @typescript-eslint/camelcase
-    client_secret: process.env.VUE_APP_OIDC_CLIENT_SECRET, // eslint-disable-line @typescript-eslint/camelcase
-    redirect_uri: `${process.env.VUE_APP_BASE_URL}/signin-oidc`, // eslint-disable-line @typescript-eslint/camelcase
-    response_type: 'code', // eslint-disable-line @typescript-eslint/camelcase
-
-    id_token_signed_response_alg: 'RS256', // eslint-disable-line @typescript-eslint/camelcase
-    post_logout_redirect_uri: process.env.VUE_APP_BASE_URL, // eslint-disable-line @typescript-eslint/camelcase
-
-    silent_redirect_uri: `${process.env.VUE_APP_BASE_URL}/silent-renew`, // eslint-disable-line @typescript-eslint/camelcase
-    automaticSilentRenew: true,
-
-    loadUserInfo: true,
-    scope: 'openid user email offline_access',
-};
+const web3 = new Web3();
 
 export interface UserProfile {
     address: string;
     privateKey: string;
     burnProofs: string[];
     memberships: string[];
+    erc20: string[];
 }
 
 @Module({ namespaced: true })
@@ -53,28 +20,14 @@ class AccountModule extends VuexModule {
     userManager: UserManager = new UserManager(config);
     _user!: User;
     _profile: UserProfile | null = null;
-
-    get address(): string {
-        if (!this.privateKey) {
-            return '';
-        }
-        const wallet = new ethers.Wallet(this.privateKey);
-        if (ethers.utils.isAddress(wallet.address)) {
-            return wallet.address;
-        } else {
-            return '';
-        }
-    }
+    _privateKey!: string;
 
     get user() {
         return this._user;
     }
 
     get privateKey() {
-        if (!this.user) {
-            return '';
-        }
-        return sessionStorage.getItem(`thx:wallet:user:${this.user.profile.sub}:key`);
+        return this._privateKey;
     }
 
     get profile() {
@@ -87,46 +40,31 @@ class AccountModule extends VuexModule {
     }
 
     @Mutation
+    setPrivateKey(privateKey: string) {
+        this._privateKey = privateKey;
+    }
+
+    @Mutation
     setUserProfile(profile: UserProfile) {
         this._profile = profile;
     }
 
     @Action
-    async getPrivateKey() {
+    async updateAccountAddress(address: string) {
         try {
-            const torus = new TorusSdk({
-                baseUrl: `${location.origin}/serviceworker`,
-                enableLogging: true,
-                network: VUE_APP_TORUS_NETWORK as TORUS_NETWORK_TYPE,
+            const r = await axios({
+                method: 'PATCH',
+                url: '/account',
+                data: { address },
             });
-            const torusKey: TorusKey = await torus.getTorusKey(
-                VUE_APP_TORUS_VERIFIER,
-                this.user.profile.sub,
-                { verifier_id: this.user.profile.sub }, // eslint-disable-line @typescript-eslint/camelcase
-                this.user.access_token,
-            );
 
-            sessionStorage.setItem(`thx:wallet:user:${this.user.profile.sub}:key`, `0x${torusKey.privateKey}`);
-
-            try {
-                const wallet = new ethers.Wallet(`0x${torusKey.privateKey}`);
-                const r = await axios({
-                    method: 'PATCH',
-                    url: '/account',
-                    data: { address: wallet.address },
-                });
-
-                if (r.status !== 200) {
-                    throw Error('PATCH /account failed.');
-                }
-
-                this.context.commit('setUserProfile', r.data);
-            } catch (e) {
-                return e;
+            if (r.status !== 200) {
+                throw new Error('PATCH /account failed.');
             }
+
+            this.context.commit('setUserProfile', r.data);
         } catch (e) {
-            console.error(e);
-            return e;
+            return new Error('Unable to update account with address.');
         }
     }
 
@@ -152,33 +90,23 @@ class AccountModule extends VuexModule {
             });
 
             if (r.status !== 200) {
-                throw Error('GET /account failed.');
+                return { error: Error('GET /account failed.') };
             }
 
             this.context.commit('setUserProfile', r.data);
 
-            return r.data;
-        } catch (e) {
-            return e;
-        }
-    }
+            try {
+                const privateKey = await getPrivateKey(this.user);
+                const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 
-    @Action
-    async signup(data: SignupRequest) {
-        try {
-            const r = await axios({
-                method: 'POST',
-                url: '/signup',
-                data,
-            });
+                this.context.commit('setPrivateKey', privateKey);
 
-            if (r.status !== 201) {
-                throw Error('POST /signup failed.');
+                await this.context.dispatch('updateAccountAddress', account.address);
+            } catch (e) {
+                return new Error('Unable to get private key.');
             }
-
-            return r.data.address;
         } catch (e) {
-            return e;
+            return { error: new Error('Unable to get profile.') };
         }
     }
 
@@ -197,7 +125,7 @@ class AccountModule extends VuexModule {
 
             this.context.commit('setUserProfile', r.data);
         } catch (e) {
-            return e;
+            return { error: e };
         }
     }
 
@@ -213,7 +141,7 @@ class AccountModule extends VuexModule {
                 },
             });
         } catch (e) {
-            return e;
+            return { error: e };
         }
     }
 
@@ -226,7 +154,7 @@ class AccountModule extends VuexModule {
 
             return user;
         } catch (e) {
-            return e;
+            return { error: e };
         }
     }
 
@@ -252,7 +180,7 @@ class AccountModule extends VuexModule {
                 url: config.authority + '/session/end',
             });
         } catch (e) {
-            return e;
+            return { error: e };
         }
     }
 
@@ -261,7 +189,7 @@ class AccountModule extends VuexModule {
         try {
             return await this.userManager.signinSilent();
         } catch (e) {
-            return e;
+            return { error: e };
         }
     }
 }

@@ -14,7 +14,10 @@ import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue
 import { BSpinner } from 'bootstrap-vue';
 
 @Component({
-    components: { 'b-spinner': BSpinner, 'modal-decode-private-key': ModalDecodePrivateKey },
+    components: {
+        'b-spinner': BSpinner,
+        'modal-decode-private-key': ModalDecodePrivateKey,
+    },
     computed: mapGetters({
         privateKey: 'account/privateKey',
         profile: 'account/profile',
@@ -33,9 +36,9 @@ export default class Redirect extends Vue {
     async mounted() {
         try {
             await this.$store.dispatch('account/signinRedirectCallback');
-            await this.$store.dispatch('account/getPrivateKey');
+            await this.$store.dispatch('account/getProfile');
 
-            if (!this.profile.privateKey) {
+            if (this.profile && !this.profile.privateKey) {
                 this.init();
                 return;
             }

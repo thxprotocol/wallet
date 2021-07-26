@@ -40,22 +40,14 @@
 </template>
 
 <script lang="ts">
+import Web3 from 'web3';
 import { UserProfile } from '@/store/modules/account';
 import { decryptString } from '@/utils/decrypt';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
-import { ethers } from 'ethers';
 import { User } from 'oidc-client';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-
-function isValidKey(privateKey: string) {
-    try {
-        const account = new ethers.Wallet(privateKey);
-        return ethers.utils.isAddress(account.address);
-    } catch (e) {
-        return false;
-    }
-}
+import { isValidKey } from '@/utils/network';
 
 @Component({
     name: 'ModalDecodePrivateKey',
@@ -82,11 +74,11 @@ export default class ModalDecodePrivateKey extends Vue {
     decryptedPrivateKey = '';
 
     // getters
+    address!: string;
     user!: User;
     privateKey!: string;
     profile!: UserProfile;
-    address!: string;
-    provider!: any;
+    web3!: Web3;
 
     cancel() {
         this.$bvModal.hide('modalDecodePrivateKey');
@@ -103,7 +95,7 @@ export default class ModalDecodePrivateKey extends Vue {
     async upgradeAddress(originalPrivateKey: string) {
         try {
             for (const poolAddress of this.profile.memberships) {
-                const signer = new ethers.Wallet(originalPrivateKey, this.provider);
+                const signer = this.web3.eth.accounts.privateKeyToAccount(originalPrivateKey);
                 const callData = {
                     poolAddress: poolAddress,
                     name: 'upgradeAddress',
@@ -131,6 +123,7 @@ export default class ModalDecodePrivateKey extends Vue {
             if (isValidKey(decryptedPrivateKey)) {
                 await this.upgradeAddress(decryptedPrivateKey);
                 await this.$store.dispatch('account/getProfile');
+
                 this.$bvModal.hide('modalDecodePrivateKey');
             } else {
                 throw Error('Not a valid key');

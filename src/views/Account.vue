@@ -6,11 +6,11 @@
             <label for="accountAddress">Your Wallet</label>
         </h2>
         <b-input-group>
-            <b-form-input id="accountAddress" readonly :value="address" />
+            <b-form-input id="accountAddress" readonly :value="profile.address" />
             <b-input-group-append>
                 <b-button
-                    variant="secondary"
-                    v-clipboard:copy="address"
+                    variant="dark"
+                    v-clipboard:copy="profile.address"
                     v-clipboard:success="onCopy"
                     v-clipboard:error="onError"
                 >
@@ -20,20 +20,21 @@
         </b-input-group>
         <hr />
         <h2 class="h4">Your Pools</h2>
-        <b-list-group>
-            <base-list-group-item-asset-pool
-                :poolAddress="poolAddress"
-                :key="key"
-                v-for="(poolAddress, key) of profile.memberships"
-            />
+        <b-list-group v-if="web3">
             <b-list-group-item class="text-center" v-if="busy">
                 <b-spinner variant="primary" />
             </b-list-group-item>
+            <base-list-group-item-asset-pool
+                v-else
+                :address="address"
+                :key="key"
+                v-for="(address, key) of profile.memberships"
+            />
         </b-list-group>
 
         <hr />
 
-        <b-button block variant="secondary" @click="logout()">
+        <b-button block variant="dark" @click="logout()">
             Logout
         </b-button>
     </div>
@@ -56,6 +57,8 @@ import { User } from 'oidc-client';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BaseListGroupItemAssetPool from '@/components/BaseListGroupItemAssetPool.vue';
+import { NetworkProvider } from '@/utils/network';
+import Web3 from 'web3';
 
 @Component({
     name: 'AccountView',
@@ -73,22 +76,23 @@ import BaseListGroupItemAssetPool from '@/components/BaseListGroupItemAssetPool.
     },
     computed: mapGetters({
         user: 'account/user',
-        address: 'account/address',
         profile: 'account/profile',
         privateKey: 'account/privateKey',
-        memberships: 'memberships/all',
+        web3: 'network/web3',
+        assetPools: 'assetpools/all',
     }),
 })
 export default class AccountView extends Vue {
     busy = true;
     error = '';
     info = '';
+    npid: NetworkProvider = NetworkProvider.Main;
 
     // getters
     user!: User;
     profile!: UserProfile;
-    address!: string;
     privateKey!: string;
+    web3!: Web3;
 
     onCopy(e: any) {
         this.info = 'You just copied: ' + e.text;
@@ -102,8 +106,8 @@ export default class AccountView extends Vue {
         this.busy = true;
 
         try {
-            this.$store.commit('network/connect', this.privateKey);
             await this.$store.dispatch('account/getProfile');
+            this.$store.commit('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
         } catch (e) {
             this.error = e.toString();
         } finally {

@@ -1,17 +1,22 @@
 <template>
-    <div id="app" class="d-flex flex-column h-100 ">
+    <div id="app" class="d-flex flex-column h-100">
         <div class="flex-grow-1 overflow-auto d-flex flex-column">
-            <b-jumbotron class="flex-grow-0" bg-variant="primary" text-variant="dark" v-if="$router.currentRoute.name">
+            <header class="pt-3 pb-3" v-if="$router.currentRoute.name">
                 <div class="container">
-                    <h1 class="display-5 m-0">{{ $router.currentRoute.name }}</h1>
+                    <div class="row">
+                        <div class="col-8">
+                            <h1 class="display-5 m-0">{{ $router.currentRoute.name }}</h1>
+                        </div>
+                        <div class="col-4">
+                            <base-network-select class="float-right" />
+                        </div>
+                    </div>
                 </div>
-            </b-jumbotron>
+            </header>
 
             <router-view class="main-container flex-grow-1" />
         </div>
-        <div class="flex-grow-0" v-if="profile && !profile.privateKey">
-            <navbar />
-        </div>
+        <navbar class="flex-grow-0" v-if="profile && !profile.privateKey" />
     </div>
 </template>
 
@@ -20,12 +25,14 @@ import { BButton, BJumbotron } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import Navbar from '@/components/Navbar.vue';
+import BaseNetworkSelect from './components/BaseNetworkSelect.vue';
 
 @Component({
     components: {
         'b-jumbotron': BJumbotron,
         'b-button': BButton,
         'navbar': Navbar,
+        'base-network-select': BaseNetworkSelect,
     },
     computed: mapGetters({
         profile: 'account/profile',

@@ -7,7 +7,8 @@ config.rawError = true;
 
 import AccountStore from './modules/account';
 import NetworkStore from './modules/network';
-import MembershipStore from './modules/memberships';
+import AssetPoolStore from './modules/assetPools';
+import ERC20Store from './modules/erc20';
 import WithdrawalStore from './modules/withdrawals';
 
 Vue.use(Vuex);
@@ -18,7 +19,8 @@ const getters = {};
 const modules = {
     account: AccountStore,
     network: NetworkStore,
-    memberships: MembershipStore,
+    assetpools: AssetPoolStore,
+    erc20: ERC20Store,
     withdrawals: WithdrawalStore,
 };
 
