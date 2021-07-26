@@ -1,11 +1,17 @@
 import Web3 from 'web3';
 import { Module, Mutation, VuexModule } from 'vuex-module-decorators';
-import { NetworkProvider } from '@/utils/network';
+import { getGasToken, NetworkProvider } from '@/utils/network';
 import { MAIN_CHILD_RPC, TEST_CHILD_RPC } from '@/utils/secrets';
 
 export interface Network {
     name: string;
     provider: Web3;
+}
+
+export interface GasToken {
+    name: string;
+    symbol: string;
+    balance: string;
 }
 
 @Module({ namespaced: true })
@@ -22,6 +28,7 @@ class NetworkModule extends VuexModule {
     ];
     _currentNetwork: NetworkProvider = NetworkProvider.Main;
     _web3: Web3 | null = null;
+    _gasToken!: GasToken;
 
     get current() {
         return this._providers[this._currentNetwork];
@@ -31,8 +38,12 @@ class NetworkModule extends VuexModule {
         return this._web3;
     }
 
+    get gasToken() {
+        return this._gasToken;
+    }
+
     @Mutation
-    setNetwork({ npid, privateKey }: { npid: NetworkProvider; privateKey: string }) {
+    async setNetwork({ npid, privateKey }: { npid: NetworkProvider; privateKey: string }) {
         const web3 = this._providers[npid].provider;
         const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 
@@ -41,6 +52,7 @@ class NetworkModule extends VuexModule {
 
         this._currentNetwork = npid;
         this._web3 = web3;
+        this._gasToken = await getGasToken(web3, account.address);
     }
 }
 

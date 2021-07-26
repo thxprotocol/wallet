@@ -1,5 +1,5 @@
 import Web3 from 'web3';
-import { isAddress } from 'web3-utils';
+import { fromWei, isAddress } from 'web3-utils';
 import Artifacts from '@/utils/artifacts';
 import Contract from 'web3/eth/contract';
 
@@ -52,4 +52,14 @@ export function isValidKey(privateKey: string) {
     } catch (e) {
         return false;
     }
+}
+
+export async function getGasToken(web3: Web3, address: string) {
+    const balanceInWei = await web3.eth.getBalance(address);
+
+    return {
+        name: 'Matic Token',
+        symbol: 'MATIC',
+        balance: fromWei(balanceInWei),
+    };
 }
