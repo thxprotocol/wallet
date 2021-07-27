@@ -63,3 +63,23 @@ export async function getGasToken(web3: Web3, address: string) {
         balance: fromWei(balanceInWei),
     };
 }
+
+export function isPrivateKey(privateKey: string) {
+    const web3 = new Web3();
+
+    try {
+        if (!privateKey.startsWith('0x')) {
+            throw new Error('Private key does not start with 0x');
+        }
+        if (privateKey.length !== 42) {
+            throw new Error('Private key string lenght is not 42.');
+        }
+
+        web3.eth.accounts.privateKeyToAccount(privateKey);
+
+        return true;
+    } catch (e) {
+        console.log(e);
+        return false;
+    }
+}

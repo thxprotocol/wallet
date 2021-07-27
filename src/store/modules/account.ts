@@ -6,6 +6,7 @@ import { config } from '@/utils/oidc';
 import { getPrivateKey } from '@/utils/torus';
 import { isAddress } from 'web3-utils';
 import { ERC20Token } from './erc20';
+import { isPrivateKey } from '@/utils/network';
 
 const web3 = new Web3();
 
@@ -99,28 +100,34 @@ class AccountModule extends VuexModule {
 
             try {
                 let privateKey = this.context.getters.privateKey;
-                let account = web3.eth.accounts.privateKeyToAccount(privateKey);
 
-                if (!isAddress(account.address)) {
+                if (!isPrivateKey(privateKey)) {
                     const result = await getPrivateKey(this.user);
 
                     if (result && !result.error) {
                         privateKey = result.privateKey;
-                        account = web3.eth.accounts.privateKeyToAccount(privateKey);
                     } else {
                         return new Error('Unable to get private key from Torus verifier.');
                     }
                 }
 
-                this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
+                const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 
-                if (r.data.address !== account.address) {
-                    await this.context.dispatch('updateAccountAddress', account.address);
+                if (isAddress(account.address)) {
+                    this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
+
+                    if (r.data.address !== account.address) {
+                        await this.context.dispatch('updateAccountAddress', account.address);
+                    }
+                } else {
+                    return new Error('Not a valid address.');
                 }
             } catch (e) {
+                console.log(e);
                 return new Error('Unable to get private key.');
             }
         } catch (e) {
+            console.log(e);
             return { error: new Error('Unable to get profile.') };
         }
     }
