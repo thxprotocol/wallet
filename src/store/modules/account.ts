@@ -99,25 +99,23 @@ class AccountModule extends VuexModule {
 
             try {
                 let privateKey = this.context.getters.privateKey;
+                let account = web3.eth.accounts.privateKeyToAccount(privateKey);
 
-                if (!privateKey) {
+                if (!isAddress(account.address)) {
                     const result = await getPrivateKey(this.user);
 
                     if (result && !result.error) {
                         privateKey = result.privateKey;
+                        account = web3.eth.accounts.privateKeyToAccount(privateKey);
+                    } else {
+                        return new Error('Unable to get private key from Torus verifier.');
                     }
                 }
 
-                const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+                this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
 
-                if (isAddress(account.address)) {
-                    this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
-
-                    if (r.data.address !== account.address) {
-                        await this.context.dispatch('updateAccountAddress', account.address);
-                    }
-                } else {
-                    return new Error('Available private key is not valid.');
+                if (r.data.address !== account.address) {
+                    await this.context.dispatch('updateAccountAddress', account.address);
                 }
             } catch (e) {
                 return new Error('Unable to get private key.');
