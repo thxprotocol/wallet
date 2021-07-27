@@ -1,6 +1,6 @@
 import Web3 from 'web3';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
-import { getGasToken, NetworkProvider } from '@/utils/network';
+import { getGasToken, isPrivateKey, NetworkProvider } from '@/utils/network';
 import { MAIN_CHILD_RPC, TEST_CHILD_RPC } from '@/utils/secrets';
 
 export interface Network {
@@ -59,15 +59,21 @@ class NetworkModule extends VuexModule {
 
     @Action
     async setNetwork({ npid, privateKey }: { npid: NetworkProvider; privateKey: string }) {
-        const web3 = this._providers[npid].provider;
-        const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+        try {
+            if (isPrivateKey(privateKey)) {
+                const web3 = this._providers[npid].provider;
+                const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 
-        web3.eth.accounts.wallet.add(account);
-        web3.eth.defaultAccount = account.address;
+                web3.eth.accounts.wallet.add(account);
+                web3.eth.defaultAccount = account.address;
 
-        this.context.commit('setCurrentNetwork', npid);
-        this.context.commit('setWeb3', web3);
-        this.context.commit('setGasToken', await getGasToken(web3, account.address));
+                this.context.commit('setCurrentNetwork', npid);
+                this.context.commit('setWeb3', web3);
+                this.context.commit('setGasToken', await getGasToken(web3, account.address));
+            }
+        } catch (e) {
+            console.log(e);
+        }
     }
 }
 

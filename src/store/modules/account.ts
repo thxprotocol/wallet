@@ -23,6 +23,7 @@ class AccountModule extends VuexModule {
     userManager: UserManager = new UserManager(config);
     _user!: User;
     _profile: UserProfile | null = null;
+    _privateKey = '';
 
     get user() {
         return this._user;
@@ -30,7 +31,9 @@ class AccountModule extends VuexModule {
 
     get privateKey() {
         const encoded = sessionStorage.getItem(`thx:wallet:user:${this._user.profile.sub}`) as string;
-        return atob(encoded);
+        const decoded = atob(encoded);
+
+        return this._privateKey || decoded;
     }
 
     get profile() {
@@ -45,6 +48,8 @@ class AccountModule extends VuexModule {
     @Mutation
     setPrivateKey({ sub, privateKey }: { sub: string; privateKey: string }) {
         sessionStorage.setItem(`thx:wallet:user:${sub}`, btoa(privateKey));
+
+        this._privateKey = privateKey;
     }
 
     @Mutation
