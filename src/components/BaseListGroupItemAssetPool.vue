@@ -7,10 +7,10 @@
         <div class="mr-auto" v-if="assetPool.title">
             <strong>{{ assetPool.title }}</strong
             ><br />
-            <small class="text-muted">{{ address }}</small>
+            <small class="text-muted text-overflow-75">{{ address }}</small>
         </div>
 
-        <div class="text-muted mr-auto" v-else>
+        <div class="text-muted text-overflow-75 mr-auto" v-else>
             {{ address }}
         </div>
 
