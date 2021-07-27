@@ -98,25 +98,26 @@ class AccountModule extends VuexModule {
             this.context.commit('setUserProfile', r.data);
 
             try {
-                let key;
-                const result = await getPrivateKey(this.user);
+                let privateKey = this.context.getters.privateKey;
 
-                if (result && result.error) {
-                    key = this.context.getters.privateKey;
-                } else {
-                    key = result.privateKey;
+                if (!privateKey) {
+                    const result = await getPrivateKey(this.user);
+
+                    if (result && !result.error) {
+                        privateKey = result.privateKey;
+                    }
                 }
 
-                if (key) {
-                    const account = web3.eth.accounts.privateKeyToAccount(key);
+                const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 
-                    if (isAddress(account.address)) {
-                        this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey: key });
+                if (isAddress(account.address)) {
+                    this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
 
-                        if (r.data.address !== account.address) {
-                            await this.context.dispatch('updateAccountAddress', account.address);
-                        }
+                    if (r.data.address !== account.address) {
+                        await this.context.dispatch('updateAccountAddress', account.address);
                     }
+                } else {
+                    return new Error('Available private key is not valid.');
                 }
             } catch (e) {
                 return new Error('Unable to get private key.');
