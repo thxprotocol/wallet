@@ -73,8 +73,7 @@ export default class Wallet extends Vue {
 
         try {
             await this.$store.dispatch('account/getProfile');
-
-            this.$store.commit('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
+            await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
         } catch (e) {
             this.error = e.toString();
         } finally {

@@ -8,10 +8,11 @@
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { User } from 'oidc-client';
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
 import { BSpinner } from 'bootstrap-vue';
+import { NetworkProvider } from '@/utils/network';
 
 @Component({
     components: {
@@ -33,10 +34,13 @@ export default class Redirect extends Vue {
     profile!: UserProfile;
     privateKey!: string;
 
+    @Prop() npid!: NetworkProvider;
+
     async mounted() {
         try {
             await this.$store.dispatch('account/signinRedirectCallback');
             await this.$store.dispatch('account/getProfile');
+            await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
 
             if (this.profile && !this.profile.privateKey) {
                 this.init();

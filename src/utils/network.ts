@@ -66,11 +66,13 @@ export async function getGasToken(web3: Web3, address: string) {
 
 export function isPrivateKey(privateKey: string) {
     const web3 = new Web3();
-
+    console.log(privateKey);
     try {
+        console.log(!privateKey.startsWith('0x'));
         if (!privateKey.startsWith('0x')) {
             throw new Error('Private key does not start with 0x');
         }
+        console.log(!privateKey.length);
         if (privateKey.length !== 42) {
             throw new Error('Private key string lenght is not 42.');
         }

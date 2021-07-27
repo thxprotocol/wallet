@@ -35,12 +35,12 @@ export default class BaseNetworkSelect extends Vue {
 
     @Prop() npid!: NetworkProvider;
 
-    mounted() {
-        this.$store.commit('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
+    async mounted() {
+        await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
     }
 
-    onClick(npid: NetworkProvider) {
-        this.$store.commit('network/setNetwork', { npid, privateKey: this.privateKey });
+    async onClick(npid: NetworkProvider) {
+        await this.$store.dispatch('network/setNetwork', { npid, privateKey: this.privateKey });
         this.$emit('change', npid);
     }
 }

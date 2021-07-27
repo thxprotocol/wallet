@@ -114,8 +114,7 @@ export default class AccountView extends Vue {
 
         try {
             await this.$store.dispatch('account/getProfile');
-
-            this.$store.commit('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
+            await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
 
             await this.getAssetPools();
         } catch (e) {

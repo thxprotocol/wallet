@@ -47,9 +47,9 @@ export default class App extends Vue {
     profile!: UserProfile;
     privateKey!: string;
 
-    onChangeNetwork(npid: NetworkProvider) {
+    async onChangeNetwork(npid: NetworkProvider) {
         this.npid = npid;
-        this.$store.commit('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
+        await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
     }
 
     created() {
