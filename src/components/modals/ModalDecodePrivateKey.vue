@@ -2,6 +2,7 @@
     <b-modal
         id="modalDecodePrivateKey"
         @hidden="$emit('init')"
+        @show="onShow()"
         no-close-on-esc
         no-close-on-backdrop
         hide-header-close
@@ -18,15 +19,15 @@
             </b-alert>
             <p>
                 Temporary address:<br />
-                <code class="text-overflow-75">{{ tempAccount.address }}</code>
+                <code>{{ profile.address }}</code>
             </p>
             <p>
                 New address:<br />
-                <code class="text-overflow-75">{{ account.address }}</code>
+                <code>{{ account.address }}</code>
             </p>
             <p>
                 Assets have been stored in your temporary wallet. Please provide your password (again) to transfer the
-                ownership of assets in your temporary wallet to your new wallet address.
+                ownership of your assets.
             </p>
             <form @submit.prevent="onSubmit()" id="formPassword">
                 <b-form-input
@@ -39,14 +40,7 @@
             </form>
         </template>
         <template v-slot:modal-footer>
-            <b-button
-                class="mt-3 rounded-pill"
-                block
-                variant="primary"
-                form="formPassword"
-                type="submit"
-                :disabled="!tempAccount || !account"
-            >
+            <b-button class="mt-3 rounded-pill" block variant="primary" form="formPassword" type="submit">
                 Transfer ownership
             </b-button>
         </template>
@@ -57,12 +51,12 @@
 import Web3 from 'web3';
 import axios from 'axios';
 import { UserProfile } from '@/store/modules/account';
-import { decryptString } from '@/utils/decrypt';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { isPrivateKey, signCall } from '@/utils/network';
 import { Account } from 'web3/eth/accounts';
+import { decryptString } from '@/utils/decrypt';
 
 @Component({
     name: 'ModalDecodePrivateKey',
@@ -80,49 +74,45 @@ import { Account } from 'web3/eth/accounts';
     }),
 })
 export default class ModalDecodePrivateKey extends Vue {
-    busy = false;
+    busy = true;
     error = '';
     password = '';
     decryptedPrivateKey = '';
 
-    tempAccount!: Account;
-    account!: Account;
+    tempAccount: Account | null = null;
+    account: Account | null = null;
+
+    @Prop() web3!: Web3;
 
     // getters
     profile!: UserProfile;
     privateKey!: string;
 
-    @Prop() web3!: Web3;
-
     onShow() {
-        try {
-            const tempPrivateKey = decryptString(this.profile.privateKey, this.password);
-
-            if (isPrivateKey(tempPrivateKey)) {
-                this.tempAccount = this.web3.eth.accounts.privateKeyToAccount(tempPrivateKey) as any;
-                this.account = this.web3.eth.accounts.privateKeyToAccount(this.privateKey) as any;
-            } else {
-                throw new Error('Not a valid key');
-            }
-        } catch (e) {
-            console.error(e);
-            this.error = e.toString();
-        } finally {
-            this.busy = false;
-        }
+        this.account = this.web3.eth.accounts.privateKeyToAccount(this.privateKey) as any;
+        this.busy = false;
+        debugger;
     }
 
     async onSubmit() {
         this.busy = true;
 
         try {
+            const tempPrivateKey = decryptString(this.profile.privateKey, this.password);
+
+            if (isPrivateKey(tempPrivateKey)) {
+                this.tempAccount = this.web3.eth.accounts.privateKeyToAccount(tempPrivateKey) as any;
+            } else {
+                throw new Error('Not a valid key');
+            }
+
             for (const poolAddress of this.profile.memberships) {
                 await this.transferOwnership(poolAddress);
             }
 
             await this.$store.dispatch('account/getProfile');
 
-            if (this.profile.address !== this.tempAccount.address) {
+            if (this.profile.address !== this.tempAccount?.address) {
                 this.$bvModal.hide('modalDecodePrivateKey');
             } else {
                 throw new Error('Account not patched');
@@ -148,22 +138,24 @@ export default class ModalDecodePrivateKey extends Vue {
                 privateKey: this.privateKey,
             });
 
-            const calldata = await signCall(
-                this.web3,
-                poolAddress,
-                'upgradeAddress',
-                [this.tempAccount.address, this.account.address],
-                this.tempAccount,
-            );
-
-            if (!calldata.error) {
-                const r = await this.$store.dispatch('assetpools/upgradeAddress', {
+            if (this.tempAccount && this.account) {
+                const calldata = await signCall(
+                    this.web3,
                     poolAddress,
-                    data: calldata,
-                });
+                    'upgradeAddress',
+                    [this.tempAccount.address, this.account.address],
+                    this.tempAccount,
+                );
 
-                if (r.error) {
-                    throw new Error('Upgrading address for pool failed');
+                if (!calldata.error) {
+                    const r = await this.$store.dispatch('assetpools/upgradeAddress', {
+                        poolAddress,
+                        data: calldata,
+                    });
+
+                    if (r.error) {
+                        throw new Error('Upgrading address for pool failed');
+                    }
                 }
             }
         } catch (e) {

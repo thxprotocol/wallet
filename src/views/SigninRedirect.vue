@@ -28,7 +28,6 @@ import Web3 from 'web3';
 export default class Redirect extends Vue {
     busy = false;
     error = '';
-
     // getters
     privateKey!: string;
     profile!: UserProfile;
