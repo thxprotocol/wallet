@@ -1,19 +1,7 @@
 <template>
     <div class="container" v-if="profile">
         <b-list-group v-if="web3">
-            <b-list-group-item v-if="gasToken" class="d-flex justify-content-between align-items-center">
-                <div class="mr-auto">
-                    <strong>{{ gasToken.symbol }}</strong
-                    ><br />
-                    <small class="text-muted">{{ gasToken.name }}</small>
-                </div>
-
-                <div class="h3 mr-3 m-0">
-                    {{ gasToken.balance }}
-                </div>
-                <b-button variant="primary" disabled>Transfer</b-button>
-            </b-list-group-item>
-
+            <base-list-group-item-gas-token />
             <base-list-group-item-token
                 :web3="web3"
                 :address="token.address"
@@ -25,15 +13,15 @@
 </template>
 
 <script lang="ts">
+import Web3 from 'web3';
+import BaseListGroupItemToken from '@/components/BaseListGroupItemToken.vue';
+import BaseListGroupItemGasToken from '@/components/BaseListGroupItemGasToken.vue';
 import { BAlert, BButton, BFormInput, BInputGroup, BInputGroupAppend, BListGroup, BListGroupItem } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
-import BaseListGroupItemToken from '@/components/BaseListGroupItemToken.vue';
-import Web3 from 'web3';
 import { NetworkProvider } from '@/utils/network';
 import { ERC20Token } from '@/store/modules/erc20';
-import { GasToken } from '@/store/modules/network';
 
 @Component({
     components: {
@@ -45,10 +33,10 @@ import { GasToken } from '@/store/modules/network';
         'b-form-input': BFormInput,
         'b-list-group-item': BListGroupItem,
         'base-list-group-item-token': BaseListGroupItemToken,
+        'base-list-group-item-gas-token': BaseListGroupItemGasToken,
     },
     computed: mapGetters({
         web3: 'network/web3',
-        gasToken: 'network/gasToken',
         profile: 'account/profile',
         privateKey: 'account/privateKey',
     }),
@@ -62,7 +50,6 @@ export default class Wallet extends Vue {
     web3!: Web3;
     profile!: UserProfile;
     privateKey!: string;
-    gasToken!: GasToken;
 
     get filteredTokens() {
         return Object.values(this.profile.erc20).filter((token: ERC20Token) => token.network === this.npid);

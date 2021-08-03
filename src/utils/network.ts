@@ -2,12 +2,37 @@ import Web3 from 'web3';
 import { fromWei, isAddress } from 'web3-utils';
 import Artifacts from '@/utils/artifacts';
 import Contract from 'web3/eth/contract';
+import { soliditySha3 } from 'web3-utils';
+import { Account } from 'web3/eth/accounts';
 
 export const MINIMUM_GAS_LIMIT = 54680;
 
 export enum NetworkProvider {
     Test = 0,
     Main = 1,
+}
+
+export async function signCall(web3: Web3, poolAddress: string, name: string, params: any[], account: Account) {
+    try {
+        const solution = new web3.eth.Contract(Artifacts.IDefaultDiamond.abi as any, poolAddress, {
+            from: account.address,
+        });
+        const abi: any = Artifacts.IDefaultDiamond.abi.find(fn => fn.name === name);
+        const nonce = Number(await solution.methods.getLatestNonce(account.address).call()) + 1;
+        const call = web3.eth.abi.encodeFunctionCall(abi, params);
+        const hash = soliditySha3(call, nonce) || '';
+        const sig = web3.eth.accounts.sign(hash, account.privateKey).signature;
+
+        return {
+            call,
+            nonce,
+            sig,
+        };
+    } catch (e) {
+        return {
+            error: 'Could not sign the call',
+        };
+    }
 }
 
 export async function send(web3: Web3, contract: Contract, fn: any, privateKey: string) {

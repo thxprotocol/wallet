@@ -9,6 +9,7 @@
     </b-dropdown>
 </template>
 <script lang="ts">
+import { UserProfile } from '@/store/modules/account';
 import { NetworkProvider } from '@/utils/network';
 import { BDropdown, BDropdownItem } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
@@ -29,9 +30,10 @@ import Web3 from 'web3';
     }),
 })
 export default class BaseNetworkSelect extends Vue {
+    profile!: UserProfile;
+    privateKey!: string;
     provider = NetworkProvider;
     web3!: Web3;
-    privateKey!: string;
 
     @Prop() npid!: NetworkProvider;
 
@@ -41,6 +43,7 @@ export default class BaseNetworkSelect extends Vue {
 
     async onClick(npid: NetworkProvider) {
         await this.$store.dispatch('network/setNetwork', { npid, privateKey: this.privateKey });
+
         this.$emit('change', npid);
     }
 }

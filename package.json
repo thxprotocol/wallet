@@ -52,7 +52,7 @@
         "lint": "vue-cli-service lint"
     },
     "dependencies": {
-        "@thxnetwork/artifacts": "^1.0.0",
+        "@thxnetwork/artifacts": "^1.0.1",
         "@toruslabs/torus-direct-web-sdk": "^4.14.1",
         "axios": "^0.21.1",
         "bootstrap": "^4.6.0",

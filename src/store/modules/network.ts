@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import Web3 from 'web3';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { getGasToken, isPrivateKey, NetworkProvider } from '@/utils/network';
@@ -18,17 +19,17 @@ export interface GasToken {
 class NetworkModule extends VuexModule {
     _providers: Network[] = [
         {
-            name: 'Polygon Test Network',
+            name: 'Polygon Testnet',
             provider: new Web3(TEST_CHILD_RPC),
         },
         {
-            name: 'Polygon Main Network',
+            name: 'Polygon Mainnet',
             provider: new Web3(MAIN_CHILD_RPC),
         },
     ];
     _currentNetwork: NetworkProvider = NetworkProvider.Main;
     _web3: Web3 | null = null;
-    _gasToken!: GasToken;
+    _gasToken: GasToken | null = null;
 
     get current() {
         return this._providers[this._currentNetwork];
@@ -44,17 +45,17 @@ class NetworkModule extends VuexModule {
 
     @Mutation
     setCurrentNetwork(npid: NetworkProvider) {
-        this._currentNetwork = npid;
+        Vue.set(this, '_currentNetwork', npid);
     }
 
     @Mutation
     setWeb3(web3: Web3) {
-        this._web3 = web3;
+        Vue.set(this, '_web3', web3);
     }
 
     @Mutation
     setGasToken(gasToken: GasToken) {
-        this._gasToken = gasToken;
+        Vue.set(this, '_gasToken', gasToken);
     }
 
     @Action

@@ -2,13 +2,12 @@
     <b-modal
         id="modalDecodePrivateKey"
         @hidden="$emit('init')"
-        @show="onShow()"
         no-close-on-esc
         no-close-on-backdrop
         hide-header-close
         centered
         scrollable
-        title="Decode and migrate your assets"
+        title="Reclaim ownership over your assets"
     >
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
@@ -18,10 +17,18 @@
                 {{ error }}
             </b-alert>
             <p>
-                Assets have been stored in your temporary account. Provide your password to transfer those assets to
-                this wallet.
+                Temporary address:<br />
+                <code class="text-overflow-75">{{ tempAccount.address }}</code>
             </p>
-            <form @submit.prevent="update()" id="formPassword">
+            <p>
+                New address:<br />
+                <code class="text-overflow-75">{{ account.address }}</code>
+            </p>
+            <p>
+                Assets have been stored in your temporary wallet. Please provide your password (again) to transfer the
+                ownership of assets in your temporary wallet to your new wallet address.
+            </p>
+            <form @submit.prevent="onSubmit()" id="formPassword">
                 <b-form-input
                     autofocus
                     size="lg"
@@ -32,8 +39,15 @@
             </form>
         </template>
         <template v-slot:modal-footer>
-            <b-button class="mt-3 btn-rounded" block variant="success" form="formPassword" type="submit">
-                Update
+            <b-button
+                class="mt-3 rounded-pill"
+                block
+                variant="primary"
+                form="formPassword"
+                type="submit"
+                :disabled="!tempAccount || !account"
+            >
+                Transfer ownership
             </b-button>
         </template>
     </b-modal>
@@ -41,13 +55,14 @@
 
 <script lang="ts">
 import Web3 from 'web3';
+import axios from 'axios';
 import { UserProfile } from '@/store/modules/account';
 import { decryptString } from '@/utils/decrypt';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
-import { User } from 'oidc-client';
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { isValidKey } from '@/utils/network';
+import { isPrivateKey, signCall } from '@/utils/network';
+import { Account } from 'web3/eth/accounts';
 
 @Component({
     name: 'ModalDecodePrivateKey',
@@ -60,11 +75,8 @@ import { isValidKey } from '@/utils/network';
         'b-button': BButton,
     },
     computed: mapGetters({
-        user: 'account/user',
         profile: 'account/profile',
         privateKey: 'account/privateKey',
-        address: 'account/address',
-        provider: 'network/provider',
     }),
 })
 export default class ModalDecodePrivateKey extends Vue {
@@ -73,65 +85,90 @@ export default class ModalDecodePrivateKey extends Vue {
     password = '';
     decryptedPrivateKey = '';
 
+    tempAccount!: Account;
+    account!: Account;
+
     // getters
-    address!: string;
-    user!: User;
-    privateKey!: string;
     profile!: UserProfile;
-    web3!: Web3;
+    privateKey!: string;
 
-    cancel() {
-        this.$bvModal.hide('modalDecodePrivateKey');
-    }
+    @Prop() web3!: Web3;
 
-    async onShow() {
+    onShow() {
         try {
-            this.$store.commit('network/connect', this.privateKey);
-        } catch (e) {
-            debugger;
-        }
-    }
+            const tempPrivateKey = decryptString(this.profile.privateKey, this.password);
 
-    async upgradeAddress(originalPrivateKey: string) {
-        try {
-            for (const poolAddress of this.profile.memberships) {
-                const signer = this.web3.eth.accounts.privateKeyToAccount(originalPrivateKey);
-                const callData = {
-                    poolAddress: poolAddress,
-                    name: 'upgradeAddress',
-                    args: [this.address],
-                    signer,
-                };
-
-                await this.$store.dispatch('network/upgradeAddress', {
-                    oldAddress: signer.address,
-                    newAddress: this.address,
-                    callData,
-                });
-            }
-        } catch (e) {
-            this.error = e.toString();
-        }
-    }
-
-    async update() {
-        this.busy = true;
-
-        try {
-            const decryptedPrivateKey = decryptString(this.profile.privateKey, this.password);
-
-            if (isValidKey(decryptedPrivateKey)) {
-                await this.upgradeAddress(decryptedPrivateKey);
-                await this.$store.dispatch('account/getProfile');
-
-                this.$bvModal.hide('modalDecodePrivateKey');
+            if (isPrivateKey(tempPrivateKey)) {
+                this.tempAccount = this.web3.eth.accounts.privateKeyToAccount(tempPrivateKey) as any;
+                this.account = this.web3.eth.accounts.privateKeyToAccount(this.privateKey) as any;
             } else {
-                throw Error('Not a valid key');
+                throw new Error('Not a valid key');
             }
         } catch (e) {
+            console.error(e);
             this.error = e.toString();
         } finally {
             this.busy = false;
+        }
+    }
+
+    async onSubmit() {
+        this.busy = true;
+
+        try {
+            for (const poolAddress of this.profile.memberships) {
+                await this.transferOwnership(poolAddress);
+            }
+
+            await this.$store.dispatch('account/getProfile');
+
+            if (this.profile.address !== this.tempAccount.address) {
+                this.$bvModal.hide('modalDecodePrivateKey');
+            } else {
+                throw new Error('Account not patched');
+            }
+        } catch (e) {
+            console.error(e);
+            this.error = e.toString();
+        } finally {
+            this.busy = false;
+        }
+    }
+
+    async transferOwnership(poolAddress: string) {
+        try {
+            const r = await axios({
+                method: 'get',
+                url: '/asset_pools/' + poolAddress,
+                headers: { AssetPool: poolAddress },
+            });
+
+            await this.$store.dispatch('network/setNetwork', {
+                npid: r.data.network,
+                privateKey: this.privateKey,
+            });
+
+            const calldata = await signCall(
+                this.web3,
+                poolAddress,
+                'upgradeAddress',
+                [this.tempAccount.address, this.account.address],
+                this.tempAccount,
+            );
+
+            if (!calldata.error) {
+                const r = await this.$store.dispatch('assetpools/upgradeAddress', {
+                    poolAddress,
+                    data: calldata,
+                });
+
+                if (r.error) {
+                    throw new Error('Upgrading address for pool failed');
+                }
+            }
+        } catch (e) {
+            console.error(e);
+            this.error = e.toString();
         }
     }
 }

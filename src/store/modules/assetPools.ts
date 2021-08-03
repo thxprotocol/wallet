@@ -6,6 +6,12 @@ import Web3 from 'web3';
 import { toWei } from 'web3-utils';
 import Contract from 'web3/eth/contract';
 
+interface SignedCall {
+    call: string;
+    nonce: number;
+    sig: string;
+}
+
 interface TokenBalance {
     name: string;
     address: string;
@@ -54,12 +60,37 @@ class AssetPoolModule extends VuexModule {
                 url: '/asset_pools/' + address,
                 headers: { AssetPool: address },
             });
+
             this.context.commit(
                 'set',
                 new AssetPool({ ...r.data, ...{ contract: getAssetPoolContract(web3, address) } }),
             );
         } catch (e) {
             return { error: new Error(e) };
+        }
+    }
+
+    @Action
+    async upgradeAddress({ poolAddress, data }: { poolAddress: string; data: SignedCall }) {
+        try {
+            const r = await axios({
+                method: 'POST',
+                url: '/gas_station/upgrade_address',
+                headers: {
+                    AssetPool: poolAddress,
+                },
+                data,
+            });
+
+            if (r.status !== 200) {
+                throw new Error('POST upgrade address failed.');
+            }
+
+            return r.data;
+        } catch (e) {
+            return {
+                error: e.toString(),
+            };
         }
     }
 

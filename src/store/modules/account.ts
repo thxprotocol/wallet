@@ -58,25 +58,6 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    async updateAccountAddress(address: string) {
-        try {
-            const r = await axios({
-                method: 'PATCH',
-                url: '/account',
-                data: { address },
-            });
-
-            if (r.status !== 200) {
-                throw new Error('PATCH /account failed.');
-            }
-
-            this.context.commit('setUserProfile', r.data);
-        } catch (e) {
-            return new Error('Unable to update account with address.');
-        }
-    }
-
-    @Action
     async getUser() {
         try {
             const user = await this.userManager.getUser();
@@ -102,38 +83,37 @@ class AccountModule extends VuexModule {
             }
 
             this.context.commit('setUserProfile', r.data);
-
-            try {
-                let privateKey = this.context.getters.privateKey;
-
-                if (!isPrivateKey(privateKey)) {
-                    const result = await getPrivateKey(this.user);
-
-                    if (result && !result.error) {
-                        privateKey = result.privateKey;
-                    } else {
-                        return new Error('Unable to get private key from Torus verifier.');
-                    }
-                }
-
-                const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-
-                if (isAddress(account.address)) {
-                    this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
-
-                    if (r.data.address !== account.address) {
-                        await this.context.dispatch('updateAccountAddress', account.address);
-                    }
-                } else {
-                    return new Error('Not a valid address.');
-                }
-            } catch (e) {
-                console.log(e);
-                return new Error('Unable to get private key.');
-            }
         } catch (e) {
             console.log(e);
             return { error: new Error('Unable to get profile.') };
+        }
+    }
+
+    @Action
+    async getPrivateKey() {
+        try {
+            let privateKey = this.context.getters.privateKey;
+
+            if (!isPrivateKey(privateKey)) {
+                const result = await getPrivateKey(this.user);
+
+                if (result && !result.error) {
+                    privateKey = result.privateKey;
+                } else {
+                    return new Error('Unable to get private key from Torus verifier.');
+                }
+            }
+
+            const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+
+            if (isAddress(account.address)) {
+                this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
+            } else {
+                return new Error('Not a valid address.');
+            }
+        } catch (e) {
+            console.log(e);
+            return new Error('Unable to get private key.');
         }
     }
 

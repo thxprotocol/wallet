@@ -1,18 +1,18 @@
 <template>
     <div class="center-center h-100">
         <b-spinner variant="dark"></b-spinner>
-        <modal-decode-private-key @init="init()" />
+        <modal-decode-private-key :web3="web3" @init="init()" />
     </div>
 </template>
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
-import { User } from 'oidc-client';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
 import { BSpinner } from 'bootstrap-vue';
 import { NetworkProvider } from '@/utils/network';
+import Web3 from 'web3';
 
 @Component({
     components: {
@@ -22,7 +22,7 @@ import { NetworkProvider } from '@/utils/network';
     computed: mapGetters({
         privateKey: 'account/privateKey',
         profile: 'account/profile',
-        user: 'account/user',
+        web3: 'network/web3',
     }),
 })
 export default class Redirect extends Vue {
@@ -30,9 +30,9 @@ export default class Redirect extends Vue {
     error = '';
 
     // getters
-    user!: User;
-    profile!: UserProfile;
     privateKey!: string;
+    profile!: UserProfile;
+    web3!: Web3;
 
     @Prop() npid!: NetworkProvider;
 
@@ -40,6 +40,7 @@ export default class Redirect extends Vue {
         try {
             await this.$store.dispatch('account/signinRedirectCallback');
             await this.$store.dispatch('account/getProfile');
+            await this.$store.dispatch('account/getPrivateKey');
             await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
 
             if (this.profile && !this.profile.privateKey) {
