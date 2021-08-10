@@ -150,6 +150,7 @@ export default class ModalDecodePrivateKey extends Vue {
                 if (!calldata.error) {
                     const r = await this.$store.dispatch('assetpools/upgradeAddress', {
                         poolAddress,
+                        newAddress: this.account.address,
                         data: calldata,
                     });
 

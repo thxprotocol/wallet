@@ -71,7 +71,15 @@ class AssetPoolModule extends VuexModule {
     }
 
     @Action
-    async upgradeAddress({ poolAddress, data }: { poolAddress: string; data: SignedCall }) {
+    async upgradeAddress({
+        poolAddress,
+        newAddress,
+        data,
+    }: {
+        poolAddress: string;
+        newAddress: string;
+        data: SignedCall;
+    }) {
         try {
             const r = await axios({
                 method: 'POST',
@@ -79,7 +87,10 @@ class AssetPoolModule extends VuexModule {
                 headers: {
                     AssetPool: poolAddress,
                 },
-                data,
+                data: {
+                    newAddress,
+                    ...data,
+                },
             });
 
             if (r.status !== 200) {
