@@ -7,6 +7,7 @@ import { getPrivateKey } from '@/utils/torus';
 import { isAddress } from 'web3-utils';
 import { ERC20Token } from './erc20';
 import { isPrivateKey } from '@/utils/network';
+import { BASE_URL } from '@/utils/secrets';
 
 const web3 = new Web3();
 
@@ -137,15 +138,33 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    async signinRedirect(payload: { token: string; key: string }) {
+    async signinRedirect(payload: { signupToken: string; token: string; key: string }) {
         try {
+            const extraQueryParams: any = {
+                return_url: BASE_URL,
+            };
+            let prompt = 'login';
+
+            if (payload.signupToken) {
+                extraQueryParams['signup_token'] = payload.signupToken;
+                prompt = 'confirm';
+            }
+
+            if (payload.token) {
+                extraQueryParams['authentication_token'] = payload.token.replace(/\s/g, '+');
+                prompt = 'password';
+            }
+
+            if (payload.key) {
+                extraQueryParams['secure_key'] = payload.key.replace(/\s/g, '+');
+                prompt = 'password';
+            }
+
             await this.userManager.clearStaleState();
 
             return await this.userManager.signinRedirect({
-                extraQueryParams: {
-                    authentication_token: payload && payload.token ? payload.token.replace(/\s/g, '+') : '', // eslint-disable-line @typescript-eslint/camelcase
-                    secure_key: payload && payload.key ? payload.key.replace(/\s/g, '+') : '', // eslint-disable-line @typescript-eslint/camelcase
-                },
+                prompt,
+                extraQueryParams,
             });
         } catch (e) {
             return { error: e };
@@ -162,6 +181,20 @@ class AccountModule extends VuexModule {
             return user;
         } catch (e) {
             return { error: e };
+        }
+    }
+
+    @Action
+    async signupRedirect() {
+        try {
+            await this.userManager.clearStaleState();
+
+            return await this.userManager.signinRedirect({
+                prompt: 'create',
+                extraQueryParams: { return_url: BASE_URL },
+            });
+        } catch (e) {
+            return e;
         }
     }
 

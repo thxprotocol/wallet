@@ -30,6 +30,12 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/Signup.vue'),
     },
     {
+        path: '/verify',
+        meta: {
+            requiresAuth: true,
+        },
+    },
+    {
         path: '/pools/:address',
         component: () => import('../views/Pool.vue'),
         meta: {
@@ -66,7 +72,9 @@ router.beforeEach(async (to, from, next) => {
         const user = await store.dispatch('account/getUser');
 
         if (requiresAuth && !user) {
-            await store.dispatch('account/signinRedirect');
+            await store.dispatch('account/signinRedirect', {
+                signupToken: to.query.signup_token || null,
+            });
         } else {
             return next();
         }
