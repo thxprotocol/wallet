@@ -120,6 +120,13 @@ class AccountModule extends VuexModule {
 
     @Action
     async update(data: UserProfile) {
+        if (data.privateKey) {
+            const account = web3.eth.accounts.privateKeyToAccount(data.privateKey);
+            if (this.context.getters.profile.address !== account.address) {
+                data.address = account.address;
+            }
+        }
+
         try {
             const r = await axios({
                 method: 'PATCH',
