@@ -159,12 +159,10 @@ class AccountModule extends VuexModule {
 
             if (payload.token) {
                 extraQueryParams['authentication_token'] = payload.token.replace(/\s/g, '+');
-                prompt = 'password';
             }
 
             if (payload.key) {
                 extraQueryParams['secure_key'] = payload.key.replace(/\s/g, '+');
-                prompt = 'password';
             }
 
             await this.userManager.clearStaleState();
