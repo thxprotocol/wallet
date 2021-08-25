@@ -17,17 +17,14 @@
             <b-alert show variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
+
             <p>
-                Temporary address:<br />
-                <code>{{ tempAccount.address }}</code>
-            </p>
-            <p>
-                New address:<br />
+                Your new address:<br />
                 <code>{{ account.address }}</code>
             </p>
             <p>
-                Assets have been stored in your temporary wallet. Please provide your password (again) to transfer the
-                ownership of your assets.
+                You might have pending withdrawals in your emporary wallet. Please provide your password to transfer the
+                ownership of your assets to your new wallet.
             </p>
             <form @submit.prevent="onSubmit()" id="formPassword">
                 <b-form-input
@@ -91,7 +88,6 @@ export default class ModalDecodePrivateKey extends Vue {
     onShow() {
         this.account = this.web3.eth.accounts.privateKeyToAccount(this.privateKey) as any;
         this.busy = false;
-        debugger;
     }
 
     async onSubmit() {
