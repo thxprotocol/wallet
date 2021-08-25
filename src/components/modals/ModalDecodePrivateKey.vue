@@ -19,7 +19,7 @@
             </b-alert>
             <p>
                 Temporary address:<br />
-                <code>{{ profile.address }}</code>
+                <code>{{ tempAccount.address }}</code>
             </p>
             <p>
                 New address:<br />
