@@ -68,6 +68,12 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
+    if (to.query.passwordResetToken) {
+        await store.dispatch('account/signinRedirect', {
+            passwordResetToken: to.query.passwordResetToken,
+        });
+    }
+
     try {
         const user = await store.dispatch('account/getUser');
 
