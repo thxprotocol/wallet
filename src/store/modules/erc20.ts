@@ -4,7 +4,6 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { getERC20Contract, NetworkProvider, send } from '@/utils/network';
 import Contract from 'web3/eth/contract';
 import { fromWei, toWei } from 'web3-utils';
-import { AssetPool } from './assetPools';
 import { UserProfile } from './account';
 import Vue from 'vue';
 
@@ -46,43 +45,75 @@ class ERC20Module extends VuexModule {
 
     @Action
     async get({ web3, address, profile }: { web3: Web3; address: string; profile: UserProfile }) {
-        const abi: any = Artifacts.ERC20.abi;
-        const contract = new web3.eth.Contract(abi, address);
+        try {
+            const abi: any = Artifacts.ERC20.abi;
+            const contract = new web3.eth.Contract(abi, address);
 
-        this.context.commit(
-            'setERC20',
-            new ERC20({
-                address,
-                contract,
-                name: await contract.methods.name().call(),
-                symbol: await contract.methods.symbol().call(),
-                balance: fromWei(await contract.methods.balanceOf(profile.address).call()),
-                totalSupply: await contract.methods.totalSupply().call(),
-            }),
-        );
+            this.context.commit(
+                'setERC20',
+                new ERC20({
+                    address,
+                    contract,
+                    name: await contract.methods.name().call(),
+                    symbol: await contract.methods.symbol().call(),
+                    balance: fromWei(await contract.methods.balanceOf(profile.address).call()),
+                    totalSupply: await contract.methods.totalSupply().call(),
+                }),
+            );
+        } catch (error) {
+            return { error };
+        }
     }
 
     @Action
     async approve({
         web3,
-        assetPool,
+        tokenAddress,
+        to,
         amount,
         privateKey,
     }: {
         web3: Web3;
-        assetPool: AssetPool;
+        tokenAddress: string;
+        to: string;
         amount: string;
         privateKey: string;
     }) {
         try {
-            const contract: any = getERC20Contract(web3, assetPool.poolToken.address);
+            const contract: any = getERC20Contract(web3, tokenAddress);
             const wei = toWei(amount);
+            const tx = await send(web3, contract, contract.methods.approve(to, wei), privateKey);
 
-            return await send(web3, contract, contract.methods.approve(assetPool.address, wei), privateKey);
-        } catch (e) {
+            return { tx };
+        } catch (error) {
             return {
-                error: e.toString(),
+                error,
             };
+        }
+    }
+
+    @Action
+    async transfer({
+        web3,
+        tokenAddress,
+        to,
+        amount,
+        privateKey,
+    }: {
+        web3: Web3;
+        tokenAddress: string;
+        to: string;
+        amount: string;
+        privateKey: string;
+    }) {
+        try {
+            const contract: any = getERC20Contract(web3, tokenAddress);
+            const wei = toWei(amount);
+            const tx = await send(web3, contract, contract.methods.transfer(to, wei), privateKey);
+
+            return { tx };
+        } catch (error) {
+            return { error };
         }
     }
 }

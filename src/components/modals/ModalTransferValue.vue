@@ -1,5 +1,5 @@
 <template>
-    <b-modal :id="`modalTransferTokens-${token.address}`" centered scrollable title="Transfer tokens to a wallet">
+    <b-modal :id="`modalTransferValue-${provider.id}`" centered scrollable title="Transfer MATIC to another wallet">
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
@@ -8,7 +8,7 @@
                 {{ error }}
             </b-alert>
             <p>
-                Transfer tokens from your THX Web Wallet to another wallet address on the selected Polygon network.
+                Transfer MATIC from your THX Web Wallet to another wallet address on the selected Polygon network.
             </p>
             <form @submit.prevent="transfer()" id="formTransfer">
                 <b-form-group>
@@ -30,6 +30,7 @@
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { ERC20 } from '@/store/modules/erc20';
+import { Network } from '@/store/modules/network';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput, BFormGroup } from 'bootstrap-vue';
 import { User } from 'oidc-client';
 import { Component, Prop, Vue } from 'vue-property-decorator';
@@ -37,7 +38,6 @@ import { mapGetters } from 'vuex';
 import Web3 from 'web3';
 
 @Component({
-    name: 'ModalDepositPool',
     components: {
         'b-form-group': BFormGroup,
         'b-form-input': BFormInput,
@@ -51,10 +51,11 @@ import Web3 from 'web3';
         web3: 'network/web3',
         user: 'account/user',
         profile: 'account/profile',
+        provider: 'network/current',
         privateKey: 'account/privateKey',
     }),
 })
-export default class BaseModalTranferTokens extends Vue {
+export default class BaseModalTranferValue extends Vue {
     busy = false;
     error = '';
     amount = 0;
@@ -63,54 +64,29 @@ export default class BaseModalTranferTokens extends Vue {
     // getters
     web3!: Web3;
     user!: User;
+    provider!: Network;
     profile!: UserProfile;
-    privateKey!: string;
 
     @Prop() token!: ERC20;
-
-    async getBalances() {
-        try {
-            await this.$store.dispatch('erc20/get', {
-                web3: this.web3,
-                address: this.token.address,
-                profile: this.profile,
-            });
-            await this.$store.dispatch('network/getGasToken', { web3: this.web3, address: this.profile.address });
-        } catch (e) {
-            this.error = 'Could not get pool token balances.';
-            console.log(e);
-        }
-    }
 
     async transfer() {
         this.busy = true;
 
         try {
-            const { error } = await this.$store.dispatch('erc20/approve', {
+            const { error } = await this.$store.dispatch('network/sendValue', {
                 web3: this.web3,
-                tokenAddress: this.token.address,
                 to: this.to,
                 amount: this.amount,
-                privateKey: this.privateKey,
             });
 
-            if (!error) {
-                const { error } = await this.$store.dispatch('erc20/transfer', {
-                    web3: this.web3,
-                    tokenAddress: this.token.address,
-                    to: this.to,
-                    amount: this.amount,
-                    privateKey: this.privateKey,
-                });
-                if (!error) {
-                    this.amount = 0;
-                    this.to = '';
-                } else {
-                    throw new Error('Transfer failed.');
-                }
-            } else {
-                throw new Error('Tranfer approve failed.');
+            if (error) {
+                throw new Error('Sending value failed.');
             }
+
+            this.amount = 0;
+            this.to = '';
+
+            await this.$store.dispatch('network/getGasToken', { web3: this.web3, address: this.profile.address });
         } catch (e) {
             this.error = e.toString();
         } finally {

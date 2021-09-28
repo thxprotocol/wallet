@@ -119,30 +119,30 @@ export default class BaseModalDepositPool extends Vue {
         this.busy = true;
 
         try {
-            const r = await this.$store.dispatch('erc20/approve', {
+            const { error } = await this.$store.dispatch('erc20/approve', {
                 web3: this.web3,
-                assetPool: this.assetPool,
+                tokenAddress: this.assetPool.poolToken.address,
+                to: this.assetPool,
                 amount: this.amount,
                 privateKey: this.privateKey,
             });
 
-            if (r.error) {
-                this.error = r.error;
-                return;
+            if (!error) {
+                const { error } = await this.$store.dispatch('assetpools/deposit', {
+                    web3: this.web3,
+                    assetPool: this.assetPool,
+                    amount: this.amount,
+                    privateKey: this.privateKey,
+                });
+
+                if (error) {
+                    throw new Error(error);
+                }
+
+                await this.getBalances();
+            } else {
+                throw new Error(error);
             }
-
-            await this.$store.dispatch('assetpools/deposit', {
-                web3: this.web3,
-                assetPool: this.assetPool,
-                amount: this.amount,
-                privateKey: this.privateKey,
-            });
-
-            if (r.error) {
-                this.error = r.error;
-            }
-
-            await this.getBalances();
         } catch (e) {
             this.error = e.toString();
         } finally {

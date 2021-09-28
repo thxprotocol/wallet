@@ -3,8 +3,10 @@ import Web3 from 'web3';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { getGasToken, isPrivateKey, NetworkProvider } from '@/utils/network';
 import { MAIN_CHILD_RPC, TEST_CHILD_RPC } from '@/utils/secrets';
+import { toWei } from 'web3-utils';
 
 export interface Network {
+    id: NetworkProvider;
     name: string;
     provider: Web3;
 }
@@ -19,10 +21,12 @@ export interface GasToken {
 class NetworkModule extends VuexModule {
     _providers: Network[] = [
         {
+            id: NetworkProvider.Test,
             name: 'Polygon Testnet',
             provider: new Web3(TEST_CHILD_RPC),
         },
         {
+            id: NetworkProvider.Test,
             name: 'Polygon Mainnet',
             provider: new Web3(MAIN_CHILD_RPC),
         },
@@ -59,6 +63,20 @@ class NetworkModule extends VuexModule {
     }
 
     @Action
+    async sendValue({ web3, to, amount }: { web3: Web3; to: string; amount: string }) {
+        try {
+            const value = toWei(amount);
+            const gas = await web3.eth.estimateGas({ to, value });
+            const tx = await web3.eth.sendTransaction({ gas, to, value });
+
+            return { tx };
+        } catch (error) {
+            console.log(error);
+            return { error };
+        }
+    }
+
+    @Action
     async setNetwork({ npid, privateKey }: { npid: NetworkProvider; privateKey: string }) {
         try {
             if (isPrivateKey(privateKey)) {
@@ -74,6 +92,15 @@ class NetworkModule extends VuexModule {
             }
         } catch (e) {
             console.log(e);
+        }
+    }
+
+    @Action
+    async getGasToken({ web3, address }: { web3: Web3; address: string }) {
+        try {
+            this.context.commit('setGasToken', await getGasToken(web3, address));
+        } catch (error) {
+            return { error };
         }
     }
 }

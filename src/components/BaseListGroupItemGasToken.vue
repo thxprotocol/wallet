@@ -10,7 +10,8 @@
         <div class="h3 mr-3 m-0">
             {{ token.balance }}
         </div>
-        <b-button variant="primary" disabled>Transfer</b-button>
+        <b-button variant="primary" v-b-modal="`modalTransferValue-${provider.id}`">Transfer</b-button>
+        <base-modal-transfer-value />
     </b-list-group-item>
 </template>
 
@@ -20,6 +21,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import { GasToken, Network } from '@/store/modules/network';
+import BaseModalTranferValue from '@/components/modals/ModalTransferValue.vue';
 
 @Component({
     components: {
@@ -30,6 +32,7 @@ import { GasToken, Network } from '@/store/modules/network';
         'b-badge': BBadge,
         'b-list-group': BListGroup,
         'b-list-group-item': BListGroupItem,
+        'base-modal-transfer-value': BaseModalTranferValue,
     },
     computed: mapGetters({
         profile: 'account/profile',

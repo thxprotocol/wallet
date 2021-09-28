@@ -24,12 +24,13 @@
             <b-list-group-item class="text-center" v-if="busy">
                 <b-spinner variant="primary" />
             </b-list-group-item>
-            <base-list-group-item-asset-pool
-                v-else
-                :address="pool.address"
-                :key="key"
-                v-for="(pool, key) of filteredPools"
-            />
+            <template v-if="filteredPools.length & !busy">
+                <base-list-group-item-asset-pool
+                    :address="pool.address"
+                    :key="key"
+                    v-for="(pool, key) of filteredPools"
+                />
+            </template>
         </b-list-group>
 
         <hr />
@@ -116,7 +117,7 @@ export default class AccountView extends Vue {
             await this.$store.dispatch('account/getProfile');
             await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
 
-            await this.getAssetPools();
+            this.getAssetPools();
         } catch (e) {
             this.error = e.toString();
         } finally {
@@ -124,15 +125,15 @@ export default class AccountView extends Vue {
         }
     }
 
-    async getAssetPools() {
-        for (const address of this.profile.memberships) {
+    getAssetPools() {
+        this.profile.memberships.forEach((address: string) => {
             try {
-                await this.$store.dispatch('assetpools/get', { web3: this.web3, address });
+                this.$store.dispatch('assetpools/get', { web3: this.web3, address });
             } catch (e) {
                 console.dir(e);
                 debugger;
             }
-        }
+        });
     }
 
     async logout() {

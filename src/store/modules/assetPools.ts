@@ -65,8 +65,8 @@ class AssetPoolModule extends VuexModule {
                 'set',
                 new AssetPool({ ...r.data, ...{ contract: getAssetPoolContract(web3, address) } }),
             );
-        } catch (e) {
-            return { error: new Error(e) };
+        } catch (error) {
+            return { error };
         }
     }
 
