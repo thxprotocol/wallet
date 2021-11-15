@@ -128,7 +128,7 @@ export default class AccountView extends Vue {
     getAssetPools() {
         this.profile.memberships.forEach((membership: Membership) => {
             try {
-                this.$store.dispatch('assetpools/get', { web3: this.web3, address: membership.poolAddress });
+                this.$store.dispatch('assetpools/get', { web3: this.web3, address: membership.address });
             } catch (e) {
                 console.dir(e);
                 debugger;

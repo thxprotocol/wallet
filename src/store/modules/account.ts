@@ -20,7 +20,7 @@ export interface UserProfile {
 }
 
 export interface Membership {
-    poolAddress: string;
+    address: string;
     network: NetworkProvider;
 }
 

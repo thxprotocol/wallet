@@ -14,5 +14,5 @@ export const config: any = {
     automaticSilentRenew: true,
 
     loadUserInfo: true,
-    scope: 'openid user offline_access',
+    scope: 'openid user email offline_access',
 };

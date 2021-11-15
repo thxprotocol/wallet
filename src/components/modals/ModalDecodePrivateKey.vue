@@ -102,8 +102,8 @@ export default class ModalDecodePrivateKey extends Vue {
                 throw new Error('Not a valid key');
             }
 
-            for (const poolAddress of this.profile.memberships) {
-                await this.transferOwnership(poolAddress);
+            for (const membership of this.profile.memberships) {
+                await this.transferOwnership(membership.address);
             }
 
             await this.$store.dispatch('account/getProfile');
