@@ -7,7 +7,7 @@ import { getPrivateKey } from '@/utils/torus';
 import { isAddress } from 'web3-utils';
 import { ERC20Token } from './erc20';
 import { isPrivateKey } from '@/utils/network';
-import { BASE_URL } from '@/utils/secrets';
+import { AUTH_URL, BASE_URL } from '@/utils/secrets';
 
 const web3 = new Web3();
 
@@ -76,7 +76,7 @@ class AccountModule extends VuexModule {
         try {
             const r = await axios({
                 method: 'GET',
-                url: '/account',
+                url: AUTH_URL + '/me',
             });
 
             if (r.status !== 200) {
@@ -123,7 +123,7 @@ class AccountModule extends VuexModule {
         try {
             const r = await axios({
                 method: 'PATCH',
-                url: '/account',
+                url: '/me',
                 data,
             });
 
