@@ -76,7 +76,7 @@ class AccountModule extends VuexModule {
         try {
             const r = await axios({
                 method: 'GET',
-                url: AUTH_URL + '/me',
+                url: AUTH_URL + '/account',
             });
 
             if (r.status !== 200) {
