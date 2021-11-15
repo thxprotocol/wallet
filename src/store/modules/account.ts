@@ -14,7 +14,6 @@ const web3 = new Web3();
 export interface UserProfile {
     address: string;
     privateKey: string;
-    burnProofs: string[];
     memberships: Membership[];
     erc20: ERC20Token[];
 }
