@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { UserProfile } from '@/store/modules/account';
+import { Membership, UserProfile } from '@/store/modules/account';
 import {
     BAlert,
     BBadge,
@@ -126,9 +126,9 @@ export default class AccountView extends Vue {
     }
 
     getAssetPools() {
-        this.profile.memberships.forEach((address: string) => {
+        this.profile.memberships.forEach((membership: Membership) => {
             try {
-                this.$store.dispatch('assetpools/get', { web3: this.web3, address });
+                this.$store.dispatch('assetpools/get', { web3: this.web3, address: membership.poolAddress });
             } catch (e) {
                 console.dir(e);
                 debugger;
