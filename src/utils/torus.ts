@@ -1,4 +1,4 @@
-import DirectWebSdk, { TorusKey, TORUS_NETWORK_TYPE } from '@toruslabs/torus-direct-web-sdk';
+import CustomAuth, { TorusKey, TORUS_NETWORK_TYPE } from '@toruslabs/customauth';
 import { User } from 'oidc-client';
 import { TORUS_NETWORK, TORUS_VERIFIER } from './secrets';
 
@@ -13,7 +13,7 @@ export async function getPrivateKey(user: User) {
               };
     }
 
-    const torus = new DirectWebSdk({
+    const torus = new CustomAuth({
         baseUrl: `${location.origin}/serviceworker`,
         enableLogging: false,
         network: TORUS_NETWORK as TORUS_NETWORK_TYPE,
