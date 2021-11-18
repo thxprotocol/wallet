@@ -16,7 +16,7 @@
                 <b-alert show dismissable variant="danger" v-if="error">
                     {{ error }}
                 </b-alert>
-                <!-- <b-list-group class="mb-3" v-if="hasWithdrawals">
+                <b-list-group class="mb-3" v-if="withdrawals">
                     <b-list-group-item
                         class="d-flex align-items-center w-100"
                         :class="{ 'border-success': withdrawal.approved && !withdrawal.state }"
@@ -24,16 +24,17 @@
                         v-for="(withdrawal, key) of withdrawals[this.$route.params.address]"
                     >
                         <strong class="font-weight-bold mr-auto">
-                            {{ withdrawal.amount }} {{ membership.poolToken.symbol }}
+                            {{ withdrawal.amount }}
+                            {{ membership.poolToken.symbol }}
                         </strong>
                         <b-button variant="primary" :disabled="withdrawal.state === 1" @click="withdraw(withdrawal)">
                             Withdraw
                         </b-button>
                     </b-list-group-item>
-                </b-list-group> -->
-                <!-- <b-alert variant="info" show class="mb-3" v-else>
+                </b-list-group>
+                <b-alert variant="info" show class="mb-3" v-else>
                     You have no open withdrawals for this pool.
-                </b-alert> -->
+                </b-alert>
                 <b-button block variant="secondary" to="/account">
                     Back
                 </b-button>
@@ -43,11 +44,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Prop } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { BAlert, BBadge, BButton, BJumbotron, BListGroup, BListGroupItem, BSpinner } from 'bootstrap-vue';
 import { IAssetPools } from '@/store/modules/assetPools';
 import { UserProfile } from '@/store/modules/account';
+import { Membership } from '@/store/modules/membership';
+import { IWithdrawals } from '@/store/modules/withdrawals';
+import { NetworkProvider } from '@/utils/network';
 import Web3 from 'web3';
 
 @Component({
@@ -63,27 +67,53 @@ import Web3 from 'web3';
     },
     computed: mapGetters({
         profile: 'account/profile',
+        privateKey: 'account/privateKey',
+        web3: 'network/web3',
         assetPools: 'assetpools/all',
-        web3: 'account/privateKey',
+        withdrawals: 'withdrawals/all',
     }),
 })
 export default class PoolView extends Vue {
     busy = false;
     error = '';
-
+    page = 1;
     // getters
     assetPools!: IAssetPools;
     profile!: UserProfile;
+    memberships!: Membership;
+    withdrawals!: IWithdrawals;
+    privateKey!: string;
     web3!: Web3;
+
+    @Prop() npid!: NetworkProvider;
 
     get assetPool() {
         return this.assetPools[this.$route.params.address];
+    }
+
+    get membership() {
+        return this.assetPools[this.$route.params.address];
+    }
+
+    async getWithdrawals() {
+        await this.$store.dispatch('withdrawals/init', {
+            profile: this.profile,
+            poolAddress: this.$route.params.address,
+            page: this.page,
+            limit: 20,
+            state: 0, // pending state
+        });
+
+        for (const id in this.withdrawals[this.$route.params.address]) {
+            this.withdrawals[this.$route.params.address][id];
+        }
     }
 
     async mounted() {
         this.busy = true;
 
         try {
+            await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
             if (!this.profile) {
                 await this.$store.dispatch('account/getProfile');
             }
@@ -93,6 +123,8 @@ export default class PoolView extends Vue {
                     address: this.$route.params.address,
                 });
             }
+            await this.getWithdrawals();
+            console.log(this.assetPools[this.$route.params.address]);
         } catch (e) {
             this.error = e.toString();
         } finally {

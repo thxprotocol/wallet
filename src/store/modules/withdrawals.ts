@@ -58,19 +58,30 @@ class WithdrawalModule extends VuexModule {
     }
 
     @Action
-    async init({ profile, poolAddress }: { profile: UserProfile; poolAddress: string }) {
+    async init({
+        profile,
+        poolAddress,
+        page,
+        limit,
+        state,
+    }: {
+        profile: UserProfile;
+        poolAddress: string;
+        page: number;
+        limit: number;
+        state: number;
+    }) {
         try {
             const r = await axios({
                 method: 'get',
-                url: '/withdrawals?member=' + profile.address,
+                url: '/withdrawals?member=' + profile.address + '&page=' + page + '&limit=' + limit + '&state=' + state,
                 headers: { AssetPool: poolAddress },
             });
 
             if (r.status !== 200) {
                 throw Error('Withdrawals READ failed.');
             }
-
-            for (const withdrawal of r.data) {
+            for (const withdrawal of r.data.results) {
                 this.context.commit('set', new Withdrawal({ ...withdrawal, poolAddress }));
             }
         } catch (e) {
