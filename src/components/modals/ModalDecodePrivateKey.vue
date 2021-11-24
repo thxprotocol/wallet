@@ -46,7 +46,6 @@
 
 <script lang="ts">
 import Web3 from 'web3';
-import axios from 'axios';
 import { UserProfile } from '@/store/modules/account';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
@@ -69,6 +68,7 @@ import { Membership } from '@/store/modules/memberships';
     computed: mapGetters({
         profile: 'account/profile',
         privateKey: 'account/privateKey',
+        memberships: 'memberships/all',
     }),
 })
 export default class ModalDecodePrivateKey extends Vue {
@@ -105,7 +105,7 @@ export default class ModalDecodePrivateKey extends Vue {
             }
 
             for (const membership of Object.values(this.memberships)) {
-                await this.transferOwnership(membership.poolAddress);
+                await this.transferOwnership(membership);
             }
 
             await this.$store.dispatch('account/getProfile');
@@ -123,23 +123,17 @@ export default class ModalDecodePrivateKey extends Vue {
         }
     }
 
-    async transferOwnership(poolAddress: string) {
+    async transferOwnership(membership: Membership) {
         try {
-            const r = await axios({
-                method: 'get',
-                url: '/asset_pools/' + poolAddress,
-                headers: { AssetPool: poolAddress },
-            });
-
             await this.$store.dispatch('network/setNetwork', {
-                npid: r.data.network,
+                npid: membership.network,
                 privateKey: this.privateKey,
             });
 
             if (this.tempAccount && this.account) {
                 const calldata = await signCall(
                     this.web3,
-                    poolAddress,
+                    membership.poolAddress,
                     'upgradeAddress',
                     [this.tempAccount.address, this.account.address],
                     this.tempAccount,
@@ -147,7 +141,7 @@ export default class ModalDecodePrivateKey extends Vue {
 
                 if (!calldata.error) {
                     const r = await this.$store.dispatch('assetpools/upgradeAddress', {
-                        poolAddress,
+                        poolAddress: membership.poolAddress,
                         newAddress: this.account.address,
                         data: calldata,
                     });

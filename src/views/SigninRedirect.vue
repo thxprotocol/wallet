@@ -39,6 +39,7 @@ export default class Redirect extends Vue {
         try {
             await this.$store.dispatch('account/signinRedirectCallback');
             await this.$store.dispatch('account/getProfile');
+            await this.$store.dispatch('memberships/getAll');
             await this.$store.dispatch('account/getPrivateKey');
             await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
 
