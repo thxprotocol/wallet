@@ -5,8 +5,7 @@ import Web3 from 'web3';
 import { config } from '@/utils/oidc';
 import { getPrivateKey } from '@/utils/torus';
 import { isAddress } from 'web3-utils';
-import { ERC20Token } from './erc20';
-import { isPrivateKey, NetworkProvider } from '@/utils/network';
+import { isPrivateKey } from '@/utils/network';
 import { BASE_URL } from '@/utils/secrets';
 
 const web3 = new Web3();
@@ -14,13 +13,6 @@ const web3 = new Web3();
 export interface UserProfile {
     address: string;
     privateKey: string;
-    memberships: Membership[];
-    erc20: ERC20Token[];
-}
-
-export interface Membership {
-    address: string;
-    network: NetworkProvider;
 }
 
 @Module({ namespaced: true })

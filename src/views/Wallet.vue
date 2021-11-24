@@ -4,9 +4,9 @@
             <base-list-group-item-gas-token />
             <base-list-group-item-token
                 :web3="web3"
-                :address="token.address"
-                :key="token.address + token.network"
-                v-for="token in filteredTokens"
+                :membership="membership"
+                :key="membership.token.address + membership.network"
+                v-for="membership in filteredTokens"
             />
         </b-list-group>
     </div>
@@ -21,7 +21,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import { NetworkProvider } from '@/utils/network';
-import { ERC20Token } from '@/store/modules/erc20';
+import { Membership } from '@/store/modules/memberships';
 
 @Component({
     components: {
@@ -39,6 +39,7 @@ import { ERC20Token } from '@/store/modules/erc20';
         web3: 'network/web3',
         profile: 'account/profile',
         privateKey: 'account/privateKey',
+        memberships: 'memberships/all',
     }),
 })
 export default class Wallet extends Vue {
@@ -50,9 +51,10 @@ export default class Wallet extends Vue {
     web3!: Web3;
     profile!: UserProfile;
     privateKey!: string;
+    memberships!: { [id: string]: Membership };
 
     get filteredTokens() {
-        return Object.values(this.profile.erc20).filter((token: ERC20Token) => token.network === this.npid);
+        return Object.values(this.memberships).filter((membership: Membership) => membership.network === this.npid);
     }
 
     async mounted() {
@@ -60,6 +62,7 @@ export default class Wallet extends Vue {
 
         try {
             await this.$store.dispatch('account/getProfile');
+            await this.$store.dispatch('memberships/getAll');
             await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
         } catch (e) {
             this.error = e.toString();

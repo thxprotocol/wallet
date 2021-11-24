@@ -8,6 +8,7 @@ config.rawError = true;
 import AccountStore from './modules/account';
 import NetworkStore from './modules/network';
 import AssetPoolStore from './modules/assetPools';
+import MembershipStore from './modules/memberships';
 import ERC20Store from './modules/erc20';
 import WithdrawalStore from './modules/withdrawals';
 
@@ -20,6 +21,7 @@ const modules = {
     account: AccountStore,
     network: NetworkStore,
     assetpools: AssetPoolStore,
+    memberships: MembershipStore,
     erc20: ERC20Store,
     withdrawals: WithdrawalStore,
 };

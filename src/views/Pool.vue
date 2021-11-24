@@ -7,9 +7,9 @@
             <div class="container">
                 <h1 class="display-4">
                     <strong class="font-weight-bold">
-                        {{ membership.poolToken.balance }}
+                        {{ membership.token.balance }}
                     </strong>
-                    {{ membership.poolToken.symbol }}
+                    {{ membership.token.symbol }}
                 </h1>
             </div>
             <div class="container mt-3">
@@ -47,9 +47,8 @@
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { BAlert, BBadge, BButton, BJumbotron, BListGroup, BListGroupItem, BSpinner } from 'bootstrap-vue';
-import { IAssetPools } from '@/store/modules/assetPools';
 import { UserProfile } from '@/store/modules/account';
-import { Membership } from '@/store/modules/membership';
+import { Membership } from '@/store/modules/memberships';
 import { IWithdrawals } from '@/store/modules/withdrawals';
 import { NetworkProvider } from '@/utils/network';
 import Web3 from 'web3';
@@ -77,22 +76,18 @@ export default class PoolView extends Vue {
     busy = false;
     error = '';
     page = 1;
+
     // getters
-    assetPools!: IAssetPools;
+    memberships!: { [id: string]: Membership };
     profile!: UserProfile;
-    memberships!: Membership;
     withdrawals!: IWithdrawals;
     privateKey!: string;
     web3!: Web3;
 
     @Prop() npid!: NetworkProvider;
 
-    get assetPool() {
-        return this.assetPools[this.$route.params.address];
-    }
-
     get membership() {
-        return this.assetPools[this.$route.params.address];
+        return Object.values(this.memberships).find((m: Membership) => m.poolAddress === this.$route.params.address);
     }
 
     async getWithdrawals() {
@@ -114,17 +109,12 @@ export default class PoolView extends Vue {
 
         try {
             await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
+
             if (!this.profile) {
                 await this.$store.dispatch('account/getProfile');
             }
-            if (!this.assetPool) {
-                await this.$store.dispatch('assetpools/get', {
-                    web3: this.web3,
-                    address: this.$route.params.address,
-                });
-            }
+
             await this.getWithdrawals();
-            console.log(this.assetPools[this.$route.params.address]);
         } catch (e) {
             this.error = e.toString();
         } finally {

@@ -26,9 +26,9 @@
             </b-list-group-item>
             <template v-if="filteredPools.length & !busy">
                 <base-list-group-item-asset-pool
-                    :address="pool.address"
+                    :membership="membership"
                     :key="key"
-                    v-for="(pool, key) of filteredPools"
+                    v-for="(membership, key) of filteredPools"
                 />
             </template>
         </b-list-group>
@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts">
-import { Membership, UserProfile } from '@/store/modules/account';
+import { UserProfile } from '@/store/modules/account';
 import {
     BAlert,
     BBadge,
@@ -60,7 +60,7 @@ import { mapGetters } from 'vuex';
 import BaseListGroupItemAssetPool from '@/components/BaseListGroupItemAssetPool.vue';
 import { NetworkProvider } from '@/utils/network';
 import Web3 from 'web3';
-import { AssetPool } from '@/store/modules/assetPools';
+import { Membership } from '@/store/modules/memberships';
 
 @Component({
     name: 'AccountView',
@@ -81,7 +81,7 @@ import { AssetPool } from '@/store/modules/assetPools';
         profile: 'account/profile',
         privateKey: 'account/privateKey',
         web3: 'network/web3',
-        assetPools: 'assetpools/all',
+        memberships: 'memberships/all',
     }),
 })
 export default class AccountView extends Vue {
@@ -93,13 +93,13 @@ export default class AccountView extends Vue {
     user!: User;
     profile!: UserProfile;
     privateKey!: string;
-    assetPools!: { [address: string]: AssetPool };
+    memberships!: { [id: string]: Membership };
     web3!: Web3;
 
     @Prop() npid!: NetworkProvider;
 
     get filteredPools() {
-        return Object.values(this.assetPools).filter((pool: AssetPool) => pool.network === this.npid);
+        return Object.values(this.memberships).filter((membership: Membership) => membership.network === this.npid);
     }
 
     onCopy(e: any) {
@@ -116,24 +116,12 @@ export default class AccountView extends Vue {
         try {
             await this.$store.dispatch('account/getProfile');
             await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
-
-            this.getAssetPools();
+            await this.$store.dispatch('memberships/getAll');
         } catch (e) {
             this.error = e.toString();
         } finally {
             this.busy = false;
         }
-    }
-
-    getAssetPools() {
-        this.profile.memberships.forEach(async (membership: Membership) => {
-            try {
-                await this.$store.dispatch('assetpools/get', { web3: this.web3, address: membership.address });
-            } catch (e) {
-                console.dir(e);
-                debugger;
-            }
-        });
     }
 
     async logout() {

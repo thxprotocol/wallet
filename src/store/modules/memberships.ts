@@ -6,20 +6,20 @@ interface MembershipData {
     id: string;
     network: number;
     poolAddress: string;
-    tokenAddress: string;
+    token: any;
 }
 
 export class Membership {
     id: string;
     network: number;
     poolAddress: string;
-    tokenAddress: string;
+    token: any;
 
-    constructor({ id, network, poolAddress, tokenAddress}: MembershipData) {
+    constructor({ id, network, poolAddress, token }: MembershipData) {
         this.id = id;
         this.network = network;
         this.poolAddress = poolAddress;
-        this.tokenAddress = tokenAddress;
+        this.token = token;
     }
 }
 
@@ -37,15 +37,30 @@ class MembershipModule extends VuexModule {
 
     @Mutation
     set(membership: Membership) {
-        if (!this._all[membership.poolAddress]) {
-            Vue.set(this._all, membership.poolAddress, {});
-        }
-        Vue.set(this._all[membership.poolAddress], membership.id, membership);
+        Vue.set(this._all, membership.id, membership);
     }
 
     @Mutation
     unset(membership: Membership) {
-        Vue.delete(this._all[membership.poolAddress], membership.id);
+        Vue.delete(this._all, membership.id);
+    }
+
+    @Action
+    async getAll() {
+        try {
+            const r = await axios({
+                method: 'GET',
+                url: '/memberships/',
+            });
+
+            if (r.status !== 200) {
+                return { error: Error('GET /memberships failed.') };
+            }
+
+            r.data.map((data: MembershipData) => this.context.commit('set', data));
+        } catch (e) {
+            return { error: new Error('Unable to get memberships.') };
+        }
     }
 
     @Action
@@ -62,7 +77,6 @@ class MembershipModule extends VuexModule {
 
             this.context.commit('set', r.data);
         } catch (e) {
-            console.log(e);
             return { error: new Error('Unable to get membership.') };
         }
     }

@@ -54,6 +54,7 @@ import { mapGetters } from 'vuex';
 import { isPrivateKey, signCall } from '@/utils/network';
 import { Account } from 'web3/eth/accounts';
 import { decryptString } from '@/utils/decrypt';
+import { Membership } from '@/store/modules/memberships';
 
 @Component({
     name: 'ModalDecodePrivateKey',
@@ -84,6 +85,7 @@ export default class ModalDecodePrivateKey extends Vue {
     // getters
     profile!: UserProfile;
     privateKey!: string;
+    memberships!: { [id: string]: Membership };
 
     onShow() {
         this.account = this.web3.eth.accounts.privateKeyToAccount(this.privateKey) as any;
@@ -102,8 +104,8 @@ export default class ModalDecodePrivateKey extends Vue {
                 throw new Error('Not a valid key');
             }
 
-            for (const membership of this.profile.memberships) {
-                await this.transferOwnership(membership.address);
+            for (const membership of Object.values(this.memberships)) {
+                await this.transferOwnership(membership.poolAddress);
             }
 
             await this.$store.dispatch('account/getProfile');
