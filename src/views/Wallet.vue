@@ -5,7 +5,7 @@
             <base-list-group-item-token
                 :web3="web3"
                 :membership="membership"
-                :key="membership.token.address + membership.network"
+                :key="membership.id"
                 v-for="membership in filteredTokens"
             />
         </b-list-group>
@@ -62,8 +62,11 @@ export default class Wallet extends Vue {
 
         try {
             await this.$store.dispatch('account/getProfile');
-            await this.$store.dispatch('memberships/getAll');
             await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
+
+            const list = await this.$store.dispatch('memberships/getAll');
+
+            await list.map(async (id: string) => await this.$store.dispatch('memberships/get', id));
         } catch (e) {
             this.error = e.toString();
         } finally {

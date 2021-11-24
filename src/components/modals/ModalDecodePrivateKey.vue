@@ -53,7 +53,7 @@ import { mapGetters } from 'vuex';
 import { isPrivateKey, signCall } from '@/utils/network';
 import { Account } from 'web3/eth/accounts';
 import { decryptString } from '@/utils/decrypt';
-import { Membership } from '@/store/modules/memberships';
+import { IMemberships, Membership } from '@/store/modules/memberships';
 
 @Component({
     name: 'ModalDecodePrivateKey',
@@ -85,7 +85,7 @@ export default class ModalDecodePrivateKey extends Vue {
     // getters
     profile!: UserProfile;
     privateKey!: string;
-    memberships!: { [id: string]: Membership };
+    memberships!: IMemberships;
 
     onShow() {
         this.account = this.web3.eth.accounts.privateKeyToAccount(this.privateKey) as any;
@@ -104,7 +104,10 @@ export default class ModalDecodePrivateKey extends Vue {
                 throw new Error('Not a valid key');
             }
 
-            for (const membership of Object.values(this.memberships)) {
+            const list = await this.$store.dispatch('memberships/getAll');
+
+            for (const id of list) {
+                const membership = await this.$store.dispatch('memberships/get', id);
                 await this.transferOwnership(membership);
             }
 
@@ -115,9 +118,9 @@ export default class ModalDecodePrivateKey extends Vue {
             } else {
                 throw new Error('Account not patched');
             }
-        } catch (e) {
-            console.error(e);
-            this.error = e.toString();
+        } catch (error) {
+            console.error(error);
+            this.error = error.toString();
         } finally {
             this.busy = false;
         }
@@ -151,9 +154,9 @@ export default class ModalDecodePrivateKey extends Vue {
                     }
                 }
             }
-        } catch (e) {
-            console.error(e);
-            this.error = e.toString();
+        } catch (error) {
+            console.error(error);
+            this.error = error.toString();
         }
     }
 }

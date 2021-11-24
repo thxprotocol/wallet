@@ -23,13 +23,13 @@ export class Membership {
     }
 }
 
-export interface IMembership {
+export interface IMemberships {
     [poolAddress: string]: Membership;
 }
 
 @Module({ namespaced: true })
 class MembershipModule extends VuexModule {
-    _all: IMembership = {};
+    _all: IMemberships = {};
 
     get all() {
         return this._all;
@@ -57,7 +57,7 @@ class MembershipModule extends VuexModule {
                 return { error: Error('GET /memberships failed.') };
             }
 
-            r.data.map((data: MembershipData) => this.context.commit('set', data));
+            return r.data;
         } catch (e) {
             return { error: new Error('Unable to get memberships.') };
         }
@@ -76,6 +76,8 @@ class MembershipModule extends VuexModule {
             }
 
             this.context.commit('set', r.data);
+
+            return new Membership(r.data);
         } catch (e) {
             return { error: new Error('Unable to get membership.') };
         }

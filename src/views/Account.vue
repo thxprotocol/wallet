@@ -24,11 +24,11 @@
             <b-list-group-item class="text-center" v-if="busy">
                 <b-spinner variant="primary" />
             </b-list-group-item>
-            <template v-if="filteredPools.length & !busy">
+            <template v-if="(filteredPools.length > 0) & !busy">
                 <base-list-group-item-asset-pool
                     :membership="membership"
-                    :key="key"
-                    v-for="(membership, key) of filteredPools"
+                    :key="membership.id"
+                    v-for="membership of filteredPools"
                 />
             </template>
         </b-list-group>
@@ -116,9 +116,12 @@ export default class AccountView extends Vue {
         try {
             await this.$store.dispatch('account/getProfile');
             await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
-            await this.$store.dispatch('memberships/getAll');
-        } catch (e) {
-            this.error = e.toString();
+
+            const list = await this.$store.dispatch('memberships/getAll');
+
+            await list.map(async (id: string) => await this.$store.dispatch('memberships/get', id));
+        } catch (error) {
+            this.error = (error as Error).toString();
         } finally {
             this.busy = false;
         }
