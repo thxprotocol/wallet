@@ -3,7 +3,7 @@ import { fromWei, isAddress } from 'web3-utils';
 import Artifacts from '@/utils/artifacts';
 import Contract from 'web3/eth/contract';
 import { soliditySha3 } from 'web3-utils';
-import { Account } from 'web3/eth/accounts';
+import { Account } from 'web3-core/types/index';
 
 export const MINIMUM_GAS_LIMIT = 54680;
 

@@ -52,7 +52,7 @@ import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { isPrivateKey, signCall } from '@/utils/network';
-import { Account } from 'web3/eth/accounts';
+import { Account } from 'web3-core/types/index';
 import { decryptString } from '@/utils/decrypt';
 
 @Component({
@@ -97,7 +97,7 @@ export default class ModalDecodePrivateKey extends Vue {
             const tempPrivateKey = decryptString(this.profile.privateKey, this.password);
 
             if (isPrivateKey(tempPrivateKey)) {
-                this.tempAccount = this.web3.eth.accounts.privateKeyToAccount(tempPrivateKey) as any;
+                this.tempAccount = this.web3.eth.accounts.privateKeyToAccount(tempPrivateKey);
             } else {
                 throw new Error('Not a valid key');
             }

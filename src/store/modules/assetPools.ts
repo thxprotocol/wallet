@@ -127,6 +127,44 @@ class AssetPoolModule extends VuexModule {
             };
         }
     }
+
+    @Action
+    async withdrawPollCall({
+        poolAddress,
+        call,
+        nonce,
+        sig,
+    }: {
+        poolAddress: string;
+        call: string;
+        nonce: string;
+        sig: SignedCall;
+    }) {
+        try {
+            const r = await axios({
+                method: 'POST',
+                url: '/gas_station/call',
+                headers: {
+                    AssetPool: poolAddress,
+                },
+                data: {
+                    call,
+                    nonce,
+                    sig,
+                },
+            });
+
+            if (r.status !== 200) {
+                throw new Error('POST withdraw Poll call failed.');
+            }
+
+            return r.data;
+        } catch (e) {
+            return {
+                error: e.toString(),
+            };
+        }
+    }
 }
 
 export default AssetPoolModule;

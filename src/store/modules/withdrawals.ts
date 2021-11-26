@@ -53,7 +53,7 @@ class WithdrawalModule extends VuexModule {
     }
 
     @Mutation
-    remove(withdrawal: Withdrawal) {
+    unset(withdrawal: Withdrawal) {
         Vue.delete(this._all[withdrawal.poolAddress], withdrawal.id);
     }
 
@@ -88,6 +88,17 @@ class WithdrawalModule extends VuexModule {
             return e;
         }
     }
+
+    @Action
+    async remove(withdrawal: Withdrawal) {
+        try {
+            this.context.commit('unset', withdrawal);
+        } catch (e) {
+            console.log(e);
+            debugger;
+        }
+    }
+
 }
 
 export default WithdrawalModule;

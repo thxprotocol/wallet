@@ -27,7 +27,11 @@
                             {{ withdrawal.amount }}
                             {{ membership.poolToken.symbol }}
                         </strong>
-                        <b-button variant="primary" :disabled="withdrawal.state === 1" @click="withdraw(withdrawal)">
+                        <b-button
+                            variant="primary"
+                            :disabled="withdrawal.state === 1"
+                            @click="withdrawPoll(withdrawal)"
+                        >
                             Withdraw
                         </b-button>
                     </b-list-group-item>
@@ -50,9 +54,12 @@ import { BAlert, BBadge, BButton, BJumbotron, BListGroup, BListGroupItem, BSpinn
 import { IAssetPools } from '@/store/modules/assetPools';
 import { UserProfile } from '@/store/modules/account';
 import { Membership } from '@/store/modules/membership';
-import { IWithdrawals } from '@/store/modules/withdrawals';
+import { IWithdrawals, Withdrawal } from '@/store/modules/withdrawals';
 import { NetworkProvider } from '@/utils/network';
 import Web3 from 'web3';
+import axios from 'axios';
+import { signCall } from '@/utils/network';
+import { Account } from 'web3-core/types/index';
 
 @Component({
     name: 'PoolView',
@@ -84,6 +91,7 @@ export default class PoolView extends Vue {
     withdrawals!: IWithdrawals;
     privateKey!: string;
     web3!: Web3;
+    userWallet: Account | null = null;
 
     @Prop() npid!: NetworkProvider;
 
@@ -123,12 +131,55 @@ export default class PoolView extends Vue {
                     address: this.$route.params.address,
                 });
             }
+            if (!this.userWallet) {
+                this.userWallet = this.web3.eth.accounts.privateKeyToAccount(this.privateKey);
+            }
             await this.getWithdrawals();
             console.log(this.assetPools[this.$route.params.address]);
         } catch (e) {
             this.error = e.toString();
         } finally {
             this.busy = false;
+        }
+    }
+
+    async withdrawPoll(withdrawal: Withdrawal) {
+        debugger;
+
+        const r = await axios({
+            method: 'get',
+            url: '/asset_pools/' + this.$route.params.address,
+            headers: { AssetPool: this.$route.params.address },
+        });
+
+        await this.$store.dispatch('network/setNetwork', {
+            npid: r.data.network,
+            privateKey: this.privateKey,
+        });
+
+        if (this.userWallet) {
+            const calldata = await signCall(
+                this.web3,
+                this.$route.params.address,
+                'withdrawPollFinalize',
+                [withdrawal.id],
+                this.userWallet,
+            );
+
+            if (!calldata.error) {
+                const r = await this.$store.dispatch('assetpools/withdrawPollCall', {
+                    poolAddress: this.$route.params.address,
+                    call: calldata.call,
+                    nonce: calldata.nonce,
+                    sig: calldata.sig,
+                });
+
+                if (r.error) {
+                    throw new Error('Withdraw Poll call failed');
+                } else {
+                    await this.$store.dispatch('withdrawals/remove', withdrawal);
+                }
+            }
         }
     }
 }
