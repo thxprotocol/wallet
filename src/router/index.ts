@@ -36,6 +36,12 @@ const routes: Array<RouteConfig> = [
         },
     },
     {
+        path: '/claim/:symbol',
+        meta: {
+            requiresAuth: true,
+        },
+    },
+    {
         path: '/pools/:address',
         component: () => import('../views/Pool.vue'),
         meta: {
@@ -68,9 +74,11 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
-    if (to.query.passwordResetToken) {
+    if (to.query.signupToken || to.query.passwordResetToken || to.query.hash) {
         await store.dispatch('account/signinRedirect', {
+            signupToken: to.query.signup_token || null,
             passwordResetToken: to.query.passwordResetToken,
+            rewardHash: to.query.hash || null,
         });
     }
 
@@ -78,9 +86,7 @@ router.beforeEach(async (to, from, next) => {
         const user = await store.dispatch('account/getUser');
 
         if (requiresAuth && !user) {
-            await store.dispatch('account/signinRedirect', {
-                signupToken: to.query.signup_token || null,
-            });
+            await store.dispatch('account/signinRedirect', {});
         } else {
             return next();
         }

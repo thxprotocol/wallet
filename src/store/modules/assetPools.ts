@@ -70,6 +70,30 @@ class AssetPoolModule extends VuexModule {
             };
         }
     }
+
+    @Action
+    async claimReward(rewardHash: string) {
+        try {
+            const data = JSON.parse(atob(rewardHash));
+            const r = await axios({
+                method: 'POST',
+                url: `/rewards/${data.rewardId}/claim`,
+                headers: {
+                    AssetPool: data.poolAddress,
+                },
+            });
+
+            if (r.status !== 200) {
+                throw new Error('POST claim reward failed.');
+            }
+
+            return { data: r.data };
+        } catch (error) {
+            return {
+                error,
+            };
+        }
+    }
 }
 
 export default AssetPoolModule;

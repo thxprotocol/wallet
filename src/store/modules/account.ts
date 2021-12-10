@@ -134,7 +134,13 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    async signinRedirect(payload: { signupToken: string; token: string; key: string; passwordResetToken: string }) {
+    async signinRedirect(payload: {
+        signupToken: string;
+        rewardHash: string;
+        token: string;
+        key: string;
+        passwordResetToken: string;
+    }) {
         try {
             const extraQueryParams: any = {
                 return_url: BASE_URL,
@@ -159,9 +165,14 @@ class AccountModule extends VuexModule {
                 extraQueryParams['secure_key'] = payload.key.replace(/\s/g, '+');
             }
 
+            if (payload.rewardHash) {
+                extraQueryParams['reward_hash'] = payload.rewardHash;
+            }
+
             await this.userManager.clearStaleState();
 
             return await this.userManager.signinRedirect({
+                state: { toPath: window.location.href, rewardHash: payload.rewardHash },
                 prompt,
                 extraQueryParams,
             });
