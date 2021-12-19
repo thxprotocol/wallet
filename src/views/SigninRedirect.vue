@@ -1,7 +1,10 @@
 <template>
     <div class="center-center flex-column h-100">
-        <div class="flex-row text-center" v-if="isClaimFailed">
-            <p>
+        <div class="flex-row text-center" v-if="isClaimInvalid || isClaimFailed">
+            <p v-if="isClaimInvalid">
+                You are not elegible for this token reward claim.
+            </p>
+            <p v-if="isClaimFailed">
                 Oops, we did not manage to claim your token reward at this time due to high network usage, please try
                 again later.
             </p>
@@ -46,6 +49,7 @@ export default class Redirect extends Vue {
     info = '';
     redirectPath = '/wallet';
     isClaimFailed = false;
+    isClaimInvalid = false;
 
     // getters
     privateKey!: string;
@@ -78,7 +82,7 @@ export default class Redirect extends Vue {
             await this.claimReward();
         }
 
-        if (!this.error && !this.isClaimFailed) this.redirect();
+        if (!this.error && !this.isClaimFailed && !this.isClaimInvalid) this.redirect();
     }
 
     redirect() {
@@ -109,16 +113,14 @@ export default class Redirect extends Vue {
 
     async claimReward() {
         this.isClaimFailed = false;
+        this.isClaimInvalid = false;
         this.info = 'Claiming your token reward...';
 
         const { error } = await this.$store.dispatch('assetpools/claimReward', this.user.state.rewardHash);
 
         if (error) {
-            if (error.response?.status === 403) {
-                this.isClaimFailed = true;
-            } else {
-                this.error = error.message;
-            }
+            this.isClaimFailed = error.response?.status === 500;
+            this.isClaimInvalid = error.response?.status === 403;
         } else {
             this.redirect();
         }

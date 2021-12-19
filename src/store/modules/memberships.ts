@@ -50,7 +50,7 @@ class MembershipModule extends VuexModule {
         try {
             const r = await axios({
                 method: 'GET',
-                url: '/memberships/',
+                url: '/memberships',
             });
 
             if (r.status !== 200) {
