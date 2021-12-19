@@ -54,12 +54,12 @@ class MembershipModule extends VuexModule {
             });
 
             if (r.status !== 200) {
-                return { error: Error('GET /memberships failed.') };
+                throw new Error('GET /memberships failed.');
             }
 
-            return r.data;
-        } catch (e) {
-            return { error: new Error('Unable to get memberships.') };
+            return { memberships: r.data };
+        } catch (error) {
+            return { error };
         }
     }
 
@@ -72,13 +72,13 @@ class MembershipModule extends VuexModule {
             });
 
             if (r.status !== 200) {
-                return { error: Error('GET /memberships/:id failed.') };
+                throw new Error('GET /memberships/:id failed.');
             }
 
             this.context.commit('set', r.data);
 
             return new Membership(r.data);
-        } catch (e) {
+        } catch (error) {
             return { error: new Error('Unable to get membership.') };
         }
     }

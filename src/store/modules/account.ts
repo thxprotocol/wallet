@@ -1,14 +1,10 @@
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { User, UserManager } from 'oidc-client';
-import Web3 from 'web3';
 import { config } from '@/utils/oidc';
-import { getPrivateKey } from '@/utils/torus';
-import { isAddress } from 'web3-utils';
+import { getPrivateKeyForUser } from '@/utils/torus';
 import { isPrivateKey } from '@/utils/network';
 import { BASE_URL } from '@/utils/secrets';
-
-const web3 = new Web3();
 
 export interface UserProfile {
     address: string;
@@ -80,37 +76,25 @@ class AccountModule extends VuexModule {
             }
 
             this.context.commit('setUserProfile', r.data);
-        } catch (e) {
-            console.log(e);
-            return { error: new Error('Unable to get profile.') };
+
+            return { profile: r.data };
+        } catch (error) {
+            return { error };
         }
     }
 
     @Action
     async getPrivateKey() {
         try {
-            let privateKey = this.context.getters.privateKey;
+            const privateKey = await getPrivateKeyForUser(this.user);
 
-            if (!isPrivateKey(privateKey)) {
-                const result = await getPrivateKey(this.user);
-
-                if (result && !result.error) {
-                    privateKey = result.privateKey;
-                } else {
-                    return new Error('Unable to get private key from Torus verifier.');
-                }
-            }
-
-            const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-
-            if (isAddress(account.address)) {
+            if (privateKey && isPrivateKey(privateKey)) {
                 this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
-            } else {
-                return new Error('Not a valid address.');
             }
-        } catch (e) {
-            console.log(e);
-            return new Error('Unable to get private key.');
+
+            return { privateKey };
+        } catch (error) {
+            return { error };
         }
     }
 
@@ -128,8 +112,9 @@ class AccountModule extends VuexModule {
             }
 
             this.context.commit('setUserProfile', r.data);
-        } catch (e) {
-            return { error: e };
+            return { account: r.data };
+        } catch (error) {
+            return { error };
         }
     }
 

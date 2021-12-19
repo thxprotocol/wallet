@@ -7,7 +7,7 @@ Vue.use(VueRouter);
 const routes: Array<RouteConfig> = [
     {
         path: '/',
-        component: () => import('../views/Wallet.vue'),
+        component: () => import('../views/Home.vue'),
         meta: {
             requiresAuth: true,
         },
