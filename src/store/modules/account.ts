@@ -23,6 +23,8 @@ class AccountModule extends VuexModule {
     }
 
     get privateKey() {
+        if (!this._user) return;
+
         const encoded = sessionStorage.getItem(`thx:wallet:user:${this._user.profile.sub}`) as string;
         const decoded = atob(encoded);
 
