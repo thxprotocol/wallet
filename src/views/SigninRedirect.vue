@@ -61,6 +61,11 @@ export default class Redirect extends Vue {
 
     async mounted() {
         await this.redirectCallback();
+
+        if (!this.user) {
+            await this.$store.dispatch('account/signinRedirect');
+        }
+
         await this.getProfile();
 
         // Check for non custodial account and return
@@ -107,7 +112,7 @@ export default class Redirect extends Vue {
 
     async getPrivateKey() {
         this.info = 'Fetching private key from Torus...';
-        const { error } = await this.$store.dispatch('account/getPrivateKey');
+        const { error } = await this.$store.dispatch('account/getPrivateKey', this.user);
         if (error) this.error = error.message;
     }
 

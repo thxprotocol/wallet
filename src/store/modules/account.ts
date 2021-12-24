@@ -84,9 +84,9 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    async getPrivateKey() {
+    async getPrivateKey(user: User) {
         try {
-            const privateKey = await getPrivateKeyForUser(this.user);
+            const privateKey = await getPrivateKeyForUser(user);
 
             if (privateKey && isPrivateKey(privateKey)) {
                 this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
