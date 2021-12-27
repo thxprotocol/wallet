@@ -1,15 +1,17 @@
 <template>
     <div class="center-center flex-column h-100">
         <div class="flex-row text-center" v-if="isClaimInvalid || isClaimFailed">
-            <p v-if="isClaimInvalid">
-                You are not elegible for this token reward claim.
-            </p>
-            <p v-if="isClaimFailed">
+            <b-alert show variant="info" v-if="isClaimInvalid">
+                You are not elegible for this token reward claim because you don't meet the reward conditions.
+            </b-alert>
+            <b-alert show variant="danger" v-if="isClaimFailed">
                 Oops, we did not manage to claim your token reward at this time due to high network usage, please try
                 again later.
-            </p>
-            <b-button variant="primary" class="rounded-pill" @click="claimReward()">Retry</b-button>
-            <b-button variant="link" @click="redirect()">Skip</b-button>
+            </b-alert>
+            <b-button variant="primary" class="rounded-pill" @click="claimReward()" v-if="isClaimFailed">
+                Try again
+            </b-button>
+            <b-button variant="link" @click="redirect()">Continue</b-button>
         </div>
         <template v-else>
             <b-alert show variant="danger" v-if="error">{{ error }}</b-alert>
