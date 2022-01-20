@@ -6,30 +6,30 @@ interface MembershipData {
     id: string;
     network: number;
     poolAddress: string;
-    tokenAddress: string;
+    token: any;
 }
 
 export class Membership {
     id: string;
     network: number;
     poolAddress: string;
-    tokenAddress: string;
+    token: any;
 
-    constructor({ id, network, poolAddress, tokenAddress}: MembershipData) {
+    constructor({ id, network, poolAddress, token }: MembershipData) {
         this.id = id;
         this.network = network;
         this.poolAddress = poolAddress;
-        this.tokenAddress = tokenAddress;
+        this.token = token;
     }
 }
 
-export interface IMembership {
+export interface IMemberships {
     [poolAddress: string]: Membership;
 }
 
 @Module({ namespaced: true })
 class MembershipModule extends VuexModule {
-    _all: IMembership = {};
+    _all: IMemberships = {};
 
     get all() {
         return this._all;
@@ -37,15 +37,30 @@ class MembershipModule extends VuexModule {
 
     @Mutation
     set(membership: Membership) {
-        if (!this._all[membership.poolAddress]) {
-            Vue.set(this._all, membership.poolAddress, {});
-        }
-        Vue.set(this._all[membership.poolAddress], membership.id, membership);
+        Vue.set(this._all, membership.id, membership);
     }
 
     @Mutation
     unset(membership: Membership) {
-        Vue.delete(this._all[membership.poolAddress], membership.id);
+        Vue.delete(this._all, membership.id);
+    }
+
+    @Action
+    async getAll() {
+        try {
+            const r = await axios({
+                method: 'GET',
+                url: '/memberships',
+            });
+
+            if (r.status !== 200) {
+                throw new Error('GET /memberships failed.');
+            }
+
+            return { memberships: r.data };
+        } catch (error) {
+            return { error };
+        }
     }
 
     @Action
@@ -57,12 +72,13 @@ class MembershipModule extends VuexModule {
             });
 
             if (r.status !== 200) {
-                return { error: Error('GET /memberships/:id failed.') };
+                throw new Error('GET /memberships/:id failed.');
             }
 
             this.context.commit('set', r.data);
-        } catch (e) {
-            console.log(e);
+
+            return new Membership(r.data);
+        } catch (error) {
             return { error: new Error('Unable to get membership.') };
         }
     }

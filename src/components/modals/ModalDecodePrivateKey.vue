@@ -46,7 +46,6 @@
 
 <script lang="ts">
 import Web3 from 'web3';
-import axios from 'axios';
 import { UserProfile } from '@/store/modules/account';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
@@ -54,6 +53,7 @@ import { mapGetters } from 'vuex';
 import { isPrivateKey, signCall } from '@/utils/network';
 import { Account } from 'web3-core/types/index';
 import { decryptString } from '@/utils/decrypt';
+import { IMemberships, Membership } from '@/store/modules/memberships';
 
 @Component({
     name: 'ModalDecodePrivateKey',
@@ -68,6 +68,7 @@ import { decryptString } from '@/utils/decrypt';
     computed: mapGetters({
         profile: 'account/profile',
         privateKey: 'account/privateKey',
+        memberships: 'memberships/all',
     }),
 })
 export default class ModalDecodePrivateKey extends Vue {
@@ -84,6 +85,7 @@ export default class ModalDecodePrivateKey extends Vue {
     // getters
     profile!: UserProfile;
     privateKey!: string;
+    memberships!: IMemberships;
 
     onShow() {
         this.account = this.web3.eth.accounts.privateKeyToAccount(this.privateKey) as any;
@@ -102,8 +104,11 @@ export default class ModalDecodePrivateKey extends Vue {
                 throw new Error('Not a valid key');
             }
 
-            for (const membership of this.profile.memberships) {
-                await this.transferOwnership(membership.address);
+            const list = await this.$store.dispatch('memberships/getAll');
+
+            for (const id of list) {
+                const membership = await this.$store.dispatch('memberships/get', id);
+                await this.transferOwnership(membership);
             }
 
             await this.$store.dispatch('account/getProfile');
@@ -113,31 +118,25 @@ export default class ModalDecodePrivateKey extends Vue {
             } else {
                 throw new Error('Account not patched');
             }
-        } catch (e) {
-            console.error(e);
-            this.error = e.toString();
+        } catch (error) {
+            console.error(error);
+            this.error = error.toString();
         } finally {
             this.busy = false;
         }
     }
 
-    async transferOwnership(poolAddress: string) {
+    async transferOwnership(membership: Membership) {
         try {
-            const r = await axios({
-                method: 'get',
-                url: '/asset_pools/' + poolAddress,
-                headers: { AssetPool: poolAddress },
-            });
-
             await this.$store.dispatch('network/setNetwork', {
-                npid: r.data.network,
+                npid: membership.network,
                 privateKey: this.privateKey,
             });
 
             if (this.tempAccount && this.account) {
                 const calldata = await signCall(
                     this.web3,
-                    poolAddress,
+                    membership.poolAddress,
                     'upgradeAddress',
                     [this.tempAccount.address, this.account.address],
                     this.tempAccount,
@@ -145,7 +144,7 @@ export default class ModalDecodePrivateKey extends Vue {
 
                 if (!calldata.error) {
                     const r = await this.$store.dispatch('assetpools/upgradeAddress', {
-                        poolAddress,
+                        poolAddress: membership.poolAddress,
                         newAddress: this.account.address,
                         data: calldata,
                     });
@@ -155,9 +154,9 @@ export default class ModalDecodePrivateKey extends Vue {
                     }
                 }
             }
-        } catch (e) {
-            console.error(e);
-            this.error = e.toString();
+        } catch (error) {
+            console.error(error);
+            this.error = error.toString();
         }
     }
 }

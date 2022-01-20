@@ -1,6 +1,7 @@
 <template>
     <b-modal
-        :id="`modalDepositPool-${assetPool.address}`"
+        v-if="membership"
+        :id="`modalDepositPool-${membership.poolAddress}`"
         @show="getBalances()"
         centered
         scrollable
@@ -14,13 +15,13 @@
                 {{ error }}
             </b-alert>
             <b-alert show variant="warning" v-if="!sufficientBalance && token">
-                You do not have enough {{ token.symbol }} on this account.
+                You do not have enough {{ membership.token.symbol }} on this account.
             </b-alert>
             <p>
                 Transfer tokens from your THX Web Wallet to this asset pool.
             </p>
             <p v-if="token">
-                Pool Balance: <code>{{ assetPool.poolToken.balance }}</code>
+                Pool Balance: <code>{{ membership.token.balance }}</code>
                 <br />
                 Your Balance:
                 <code>{{ token.balance }}</code>
@@ -46,8 +47,8 @@
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
-import { AssetPool } from '@/store/modules/assetPools';
 import { ERC20 } from '@/store/modules/erc20';
+import { Membership } from '@/store/modules/memberships';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
@@ -81,10 +82,10 @@ export default class BaseModalDepositPool extends Vue {
     erc20!: { [address: string]: ERC20 };
 
     @Prop() web3!: Web3;
-    @Prop() assetPool!: AssetPool;
+    @Prop() membership!: Membership;
 
     get token() {
-        return this.erc20[this.assetPool.poolToken.address];
+        return this.erc20[this.membership.token.address];
     }
 
     get sufficientBalance() {
@@ -97,16 +98,9 @@ export default class BaseModalDepositPool extends Vue {
 
     async getBalances() {
         try {
-            const tokenAddress = this.assetPool.poolToken.address;
-
-            await this.$store.dispatch('assetpools/get', {
-                web3: this.web3,
-                address: this.assetPool.address,
-            });
-
             await this.$store.dispatch('erc20/get', {
                 web3: this.web3,
-                address: tokenAddress,
+                address: this.membership.token.address,
                 profile: this.profile,
             });
         } catch (e) {
@@ -121,8 +115,8 @@ export default class BaseModalDepositPool extends Vue {
         try {
             const { error } = await this.$store.dispatch('erc20/approve', {
                 web3: this.web3,
-                tokenAddress: this.assetPool.poolToken.address,
-                to: this.assetPool,
+                tokenAddress: this.membership.token.address,
+                to: this.membership.poolAddress,
                 amount: this.amount,
                 privateKey: this.privateKey,
             });
@@ -130,7 +124,7 @@ export default class BaseModalDepositPool extends Vue {
             if (!error) {
                 const { error } = await this.$store.dispatch('assetpools/deposit', {
                     web3: this.web3,
-                    assetPool: this.assetPool,
+                    poolAddress: this.membership.poolAddress,
                     amount: this.amount,
                     privateKey: this.privateKey,
                 });

@@ -1,5 +1,5 @@
 <template>
-    <b-list-group-item v-if="token" class="d-flex justify-content-between align-items-center">
+    <b-list-group-item v-if="memberships && token" class="d-flex justify-content-between align-items-center">
         <div class="mr-auto">
             <strong>{{ token.symbol }}</strong
             ><br />
@@ -22,6 +22,7 @@ import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import { ERC20 } from '@/store/modules/erc20';
 import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue';
+import { Membership } from '@/store/modules/memberships';
 
 @Component({
     components: {
@@ -37,6 +38,7 @@ import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue
     computed: mapGetters({
         profile: 'account/profile',
         erc20: 'erc20/all',
+        memberships: 'memberships/all',
     }),
 })
 export default class BaseListGroupItemToken extends Vue {
@@ -45,24 +47,24 @@ export default class BaseListGroupItemToken extends Vue {
     // getters
     profile!: UserProfile;
     erc20!: { [address: string]: ERC20 };
+    memberships!: { [address: string]: Membership };
 
     @Prop() web3!: Web3;
-    @Prop() address!: string;
+    @Prop() membership!: Membership;
 
     get token() {
-        return this.erc20[this.address];
+        return this.erc20[this.membership.token.address];
     }
 
     async mounted() {
         try {
             this.$store.dispatch('erc20/get', {
                 web3: this.web3,
-                address: this.address,
+                address: this.membership.token.address,
                 profile: this.profile,
             });
         } catch (e) {
             console.log(e);
-            debugger;
         }
     }
 }

@@ -14,3 +14,4 @@ export const TEST_CHILD_RPC = process.env['VUE_APP_TEST_CHILD_RPC'] || '';
 
 export const TORUS_VERIFIER = process.env.VUE_APP_TORUS_VERIFIER || '';
 export const TORUS_NETWORK = process.env.VUE_APP_TORUS_NETWORK || '';
+export const VUE_APP_TEST_KEY = process.env.VUE_APP_TEST_KEY;

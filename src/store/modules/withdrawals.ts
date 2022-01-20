@@ -2,6 +2,7 @@ import { Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { UserProfile } from './account';
+import { Membership } from './memberships';
 
 interface WithdrawalData {
     id: number;
@@ -18,15 +19,13 @@ export class Withdrawal {
     beneficiary: string;
     state: number;
     approved: boolean;
-    poolAddress: string;
 
-    constructor({ id, amount, state, beneficiary, approved, poolAddress }: WithdrawalData) {
+    constructor({ id, amount, state, beneficiary, approved }: WithdrawalData) {
         this.id = id;
         this.amount = amount;
         this.state = state;
         this.beneficiary = beneficiary;
         this.approved = approved;
-        this.poolAddress = poolAddress;
     }
 }
 
@@ -45,28 +44,28 @@ class WithdrawalModule extends VuexModule {
     }
 
     @Mutation
-    set(withdrawal: Withdrawal) {
-        if (!this._all[withdrawal.poolAddress]) {
-            Vue.set(this._all, withdrawal.poolAddress, {});
+    set({ withdrawal, membership }: { withdrawal: Withdrawal; membership: Membership }) {
+        if (!this._all[membership.id]) {
+            Vue.set(this._all, membership.id, {});
         }
-        Vue.set(this._all[withdrawal.poolAddress], withdrawal.id, withdrawal);
+        Vue.set(this._all[membership.id], withdrawal.id, withdrawal);
     }
 
     @Mutation
-    unset(withdrawal: Withdrawal) {
-        Vue.delete(this._all[withdrawal.poolAddress], withdrawal.id);
+    unset({ withdrawal, membership }: { withdrawal: Withdrawal; membership: Membership }) {
+        Vue.delete(this._all[membership.id], withdrawal.id);
     }
 
     @Action
-    async init({
+    async filter({
         profile,
-        poolAddress,
+        membership,
         page,
         limit,
         state,
     }: {
         profile: UserProfile;
-        poolAddress: string;
+        membership: Membership;
         page: number;
         limit: number;
         state: number;
@@ -75,30 +74,19 @@ class WithdrawalModule extends VuexModule {
             const r = await axios({
                 method: 'get',
                 url: '/withdrawals?member=' + profile.address + '&page=' + page + '&limit=' + limit + '&state=' + state,
-                headers: { AssetPool: poolAddress },
+                headers: { AssetPool: membership.poolAddress },
             });
 
             if (r.status !== 200) {
                 throw Error('Withdrawals READ failed.');
             }
             for (const withdrawal of r.data.results) {
-                this.context.commit('set', new Withdrawal({ ...withdrawal, poolAddress }));
+                this.context.commit('set', { withdrawal: new Withdrawal(withdrawal), membership });
             }
         } catch (e) {
             return e;
         }
     }
-
-    @Action
-    async remove(withdrawal: Withdrawal) {
-        try {
-            this.context.commit('unset', withdrawal);
-        } catch (e) {
-            console.log(e);
-            debugger;
-        }
-    }
-
 }
 
 export default WithdrawalModule;

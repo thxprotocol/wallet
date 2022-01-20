@@ -15,7 +15,7 @@
             </header>
             <router-view :npid="npid" class="main-container flex-grow-1" />
         </div>
-        <navbar class="flex-grow-0" v-if="profile && !profile.privateKey" />
+        <navbar class="flex-grow-0" v-if="profile && $router.currentRoute.path !== '/signin-oidc'" />
     </div>
 </template>
 

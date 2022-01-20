@@ -1,11 +1,11 @@
+import Vue from 'vue';
 import Web3 from 'web3';
 import Artifacts from '@/utils/artifacts';
+import Contract from 'web3/eth/contract';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { getERC20Contract, NetworkProvider, send } from '@/utils/network';
-import Contract from 'web3/eth/contract';
 import { fromWei, toWei } from 'web3-utils';
 import { UserProfile } from './account';
-import Vue from 'vue';
 
 export interface ERC20Token {
     network: NetworkProvider;
@@ -39,7 +39,7 @@ class ERC20Module extends VuexModule {
     }
 
     @Mutation
-    setERC20(erc20: ERC20) {
+    set(erc20: ERC20) {
         Vue.set(this._all, erc20.address, erc20);
     }
 
@@ -50,7 +50,7 @@ class ERC20Module extends VuexModule {
             const contract = new web3.eth.Contract(abi, address);
 
             this.context.commit(
-                'setERC20',
+                'set',
                 new ERC20({
                     address,
                     contract,
