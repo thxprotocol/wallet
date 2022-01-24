@@ -11,6 +11,11 @@ interface WithdrawalData {
     approved: boolean;
     state: number;
     poolAddress: string;
+    withdrawalId: number;
+    jobId: string;
+    rewardId?: number;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export class Withdrawal {
@@ -19,13 +24,25 @@ export class Withdrawal {
     beneficiary: string;
     state: number;
     approved: boolean;
+    withdrawalId: number;
+    rewardId?: number;
+    jobId: string;
+    page: number;
+    createdAt: string;
+    updatedAt: string;
 
-    constructor({ id, amount, state, beneficiary, approved }: WithdrawalData) {
-        this.id = id;
-        this.amount = amount;
-        this.state = state;
-        this.beneficiary = beneficiary;
-        this.approved = approved;
+    constructor(data: WithdrawalData, page: number) {
+        this.id = data.id;
+        this.amount = data.amount;
+        this.state = data.state;
+        this.beneficiary = data.beneficiary;
+        this.approved = data.approved;
+        this.withdrawalId = data.withdrawalId;
+        this.rewardId = data.rewardId;
+        this.page = page;
+        this.jobId = data.jobId;
+        this.createdAt = data.createdAt;
+        this.updatedAt = data.updatedAt;
     }
 }
 
@@ -81,8 +98,10 @@ class WithdrawalModule extends VuexModule {
                 throw Error('Withdrawals READ failed.');
             }
             for (const withdrawal of r.data.results) {
-                this.context.commit('set', { withdrawal: new Withdrawal(withdrawal), membership });
+                this.context.commit('set', { withdrawal: new Withdrawal(withdrawal, page), membership });
             }
+
+            return { pagination: r.data };
         } catch (e) {
             return e;
         }

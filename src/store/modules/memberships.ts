@@ -7,6 +7,7 @@ interface MembershipData {
     network: number;
     poolAddress: string;
     token: any;
+    pendingBalance: number;
 }
 
 export class Membership {
@@ -14,12 +15,14 @@ export class Membership {
     network: number;
     poolAddress: string;
     token: any;
+    pendingBalance: number;
 
-    constructor({ id, network, poolAddress, token }: MembershipData) {
+    constructor({ id, network, poolAddress, token, pendingBalance }: MembershipData) {
         this.id = id;
         this.network = network;
         this.poolAddress = poolAddress;
         this.token = token;
+        this.pendingBalance = pendingBalance;
     }
 }
 

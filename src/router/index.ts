@@ -25,6 +25,10 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/SilentRenew.vue'),
     },
     {
+        path: '/signin',
+        component: () => import('../views/Signin.vue'),
+    },
+    {
         path: '/signup',
         name: 'Signup',
         component: () => import('../views/Signup.vue'),
@@ -37,6 +41,7 @@ const routes: Array<RouteConfig> = [
     },
     {
         path: '/memberships/:id',
+        name: 'Membership',
         component: () => import('../views/Pool.vue'),
         meta: {
             requiresAuth: true,

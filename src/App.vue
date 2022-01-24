@@ -5,7 +5,7 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-8">
-                            <h1 class="display-5 m-0">{{ $router.currentRoute.name }}</h1>
+                            <h1 class="display-5 m-0 text-secondary">{{ $router.currentRoute.name }}</h1>
                         </div>
                         <div class="col-4">
                             <base-network-select :npid="npid" @change="onChangeNetwork($event)" class="float-right" />

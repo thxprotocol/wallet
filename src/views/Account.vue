@@ -1,5 +1,5 @@
 <template>
-    <div class="container" v-if="profile">
+    <div class="container mt-3 h-100 d-flex flex-column" v-if="profile">
         <b-alert show variant="danger" v-if="error">{{ error }}</b-alert>
         <b-alert show variant="info" dismissible @dismissed="info = ''" v-if="info">{{ info }}</b-alert>
         <h2 class="h4">
@@ -33,9 +33,7 @@
             </template>
         </b-list-group>
 
-        <hr />
-
-        <b-button block variant="dark" @click="logout()">
+        <b-button class="mt-auto" block variant="dark" @click="logout()">
             Logout
         </b-button>
     </div>

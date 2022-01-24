@@ -66,6 +66,18 @@ Vue.filter('fromBigNumber', (hex: string) => {
     return fromWei(hex);
 });
 
+Vue.filter('abbrNumber', (num: number) => {
+    if (String(num).length < 4) {
+        return num;
+    } else if (String(num).length < 7) {
+        return Math.floor(num / 1000) + 'K';
+    } else if (String(num).length < 10) {
+        return Math.floor(num / 1000000) + 'M';
+    } else {
+        return Math.floor(num / 1000000000) + 'B';
+    }
+});
+
 new Vue({
     router,
     store,

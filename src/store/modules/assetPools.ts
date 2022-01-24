@@ -72,7 +72,7 @@ class AssetPoolModule extends VuexModule {
     }
 
     @Action
-    async withdrawPollCall({
+    async withdraw({
         poolAddress,
         call,
         nonce,
@@ -96,9 +96,12 @@ class AssetPoolModule extends VuexModule {
                     sig,
                 },
             });
+
             if (r.status !== 200) {
                 throw new Error('POST withdraw Poll call failed.');
             }
+
+            return { withdrawal: r.data };
         } catch (error) {
             return { error };
         }

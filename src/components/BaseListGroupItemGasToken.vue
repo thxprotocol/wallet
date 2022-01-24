@@ -5,12 +5,15 @@
                 {{ token.symbol }}
             </strong>
             <br />
-            <small class="text-muted">{{ token.name }} ({{ provider.name }})</small>
+            <small class="text-muted d-none d-md-inline">{{ token.name }} ({{ provider.name }})</small>
         </div>
         <div class="h3 mr-3 m-0">
-            {{ token.balance }}
+            {{ token.balance | abbrNumber }}
         </div>
-        <b-button variant="primary" v-b-modal="`modalTransferValue-${provider.id}`">Transfer</b-button>
+        <b-button variant="primary" size="sm" v-b-modal="`modalTransferValue-${provider.id}`">
+            <i class="fas fa-exchange-alt ml-0 mr-md-2"></i>
+            <span class="d-none d-md-inline">Transfer</span>
+        </b-button>
         <base-modal-transfer-value />
     </b-list-group-item>
 </template>

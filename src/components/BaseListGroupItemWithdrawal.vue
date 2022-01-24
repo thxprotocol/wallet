@@ -1,13 +1,24 @@
 <template>
-    <b-list-group-item
-        class="d-flex align-items-center w-100"
-        :class="{ 'border-success': withdrawal.approved && !withdrawal.state }"
-    >
-        <strong class="font-weight-bold mr-auto">
-            {{ withdrawal.amount }}
-            {{ membership.token.symbol }}
-        </strong>
-        <b-button variant="primary" :disabled="withdrawal.state === 1" @click="withdraw(withdrawal)">
+    <b-list-group-item class="d-flex align-items-center w-100">
+        <div
+            class="mr-3"
+            :class="{
+                'text-muted': withdrawal.job,
+                'text-success': !withdrawal.job,
+            }"
+        >
+            <i :class="withdrawal.approved ? 'fas' : 'far'" class="fa-check-circle"></i>
+        </div>
+        <div class="mr-auto line-height-12">
+            <strong class="font-weight-bold">
+                {{ withdrawal.amount }}
+                {{ membership.token.symbol }} </strong
+            ><br />
+            <span class="text-muted small">
+                {{ format(new Date(withdrawal.createdAt), 'HH:mm MMMM dd, yyyy') }}
+            </span>
+        </div>
+        <b-button variant="primary" :disabled="withdrawal.state === 1 || error || busy" @click="withdraw()">
             Withdraw
         </b-button>
     </b-list-group-item>
@@ -22,6 +33,7 @@ import { UserProfile } from '@/store/modules/account';
 import { Membership } from '@/store/modules/memberships';
 import { Withdrawal } from '@/store/modules/withdrawals';
 import { signCall } from '@/utils/network';
+import { format } from 'date-fns';
 
 @Component({
     components: {
@@ -42,8 +54,9 @@ import { signCall } from '@/utils/network';
     }),
 })
 export default class BaseListGroupItemWithdrawal extends Vue {
-    busy = true;
+    busy = false;
     error = '';
+    format = format;
 
     // getters
     profile!: UserProfile;
@@ -53,33 +66,32 @@ export default class BaseListGroupItemWithdrawal extends Vue {
     @Prop() withdrawal!: Withdrawal;
     @Prop() membership!: Membership;
 
-    async withdraw(withdrawal: Withdrawal) {
+    async withdraw() {
         this.busy = true;
         try {
             const calldata = await signCall(
                 this.web3,
-                this.$route.params.address,
+                this.membership.poolAddress,
                 'withdrawPollFinalize',
-                [withdrawal.id],
+                [this.withdrawal.withdrawalId],
                 this.web3.eth.accounts.privateKeyToAccount(this.privateKey),
             );
 
             if (!calldata.error) {
-                const r = await this.$store.dispatch('assetpools/withdrawPollCall', {
-                    poolAddress: this.$route.params.address,
+                await this.$store.dispatch('assetpools/withdraw', {
+                    poolAddress: this.membership.poolAddress,
                     call: calldata.call,
                     nonce: calldata.nonce,
                     sig: calldata.sig,
                 });
 
-                if (r.error) {
-                    throw new Error('Withdraw Poll call failed');
-                }
-
-                this.$store.commit('withdrawals/unset', { withdrawal, membership: this.membership });
+                const withdrawal = this.withdrawal;
+                withdrawal.state = 1;
+                this.$store.commit('withdrawals/set', { withdrawal, membership: this.membership });
             }
         } catch (error) {
             this.error = (error as Error).toString();
+            debugger;
         } finally {
             this.busy = false;
         }

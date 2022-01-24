@@ -1,6 +1,6 @@
 <template>
     <b-list-group-item
-        :href="`/memberships/${membership.id}`"
+        :to="`/memberships/${membership.id}`"
         v-if="membership"
         class="d-flex justify-content-between align-items-center"
     >
