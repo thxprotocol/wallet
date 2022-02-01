@@ -49,7 +49,7 @@
             </strong>
 
             <br />
-            <span class="text-muted small">
+            <span class="text-muted small" v-if="withdrawal.createdAt">
                 {{ format(new Date(withdrawal.createdAt), 'HH:mm MMMM dd, yyyy') }}
             </span>
         </div>
