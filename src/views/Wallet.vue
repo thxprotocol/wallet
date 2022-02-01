@@ -64,16 +64,19 @@ export default class Wallet extends Vue {
     async updateBalances() {
         this.busy = true;
         try {
-            for (const poolAddress in this.memberships) {
-                const membership = this.memberships[poolAddress];
+            for (const id in this.memberships) {
+                const membership = this.memberships[id];
+
+                await this.$store.dispatch('memberships/get', id);
                 await this.$store.dispatch('erc20/updateBalance', {
                     web3: this.web3,
                     address: membership.token.address,
                     profile: this.profile,
                 });
             }
+            this.$forceUpdate();
         } catch (error) {
-            this.error = (error as Error).toString();
+            this.error = (error as Error).message;
         } finally {
             this.busy = false;
         }
@@ -85,12 +88,7 @@ export default class Wallet extends Vue {
         try {
             await this.$store.dispatch('account/getProfile');
             await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
-
-            const { memberships, error } = await this.$store.dispatch('memberships/getAll');
-
-            if (error) this.error = error.message;
-
-            await memberships.map(async (id: string) => await this.$store.dispatch('memberships/get', id));
+            await this.$store.dispatch('memberships/getAll');
         } catch (error) {
             this.error = (error as Error).toString();
         } finally {

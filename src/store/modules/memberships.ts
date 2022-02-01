@@ -27,7 +27,7 @@ export class Membership {
 }
 
 export interface IMemberships {
-    [poolAddress: string]: Membership;
+    [id: string]: Membership;
 }
 
 @Module({ namespaced: true })
@@ -60,7 +60,11 @@ class MembershipModule extends VuexModule {
                 throw new Error('GET /memberships failed.');
             }
 
-            return { memberships: r.data };
+            for (const id of r.data) {
+                await this.context.dispatch('get', id);
+            }
+
+            return r.data;
         } catch (error) {
             return { error };
         }

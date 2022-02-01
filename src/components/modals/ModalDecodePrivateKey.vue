@@ -104,11 +104,10 @@ export default class ModalDecodePrivateKey extends Vue {
                 throw new Error('Not a valid key');
             }
 
-            const list = await this.$store.dispatch('memberships/getAll');
+            await this.$store.dispatch('memberships/getAll');
 
-            for (const id of list) {
-                const membership = await this.$store.dispatch('memberships/get', id);
-                await this.transferOwnership(membership);
+            for (const id in this.memberships) {
+                await this.transferOwnership(this.memberships[id]);
             }
 
             await this.$store.dispatch('account/getProfile');
@@ -119,8 +118,7 @@ export default class ModalDecodePrivateKey extends Vue {
                 throw new Error('Account not patched');
             }
         } catch (error) {
-            console.error(error);
-            this.error = error.toString();
+            this.error = (error as Error).message;
         } finally {
             this.busy = false;
         }
@@ -128,12 +126,12 @@ export default class ModalDecodePrivateKey extends Vue {
 
     async transferOwnership(membership: Membership) {
         try {
-            await this.$store.dispatch('network/setNetwork', {
-                npid: membership.network,
-                privateKey: this.privateKey,
-            });
-
             if (this.tempAccount && this.account) {
+                await this.$store.dispatch('network/setNetwork', {
+                    npid: membership.network,
+                    privateKey: this.privateKey,
+                });
+
                 const calldata = await signCall(
                     this.web3,
                     membership.poolAddress,

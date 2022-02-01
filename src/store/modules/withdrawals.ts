@@ -4,15 +4,27 @@ import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { UserProfile } from './account';
 import { Membership } from './memberships';
 
+export enum WithdrawalState {
+    Pending = 0,
+    Withdrawn = 1,
+}
+
+export enum WithdrawalType {
+    ClaimReward = 0,
+    ClaimRewardFor = 1,
+    ProposeWithdrawal = 2,
+}
+
 interface WithdrawalData {
     id: number;
     amount: string;
     beneficiary: string;
     approved: boolean;
     state: number;
+    type: WithdrawalType;
     poolAddress: string;
     withdrawalId: number;
-    jobId: string;
+    failReason?: string;
     rewardId?: number;
     createdAt: string;
     updatedAt: string;
@@ -26,10 +38,11 @@ export class Withdrawal {
     approved: boolean;
     withdrawalId: number;
     rewardId?: number;
-    jobId: string;
-    page: number;
+    failReason?: string;
     createdAt: string;
     updatedAt: string;
+    page: number;
+    type: WithdrawalType;
 
     constructor(data: WithdrawalData, page: number) {
         this.id = data.id;
@@ -39,8 +52,9 @@ export class Withdrawal {
         this.approved = data.approved;
         this.withdrawalId = data.withdrawalId;
         this.rewardId = data.rewardId;
+        this.type = data.type;
         this.page = page;
-        this.jobId = data.jobId;
+        this.failReason = data.failReason;
         this.createdAt = data.createdAt;
         this.updatedAt = data.updatedAt;
     }
@@ -73,30 +87,48 @@ class WithdrawalModule extends VuexModule {
         Vue.delete(this._all[membership.id], withdrawal.id);
     }
 
+    @Mutation
+    clear() {
+        Vue.set(this, '_all', {});
+    }
+
     @Action
     async filter({
         profile,
         membership,
-        page,
-        limit,
+        page = 1,
+        limit = 10,
         state,
     }: {
         profile: UserProfile;
         membership: Membership;
         page: number;
         limit: number;
-        state: number;
+        state?: WithdrawalState;
     }) {
         try {
+            const params = new URLSearchParams();
+            params.append('member', profile.address);
+            params.append('page', String(page));
+            params.append('limit', String(limit));
+
+            if (state === WithdrawalState.Pending || state === WithdrawalState.Withdrawn) {
+                params.append('state', String(state));
+            }
+
             const r = await axios({
                 method: 'get',
-                url: '/withdrawals?member=' + profile.address + '&page=' + page + '&limit=' + limit + '&state=' + state,
+                url: '/withdrawals',
+                params,
                 headers: { AssetPool: membership.poolAddress },
             });
 
             if (r.status !== 200) {
                 throw Error('Withdrawals READ failed.');
             }
+
+            this.context.commit('clear');
+
             for (const withdrawal of r.data.results) {
                 this.context.commit('set', { withdrawal: new Withdrawal(withdrawal, page), membership });
             }
