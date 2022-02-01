@@ -112,7 +112,7 @@ export default class BaseModalTranferTokens extends Vue {
                 throw new Error('Tranfer approve failed.');
             }
         } catch (e) {
-            this.error = e.toString();
+            this.error = (e as Error).toString();
         } finally {
             this.busy = false;
         }

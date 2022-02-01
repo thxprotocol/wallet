@@ -51,7 +51,7 @@ import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { isPrivateKey, signCall } from '@/utils/network';
-import { Account } from 'web3/eth/accounts';
+import { Account } from 'web3-core/types/index';
 import { decryptString } from '@/utils/decrypt';
 import { IMemberships, Membership } from '@/store/modules/memberships';
 
@@ -99,16 +99,15 @@ export default class ModalDecodePrivateKey extends Vue {
             const tempPrivateKey = decryptString(this.profile.privateKey, this.password);
 
             if (isPrivateKey(tempPrivateKey)) {
-                this.tempAccount = this.web3.eth.accounts.privateKeyToAccount(tempPrivateKey) as any;
+                this.tempAccount = this.web3.eth.accounts.privateKeyToAccount(tempPrivateKey);
             } else {
                 throw new Error('Not a valid key');
             }
 
-            const list = await this.$store.dispatch('memberships/getAll');
+            await this.$store.dispatch('memberships/getAll');
 
-            for (const id of list) {
-                const membership = await this.$store.dispatch('memberships/get', id);
-                await this.transferOwnership(membership);
+            for (const id in this.memberships) {
+                await this.transferOwnership(this.memberships[id]);
             }
 
             await this.$store.dispatch('account/getProfile');
@@ -119,8 +118,7 @@ export default class ModalDecodePrivateKey extends Vue {
                 throw new Error('Account not patched');
             }
         } catch (error) {
-            console.error(error);
-            this.error = error.toString();
+            this.error = (error as Error).message;
         } finally {
             this.busy = false;
         }
@@ -128,12 +126,12 @@ export default class ModalDecodePrivateKey extends Vue {
 
     async transferOwnership(membership: Membership) {
         try {
-            await this.$store.dispatch('network/setNetwork', {
-                npid: membership.network,
-                privateKey: this.privateKey,
-            });
-
             if (this.tempAccount && this.account) {
+                await this.$store.dispatch('network/setNetwork', {
+                    npid: membership.network,
+                    privateKey: this.privateKey,
+                });
+
                 const calldata = await signCall(
                     this.web3,
                     membership.poolAddress,

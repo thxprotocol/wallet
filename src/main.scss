@@ -37,6 +37,7 @@
 @import '~bootstrap/scss/grid';
 @import '~bootstrap/scss/code';
 @import '~bootstrap/scss/dropdown';
+@import '~bootstrap/scss/pagination';
 
 // Bootstrap Vue
 @import '~bootstrap-vue/src/index.scss';
@@ -57,7 +58,10 @@
 html,
 body {
     height: 100%;
-    background-color: $yellow;
+    background-image: url('./assets//img/thx_landing_crater.webp');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center center;
     overflow: hidden;
 }
 
@@ -96,4 +100,8 @@ body {
 
 .btn-rounded {
     border-radius: 25px;
+}
+
+.line-height-12 {
+    line-height: 1.2;
 }

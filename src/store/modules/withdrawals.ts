@@ -2,6 +2,18 @@ import { Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { UserProfile } from './account';
+import { Membership } from './memberships';
+
+export enum WithdrawalState {
+    Pending = 0,
+    Withdrawn = 1,
+}
+
+export enum WithdrawalType {
+    ClaimReward = 0,
+    ClaimRewardFor = 1,
+    ProposeWithdrawal = 2,
+}
 
 interface WithdrawalData {
     id: number;
@@ -9,7 +21,13 @@ interface WithdrawalData {
     beneficiary: string;
     approved: boolean;
     state: number;
+    type: WithdrawalType;
     poolAddress: string;
+    withdrawalId: number;
+    failReason?: string;
+    rewardId?: number;
+    createdAt: string;
+    updatedAt: string;
 }
 
 export class Withdrawal {
@@ -18,15 +36,27 @@ export class Withdrawal {
     beneficiary: string;
     state: number;
     approved: boolean;
-    poolAddress: string;
+    withdrawalId: number;
+    rewardId?: number;
+    failReason?: string;
+    createdAt: string;
+    updatedAt: string;
+    page: number;
+    type: WithdrawalType;
 
-    constructor({ id, amount, state, beneficiary, approved, poolAddress }: WithdrawalData) {
-        this.id = id;
-        this.amount = amount;
-        this.state = state;
-        this.beneficiary = beneficiary;
-        this.approved = approved;
-        this.poolAddress = poolAddress;
+    constructor(data: WithdrawalData, page: number) {
+        this.id = data.id;
+        this.amount = data.amount;
+        this.state = data.state;
+        this.beneficiary = data.beneficiary;
+        this.approved = data.approved;
+        this.withdrawalId = data.withdrawalId;
+        this.rewardId = data.rewardId;
+        this.type = data.type;
+        this.page = page;
+        this.failReason = data.failReason;
+        this.createdAt = data.createdAt;
+        this.updatedAt = data.updatedAt;
     }
 }
 
@@ -45,45 +75,65 @@ class WithdrawalModule extends VuexModule {
     }
 
     @Mutation
-    set(withdrawal: Withdrawal) {
-        if (!this._all[withdrawal.poolAddress]) {
-            Vue.set(this._all, withdrawal.poolAddress, {});
+    set({ withdrawal, membership }: { withdrawal: Withdrawal; membership: Membership }) {
+        if (!this._all[membership.id]) {
+            Vue.set(this._all, membership.id, {});
         }
-        Vue.set(this._all[withdrawal.poolAddress], withdrawal.id, withdrawal);
+        Vue.set(this._all[membership.id], withdrawal.id, withdrawal);
     }
 
     @Mutation
-    remove(withdrawal: Withdrawal) {
-        Vue.delete(this._all[withdrawal.poolAddress], withdrawal.id);
+    unset({ withdrawal, membership }: { withdrawal: Withdrawal; membership: Membership }) {
+        Vue.delete(this._all[membership.id], withdrawal.id);
+    }
+
+    @Mutation
+    clear() {
+        Vue.set(this, '_all', {});
     }
 
     @Action
-    async init({
+    async filter({
         profile,
-        poolAddress,
-        page,
-        limit,
+        membership,
+        page = 1,
+        limit = 10,
         state,
     }: {
         profile: UserProfile;
-        poolAddress: string;
+        membership: Membership;
         page: number;
         limit: number;
-        state: number;
+        state?: WithdrawalState;
     }) {
         try {
+            const params = new URLSearchParams();
+            params.append('member', profile.address);
+            params.append('page', String(page));
+            params.append('limit', String(limit));
+
+            if (state === WithdrawalState.Pending || state === WithdrawalState.Withdrawn) {
+                params.append('state', String(state));
+            }
+
             const r = await axios({
                 method: 'get',
-                url: '/withdrawals?member=' + profile.address + '&page=' + page + '&limit=' + limit + '&state=' + state,
-                headers: { AssetPool: poolAddress },
+                url: '/withdrawals',
+                params,
+                headers: { AssetPool: membership.poolAddress },
             });
 
             if (r.status !== 200) {
                 throw Error('Withdrawals READ failed.');
             }
+
+            this.context.commit('clear');
+
             for (const withdrawal of r.data.results) {
-                this.context.commit('set', new Withdrawal({ ...withdrawal, poolAddress }));
+                this.context.commit('set', { withdrawal: new Withdrawal(withdrawal, page), membership });
             }
+
+            return { pagination: r.data };
         } catch (e) {
             return e;
         }

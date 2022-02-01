@@ -72,6 +72,42 @@ class AssetPoolModule extends VuexModule {
     }
 
     @Action
+    async withdraw({
+        poolAddress,
+        call,
+        nonce,
+        sig,
+    }: {
+        poolAddress: string;
+        call: string;
+        nonce: string;
+        sig: SignedCall;
+    }) {
+        try {
+            const r = await axios({
+                method: 'POST',
+                url: '/gas_station/call',
+                headers: {
+                    AssetPool: poolAddress,
+                },
+                data: {
+                    call,
+                    nonce,
+                    sig,
+                },
+            });
+
+            if (r.status !== 200) {
+                throw new Error('POST withdraw Poll call failed.');
+            }
+
+            return { withdrawal: r.data };
+        } catch (error) {
+            return { error };
+        }
+    }
+
+    @Action
     async claimReward(rewardHash: string) {
         try {
             const data = JSON.parse(atob(rewardHash));
@@ -82,7 +118,6 @@ class AssetPoolModule extends VuexModule {
                     AssetPool: data.poolAddress,
                 },
             });
-
             if (r.status !== 200) {
                 throw new Error('POST claim reward failed.');
             }

@@ -3,13 +3,19 @@
         <div class="mr-auto">
             <strong>{{ token.symbol }}</strong
             ><br />
-            <small class="text-muted">{{ token.name }}</small>
+            <small class="text-muted d-none d-md-inline">{{ token.name }}</small>
         </div>
 
         <div class="h3 mr-3 m-0">
-            {{ token.balance }}
+            {{ token.balance | abbrNumber }}
+            <small class="text-muted" v-if="membership.pendingBalance > 0">
+                ({{ membership.pendingBalance | abbrNumber }})
+            </small>
         </div>
-        <b-button variant="primary" v-b-modal="`modalTransferTokens-${token.address}`">Transfer</b-button>
+        <b-button variant="primary" size="sm" v-b-modal="`modalTransferTokens-${token.address}`">
+            <i class="fas fa-exchange-alt ml-0 mr-md-2"></i>
+            <span class="d-none d-md-inline">Transfer</span>
+        </b-button>
         <base-modal-transfer-tokens :token="token" />
     </b-list-group-item>
 </template>

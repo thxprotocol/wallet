@@ -1,57 +1,48 @@
 <template>
-    <div class="h-100 w-100">
+    <div class="container">
         <div class="h-100 w-100 center-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
-        <template v-if="!busy && membership">
-            <div class="container">
-                <h1 class="display-4">
-                    <strong class="font-weight-bold">
-                        {{ membership.token.balance }}
-                    </strong>
-                    {{ membership.token.symbol }}
-                </h1>
+        <div class="container mt-3 h-100 d-flex flex-column" v-if="!busy && membership">
+            <b-alert show dismissable variant="danger" v-if="error">
+                {{ error }}
+            </b-alert>
+            <b-alert variant="info" show class="mb-3" v-if="!filteredWithdrawals.length">
+                You have no scheduled or pending withdrawals for this pool.
+            </b-alert>
+            <div class="mb-auto">
+                <base-list-group-item-withdrawal
+                    :withdrawal="withdrawal"
+                    :membership="membership"
+                    :key="key"
+                    v-for="(withdrawal, key) of filteredWithdrawals"
+                />
             </div>
-            <div class="container mt-3">
-                <b-alert show dismissable variant="danger" v-if="error">
-                    {{ error }}
-                </b-alert>
-                <b-list-group class="mb-3" v-if="withdrawals">
-                    <b-list-group-item
-                        class="d-flex align-items-center w-100"
-                        :class="{ 'border-success': withdrawal.approved && !withdrawal.state }"
-                        :key="key"
-                        v-for="(withdrawal, key) of withdrawals[this.$route.params.address]"
-                    >
-                        <strong class="font-weight-bold mr-auto">
-                            {{ withdrawal.amount }}
-                            {{ membership.poolToken.symbol }}
-                        </strong>
-                        <b-button variant="primary" :disabled="withdrawal.state === 1" @click="withdraw(withdrawal)">
-                            Withdraw
-                        </b-button>
-                    </b-list-group-item>
-                </b-list-group>
-                <b-alert variant="info" show class="mb-3" v-else>
-                    You have no open withdrawals for this pool.
-                </b-alert>
-                <b-button block variant="secondary" to="/account">
-                    Back
-                </b-button>
-            </div>
-        </template>
+            <b-pagination
+                v-if="total > perPage"
+                @change="onChange"
+                v-model="currentPage"
+                :per-page="perPage"
+                :total-rows="total"
+                align="fill"
+            ></b-pagination>
+            <b-button block variant="dark" to="/account">
+                Back
+            </b-button>
+        </div>
     </div>
 </template>
 
 <script lang="ts">
+import Web3 from 'web3';
 import { Component, Vue, Prop } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { BAlert, BBadge, BButton, BJumbotron, BListGroup, BListGroupItem, BSpinner } from 'bootstrap-vue';
+import { BAlert, BBadge, BButton, BJumbotron, BListGroup, BListGroupItem, BPagination, BSpinner } from 'bootstrap-vue';
 import { UserProfile } from '@/store/modules/account';
-import { Membership } from '@/store/modules/memberships';
-import { IWithdrawals } from '@/store/modules/withdrawals';
+import { IWithdrawals, Withdrawal } from '@/store/modules/withdrawals';
 import { NetworkProvider } from '@/utils/network';
-import Web3 from 'web3';
+import { IMemberships, Membership } from '@/store/modules/memberships';
+import BaseListGroupItemWithdrawal from '@/components/BaseListGroupItemWithdrawal.vue';
 
 @Component({
     name: 'PoolView',
@@ -63,22 +54,27 @@ import Web3 from 'web3';
         'b-spinner': BSpinner,
         'b-list-group': BListGroup,
         'b-list-group-item': BListGroupItem,
+        BaseListGroupItemWithdrawal,
+        BPagination,
     },
     computed: mapGetters({
+        web3: 'network/web3',
         profile: 'account/profile',
         privateKey: 'account/privateKey',
-        web3: 'network/web3',
-        assetPools: 'assetpools/all',
+        memberships: 'memberships/all',
         withdrawals: 'withdrawals/all',
     }),
 })
 export default class PoolView extends Vue {
     busy = false;
     error = '';
-    page = 1;
+    currentPage = 1;
+    perPage = 10;
+    total = 0;
+    membership: Membership | null = null;
 
     // getters
-    memberships!: { [id: string]: Membership };
+    memberships!: IMemberships;
     profile!: UserProfile;
     withdrawals!: IWithdrawals;
     privateKey!: string;
@@ -86,37 +82,45 @@ export default class PoolView extends Vue {
 
     @Prop() npid!: NetworkProvider;
 
-    get membership() {
-        return Object.values(this.memberships).find((m: Membership) => m.poolAddress === this.$route.params.address);
+    get filteredWithdrawals() {
+        if (!this.withdrawals[this.$router.currentRoute.params.id]) return [];
+
+        return Object.values(this.withdrawals[this.$router.currentRoute.params.id]).filter(
+            (w: Withdrawal) => w.page === this.currentPage,
+        );
     }
 
-    async getWithdrawals() {
-        await this.$store.dispatch('withdrawals/init', {
+    async onChange(page: number) {
+        const { pagination, error } = await this.$store.dispatch('withdrawals/filter', {
             profile: this.profile,
-            poolAddress: this.$route.params.address,
-            page: this.page,
-            limit: 20,
-            state: 0, // pending state
+            membership: this.membership,
+            page,
+            limit: this.perPage,
+            state: 0, // 0 = Pending, 1 = Withdrawn
         });
 
-        for (const id in this.withdrawals[this.$route.params.address]) {
-            this.withdrawals[this.$route.params.address][id];
-        }
+        this.total = pagination.total;
+        this.error = error;
     }
 
     async mounted() {
         this.busy = true;
 
         try {
-            await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
+            await this.$store.dispatch('account/getProfile');
 
-            if (!this.profile) {
-                await this.$store.dispatch('account/getProfile');
+            this.membership = await this.$store.dispatch('memberships/get', this.$route.params.id);
+
+            if (this.membership) {
+                await this.$store.dispatch('network/setNetwork', {
+                    npid: this.membership.network,
+                    privateKey: this.privateKey,
+                });
+
+                await this.onChange(this.currentPage);
             }
-
-            await this.getWithdrawals();
-        } catch (e) {
-            this.error = e.toString();
+        } catch (error) {
+            this.error = (error as Error).toString();
         } finally {
             this.busy = false;
         }

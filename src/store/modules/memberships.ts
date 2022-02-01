@@ -7,6 +7,7 @@ interface MembershipData {
     network: number;
     poolAddress: string;
     token: any;
+    pendingBalance: number;
 }
 
 export class Membership {
@@ -14,17 +15,19 @@ export class Membership {
     network: number;
     poolAddress: string;
     token: any;
+    pendingBalance: number;
 
-    constructor({ id, network, poolAddress, token }: MembershipData) {
+    constructor({ id, network, poolAddress, token, pendingBalance }: MembershipData) {
         this.id = id;
         this.network = network;
         this.poolAddress = poolAddress;
         this.token = token;
+        this.pendingBalance = pendingBalance;
     }
 }
 
 export interface IMemberships {
-    [poolAddress: string]: Membership;
+    [id: string]: Membership;
 }
 
 @Module({ namespaced: true })
@@ -57,7 +60,11 @@ class MembershipModule extends VuexModule {
                 throw new Error('GET /memberships failed.');
             }
 
-            return { memberships: r.data };
+            for (const id of r.data) {
+                await this.context.dispatch('get', id);
+            }
+
+            return r.data;
         } catch (error) {
             return { error };
         }

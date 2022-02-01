@@ -66,6 +66,21 @@ class ERC20Module extends VuexModule {
     }
 
     @Action
+    async updateBalance({ web3, address, profile }: { web3: Web3; address: string; profile: UserProfile }) {
+        try {
+            const erc20 = this.context.getters['all'][address];
+            const abi: any = Artifacts.ERC20.abi;
+            const contract = new web3.eth.Contract(abi, address);
+
+            erc20.balance = fromWei(await contract.methods.balanceOf(profile.address).call());
+
+            this.context.commit('set', erc20);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    @Action
     async approve({
         web3,
         tokenAddress,

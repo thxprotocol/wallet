@@ -1,5 +1,5 @@
 <template>
-    <div class="container" v-if="profile">
+    <div class="container h-100 d-flex flex-column" v-if="profile">
         <b-list-group v-if="web3">
             <base-list-group-item-gas-token />
             <base-list-group-item-token
@@ -9,6 +9,10 @@
                 v-for="membership in filteredTokens"
             />
         </b-list-group>
+        <hr />
+        <b-button class="mx-auto rounded-pill" variant="primary" :disabled="busy" @click="updateBalances()">
+            Reload Balances
+        </b-button>
     </div>
 </template>
 
@@ -21,7 +25,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import { NetworkProvider } from '@/utils/network';
-import { Membership } from '@/store/modules/memberships';
+import { IMemberships, Membership } from '@/store/modules/memberships';
 
 @Component({
     components: {
@@ -51,10 +55,31 @@ export default class Wallet extends Vue {
     web3!: Web3;
     profile!: UserProfile;
     privateKey!: string;
-    memberships!: { [id: string]: Membership };
+    memberships!: IMemberships;
 
     get filteredTokens() {
         return Object.values(this.memberships).filter((membership: Membership) => membership.network === this.npid);
+    }
+
+    async updateBalances() {
+        this.busy = true;
+        try {
+            for (const id in this.memberships) {
+                const membership = this.memberships[id];
+
+                await this.$store.dispatch('memberships/get', id);
+                await this.$store.dispatch('erc20/updateBalance', {
+                    web3: this.web3,
+                    address: membership.token.address,
+                    profile: this.profile,
+                });
+            }
+            this.$forceUpdate();
+        } catch (error) {
+            this.error = (error as Error).message;
+        } finally {
+            this.busy = false;
+        }
     }
 
     async mounted() {
@@ -63,14 +88,9 @@ export default class Wallet extends Vue {
         try {
             await this.$store.dispatch('account/getProfile');
             await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
-
-            const { memberships, error } = await this.$store.dispatch('memberships/getAll');
-
-            if (error) this.error = error.message;
-
-            await memberships.map(async (id: string) => await this.$store.dispatch('memberships/get', id));
-        } catch (e) {
-            this.error = e.toString();
+            await this.$store.dispatch('memberships/getAll');
+        } catch (error) {
+            this.error = (error as Error).toString();
         } finally {
             this.busy = false;
         }

@@ -4,7 +4,7 @@ import router from './router';
 import store from './store';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import Web3 from 'web3';
-import { ModalPlugin, ToastPlugin } from 'bootstrap-vue';
+import { ModalPlugin, ToastPlugin, VBTooltip } from 'bootstrap-vue';
 import './main.scss';
 import './registerServiceWorker';
 import VueClipboard from 'vue-clipboard2';
@@ -30,17 +30,8 @@ axios.interceptors.response.use(
     (res: AxiosResponse) => res,
     async (error: AxiosError) => {
         if (error.response?.status === 401) {
-            const user = await store.dispatch('account/getUser');
-            if (user) {
-                // Token expired or invalid, signout id_token_hint
-                await store.dispatch('account/signoutRedirect');
-            } else {
-                // id_token_hint not available, force signout and request signin
-                await store.dispatch('account/signout');
-                await store.dispatch('account/signinRedirect');
-            }
+            await store.dispatch('account/signinRedirect');
         }
-        throw error;
     },
 );
 
@@ -54,6 +45,8 @@ Vue.use(ModalPlugin);
 Vue.use(ToastPlugin);
 Vue.use(VueClipboard);
 
+Vue.directive('b-tooltip', VBTooltip);
+
 // Set custom filters
 Vue.filter('fromWei', (value: string) => {
     if (!value) return '';
@@ -64,6 +57,18 @@ Vue.filter('fromWei', (value: string) => {
 // Set custom filters
 Vue.filter('fromBigNumber', (hex: string) => {
     return fromWei(hex);
+});
+
+Vue.filter('abbrNumber', (num: number) => {
+    if (String(num).length < 4) {
+        return num;
+    } else if (String(num).length < 7) {
+        return Math.floor(num / 1000) + 'K';
+    } else if (String(num).length < 10) {
+        return Math.floor(num / 1000000) + 'M';
+    } else {
+        return Math.floor(num / 1000000000) + 'B';
+    }
 });
 
 new Vue({
