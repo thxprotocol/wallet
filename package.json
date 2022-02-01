@@ -75,7 +75,7 @@
     },
     "devDependencies": {
         "@maticnetwork/maticjs": "^2.0.15",
-        "@openzeppelin/contracts": "^4.4.1",
+        "@openzeppelin/contracts": "^4.4.2",
         "@types/chai": "^4.2.11",
         "@types/mocha": "^5.2.4",
         "@typescript-eslint/eslint-plugin": "^2.33.0",
