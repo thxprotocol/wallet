@@ -132,7 +132,6 @@ class AccountModule extends VuexModule {
             const extraQueryParams: any = {
                 return_url: BASE_URL,
             };
-            let prompt = 'login';
 
             if (payload.signupToken) {
                 extraQueryParams['prompt'] = 'confirm';
@@ -160,7 +159,6 @@ class AccountModule extends VuexModule {
 
             return await this.userManager.signinRedirect({
                 state: { toPath: window.location.href, rewardHash: payload.rewardHash },
-                prompt,
                 extraQueryParams,
             });
         } catch (e) {
