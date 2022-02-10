@@ -135,13 +135,13 @@ class AccountModule extends VuexModule {
             let prompt = 'login';
 
             if (payload.signupToken) {
+                extraQueryParams['prompt'] = 'confirm';
                 extraQueryParams['signup_token'] = payload.signupToken;
-                prompt = 'confirm';
             }
 
             if (payload.passwordResetToken) {
+                extraQueryParams['prompt'] = 'reset';
                 extraQueryParams['password_reset_token'] = payload.passwordResetToken;
-                prompt = 'reset';
             }
 
             if (payload.token) {
