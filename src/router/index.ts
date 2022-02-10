@@ -13,10 +13,6 @@ const routes: Array<RouteConfig> = [
         },
     },
     {
-        path: '/login',
-        component: () => import('../views/Signin.vue'),
-    },
-    {
         path: '/signin-oidc',
         component: () => import('../views/SigninRedirect.vue'),
     },
@@ -73,11 +69,13 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
-    if (to.query.signupToken || to.query.passwordResetToken || to.query.hash) {
+    if (to.query.passwordResetToken || to.query.hash || to.query.signup_token || to.query.authentication_token) {
         await store.dispatch('account/signinRedirect', {
-            signupToken: to.query.signup_token || null,
-            passwordResetToken: to.query.passwordResetToken,
+            passwordResetToken: to.query.passwordResetToken || null,
             rewardHash: to.query.hash || null,
+            signupToken: to.query.signup_token || null,
+            token: to.query.authentication_token || null,
+            key: to.query.secure_key || null,
         });
     }
 
