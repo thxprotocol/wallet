@@ -69,11 +69,10 @@ const router = new VueRouter({
 router.beforeEach(async (to, from, next) => {
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
-    if (to.query.passwordResetToken || to.query.hash || to.query.signup_token || to.query.authentication_token) {
+    if (to.query.passwordResetToken || to.query.hash || to.query.authentication_token) {
         await store.dispatch('account/signinRedirect', {
             passwordResetToken: to.query.passwordResetToken || null,
             rewardHash: to.query.hash || null,
-            signupToken: to.query.signup_token || null,
             token: to.query.authentication_token || null,
             key: to.query.secure_key || null,
         });
@@ -83,7 +82,7 @@ router.beforeEach(async (to, from, next) => {
         const user = await store.dispatch('account/getUser');
 
         if (requiresAuth && !user) {
-            await store.dispatch('account/signinRedirect', {});
+            await store.dispatch('account/signinRedirect', { signupToken: to.query.signup_token || null });
         } else {
             return next();
         }
