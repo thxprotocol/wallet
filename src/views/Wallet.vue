@@ -4,9 +4,9 @@
             <base-list-group-item-gas-token />
             <base-list-group-item-token
                 :web3="web3"
-                :membership="membership"
+                :id="membership.id"
                 :key="membership.id"
-                v-for="membership in filteredTokens"
+                v-for="membership in memberships"
             />
         </b-list-group>
         <hr />
@@ -57,31 +57,6 @@ export default class Wallet extends Vue {
     privateKey!: string;
     memberships!: IMemberships;
 
-    get filteredTokens() {
-        return Object.values(this.memberships).filter((membership: Membership) => membership.network === this.npid);
-    }
-
-    async updateBalances() {
-        this.busy = true;
-        try {
-            for (const id in this.memberships) {
-                const membership = this.memberships[id];
-
-                await this.$store.dispatch('memberships/get', id);
-                await this.$store.dispatch('erc20/updateBalance', {
-                    web3: this.web3,
-                    address: membership.token.address,
-                    profile: this.profile,
-                });
-            }
-            this.$forceUpdate();
-        } catch (error) {
-            this.error = (error as Error).message;
-        } finally {
-            this.busy = false;
-        }
-    }
-
     async mounted() {
         this.busy = true;
 
@@ -91,6 +66,26 @@ export default class Wallet extends Vue {
             await this.$store.dispatch('memberships/getAll');
         } catch (error) {
             this.error = (error as Error).toString();
+        } finally {
+            this.busy = false;
+        }
+    }
+
+    async updateBalances() {
+        this.busy = true;
+        try {
+            for (const id in this.memberships) {
+                this.$store.dispatch('memberships/get', id).then(async (membership: Membership) => {
+                    await this.$store.dispatch('erc20/updateBalance', {
+                        web3: this.web3,
+                        address: membership.token.address,
+                        profile: this.profile,
+                    });
+                });
+                this.$forceUpdate();
+            }
+        } catch (error) {
+            this.error = (error as Error).message;
         } finally {
             this.busy = false;
         }

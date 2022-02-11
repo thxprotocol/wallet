@@ -5,6 +5,10 @@
         class="d-flex justify-content-between align-items-center"
     >
         <div class="mr-auto">
+            <i
+                class="fas fa-certificate mr-2"
+                :class="{ 'text-primary': membership.network, 'text-muted': !membership.network }"
+            ></i>
             <strong class="mr-1">{{ membership.token.symbol }} Pool</strong>
             <b-badge class="px-2" v-if="pendingWithdrawalCount" variant="danger">{{ pendingWithdrawalCount }}</b-badge>
             <br />
@@ -24,7 +28,7 @@ import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import BaseModalDepositPool from '@/components/modals/ModalDepositPool.vue';
 import Web3 from 'web3';
-import { Membership } from '@/store/modules/memberships';
+import { IMemberships, Membership } from '@/store/modules/memberships';
 import { WithdrawalState } from '@/store/modules/withdrawals';
 
 @Component({
@@ -40,32 +44,37 @@ import { WithdrawalState } from '@/store/modules/withdrawals';
     },
     computed: mapGetters({
         profile: 'account/profile',
-        assetPools: 'assetpools/all',
+        memberships: 'memberships/all',
         web3: 'network/web3',
     }),
 })
 export default class BaseListGroupItemAssetPool extends Vue {
     busy = true;
     pendingWithdrawalCount = 0;
+    membership: Membership | null = null;
 
     // getters
+    memberships!: IMemberships;
     profile!: UserProfile;
     web3!: Web3;
 
-    @Prop() membership!: Membership;
+    @Prop() id!: string;
 
     onClick() {
-        this.$bvModal.show(`modalDepositPool-${this.membership.poolAddress}`);
+        this.$bvModal.show(`modalDepositPool-${this.membership?.poolAddress}`);
     }
 
     async mounted() {
-        const { pagination } = await this.$store.dispatch('withdrawals/filter', {
-            profile: this.profile,
-            membership: this.membership,
-            state: WithdrawalState.Pending,
-        });
-
-        this.pendingWithdrawalCount = pagination.total;
+        this.membership = await this.$store.dispatch('memberships/get', this.id);
+        this.$store
+            .dispatch('withdrawals/filter', {
+                profile: this.profile,
+                membership: this.membership,
+                state: WithdrawalState.Pending,
+            })
+            .then(({ pagination }) => {
+                this.pendingWithdrawalCount = pagination.total;
+            });
     }
 }
 </script>

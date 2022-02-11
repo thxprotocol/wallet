@@ -48,18 +48,16 @@ class ERC20Module extends VuexModule {
         try {
             const abi: any = Artifacts.ERC20.abi;
             const contract = new web3.eth.Contract(abi, address);
-
-            this.context.commit(
-                'set',
-                new ERC20({
-                    address,
-                    contract,
-                    name: await contract.methods.name().call(),
-                    symbol: await contract.methods.symbol().call(),
-                    balance: fromWei(await contract.methods.balanceOf(profile.address).call()),
-                    totalSupply: await contract.methods.totalSupply().call(),
-                }),
-            );
+            const erc20 = new ERC20({
+                address,
+                contract,
+                name: await contract.methods.name().call(),
+                symbol: await contract.methods.symbol().call(),
+                balance: fromWei(await contract.methods.balanceOf(profile.address).call()),
+                totalSupply: await contract.methods.totalSupply().call(),
+            });
+            this.context.commit('set', erc20);
+            return { erc20 };
         } catch (error) {
             return { error };
         }

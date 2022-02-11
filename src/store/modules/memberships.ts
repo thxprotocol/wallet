@@ -60,9 +60,9 @@ class MembershipModule extends VuexModule {
                 throw new Error('GET /memberships failed.');
             }
 
-            for (const id of r.data) {
-                await this.context.dispatch('get', id);
-            }
+            r.data.forEach((id: string) => {
+                this.context.commit('set', { id });
+            });
 
             return r.data;
         } catch (error) {

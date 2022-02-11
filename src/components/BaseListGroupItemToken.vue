@@ -1,8 +1,12 @@
 <template>
-    <b-list-group-item v-if="memberships && token" class="d-flex justify-content-between align-items-center">
+    <b-list-group-item v-if="token" class="d-flex justify-content-between align-items-center">
         <div class="mr-auto">
-            <strong>{{ token.symbol }}</strong
-            ><br />
+            <i
+                class="fas fa-certificate mr-2"
+                :class="{ 'text-primary': membership.network, 'text-muted': !membership.network }"
+            ></i>
+            <strong>{{ token.symbol }}</strong>
+            <br />
             <small class="text-muted d-none d-md-inline">{{ token.name }}</small>
         </div>
 
@@ -44,29 +48,29 @@ import { Membership } from '@/store/modules/memberships';
     computed: mapGetters({
         profile: 'account/profile',
         erc20: 'erc20/all',
-        memberships: 'memberships/all',
     }),
 })
 export default class BaseListGroupItemToken extends Vue {
     busy = true;
+    membership: Membership | null = null;
 
     // getters
     profile!: UserProfile;
     erc20!: { [address: string]: ERC20 };
-    memberships!: { [address: string]: Membership };
 
     @Prop() web3!: Web3;
-    @Prop() membership!: Membership;
+    @Prop() id!: string;
 
     get token() {
-        return this.erc20[this.membership.token.address];
+        return this.erc20[this.membership?.token?.address];
     }
 
     async mounted() {
         try {
+            this.membership = await this.$store.dispatch('memberships/get', this.id);
             this.$store.dispatch('erc20/get', {
                 web3: this.web3,
-                address: this.membership.token.address,
+                address: this.membership?.token.address,
                 profile: this.profile,
             });
         } catch (e) {

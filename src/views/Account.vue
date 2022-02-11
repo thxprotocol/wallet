@@ -24,11 +24,11 @@
             <b-list-group-item class="text-center" v-if="busy">
                 <b-spinner variant="primary" />
             </b-list-group-item>
-            <template v-if="(filteredPools.length > 0) & !busy">
+            <template v-if="!busy">
                 <base-list-group-item-asset-pool
-                    :membership="membership"
+                    :id="membership.id"
                     :key="membership.id"
-                    v-for="membership of filteredPools"
+                    v-for="membership of memberships"
                 />
             </template>
         </b-list-group>
@@ -95,10 +95,6 @@ export default class AccountView extends Vue {
     web3!: Web3;
 
     @Prop() npid!: NetworkProvider;
-
-    get filteredPools() {
-        return Object.values(this.memberships).filter((membership: Membership) => membership.network === this.npid);
-    }
 
     onCopy(e: any) {
         this.info = 'You just copied: ' + e.text;
