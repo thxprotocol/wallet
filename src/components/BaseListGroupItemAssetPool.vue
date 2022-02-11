@@ -6,8 +6,8 @@
     >
         <div class="mr-auto">
             <i
-                class="fas fa-certificate mr-2"
-                :class="{ 'text-primary': membership.network, 'text-muted': !membership.network }"
+                class="fas fa-code-branch mr-2"
+                :class="{ 'text-success': membership.network, 'text-muted': !membership.network }"
             ></i>
             <strong class="mr-1">{{ membership.token.symbol }} Pool</strong>
             <b-badge class="px-2" v-if="pendingWithdrawalCount" variant="danger">{{ pendingWithdrawalCount }}</b-badge>
@@ -16,7 +16,10 @@
         </div>
 
         <div class="h3 mr-3 m-0">{{ membership.token.balance }} {{ membership.token.symbol }}</div>
-        <b-button variant="primary" v-on:click.prevent="onClick()">Deposit</b-button>
+        <b-button size="sm" :disabled="membership.network !== npid" variant="primary" v-on:click.prevent="onClick()">
+            <i class="fas fa-arrow-alt-circle-down ml-0 mr-md-2"></i>
+            <span class="d-none d-md-inline">Deposit</span>
+        </b-button>
         <base-modal-deposit-pool :membership="membership" :web3="web3" />
     </b-list-group-item>
 </template>
@@ -30,6 +33,7 @@ import BaseModalDepositPool from '@/components/modals/ModalDepositPool.vue';
 import Web3 from 'web3';
 import { IMemberships, Membership } from '@/store/modules/memberships';
 import { WithdrawalState } from '@/store/modules/withdrawals';
+import { NetworkProvider } from '@/utils/network';
 
 @Component({
     components: {
@@ -59,22 +63,26 @@ export default class BaseListGroupItemAssetPool extends Vue {
     web3!: Web3;
 
     @Prop() id!: string;
+    @Prop() npid!: NetworkProvider;
 
     onClick() {
         this.$bvModal.show(`modalDepositPool-${this.membership?.poolAddress}`);
     }
 
     async mounted() {
-        this.membership = await this.$store.dispatch('memberships/get', this.id);
-        this.$store
-            .dispatch('withdrawals/filter', {
-                profile: this.profile,
-                membership: this.membership,
-                state: WithdrawalState.Pending,
-            })
-            .then(({ pagination }) => {
-                this.pendingWithdrawalCount = pagination.total;
-            });
+        const membership = await this.$store.dispatch('memberships/get', this.id);
+        if (membership?.token) {
+            this.membership = membership;
+            this.$store
+                .dispatch('withdrawals/filter', {
+                    profile: this.profile,
+                    membership: this.membership,
+                    state: WithdrawalState.Pending,
+                })
+                .then(({ pagination }) => {
+                    this.pendingWithdrawalCount = pagination.total;
+                });
+        }
     }
 }
 </script>

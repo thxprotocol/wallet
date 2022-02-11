@@ -1,25 +1,7 @@
 <template>
-    <div class="container h-100 d-flex flex-column" v-if="profile">
+    <div class="" v-if="profile">
         <b-alert show variant="danger" v-if="error">{{ error }}</b-alert>
         <b-alert show variant="info" dismissible @dismissed="info = ''" v-if="info">{{ info }}</b-alert>
-        <h2 class="h4">
-            <label for="accountAddress">Your Address</label>
-        </h2>
-        <b-input-group>
-            <b-form-input id="accountAddress" readonly :value="profile.address" />
-            <b-input-group-append>
-                <b-button
-                    variant="dark"
-                    v-clipboard:copy="profile.address"
-                    v-clipboard:success="onCopy"
-                    v-clipboard:error="onError"
-                >
-                    Copy
-                </b-button>
-            </b-input-group-append>
-        </b-input-group>
-        <hr />
-        <h2 class="h4">Your Memberships</h2>
         <b-list-group v-if="web3">
             <b-list-group-item class="text-center" v-if="busy">
                 <b-spinner variant="primary" />
@@ -27,15 +9,12 @@
             <template v-if="!busy">
                 <base-list-group-item-asset-pool
                     :id="membership.id"
+                    :npid="npid"
                     :key="membership.id"
                     v-for="membership of memberships"
                 />
             </template>
         </b-list-group>
-
-        <b-button class="mt-auto" block variant="dark" @click="logout()">
-            Logout
-        </b-button>
     </div>
 </template>
 
@@ -115,14 +94,6 @@ export default class AccountView extends Vue {
             this.error = (error as Error).message;
         } finally {
             this.busy = false;
-        }
-    }
-
-    async logout() {
-        try {
-            await this.$store.dispatch('account/signoutRedirect');
-        } catch (e) {
-            return;
         }
     }
 }

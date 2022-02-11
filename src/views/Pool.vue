@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div>
         <div class="h-100 w-100 center-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>

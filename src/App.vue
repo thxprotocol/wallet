@@ -1,39 +1,42 @@
 <template>
     <div id="app" class="d-flex flex-column h-100">
         <div class="flex-grow-1 overflow-auto d-flex flex-column">
-            <header class="pt-3 pb-3" v-if="$router.currentRoute.name">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-8">
-                            <h1 class="display-5 m-0 text-secondary">{{ $router.currentRoute.name }}</h1>
-                        </div>
-                        <div class="col-4">
-                            <base-network-select :npid="npid" @change="onChangeNetwork($event)" class="float-right" />
-                        </div>
-                    </div>
-                </div>
+            <header class="pt-3 pb-3 container-fluid d-flex align-items-center" v-if="$router.currentRoute.name">
+                <b-button to="/" variant="link" class="pl-0 mr-auto mr-md-0">
+                    <img :src="require('@/assets/img/logo.png')" height="32" alt="" />
+                </b-button>
+                <base-network-select :npid="npid" @change="onChangeNetwork($event)" />
+                <base-dropdown-account class="ml-md-auto" />
             </header>
-            <router-view :npid="npid" class="main-container flex-grow-1" />
+            <div
+                class="my-auto container d-flex flex-column"
+                style="height: 100%; max-height: 400px; max-width: 769px;"
+            >
+                <h1 class="display-5 text-secondary">{{ $router.currentRoute.name }}</h1>
+                <router-view class="main-container flex-grow-1 overflow-auto shadow-lg" :npid="npid" />
+            </div>
+            <footer class="container-fluid" style="height: 85px" v-if="$router.currentRoute.name"></footer>
         </div>
-        <navbar class="flex-grow-0" v-if="profile && $router.currentRoute.path !== '/signin-oidc'" />
     </div>
 </template>
 
 <script lang="ts">
-import { BButton, BJumbotron } from 'bootstrap-vue';
+import { BButton, BDropdown, BDropdownDivider, BDropdownItem } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import Navbar from '@/components/Navbar.vue';
 import BaseNetworkSelect from './components/BaseNetworkSelect.vue';
 import { NetworkProvider } from './utils/network';
 import { UserProfile } from './store/modules/account';
+import BaseDropdownAccount from './components/BaseDropdownAccount.vue';
 
 @Component({
     components: {
-        'b-jumbotron': BJumbotron,
-        'b-button': BButton,
-        'navbar': Navbar,
-        'base-network-select': BaseNetworkSelect,
+        BButton,
+        BaseNetworkSelect,
+        BaseDropdownAccount,
+        BDropdown,
+        BDropdownItem,
+        BDropdownDivider,
     },
     computed: mapGetters({
         privateKey: 'account/privateKey',
@@ -49,7 +52,9 @@ export default class App extends Vue {
 
     async onChangeNetwork(npid: NetworkProvider) {
         this.npid = npid;
-        await this.$store.dispatch('account/getProfile');
+        const { result, error } = await this.$store.dispatch('account/getProfile');
+        if (!result && error?.response?.status === 401) this.$router.push('/signin');
+
         await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
     }
 

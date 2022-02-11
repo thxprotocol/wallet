@@ -214,6 +214,8 @@ class AccountModule extends VuexModule {
                 method: 'GET',
                 url: config.authority + '/session/end',
             });
+
+            await this.userManager.signinRedirect({});
         } catch (e) {
             return { error: e };
         }

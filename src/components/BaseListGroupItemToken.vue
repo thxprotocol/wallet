@@ -2,8 +2,8 @@
     <b-list-group-item v-if="token" class="d-flex justify-content-between align-items-center">
         <div class="mr-auto">
             <i
-                class="fas fa-certificate mr-2"
-                :class="{ 'text-primary': membership.network, 'text-muted': !membership.network }"
+                class="fas fa-code-branch mr-2"
+                :class="{ 'text-success': membership.network, 'text-muted': !membership.network }"
             ></i>
             <strong>{{ token.symbol }}</strong>
             <br />
@@ -16,7 +16,12 @@
                 ({{ membership.pendingBalance | abbrNumber }})
             </small>
         </div>
-        <b-button variant="primary" size="sm" v-b-modal="`modalTransferTokens-${token.address}`">
+        <b-button
+            variant="primary"
+            size="sm"
+            :disabled="membership.network !== npid"
+            v-b-modal="`modalTransferTokens-${token.address}`"
+        >
             <i class="fas fa-exchange-alt ml-0 mr-md-2"></i>
             <span class="d-none d-md-inline">Transfer</span>
         </b-button>
@@ -33,6 +38,8 @@ import { UserProfile } from '@/store/modules/account';
 import { ERC20 } from '@/store/modules/erc20';
 import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue';
 import { Membership } from '@/store/modules/memberships';
+import { Network } from '@/store/modules/network';
+import { NetworkProvider } from '@/utils/network';
 
 @Component({
     components: {
@@ -48,6 +55,7 @@ import { Membership } from '@/store/modules/memberships';
     computed: mapGetters({
         profile: 'account/profile',
         erc20: 'erc20/all',
+        provider: 'network/current',
     }),
 })
 export default class BaseListGroupItemToken extends Vue {
@@ -57,9 +65,11 @@ export default class BaseListGroupItemToken extends Vue {
     // getters
     profile!: UserProfile;
     erc20!: { [address: string]: ERC20 };
+    provider!: Network;
 
     @Prop() web3!: Web3;
     @Prop() id!: string;
+    @Prop() npid!: NetworkProvider;
 
     get token() {
         return this.erc20[this.membership?.token?.address];
@@ -67,12 +77,15 @@ export default class BaseListGroupItemToken extends Vue {
 
     async mounted() {
         try {
-            this.membership = await this.$store.dispatch('memberships/get', this.id);
-            this.$store.dispatch('erc20/get', {
-                web3: this.web3,
-                address: this.membership?.token.address,
-                profile: this.profile,
-            });
+            const membership = await this.$store.dispatch('memberships/get', this.id);
+            if (membership?.token) {
+                this.membership = membership;
+                this.$store.dispatch('erc20/get', {
+                    web3: this.web3,
+                    address: membership.token.address,
+                    profile: this.profile,
+                });
+            }
         } catch (e) {
             console.log(e);
         }

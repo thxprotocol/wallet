@@ -7,10 +7,7 @@ Vue.use(VueRouter);
 const routes: Array<RouteConfig> = [
     {
         path: '/',
-        component: () => import('../views/Home.vue'),
-        meta: {
-            requiresAuth: true,
-        },
+        redirect: '/wallet',
     },
     {
         path: '/signin-oidc',
@@ -28,6 +25,10 @@ const routes: Array<RouteConfig> = [
         path: '/signup',
         name: 'Signup',
         component: () => import('../views/Signup.vue'),
+    },
+    {
+        path: '/signout',
+        component: () => import('../views/Signout.vue'),
     },
     {
         path: '/verify',
@@ -53,7 +54,7 @@ const routes: Array<RouteConfig> = [
     },
     {
         path: '/account',
-        name: 'Account',
+        name: 'Pools',
         component: () => import('../views/Account.vue'),
         meta: {
             requiresAuth: true,

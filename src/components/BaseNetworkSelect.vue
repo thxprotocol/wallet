@@ -1,39 +1,53 @@
 <template>
-    <b-dropdown id="dropdownNetworkSelect" :text="network.name" class="m-md-2">
-        <b-dropdown-item @click="onClick(provider.Test)">
-            Test Network
+    <b-dropdown size="sm" variant="darker" no-caret>
+        <template #button-content>
+            <div class="d-flex align-items-center">
+                <i
+                    class="fas fa-code-branch p-1 mr-2"
+                    :class="{ 'text-muted': !npid, 'text-success': npid }"
+                    style="font-size: 1.5rem"
+                ></i>
+                <span class="d-none d-md-block text-muted">
+                    {{ provider.name }}
+                </span>
+            </div>
+        </template>
+        <b-dropdown-item @click="onClick(NetworkProvider.Test)">
+            <i class="fas fa-code-branch text-muted"></i> Polygon Test
         </b-dropdown-item>
-        <b-dropdown-item @click="onClick(provider.Main)">
-            Main Network
+        <b-dropdown-item @click="onClick(NetworkProvider.Main)">
+            <i class="fas fa-code-branch text-success"></i> Polygon Main
         </b-dropdown-item>
     </b-dropdown>
 </template>
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
+import { Network } from '@/store/modules/network';
 import { NetworkProvider } from '@/utils/network';
-import { BDropdown, BDropdownItem } from 'bootstrap-vue';
+import { BDropdown, BDropdownDivider, BDropdownItem } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import Web3 from 'web3';
 
 @Component({
     name: 'BaseNetworkSelect',
     components: {
-        'b-dropdown': BDropdown,
-        'b-dropdown-item': BDropdownItem,
+        BDropdown,
+        BDropdownItem,
+        BDropdownDivider,
     },
     computed: mapGetters({
         profile: 'account/profile',
         privateKey: 'account/privateKey',
-        network: 'network/current',
-        web3: 'network/web3',
+        provider: 'network/current',
     }),
 })
 export default class BaseNetworkSelect extends Vue {
     profile!: UserProfile;
     privateKey!: string;
-    provider = NetworkProvider;
-    web3!: Web3;
+    NetworkProvider = NetworkProvider;
+
+    //getters
+    provider!: Network;
 
     @Prop() npid!: NetworkProvider;
 
@@ -43,7 +57,6 @@ export default class BaseNetworkSelect extends Vue {
 
     async onClick(npid: NetworkProvider) {
         await this.$store.dispatch('network/setNetwork', { npid, privateKey: this.privateKey });
-
         this.$emit('change', npid);
     }
 }
