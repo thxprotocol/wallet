@@ -80,7 +80,7 @@ export default class Redirect extends Vue {
         await this.setNetwork(this.privateKey);
 
         // Check for first time login
-        if (!this.profile.address) {
+        if (this.profile && !this.profile.address) {
             await this.setPrivateKey();
         }
 

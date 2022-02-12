@@ -197,27 +197,8 @@ class AccountModule extends VuexModule {
     async signoutRedirect() {
         try {
             await this.userManager.signoutRedirect({});
-
-            this.context.commit('setUser', null);
         } catch (e) {
             return e;
-        }
-    }
-
-    @Action
-    async signout() {
-        try {
-            await this.userManager.removeUser();
-            await this.userManager.clearStaleState();
-
-            await axios({
-                method: 'GET',
-                url: config.authority + '/session/end',
-            });
-
-            await this.userManager.signinRedirect({});
-        } catch (e) {
-            return { error: e };
         }
     }
 
