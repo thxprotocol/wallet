@@ -52,9 +52,7 @@ export default class App extends Vue {
 
     async onChangeNetwork(npid: NetworkProvider) {
         this.npid = npid;
-        const { result, error } = await this.$store.dispatch('account/getProfile');
-        if (!result && error?.response?.status === 401) this.$router.push('/signin');
-
+        await this.$store.dispatch('account/getProfile');
         await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
     }
 
