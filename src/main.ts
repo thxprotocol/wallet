@@ -4,7 +4,7 @@ import router from './router';
 import store from './store';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import Web3 from 'web3';
-import { ModalPlugin, ToastPlugin, VBTooltip } from 'bootstrap-vue';
+import { BootstrapVue, ModalPlugin, ToastPlugin, VBTooltip } from 'bootstrap-vue';
 import './main.scss';
 import './registerServiceWorker';
 import VueClipboard from 'vue-clipboard2';
@@ -50,6 +50,7 @@ Vue.config.productionTip = false;
 // Sets a container to fix issues related to bootstrap modals
 VueClipboard.config.autoSetContainer = true;
 
+Vue.use(BootstrapVue);
 Vue.use(ModalPlugin);
 Vue.use(ToastPlugin);
 Vue.use(VueClipboard);

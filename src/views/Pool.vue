@@ -3,7 +3,7 @@
         <div class="h-100 w-100 center-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
-        <div class="container mt-3 h-100 d-flex flex-column" v-if="!busy && membership">
+        <div class="container pt-3 h-100 d-flex flex-column" v-if="!busy && membership">
             <b-alert show dismissable variant="danger" v-if="error">
                 {{ error }}
             </b-alert>

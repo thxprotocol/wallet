@@ -2,11 +2,10 @@
     <div class="center-center flex-column h-100">
         <div class="flex-row text-center" v-if="isClaimInvalid || isClaimFailed">
             <b-alert show variant="info" v-if="isClaimInvalid">
-                You are not elegible for this token reward claim because you don't meet the reward conditions.
+                You are not elegible for this token reward because you don't meet the reward conditions.
             </b-alert>
             <b-alert show variant="danger" v-if="isClaimFailed">
-                Oops, we did not manage to claim your token reward at this time due to high network usage, please try
-                again later.
+                Oops, we did not manage to claim your token reward at this time, please try again later.
             </b-alert>
             <b-button variant="primary" class="rounded-pill" @click="claimReward()" v-if="isClaimFailed">
                 Try again
@@ -18,26 +17,25 @@
             <b-spinner variant="primary" size="lg"></b-spinner><br />
             <span class="text-muted">{{ info }}</span>
         </template>
+        <modal-show-withdrawal @redirect="redirect()" :withdrawal="withdrawal" v-if="withdrawal" />
         <modal-decode-private-key :web3="web3" @init="redirect()" />
     </div>
 </template>
 
 <script lang="ts">
+import Web3 from 'web3';
 import { UserProfile } from '@/store/modules/account';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
-import { BSpinner, BAlert, BButton } from 'bootstrap-vue';
 import { NetworkProvider } from '@/utils/network';
-import Web3 from 'web3';
 import { User } from 'oidc-client';
+import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
+import ModalShowWithdrawal from '@/components/modals/ModalShowWithdrawal.vue';
 
 @Component({
     components: {
-        BButton,
-        BSpinner,
-        BAlert,
-        'modal-decode-private-key': ModalDecodePrivateKey,
+        ModalShowWithdrawal,
+        ModalDecodePrivateKey,
     },
     computed: mapGetters({
         privateKey: 'account/privateKey',
@@ -52,6 +50,8 @@ export default class Redirect extends Vue {
     redirectPath = '/wallet';
     isClaimFailed = false;
     isClaimInvalid = false;
+
+    withdrawal = null;
 
     // getters
     privateKey!: string;
@@ -89,7 +89,7 @@ export default class Redirect extends Vue {
             await this.claimReward();
         }
 
-        if (!this.error && !this.isClaimFailed && !this.isClaimInvalid) this.redirect();
+        if (!this.error && !this.isClaimFailed && !this.isClaimInvalid && !this.withdrawal) this.redirect();
     }
 
     redirect() {
@@ -123,13 +123,13 @@ export default class Redirect extends Vue {
         this.isClaimInvalid = false;
         this.info = 'Claiming your token reward...';
 
-        const { error } = await this.$store.dispatch('assetpools/claimReward', this.user.state.rewardHash);
+        const { withdrawal, error } = await this.$store.dispatch('assetpools/claimReward', this.user.state.rewardHash);
 
         if (error) {
             this.isClaimFailed = error.response?.status === 500;
             this.isClaimInvalid = error.response?.status === 403;
         } else {
-            this.redirect();
+            this.withdrawal = withdrawal;
         }
     }
 

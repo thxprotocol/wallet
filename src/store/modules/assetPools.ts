@@ -122,7 +122,7 @@ class AssetPoolModule extends VuexModule {
                 throw new Error('POST claim reward failed.');
             }
 
-            return { withdrawal: r.data };
+            return { withdrawal: { ...r.data, ...{ tokenSymbol: data.tokenSymbol } } };
         } catch (error) {
             return { error };
         }

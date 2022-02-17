@@ -50,7 +50,7 @@ export default class Wallet extends Vue {
         this.busy = true;
 
         try {
-            await this.$store.dispatch('account/getProfile');
+            await this.$store.dispatch('promoCodes/list');
             await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
             await this.$store.dispatch('memberships/getAll');
         } catch (error) {
