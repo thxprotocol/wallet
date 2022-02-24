@@ -79,6 +79,31 @@ class ERC20Module extends VuexModule {
     }
 
     @Action
+    async allowance({
+        web3,
+        tokenAddress,
+        owner,
+        spender,
+        privateKey,
+    }: {
+        web3: Web3;
+        tokenAddress: string;
+        owner: string;
+        spender: string;
+        privateKey: string;
+    }) {
+        try {
+            const contract: any = getERC20Contract(web3, tokenAddress);
+            const from = web3.eth.accounts.privateKeyToAccount(privateKey).address;
+            const wei = await contract.methods.allowance(owner, spender).call({ from });
+
+            return fromWei(wei, 'ether');
+        } catch (error) {
+            throw new Error(String(error));
+        }
+    }
+
+    @Action
     async approve({
         web3,
         tokenAddress,

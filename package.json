@@ -71,7 +71,7 @@
         "vue-router": "^3.2.0",
         "vuex": "^3.6.1",
         "vuex-module-decorators": "^1.0.1",
-        "web3": "^1.6.1"
+        "web3": "^1.7.0"
     },
     "devDependencies": {
         "@maticnetwork/maticjs": "^2.0.15",

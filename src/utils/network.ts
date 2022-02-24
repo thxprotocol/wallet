@@ -45,7 +45,7 @@ export async function send(web3: Web3, contract: Contract, fn: any, privateKey: 
     const sig = await web3.eth.accounts.signTransaction(
         {
             gas,
-            gasPrice,
+            maxPriorityFeePerGas: gasPrice,
             to,
             from,
             data,

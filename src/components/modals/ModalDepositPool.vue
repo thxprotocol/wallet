@@ -27,14 +27,7 @@
                 <code>{{ token.balance }}</code>
             </p>
             <form @submit.prevent="deposit()" id="formAmount">
-                <b-form-input
-                    autofocus
-                    size="lg"
-                    v-model="amount"
-                    step="any"
-                    type="number"
-                    placeholder="Specify the amount"
-                />
+                <b-form-input autofocus size="lg" v-model="amount" type="number" placeholder="Specify the amount" />
             </form>
         </template>
         <template v-slot:modal-footer>
@@ -120,30 +113,32 @@ export default class BaseModalDepositPool extends Vue {
         this.busy = true;
 
         try {
-            const { error } = await this.$store.dispatch('erc20/approve', {
+            const allowance = await this.$store.dispatch('erc20/allowance', {
                 web3: this.web3,
                 tokenAddress: this.membership.token.address,
-                to: this.membership.poolAddress,
+                owner: this.profile.address,
+                spender: this.membership.poolAddress,
+                privateKey: this.privateKey,
+            });
+
+            if (Number(allowance) < Number(this.amount)) {
+                await this.$store.dispatch('erc20/approve', {
+                    web3: this.web3,
+                    tokenAddress: this.membership.token.address,
+                    to: this.membership.poolAddress,
+                    amount: this.amount,
+                    privateKey: this.privateKey,
+                });
+            }
+
+            await this.$store.dispatch('assetpools/deposit', {
+                web3: this.web3,
+                poolAddress: this.membership.poolAddress,
                 amount: this.amount,
                 privateKey: this.privateKey,
             });
 
-            if (!error) {
-                const { error } = await this.$store.dispatch('assetpools/deposit', {
-                    web3: this.web3,
-                    poolAddress: this.membership.poolAddress,
-                    amount: this.amount,
-                    privateKey: this.privateKey,
-                });
-
-                if (error) {
-                    throw new Error(error);
-                }
-
-                await this.getBalances();
-            } else {
-                throw new Error(error);
-            }
+            await this.getBalances();
         } catch (e) {
             this.error = e.toString();
         } finally {
