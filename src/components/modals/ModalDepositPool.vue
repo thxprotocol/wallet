@@ -27,7 +27,14 @@
                 <code>{{ token.balance }}</code>
             </p>
             <form @submit.prevent="deposit()" id="formAmount">
-                <b-form-input autofocus size="lg" v-model="amount" type="number" placeholder="Specify the amount" />
+                <b-form-input
+                    autofocus
+                    size="lg"
+                    v-model="amount"
+                    step="any"
+                    type="number"
+                    placeholder="Specify the amount"
+                />
             </form>
         </template>
         <template v-slot:modal-footer>
