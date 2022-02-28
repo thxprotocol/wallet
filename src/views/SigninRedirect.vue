@@ -2,7 +2,7 @@
     <div class="center-center flex-column h-100">
         <div class="flex-row text-center" v-if="isClaimInvalid || isClaimFailed">
             <b-alert show variant="info" v-if="isClaimInvalid">
-                You are not elegible for this token reward because you don't meet the reward conditions.
+                {{ error }}
             </b-alert>
             <b-alert show variant="danger" v-if="isClaimFailed">
                 Oops, we did not manage to claim your token reward at this time, please try again later.
@@ -126,6 +126,7 @@ export default class Redirect extends Vue {
         const { withdrawal, error } = await this.$store.dispatch('assetpools/claimReward', this.user.state.rewardHash);
 
         if (error) {
+            this.error = error.response.data.error.message;
             this.isClaimFailed = error.response?.status === 500;
             this.isClaimInvalid = error.response?.status === 403;
         } else {
