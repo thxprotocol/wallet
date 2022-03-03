@@ -80,7 +80,7 @@ export default class BaseListGroupItemAssetPool extends Vue {
                     state: WithdrawalState.Pending,
                 })
                 .then(({ pagination }) => {
-                    this.pendingWithdrawalCount = pagination.total;
+                    this.pendingWithdrawalCount = pagination?.total;
                 });
         }
     }

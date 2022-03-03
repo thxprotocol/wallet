@@ -99,7 +99,7 @@ export default class PoolView extends Vue {
             state: 0, // 0 = Pending, 1 = Withdrawn
         });
 
-        this.total = pagination.total;
+        this.total = pagination?.total;
         this.error = error;
     }
 
