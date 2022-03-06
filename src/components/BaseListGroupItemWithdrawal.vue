@@ -18,7 +18,9 @@
                 v-else
                 v-b-tooltip.hover
                 :title="
-                    !withdrawal.withdrawalId ? 'Withdrawal is scheduled to be processed.' : 'Withdrawal is processed.'
+                    !withdrawal.withdrawalId
+                        ? `Withdrawal queued at ${format(new Date(withdrawal.createdAt), 'HH:mm MMMM dd, yyyy')}.`
+                        : 'Withdrawal is processed.'
                 "
                 :class="withdrawal.approved ? 'fas' : 'far'"
                 class="fa-check-circle"
@@ -50,7 +52,7 @@
 
             <br />
             <span class="text-muted small" v-if="withdrawal.createdAt">
-                {{ format(new Date(withdrawal.createdAt), 'HH:mm MMMM dd, yyyy') }}
+                Last update: {{ format(new Date(withdrawal.updatedAt), 'HH:mm MMMM dd, yyyy') }}
             </span>
         </div>
         <b-button
@@ -59,6 +61,9 @@
             @click="withdraw()"
         >
             Withdraw
+        </b-button>
+        <b-button hover-class="text-danger" class="ml-3" variant="light" :disabled="busy" @click="remove()">
+            <i class="fas fa-trash m-0"></i>
         </b-button>
     </b-list-group-item>
 </template>
@@ -71,7 +76,6 @@ import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import { Membership } from '@/store/modules/memberships';
 import { Withdrawal, WithdrawalType } from '@/store/modules/withdrawals';
-import { signCall } from '@/utils/network';
 import { format } from 'date-fns';
 
 @Component({
@@ -106,32 +110,38 @@ export default class BaseListGroupItemWithdrawal extends Vue {
     @Prop() withdrawal!: Withdrawal;
     @Prop() membership!: Membership;
 
-    async withdraw() {
+    async remove() {
         this.busy = true;
         try {
-            const calldata = await signCall(
-                this.web3,
-                this.membership.poolAddress,
-                'withdrawPollFinalize',
-                [this.withdrawal.withdrawalId],
-                this.web3.eth.accounts.privateKeyToAccount(this.privateKey),
-            );
-
-            if (!calldata.error) {
-                await this.$store.dispatch('assetpools/withdraw', {
-                    poolAddress: this.membership.poolAddress,
-                    call: calldata.call,
-                    nonce: calldata.nonce,
-                    sig: calldata.sig,
-                });
-
-                const withdrawal = this.withdrawal;
-                withdrawal.state = 1;
-                this.$store.commit('withdrawals/set', { withdrawal, membership: this.membership });
+            const { error } = await this.$store.dispatch('withdrawals/remove', {
+                membership: this.membership,
+                withdrawal: this.withdrawal,
+            });
+            if (error) {
+                this.error = error;
+                return;
             }
         } catch (error) {
             this.error = (error as Error).toString();
-            debugger;
+        } finally {
+            this.busy = false;
+        }
+    }
+
+    async withdraw() {
+        this.busy = true;
+        try {
+            const { withdrawal, error } = await this.$store.dispatch('withdrawals/withdraw', {
+                membership: this.membership,
+                id: this.withdrawal.id,
+            });
+            if (error) {
+                this.error = error;
+                return;
+            }
+            this.$store.commit('withdrawals/set', { withdrawal, membership: this.membership });
+        } catch (error) {
+            this.error = (error as Error).toString();
         } finally {
             this.busy = false;
         }

@@ -19,6 +19,7 @@
                 />
             </div>
             <b-pagination
+                class="mt-3"
                 v-if="total > perPage"
                 @change="onChange"
                 v-model="currentPage"
@@ -26,7 +27,7 @@
                 :total-rows="total"
                 align="fill"
             ></b-pagination>
-            <b-button block variant="dark" to="/account">
+            <b-button block variant="dark" to="/account" class="mt-3">
                 Back
             </b-button>
         </div>

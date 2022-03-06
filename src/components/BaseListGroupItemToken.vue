@@ -77,12 +77,11 @@ export default class BaseListGroupItemToken extends Vue {
 
     async mounted() {
         try {
-            const membership = await this.$store.dispatch('memberships/get', this.id);
-            if (membership?.token) {
-                this.membership = membership;
+            this.membership = await this.$store.dispatch('memberships/get', this.id);
+            if (this.membership?.token) {
                 this.$store.dispatch('erc20/get', {
                     web3: this.web3,
-                    address: membership.token.address,
+                    poolToken: this.membership.token,
                     profile: this.profile,
                 });
             }

@@ -44,17 +44,18 @@ class ERC20Module extends VuexModule {
     }
 
     @Action
-    async get({ web3, address, profile }: { web3: Web3; address: string; profile: UserProfile }) {
+    async get({ web3, poolToken, profile }: { web3: Web3; poolToken: any; profile: UserProfile }) {
         try {
             const abi: any = Artifacts.ERC20.abi;
-            const contract = new web3.eth.Contract(abi, address);
+            const contract = new web3.eth.Contract(abi, poolToken.address);
+            // const balance = await contract.methods.balanceOf(profile.address).call();
             const erc20 = new ERC20({
-                address,
+                address: poolToken.address,
                 contract,
-                name: await contract.methods.name().call(),
-                symbol: await contract.methods.symbol().call(),
-                balance: fromWei(await contract.methods.balanceOf(profile.address).call()),
-                totalSupply: await contract.methods.totalSupply().call(),
+                name: poolToken.name,
+                symbol: poolToken.symbol,
+                balance: poolToken.balance,
+                totalSupply: poolToken.totalSupply,
             });
             this.context.commit('set', erc20);
             return { erc20 };

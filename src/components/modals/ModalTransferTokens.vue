@@ -72,7 +72,7 @@ export default class BaseModalTranferTokens extends Vue {
         try {
             await this.$store.dispatch('erc20/get', {
                 web3: this.web3,
-                address: this.token.address,
+                poolToken: this.token,
                 profile: this.profile,
             });
             await this.$store.dispatch('network/getGasToken', { web3: this.web3, address: this.profile.address });

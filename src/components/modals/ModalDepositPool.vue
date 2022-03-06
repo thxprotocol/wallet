@@ -100,7 +100,7 @@ export default class BaseModalDepositPool extends Vue {
         try {
             await this.$store.dispatch('erc20/get', {
                 web3: this.web3,
-                address: this.membership.token.address,
+                poolToken: this.membership.token,
                 profile: this.profile,
             });
         } catch (e) {
