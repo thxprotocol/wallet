@@ -1,7 +1,7 @@
 import Web3 from 'web3';
 import { fromWei, isAddress } from 'web3-utils';
 import Artifacts from '@/utils/artifacts';
-import Contract from 'web3/eth/contract';
+import { Contract } from 'web3-eth-contract';
 import { soliditySha3 } from 'web3-utils';
 import { Account } from 'web3-core/types/index';
 
@@ -59,7 +59,7 @@ export async function send(web3: Web3, contract: Contract, fn: any, privateKey: 
 }
 
 export function getERC20Contract(web3: Web3, address: string) {
-    const abi: any = Artifacts.ERC20.abi;
+    const abi: any = Artifacts.IERC20.abi;
     return new web3.eth.Contract(abi, address);
 }
 

@@ -21,7 +21,6 @@
 </template>
 
 <script lang="ts">
-import { BButton, BDropdown, BDropdownDivider, BDropdownItem } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BaseNetworkSelect from './components/BaseNetworkSelect.vue';
@@ -31,12 +30,8 @@ import BaseDropdownAccount from './components/BaseDropdownAccount.vue';
 
 @Component({
     components: {
-        BButton,
         BaseNetworkSelect,
         BaseDropdownAccount,
-        BDropdown,
-        BDropdownItem,
-        BDropdownDivider,
     },
     computed: mapGetters({
         privateKey: 'account/privateKey',

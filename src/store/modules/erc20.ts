@@ -1,10 +1,10 @@
 import Vue from 'vue';
 import Web3 from 'web3';
 import Artifacts from '@/utils/artifacts';
-import Contract from 'web3/eth/contract';
+import { Contract } from 'web3-eth-contract';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { getERC20Contract, NetworkProvider, send } from '@/utils/network';
-import { fromWei, toWei } from 'web3-utils';
+import { fromWei, toWei, toChecksumAddress } from 'web3-utils';
 import { UserProfile } from './account';
 
 export interface ERC20Token {
@@ -44,18 +44,16 @@ class ERC20Module extends VuexModule {
     }
 
     @Action
-    async get({ web3, poolToken, profile }: { web3: Web3; poolToken: any; profile: UserProfile }) {
+    async get({ web3, poolToken }: { web3: Web3; poolToken: any }) {
         try {
-            const abi: any = Artifacts.ERC20.abi;
-            const contract = new web3.eth.Contract(abi, poolToken.address);
-            // const balance = await contract.methods.balanceOf(profile.address).call();
+            const contract = new web3.eth.Contract(Artifacts.IERC20.abi as any, toChecksumAddress(poolToken.address));
             const erc20 = new ERC20({
                 address: poolToken.address,
                 contract,
                 name: poolToken.name,
                 symbol: poolToken.symbol,
-                balance: poolToken.balance,
                 totalSupply: poolToken.totalSupply,
+                balance: poolToken.balance,
             });
             this.context.commit('set', erc20);
             return { erc20 };
@@ -65,10 +63,21 @@ class ERC20Module extends VuexModule {
     }
 
     @Action
+    async balanceOf({ web3, address, profile }: { web3: Web3; address: string; profile: UserProfile }) {
+        try {
+            const abi: any = Artifacts.IERC20.abi;
+            const contract = new web3.eth.Contract(abi, address);
+            return { balance: fromWei(await contract.methods.balanceOf(profile.address).call()) };
+        } catch (error) {
+            return { error };
+        }
+    }
+
+    @Action
     async updateBalance({ web3, address, profile }: { web3: Web3; address: string; profile: UserProfile }) {
         try {
             const erc20 = this.context.getters['all'][address];
-            const abi: any = Artifacts.ERC20.abi;
+            const abi: any = Artifacts.IERC20.abi;
             const contract = new web3.eth.Contract(abi, address);
 
             erc20.balance = fromWei(await contract.methods.balanceOf(profile.address).call());

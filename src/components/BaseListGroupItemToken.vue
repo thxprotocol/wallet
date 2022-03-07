@@ -11,7 +11,7 @@
         </div>
 
         <div class="h3 mr-3 m-0">
-            {{ token.balance | abbrNumber }}
+            {{ balance | abbrNumber }}
             <small class="text-muted" v-if="membership.pendingBalance > 0">
                 ({{ membership.pendingBalance | abbrNumber }})
             </small>
@@ -61,6 +61,7 @@ import { NetworkProvider } from '@/utils/network';
 export default class BaseListGroupItemToken extends Vue {
     busy = true;
     membership: Membership | null = null;
+    balance = 0;
 
     // getters
     profile!: UserProfile;
@@ -79,15 +80,26 @@ export default class BaseListGroupItemToken extends Vue {
         try {
             this.membership = await this.$store.dispatch('memberships/get', this.id);
             if (this.membership?.token) {
-                this.$store.dispatch('erc20/get', {
+                await this.$store.dispatch('erc20/get', {
                     web3: this.web3,
                     poolToken: this.membership.token,
                     profile: this.profile,
                 });
+
+                this.getBalance(this.membership.token.address);
             }
         } catch (e) {
             console.log(e);
         }
+    }
+
+    async getBalance(address: string) {
+        const { balance } = await this.$store.dispatch('erc20/balanceOf', {
+            web3: this.web3,
+            address,
+            profile: this.profile,
+        });
+        this.balance = balance;
     }
 }
 </script>
