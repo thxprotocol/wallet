@@ -8,7 +8,7 @@
             <small class="text-muted d-none d-md-inline">{{ token.name }} ({{ provider.name }})</small>
         </div>
         <div class="h3 mr-3 m-0">
-            {{ token.balance | abbrNumber }}
+            {{ token.balance }}
         </div>
         <b-button variant="primary" size="sm" v-b-modal="`modalTransferValue-${provider.id}`">
             <i class="fas fa-exchange-alt ml-0 mr-md-2"></i>

@@ -11,7 +11,7 @@
         </div>
 
         <div class="h3 mr-3 m-0">
-            {{ balance | abbrNumber }}
+            {{ balance }}
             <small class="text-muted" v-if="membership.pendingBalance > 0">
                 ({{ membership.pendingBalance | abbrNumber }})
             </small>
