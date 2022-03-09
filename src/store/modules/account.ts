@@ -121,13 +121,15 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    async signinRedirect(payload: {
-        signupToken: string;
-        rewardHash: string;
-        token: string;
-        key: string;
-        passwordResetToken: string;
-    }) {
+    async signinRedirect(
+        payload: {
+            signupToken?: string;
+            rewardHash?: string;
+            token?: string;
+            key?: string;
+            passwordResetToken?: string;
+        } = {},
+    ) {
         try {
             const extraQueryParams: any = {
                 return_url: BASE_URL,

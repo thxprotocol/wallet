@@ -41,20 +41,12 @@ export function redirectSigninSilent() {
 }
 
 export async function assertAuthorization(to: any, from: any, next: any) {
-    try {
-        const user = await store.dispatch('account/getUser');
-        if (!user) return redirectSignin();
-
-        next();
-    } catch (err) {
-        console.error(err);
-    }
+    const user = await store.dispatch('account/getUser');
+    if (!user) return redirectSignin();
+    next();
 }
 
 export function assertUserAgent(to: Route, from: Route, next: NavigationGuardNext) {
-    if (navigator.userAgent.match('Android.*Version/')) {
-        next({ path: '/user-agent-warning', query: { hash: to.query.hash }, hash: to.hash });
-    } else {
-        redirectRewardLink(to);
-    }
+    if (!navigator.userAgent.match('Android.*Version/')) return redirectRewardLink(to);
+    next({ path: '/user-agent-warning', query: { hash: to.query.hash }, hash: to.hash });
 }

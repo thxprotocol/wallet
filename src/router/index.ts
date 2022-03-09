@@ -17,7 +17,7 @@ Vue.use(VueRouter);
 const routes: Array<RouteConfig> = [
     {
         path: '/',
-        redirect: '/wallet',
+        redirect: '/account',
     },
     {
         path: '/reset',
