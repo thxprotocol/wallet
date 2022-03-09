@@ -52,7 +52,7 @@ export async function assertAuthorization(to: any, from: any, next: any) {
 }
 
 export function assertUserAgent(to: Route, from: Route, next: NavigationGuardNext) {
-    if (navigator.userAgent.match(/android/)) {
+    if (navigator.userAgent.match('Android.*Version/')) {
         next({ path: '/user-agent-warning', query: { hash: to.query.hash }, hash: to.hash });
     } else {
         redirectRewardLink(to);

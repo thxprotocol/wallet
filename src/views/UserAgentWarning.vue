@@ -44,7 +44,7 @@ export default class UserAgentWarning extends Vue {
         const hash = String(this.$router.currentRoute.query.hash);
         this.rewardUrl = BASE_URL + '/claim?hash=' + hash;
 
-        if (hash && this.navigator.userAgent.match(/android/)) {
+        if (hash && this.navigator.userAgent.match('Android.*Version/')) {
             this.decodedHash = JSON.parse(atob(hash));
         } else {
             this.$router.push('/claim?hash=' + hash);
