@@ -55,10 +55,5 @@ import { mapGetters } from 'vuex';
 })
 export default class BaseDropdownAccount extends Vue {
     profile!: UserProfile;
-
-    async mounted() {
-        const { result, error } = await this.$store.dispatch('account/getProfile');
-        if (!result && error?.response?.status === 401) this.$router.push('/signin');
-    }
 }
 </script>
