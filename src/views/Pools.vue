@@ -20,17 +20,6 @@
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
-import {
-    BAlert,
-    BBadge,
-    BButton,
-    BFormInput,
-    BInputGroup,
-    BInputGroupAppend,
-    BListGroup,
-    BListGroupItem,
-    BSpinner,
-} from 'bootstrap-vue';
 import { User } from 'oidc-client';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
@@ -43,15 +32,6 @@ import { Membership } from '@/store/modules/memberships';
     name: 'AccountView',
     components: {
         'base-list-group-item-asset-pool': BaseListGroupItemAssetPool,
-        'b-button': BButton,
-        'b-badge': BBadge,
-        'b-alert': BAlert,
-        'b-spinner': BSpinner,
-        'b-input-group': BInputGroup,
-        'b-input-group-append': BInputGroupAppend,
-        'b-form-input': BFormInput,
-        'b-list-group': BListGroup,
-        'b-list-group-item': BListGroupItem,
     },
     computed: mapGetters({
         user: 'account/user',
@@ -61,7 +41,7 @@ import { Membership } from '@/store/modules/memberships';
         memberships: 'memberships/all',
     }),
 })
-export default class AccountView extends Vue {
+export default class PoolsView extends Vue {
     busy = true;
     error = '';
     info = '';

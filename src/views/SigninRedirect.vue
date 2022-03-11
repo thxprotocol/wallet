@@ -47,7 +47,7 @@ import ModalShowWithdrawal from '@/components/modals/ModalShowWithdrawal.vue';
 export default class Redirect extends Vue {
     error = '';
     info = '';
-    redirectPath = '/account';
+    redirectPath = '/pools';
     isClaimFailed = false;
     isClaimInvalid = false;
 

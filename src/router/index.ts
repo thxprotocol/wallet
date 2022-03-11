@@ -17,7 +17,7 @@ Vue.use(VueRouter);
 const routes: Array<RouteConfig> = [
     {
         path: '/',
-        redirect: '/account',
+        redirect: '/pools',
     },
     {
         path: '/reset',
@@ -73,9 +73,9 @@ const routes: Array<RouteConfig> = [
         beforeEnter: assertAuthorization,
     },
     {
-        path: '/account',
+        path: '/pools',
         name: 'Pools',
-        component: () => import('../views/Account.vue'),
+        component: () => import('../views/Pools.vue'),
         beforeEnter: assertAuthorization,
     },
 ];

@@ -6,7 +6,8 @@
                     <img :src="require('@/assets/img/logo.png')" height="32" alt="" />
                 </b-button>
                 <base-network-select :npid="npid" @change="onChangeNetwork($event)" />
-                <base-dropdown-account class="ml-md-auto" />
+                <base-dropdown-account class="ml-2 ml-md-auto" />
+                <base-dropdown-menu class="ml-2 ml-md-auto" />
             </header>
             <div
                 class="my-auto container container-md d-flex flex-column"
@@ -27,11 +28,13 @@ import BaseNetworkSelect from './components/BaseNetworkSelect.vue';
 import { NetworkProvider } from './utils/network';
 import { UserProfile } from './store/modules/account';
 import BaseDropdownAccount from './components/BaseDropdownAccount.vue';
+import BaseDropdownMenu from './components/BaseDropdownMenu.vue';
 
 @Component({
     components: {
         BaseNetworkSelect,
         BaseDropdownAccount,
+        BaseDropdownMenu,
     },
     computed: mapGetters({
         privateKey: 'account/privateKey',
