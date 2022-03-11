@@ -7,7 +7,7 @@
                 </b-button>
                 <base-network-select :npid="npid" @change="onChangeNetwork($event)" />
                 <base-dropdown-account class="ml-2 ml-md-auto" />
-                <base-dropdown-menu class="ml-2 ml-md-auto" />
+                <base-dropdown-menu class="ml-2" />
             </header>
             <div
                 class="my-auto container container-md d-flex flex-column"
