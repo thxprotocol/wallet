@@ -27,7 +27,7 @@
                 :total-rows="total"
                 align="fill"
             ></b-pagination>
-            <b-button block variant="dark" to="/account" class="mt-3">
+            <b-button block variant="dark" to="/pools" class="mt-3">
                 Back
             </b-button>
         </div>
