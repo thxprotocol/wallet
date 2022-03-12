@@ -9,7 +9,7 @@
         <b-dropdown-item to="/pools">
             Pools
         </b-dropdown-item>
-        <b-dropdown-item to="/account">
+        <b-dropdown-item to="/account" disabled>
             Account
         </b-dropdown-item>
         <b-dropdown-divider />
