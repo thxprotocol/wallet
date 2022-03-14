@@ -36,6 +36,10 @@ export function redirectSignout() {
     return store.dispatch('account/signoutRedirect');
 }
 
+export function redirectAccount() {
+    return store.dispatch('account/accountRedirect');
+}
+
 export function redirectSigninSilent() {
     return store.dispatch('account/signinSilent');
 }
