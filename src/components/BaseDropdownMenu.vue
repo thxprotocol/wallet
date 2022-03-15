@@ -6,8 +6,8 @@
         <b-dropdown-item to="/wallet">
             Wallet
         </b-dropdown-item>
-        <b-dropdown-item to="/pools">
-            Pools
+        <b-dropdown-item to="/memberships">
+            Memberships
         </b-dropdown-item>
         <b-dropdown-item to="/account" disabled>
             Account

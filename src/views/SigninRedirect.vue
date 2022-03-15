@@ -23,7 +23,6 @@
 </template>
 
 <script lang="ts">
-import Web3 from 'web3';
 import { UserProfile } from '@/store/modules/account';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
@@ -31,6 +30,8 @@ import { NetworkProvider } from '@/utils/network';
 import { User } from 'oidc-client';
 import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
 import ModalShowWithdrawal from '@/components/modals/ModalShowWithdrawal.vue';
+import { TNetworks } from '@/store/modules/network';
+import Web3 from 'web3';
 
 @Component({
     components: {
@@ -41,13 +42,13 @@ import ModalShowWithdrawal from '@/components/modals/ModalShowWithdrawal.vue';
         privateKey: 'account/privateKey',
         profile: 'account/profile',
         user: 'account/user',
-        web3: 'network/web3',
+        networks: 'network/all',
     }),
 })
 export default class Redirect extends Vue {
     error = '';
     info = '';
-    redirectPath = '/pools';
+    redirectPath = '/memberships';
     isClaimFailed = false;
     isClaimInvalid = false;
 
@@ -56,7 +57,7 @@ export default class Redirect extends Vue {
     // getters
     privateKey!: string;
     profile!: UserProfile;
-    web3!: Web3;
+    networks!: TNetworks;
     user!: User;
 
     @Prop() npid!: NetworkProvider;
@@ -97,8 +98,9 @@ export default class Redirect extends Vue {
     }
 
     async setNetwork(privateKey: string) {
-        this.info = 'Authenticating your account...';
-        await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey });
+        this.info = 'Initializing blockchain networks...';
+        await this.$store.dispatch('network/setNetwork', { npid: NetworkProvider.Test, privateKey });
+        await this.$store.dispatch('network/setNetwork', { npid: NetworkProvider.Main, privateKey });
     }
 
     async redirectCallback() {
@@ -113,7 +115,7 @@ export default class Redirect extends Vue {
     }
 
     async getPrivateKey() {
-        this.info = 'Fetching private key from Torus...';
+        this.info = 'Fetching private key from Web3Auth...';
         const { error } = await this.$store.dispatch('account/getPrivateKey', this.user);
         if (error) this.error = error.message;
     }
@@ -136,7 +138,8 @@ export default class Redirect extends Vue {
 
     async setPrivateKey() {
         this.info = 'Updating your account details with a new address...';
-        const account = this.web3.eth.accounts.privateKeyToAccount(this.privateKey);
+        const web3 = new Web3();
+        const account = web3.eth.accounts.privateKeyToAccount(this.privateKey);
         const { error } = await this.$store.dispatch('account/update', { address: account.address });
         if (error) this.error = error.message;
     }

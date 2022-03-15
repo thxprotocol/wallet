@@ -15,11 +15,15 @@ axios.defaults.withCredentials = true;
 axios.defaults.baseURL = process.env.VUE_APP_API_ROOT + '/v1';
 
 // Add a request interceptor
-axios.interceptors.request.use((req: AxiosRequestConfig) => {
+axios.interceptors.request.use(async (req: AxiosRequestConfig) => {
     const user = store.getters['account/user'];
+    const now = Math.floor(Date.now() / 1000);
 
-    if (user) {
+    if (user && user.expires_at > now) {
         req.headers.common['Authorization'] = `Bearer ${user.access_token}`;
+    } else {
+        await store.dispatch('account/signinRedirect');
+        return;
     }
 
     return req;
@@ -30,15 +34,7 @@ axios.interceptors.response.use(
     (res: AxiosResponse) => res,
     async (error: AxiosError) => {
         if (error.response?.status === 401) {
-            const user = await store.dispatch('account/getUser');
-            if (user) {
-                // Token expired or invalid, signout id_token_hint
-                await store.dispatch('account/signoutRedirect');
-            } else {
-                // id_token_hint not available, force signout and request signin
-                await store.dispatch('account/signout');
-                await store.dispatch('account/signinRedirect');
-            }
+            await store.dispatch('account/signinRedirect');
         }
         throw error;
     },

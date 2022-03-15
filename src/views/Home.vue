@@ -41,20 +41,6 @@ export default class Home extends Vue {
     // getters
     profile!: UserProfile;
 
-    async mounted() {
-        this.busy = true;
-
-        try {
-            if (!this.profile) {
-                await this.$store.dispatch('account/getProfile');
-            }
-        } catch (e) {
-            this.error = e.toString();
-        } finally {
-            this.busy = false;
-        }
-    }
-
     reset() {
         this.result = null;
     }

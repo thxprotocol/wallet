@@ -1,5 +1,9 @@
 <template>
-    <b-list-group-item v-if="token" class="d-flex justify-content-between align-items-center">
+    <b-list-group-item
+        :to="`/memberships/${membership.id}/withdrawals`"
+        v-if="token"
+        class="d-flex justify-content-between align-items-center"
+    >
         <div class="mr-auto">
             <i
                 class="fas fa-code-branch mr-2"
@@ -16,12 +20,7 @@
                 ({{ membership.pendingBalance | abbrNumber }})
             </small>
         </div>
-        <b-button
-            variant="primary"
-            size="sm"
-            :disabled="membership.network !== npid"
-            v-b-modal="`modalTransferTokens-${token.address}`"
-        >
+        <b-button variant="primary" size="sm" v-b-modal="`modalTransferTokens-${token.address}`">
             <i class="fas fa-exchange-alt ml-0 mr-md-2"></i>
             <span class="d-none d-md-inline">Transfer</span>
         </b-button>
@@ -30,76 +29,55 @@
 </template>
 
 <script lang="ts">
-import Web3 from 'web3';
-import { BLink, BAlert, BButton, BSpinner, BListGroupItem, BListGroup, BBadge } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import { ERC20 } from '@/store/modules/erc20';
 import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue';
 import { Membership } from '@/store/modules/memberships';
-import { Network } from '@/store/modules/network';
-import { NetworkProvider } from '@/utils/network';
+import { TNetworks } from '@/store/modules/network';
 
 @Component({
     components: {
-        'b-alert': BAlert,
-        'b-link': BLink,
-        'b-spinner': BSpinner,
-        'b-button': BButton,
-        'b-badge': BBadge,
-        'b-list-group': BListGroup,
-        'b-list-group-item': BListGroupItem,
         'base-modal-transfer-tokens': BaseModalTransferTokens,
     },
     computed: mapGetters({
         profile: 'account/profile',
         erc20: 'erc20/all',
-        provider: 'network/current',
+        networks: 'network/all',
     }),
 })
 export default class BaseListGroupItemToken extends Vue {
     busy = true;
-    membership: Membership | null = null;
     balance = 0;
+    token: ERC20 | null = null;
 
     // getters
     profile!: UserProfile;
-    erc20!: { [address: string]: ERC20 };
-    provider!: Network;
+    networks!: TNetworks;
 
-    @Prop() web3!: Web3;
-    @Prop() id!: string;
-    @Prop() npid!: NetworkProvider;
-
-    get token() {
-        return this.erc20[this.membership?.token?.address];
-    }
+    @Prop() membership!: Membership;
 
     async mounted() {
-        try {
-            this.membership = await this.$store.dispatch('memberships/get', this.id);
-            if (this.membership?.token) {
-                await this.$store.dispatch('erc20/get', {
-                    web3: this.web3,
-                    poolToken: this.membership.token,
+        this.$store
+            .dispatch('memberships/get', this.membership.id)
+            .then(async ({ membership }: { membership: Membership; error: Error }) => {
+                const web3 = this.networks[membership.network];
+                const { erc20 } = await this.$store.dispatch('erc20/get', {
+                    web3,
+                    membership,
                     profile: this.profile,
                 });
+                this.token = erc20;
 
-                this.getBalance(this.membership.token.address);
-            }
-        } catch (e) {
-            console.log(e);
-        }
-    }
-
-    async getBalance(address: string) {
-        const { balance } = await this.$store.dispatch('erc20/balanceOf', {
-            web3: this.web3,
-            address,
-            profile: this.profile,
-        });
-        this.balance = balance;
+                if (this.token) {
+                    const { balance } = await this.$store.dispatch('erc20/balanceOf', {
+                        token: this.token,
+                        profile: this.profile,
+                    });
+                    this.balance = balance;
+                }
+            });
     }
 }
 </script>

@@ -1,6 +1,7 @@
 import { Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
+import { NetworkProvider } from '@/utils/network';
 
 interface MembershipData {
     id: string;
@@ -12,7 +13,7 @@ interface MembershipData {
 
 export class Membership {
     id: string;
-    network: number;
+    network: NetworkProvider;
     poolAddress: string;
     token: any;
     pendingBalance: number;
@@ -84,9 +85,10 @@ class MembershipModule extends VuexModule {
 
             this.context.commit('set', r.data);
 
-            return new Membership(r.data);
+            const membership = new Membership(r.data);
+            return { membership };
         } catch (error) {
-            return { error: new Error('Unable to get membership.') };
+            return { error };
         }
     }
 }

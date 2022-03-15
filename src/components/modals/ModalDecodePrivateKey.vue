@@ -137,7 +137,7 @@ export default class ModalDecodePrivateKey extends Vue {
                     membership.poolAddress,
                     'upgradeAddress',
                     [this.tempAccount.address, this.account.address],
-                    this.tempAccount,
+                    this.tempAccount.privateKey,
                 );
 
                 if (!calldata.error) {
@@ -153,8 +153,7 @@ export default class ModalDecodePrivateKey extends Vue {
                 }
             }
         } catch (error) {
-            console.error(error);
-            this.error = error.toString();
+            this.error = String(error);
         }
     }
 }

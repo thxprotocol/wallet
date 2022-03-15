@@ -17,7 +17,7 @@ Vue.use(VueRouter);
 const routes: Array<RouteConfig> = [
     {
         path: '/',
-        redirect: '/pools',
+        redirect: '/memberships',
     },
     {
         path: '/reset',
@@ -61,21 +61,33 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/UserAgentWarning.vue'),
     },
     {
-        path: '/memberships/:id',
-        name: 'Membership',
-        component: () => import('../views/Pool.vue'),
-        beforeEnter: assertAuthorization,
-    },
-    {
         path: '/wallet',
         name: 'Wallet',
         component: () => import('../views/Wallet.vue'),
         beforeEnter: assertAuthorization,
     },
     {
-        path: '/pools',
+        path: '/memberships',
         name: 'Pools',
-        component: () => import('../views/Pools.vue'),
+        component: () => import('../views/Memberships.vue'),
+        beforeEnter: assertAuthorization,
+    },
+    {
+        path: '/memberships/:id',
+        name: 'Promotions',
+        component: () => import('../views/memberships/Promotions.vue'),
+        beforeEnter: assertAuthorization,
+    },
+    {
+        path: '/memberships/:id/promotions',
+        name: 'Promotions',
+        component: () => import('../views/memberships/Promotions.vue'),
+        beforeEnter: assertAuthorization,
+    },
+    {
+        path: '/memberships/:id/withdrawals',
+        name: 'Withdrawals',
+        component: () => import('../views/memberships/Withdrawals.vue'),
         beforeEnter: assertAuthorization,
     },
 ];

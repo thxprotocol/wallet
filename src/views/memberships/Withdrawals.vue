@@ -27,7 +27,7 @@
                 :total-rows="total"
                 align="fill"
             ></b-pagination>
-            <b-button block variant="dark" to="/pools" class="mt-3">
+            <b-button block variant="dark" to="/memberships" class="mt-3">
                 Back
             </b-button>
         </div>
@@ -35,38 +35,24 @@
 </template>
 
 <script lang="ts">
-import Web3 from 'web3';
-import { Component, Vue, Prop } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { BAlert, BBadge, BButton, BJumbotron, BListGroup, BListGroupItem, BPagination, BSpinner } from 'bootstrap-vue';
 import { UserProfile } from '@/store/modules/account';
 import { IWithdrawals, Withdrawal } from '@/store/modules/withdrawals';
-import { NetworkProvider } from '@/utils/network';
-import { IMemberships, Membership } from '@/store/modules/memberships';
+import { Membership } from '@/store/modules/memberships';
 import BaseListGroupItemWithdrawal from '@/components/BaseListGroupItemWithdrawal.vue';
 
 @Component({
-    name: 'PoolView',
     components: {
-        'b-jumbotron': BJumbotron,
-        'b-alert': BAlert,
-        'b-button': BButton,
-        'b-badge': BBadge,
-        'b-spinner': BSpinner,
-        'b-list-group': BListGroup,
-        'b-list-group-item': BListGroupItem,
         BaseListGroupItemWithdrawal,
-        BPagination,
     },
     computed: mapGetters({
-        web3: 'network/web3',
         profile: 'account/profile',
-        privateKey: 'account/privateKey',
         memberships: 'memberships/all',
         withdrawals: 'withdrawals/all',
     }),
 })
-export default class PoolView extends Vue {
+export default class MembershipWithdrawalsView extends Vue {
     busy = false;
     error = '';
     currentPage = 1;
@@ -75,56 +61,35 @@ export default class PoolView extends Vue {
     membership: Membership | null = null;
 
     // getters
-    memberships!: IMemberships;
     profile!: UserProfile;
     withdrawals!: IWithdrawals;
-    privateKey!: string;
-    web3!: Web3;
-
-    @Prop() npid!: NetworkProvider;
 
     get filteredWithdrawals() {
         if (!this.withdrawals[this.$router.currentRoute.params.id]) return [];
-
         return Object.values(this.withdrawals[this.$router.currentRoute.params.id]).filter(
             (w: Withdrawal) => w.page === this.currentPage,
         );
     }
 
-    async onChange(page: number) {
+    async onChange(membership: Membership, page: number) {
         const { pagination, error } = await this.$store.dispatch('withdrawals/filter', {
             profile: this.profile,
-            membership: this.membership,
+            membership,
             page,
             limit: this.perPage,
             state: 0, // 0 = Pending, 1 = Withdrawn
         });
-
         this.total = pagination?.total;
         this.error = error;
     }
 
     async mounted() {
-        this.busy = true;
-
-        try {
-            await this.$store.dispatch('account/getProfile');
-
-            this.membership = await this.$store.dispatch('memberships/get', this.$route.params.id);
-
-            if (this.membership) {
-                await this.$store.dispatch('network/setNetwork', {
-                    npid: this.membership.network,
-                    privateKey: this.privateKey,
-                });
-
-                await this.onChange(this.currentPage);
-            }
-        } catch (error) {
-            this.error = (error as Error).toString();
-        } finally {
-            this.busy = false;
-        }
+        this.$store
+            .dispatch('memberships/get', this.$route.params.id)
+            .then(async ({ membership }: { membership: Membership; error: Error }) => {
+                this.membership = membership;
+                await this.onChange(membership, this.currentPage);
+            });
     }
 }
 </script>

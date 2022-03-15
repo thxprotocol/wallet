@@ -2,14 +2,13 @@
     <div class="" v-if="profile">
         <b-alert show variant="danger" v-if="error">{{ error }}</b-alert>
         <b-alert show variant="info" dismissible @dismissed="info = ''" v-if="info">{{ info }}</b-alert>
-        <b-list-group v-if="web3">
+        <b-list-group>
             <b-list-group-item class="text-center" v-if="busy">
                 <b-spinner variant="primary" />
             </b-list-group-item>
             <template v-if="!busy">
                 <base-list-group-item-asset-pool
-                    :id="membership.id"
-                    :npid="npid"
+                    :membership="membership"
                     :key="membership.id"
                     v-for="membership of memberships"
                 />
@@ -21,11 +20,9 @@
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { User } from 'oidc-client';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BaseListGroupItemAssetPool from '@/components/BaseListGroupItemAssetPool.vue';
-import { NetworkProvider } from '@/utils/network';
-import Web3 from 'web3';
 import { Membership } from '@/store/modules/memberships';
 
 @Component({
@@ -34,10 +31,7 @@ import { Membership } from '@/store/modules/memberships';
         'base-list-group-item-asset-pool': BaseListGroupItemAssetPool,
     },
     computed: mapGetters({
-        user: 'account/user',
         profile: 'account/profile',
-        privateKey: 'account/privateKey',
-        web3: 'network/web3',
         memberships: 'memberships/all',
     }),
 })
@@ -51,9 +45,6 @@ export default class PoolsView extends Vue {
     profile!: UserProfile;
     privateKey!: string;
     memberships!: { [id: string]: Membership };
-    web3!: Web3;
-
-    @Prop() npid!: NetworkProvider;
 
     onCopy(e: any) {
         this.info = 'You just copied: ' + e.text;
@@ -67,8 +58,6 @@ export default class PoolsView extends Vue {
         this.busy = true;
 
         try {
-            await this.$store.dispatch('account/getProfile');
-            await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
             await this.$store.dispatch('memberships/getAll');
         } catch (error) {
             this.error = (error as Error).message;

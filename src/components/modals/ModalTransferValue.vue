@@ -30,12 +30,11 @@
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { ERC20 } from '@/store/modules/erc20';
-import { Network } from '@/store/modules/network';
+import { TNetworks } from '@/store/modules/network';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput, BFormGroup } from 'bootstrap-vue';
 import { User } from 'oidc-client';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import Web3 from 'web3';
 
 @Component({
     components: {
@@ -48,10 +47,9 @@ import Web3 from 'web3';
         'b-button': BButton,
     },
     computed: mapGetters({
-        web3: 'network/web3',
         user: 'account/user',
         profile: 'account/profile',
-        provider: 'network/current',
+        networks: 'network/all',
         privateKey: 'account/privateKey',
     }),
 })
@@ -62,9 +60,8 @@ export default class BaseModalTranferValue extends Vue {
     to = '';
 
     // getters
-    web3!: Web3;
+    networks!: TNetworks;
     user!: User;
-    provider!: Network;
     profile!: UserProfile;
 
     @Prop() token!: ERC20;
@@ -74,7 +71,7 @@ export default class BaseModalTranferValue extends Vue {
 
         try {
             const { error } = await this.$store.dispatch('network/sendValue', {
-                web3: this.web3,
+                networks: this.networks,
                 to: this.to,
                 amount: this.amount,
             });
@@ -86,7 +83,10 @@ export default class BaseModalTranferValue extends Vue {
             this.amount = 0;
             this.to = '';
 
-            await this.$store.dispatch('network/getGasToken', { web3: this.web3, address: this.profile.address });
+            await this.$store.dispatch('network/getGasToken', {
+                networks: this.networks,
+                address: this.profile.address,
+            });
         } catch (e) {
             this.error = e.toString();
         } finally {

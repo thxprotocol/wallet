@@ -5,7 +5,22 @@
                 <b-button to="/" variant="link" class="pl-0 mr-auto mr-md-0">
                     <img :src="require('@/assets/img/logo.png')" height="32" alt="" />
                 </b-button>
-                <base-network-select :npid="npid" @change="onChangeNetwork($event)" />
+                <base-network-select />
+                <div class="d-none d-md-flex flex-grow-1 justify-content-center">
+                    <b-button-group size="md" class="mx-auto">
+                        <b-button
+                            to="/wallet"
+                            :variant="$router.currentRoute.path === '/wallet' ? 'secondary' : 'darker'"
+                            >Wallet</b-button
+                        >
+                        <b-button
+                            to="/memberships"
+                            :variant="$router.currentRoute.path === '/memberships' ? 'secondary' : 'darker'"
+                        >
+                            Pools
+                        </b-button>
+                    </b-button-group>
+                </div>
                 <base-dropdown-account class="ml-2 ml-md-auto" />
                 <base-dropdown-menu class="ml-2" />
             </header>
@@ -47,12 +62,6 @@ export default class App extends Vue {
     // getters
     profile!: UserProfile;
     privateKey!: string;
-
-    async onChangeNetwork(npid: NetworkProvider) {
-        this.npid = npid;
-        await this.$store.dispatch('account/getProfile');
-        await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
-    }
 
     created() {
         if (process.env.VUE_APP_GTM) {

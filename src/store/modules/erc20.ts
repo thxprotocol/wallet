@@ -3,9 +3,10 @@ import Web3 from 'web3';
 import Artifacts from '@/utils/artifacts';
 import { Contract } from 'web3-eth-contract';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
-import { getERC20Contract, NetworkProvider, send } from '@/utils/network';
+import { NetworkProvider } from '@/utils/network';
 import { fromWei, toWei, toChecksumAddress } from 'web3-utils';
 import { UserProfile } from './account';
+import { Membership } from './memberships';
 
 export interface ERC20Token {
     network: NetworkProvider;
@@ -44,18 +45,22 @@ class ERC20Module extends VuexModule {
     }
 
     @Action
-    async get({ web3, poolToken }: { web3: Web3; poolToken: any }) {
+    async get({ web3, membership }: { web3: Web3; membership: Membership }) {
         try {
-            const contract = new web3.eth.Contract(Artifacts.IERC20.abi as any, toChecksumAddress(poolToken.address));
+            const contract = new web3.eth.Contract(
+                Artifacts.IERC20.abi as any,
+                toChecksumAddress(membership.token.address),
+            );
             const erc20 = new ERC20({
-                address: poolToken.address,
+                address: membership.token.address,
                 contract,
-                name: poolToken.name,
-                symbol: poolToken.symbol,
-                totalSupply: poolToken.totalSupply,
-                balance: poolToken.balance,
+                name: membership.token.name,
+                symbol: membership.token.symbol,
+                totalSupply: membership.token.totalSupply,
+                balance: membership.token.balance,
             });
             this.context.commit('set', erc20);
+
             return { erc20 };
         } catch (error) {
             return { error };
@@ -63,101 +68,50 @@ class ERC20Module extends VuexModule {
     }
 
     @Action
-    async balanceOf({ web3, address, profile }: { web3: Web3; address: string; profile: UserProfile }) {
+    async balanceOf({ token, profile }: { token: ERC20; profile: UserProfile }) {
         try {
-            const abi: any = Artifacts.IERC20.abi;
-            const contract = new web3.eth.Contract(abi, address);
-            return { balance: fromWei(await contract.methods.balanceOf(profile.address).call()) };
+            const wei = await token.contract.methods.balanceOf(profile.address).call();
+
+            return { balance: fromWei(wei) };
         } catch (error) {
             return { error };
         }
     }
 
     @Action
-    async updateBalance({ web3, address, profile }: { web3: Web3; address: string; profile: UserProfile }) {
+    async allowance({ token, owner, spender }: { token: ERC20; owner: string; spender: string }) {
         try {
-            const erc20 = this.context.getters['all'][address];
-            const abi: any = Artifacts.IERC20.abi;
-            const contract = new web3.eth.Contract(abi, address);
+            const wei = await token.contract.methods.allowance(owner, spender).call();
 
-            erc20.balance = fromWei(await contract.methods.balanceOf(profile.address).call());
-
-            this.context.commit('set', erc20);
+            return { allowance: fromWei(wei, 'ether') };
         } catch (error) {
-            console.log(error);
+            throw { error };
         }
     }
 
     @Action
-    async allowance({
-        web3,
-        tokenAddress,
-        owner,
-        spender,
-        privateKey,
-    }: {
-        web3: Web3;
-        tokenAddress: string;
-        owner: string;
-        spender: string;
-        privateKey: string;
-    }) {
+    async approve({ token, to, amount }: { token: ERC20; to: string; amount: string }) {
         try {
-            const contract: any = getERC20Contract(web3, tokenAddress);
-            const from = web3.eth.accounts.privateKeyToAccount(privateKey).address;
-            const wei = await contract.methods.allowance(owner, spender).call({ from });
+            console.log('approved owner', token.contract.defaultAccount);
+            console.log('approved spender', to);
 
-            return fromWei(wei, 'ether');
-        } catch (error) {
-            throw new Error(String(error));
-        }
-    }
-
-    @Action
-    async approve({
-        web3,
-        tokenAddress,
-        to,
-        amount,
-        privateKey,
-    }: {
-        web3: Web3;
-        tokenAddress: string;
-        to: string;
-        amount: string;
-        privateKey: string;
-    }) {
-        try {
-            const contract: any = getERC20Contract(web3, tokenAddress);
-            const wei = toWei(amount);
-            const tx = await send(web3, contract, contract.methods.approve(to, wei), privateKey);
+            const fn = token.contract.methods.approve(to, amount);
+            const gas = await fn.estimateGas();
+            const tx = await fn.send({ gas, from: token.contract.defaultAccount });
 
             return { tx };
         } catch (error) {
-            return {
-                error,
-            };
+            return { error };
         }
     }
 
     @Action
-    async transfer({
-        web3,
-        tokenAddress,
-        to,
-        amount,
-        privateKey,
-    }: {
-        web3: Web3;
-        tokenAddress: string;
-        to: string;
-        amount: string;
-        privateKey: string;
-    }) {
+    async transfer({ token, to, amount }: { token: ERC20; to: string; amount: string }) {
         try {
-            const contract: any = getERC20Contract(web3, tokenAddress);
             const wei = toWei(amount);
-            const tx = await send(web3, contract, contract.methods.transfer(to, wei), privateKey);
+            const fn = token.contract.methods.transfer(to, wei);
+            const gas = await fn.estimateGas();
+            const tx = await fn.send({ gas, from: token.contract.defaultAccount });
 
             return { tx };
         } catch (error) {

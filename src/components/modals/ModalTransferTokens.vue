@@ -30,11 +30,12 @@
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { ERC20 } from '@/store/modules/erc20';
+import { Membership } from '@/store/modules/memberships';
+import { TNetworks } from '@/store/modules/network';
+import { NetworkProvider } from '@/utils/network';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput, BFormGroup } from 'bootstrap-vue';
-import { User } from 'oidc-client';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import Web3 from 'web3';
 
 @Component({
     name: 'ModalDepositPool',
@@ -48,8 +49,7 @@ import Web3 from 'web3';
         'b-button': BButton,
     },
     computed: mapGetters({
-        web3: 'network/web3',
-        user: 'account/user',
+        networks: 'network/all',
         profile: 'account/profile',
         privateKey: 'account/privateKey',
     }),
@@ -61,21 +61,24 @@ export default class BaseModalTranferTokens extends Vue {
     to = '';
 
     // getters
-    web3!: Web3;
-    user!: User;
+    networks!: TNetworks;
     profile!: UserProfile;
     privateKey!: string;
 
+    @Prop() membership!: Membership;
     @Prop() token!: ERC20;
 
     async getBalances() {
         try {
             await this.$store.dispatch('erc20/get', {
-                web3: this.web3,
+                networks: this.networks,
                 poolToken: this.token,
                 profile: this.profile,
             });
-            await this.$store.dispatch('network/getGasToken', { web3: this.web3, address: this.profile.address });
+            await this.$store.dispatch('network/getGasToken', {
+                networks: this.networks,
+                address: this.profile.address,
+            });
         } catch (e) {
             this.error = 'Could not get pool token balances.';
             console.log(e);
@@ -86,8 +89,9 @@ export default class BaseModalTranferTokens extends Vue {
         this.busy = true;
 
         try {
+            const web3 = this.networks[this.membership.network as NetworkProvider];
             const { error } = await this.$store.dispatch('erc20/approve', {
-                web3: this.web3,
+                web3,
                 tokenAddress: this.token.address,
                 to: this.to,
                 amount: this.amount,
@@ -96,7 +100,7 @@ export default class BaseModalTranferTokens extends Vue {
 
             if (!error) {
                 const { error } = await this.$store.dispatch('erc20/transfer', {
-                    web3: this.web3,
+                    web3,
                     tokenAddress: this.token.address,
                     to: this.to,
                     amount: this.amount,

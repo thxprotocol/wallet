@@ -1,19 +1,20 @@
 import Web3 from 'web3';
-import { fromWei, isAddress } from 'web3-utils';
+import { isAddress } from 'web3-utils';
 import Artifacts from '@/utils/artifacts';
 import { Contract } from 'web3-eth-contract';
 import { soliditySha3 } from 'web3-utils';
-import { Account } from 'web3-core/types/index';
 
 export const MINIMUM_GAS_LIMIT = 54680;
+export const MAX_UINT256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
 export enum NetworkProvider {
     Test = 0,
     Main = 1,
 }
 
-export async function signCall(web3: Web3, poolAddress: string, name: string, params: any[], account: Account) {
+export async function signCall(web3: Web3, poolAddress: string, name: string, params: any[], privateKey: string) {
     try {
+        const account = web3.eth.accounts.privateKeyToAccount(privateKey);
         const solution = new web3.eth.Contract(Artifacts.IDefaultDiamond.abi as any, poolAddress, {
             from: account.address,
         });
@@ -77,16 +78,6 @@ export function isValidKey(privateKey: string) {
     } catch (e) {
         return false;
     }
-}
-
-export async function getGasToken(web3: Web3, address: string) {
-    const balanceInWei = await web3.eth.getBalance(address);
-
-    return {
-        name: 'Matic Token',
-        symbol: 'MATIC',
-        balance: fromWei(balanceInWei),
-    };
 }
 
 export function isPrivateKey(privateKey: string) {

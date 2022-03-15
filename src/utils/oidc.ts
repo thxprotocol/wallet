@@ -11,5 +11,5 @@ export const config: any = {
     silent_redirect_uri: `${BASE_URL}/silent-renew`, // eslint-disable-line @typescript-eslint/camelcase
     automaticSilentRenew: true,
     loadUserInfo: false,
-    scope: 'openid user',
+    scope: 'openid user deposits:read deposits:write',
 };

@@ -69,7 +69,6 @@
 </template>
 
 <script lang="ts">
-import Web3 from 'web3';
 import { BLink, BAlert, BButton, BSpinner, BListGroupItem, BListGroup, BBadge } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
@@ -89,7 +88,6 @@ import { format } from 'date-fns';
         'b-list-group-item': BListGroupItem,
     },
     computed: mapGetters({
-        web3: 'network/web3',
         profile: 'account/profile',
         privateKey: 'account/privateKey',
         memberships: 'memberships/all',
@@ -105,7 +103,6 @@ export default class BaseListGroupItemWithdrawal extends Vue {
     // getters
     profile!: UserProfile;
     privateKey!: string;
-    web3!: Web3;
 
     @Prop() withdrawal!: Withdrawal;
     @Prop() membership!: Membership;
