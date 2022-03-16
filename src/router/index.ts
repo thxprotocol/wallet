@@ -74,20 +74,20 @@ const routes: Array<RouteConfig> = [
     },
     {
         path: '/memberships/:id',
-        name: 'Promotions',
-        component: () => import('../views/memberships/Promotions.vue'),
-        beforeEnter: assertAuthorization,
-    },
-    {
-        path: '/memberships/:id/promotions',
-        name: 'Promotions',
-        component: () => import('../views/memberships/Promotions.vue'),
+        name: 'Withdrawals',
+        component: () => import('../views/memberships/Withdrawals.vue'),
         beforeEnter: assertAuthorization,
     },
     {
         path: '/memberships/:id/withdrawals',
         name: 'Withdrawals',
         component: () => import('../views/memberships/Withdrawals.vue'),
+        beforeEnter: assertAuthorization,
+    },
+    {
+        path: '/memberships/:id/promotions',
+        name: 'Promotions',
+        component: () => import('../views/memberships/Promotions.vue'),
         beforeEnter: assertAuthorization,
     },
 ];
