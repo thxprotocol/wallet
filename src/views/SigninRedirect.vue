@@ -18,7 +18,7 @@
             <span class="text-muted">{{ info }}</span>
         </template>
         <modal-show-withdrawal @redirect="redirect()" :withdrawal="withdrawal" v-if="withdrawal" />
-        <modal-decode-private-key :web3="web3" @init="redirect()" />
+        <modal-decode-private-key @init="redirect()" />
     </div>
 </template>
 

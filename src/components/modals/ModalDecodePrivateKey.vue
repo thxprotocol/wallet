@@ -48,12 +48,13 @@
 import Web3 from 'web3';
 import { UserProfile } from '@/store/modules/account';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { isPrivateKey, signCall } from '@/utils/network';
+import { isPrivateKey, NetworkProvider, signCall } from '@/utils/network';
 import { Account } from 'web3-core/types/index';
 import { decryptString } from '@/utils/decrypt';
 import { IMemberships, Membership } from '@/store/modules/memberships';
+import { TNetworks } from '@/store/modules/network';
 
 @Component({
     name: 'ModalDecodePrivateKey',
@@ -79,15 +80,16 @@ export default class ModalDecodePrivateKey extends Vue {
 
     tempAccount: Account | null = null;
     account: Account | null = null;
-
-    @Prop() web3!: Web3;
+    web3!: Web3;
 
     // getters
     profile!: UserProfile;
     privateKey!: string;
     memberships!: IMemberships;
+    networks!: TNetworks;
 
     onShow() {
+        this.web3 = this.networks[NetworkProvider.Main];
         this.account = this.web3.eth.accounts.privateKeyToAccount(this.privateKey) as any;
         this.busy = false;
     }
