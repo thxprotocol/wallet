@@ -8,6 +8,7 @@ import {
     redirectPasswordResetLink,
     redirectSignin,
     redirectSigninSilent,
+    redirectAccount,
     redirectSignout,
     redirectSignup,
 } from '@/utils/guards';
@@ -46,6 +47,10 @@ const routes: Array<RouteConfig> = [
     {
         path: '/signup',
         beforeEnter: redirectSignup,
+    },
+    {
+        path: '/setting',
+        beforeEnter: redirectAccount,
     },
     {
         path: '/signout',
