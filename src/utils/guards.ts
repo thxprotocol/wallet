@@ -36,8 +36,8 @@ export function redirectSignout() {
     return store.dispatch('account/signoutRedirect');
 }
 
-export function redirectAccount() {
-    return store.dispatch('account/accountRedirect');
+export function redirectAccount(to: Route, from: Route) {
+    return store.dispatch('account/accountRedirect', from.path);
 }
 
 export function redirectSigninSilent() {

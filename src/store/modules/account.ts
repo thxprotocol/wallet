@@ -196,10 +196,10 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    async accountRedirect() {
+    async accountRedirect(path: string) {
         try {
             await this.userManager.signinRedirect({
-                extraQueryParams: { prompt: 'account-settings', return_url: BASE_URL + '/integrations' },
+                extraQueryParams: { prompt: 'account-settings', return_url: BASE_URL + path },
             });
         } catch (e) {
             return e;

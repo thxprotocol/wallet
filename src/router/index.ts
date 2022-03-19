@@ -49,7 +49,7 @@ const routes: Array<RouteConfig> = [
         beforeEnter: redirectSignup,
     },
     {
-        path: '/setting',
+        path: '/account',
         beforeEnter: redirectAccount,
     },
     {
