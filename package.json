@@ -53,7 +53,7 @@
         "lint": "vue-cli-service lint"
     },
     "dependencies": {
-        "@thxnetwork/artifacts": "^1.0.7",
+        "@thxnetwork/artifacts": "^2.0.0",
         "@toruslabs/customauth": "^6.0.1",
         "axios": "^0.21.2",
         "bootstrap": "^4.6.0",
@@ -72,7 +72,6 @@
         "web3": "^1.7.0"
     },
     "devDependencies": {
-        "@openzeppelin/contracts": "^4.4.2",
         "@types/chai": "^4.2.11",
         "@types/mocha": "^5.2.4",
         "@typescript-eslint/eslint-plugin": "^2.33.0",
