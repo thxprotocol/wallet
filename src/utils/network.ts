@@ -1,8 +1,8 @@
 import Web3 from 'web3';
 import { isAddress } from 'web3-utils';
-import Artifacts from '@/utils/artifacts';
 import { Contract } from 'web3-eth-contract';
 import { soliditySha3 } from 'web3-utils';
+import { contractConfig, diamondAbi } from '@thxnetwork/artifacts';
 
 export const MINIMUM_GAS_LIMIT = 54680;
 export const MAX_UINT256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
@@ -15,10 +15,10 @@ export enum NetworkProvider {
 export async function signCall(web3: Web3, poolAddress: string, name: string, params: any[], privateKey: string) {
     try {
         const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-        const solution = new web3.eth.Contract(Artifacts.IDefaultDiamond.abi as any, poolAddress, {
+        const solution = new web3.eth.Contract(diamondAbi('hardhat', 'defaultPool') as any, poolAddress, {
             from: account.address,
         });
-        const abi: any = Artifacts.IDefaultDiamond.abi.find(fn => fn.name === name);
+        const abi: any = diamondAbi('hardhat', 'defaultPool').find(fn => fn.name === name);
         const nonce = Number(await solution.methods.getLatestNonce(account.address).call()) + 1;
         const call = web3.eth.abi.encodeFunctionCall(abi, params);
         const hash = soliditySha3(call, nonce) || '';
@@ -60,12 +60,12 @@ export async function send(web3: Web3, contract: Contract, fn: any, privateKey: 
 }
 
 export function getERC20Contract(web3: Web3, address: string) {
-    const abi: any = Artifacts.IERC20.abi;
+    const abi = contractConfig('hardhat', 'TokenLimitedSupply').abi;
     return new web3.eth.Contract(abi, address);
 }
 
 export function getAssetPoolContract(web3: Web3, address: string) {
-    const abi: any = Artifacts.IDefaultDiamond.abi;
+    const abi = diamondAbi('hardhat', 'defaultPool');
     return new web3.eth.Contract(abi, address);
 }
 
