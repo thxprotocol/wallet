@@ -1,0 +1,20 @@
+name: CI
+
+on: push
+
+jobs:
+    build:
+        name: CI Pipeline
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v2
+              with:
+                  submodules: true
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build distribution
+              run: npm run build
