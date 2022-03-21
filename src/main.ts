@@ -6,7 +6,6 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import Web3 from 'web3';
 import { BootstrapVue, ModalPlugin, ToastPlugin, VBTooltip } from 'bootstrap-vue';
 import './main.scss';
-import './registerServiceWorker';
 import VueClipboard from 'vue-clipboard2';
 import { fromWei } from 'web3-utils';
 
