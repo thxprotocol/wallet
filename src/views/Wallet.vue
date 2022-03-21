@@ -1,11 +1,8 @@
 <template>
     <div v-if="profile">
-        <b-list-group v-if="web3">
-            <base-list-group-item-gas-token />
+        <b-list-group>
             <base-list-group-item-token
-                :web3="web3"
-                :id="membership.id"
-                :npid="npid"
+                :membership="membership"
                 :key="membership.id"
                 v-for="membership in memberships"
             />
@@ -14,22 +11,18 @@
 </template>
 
 <script lang="ts">
-import Web3 from 'web3';
 import BaseListGroupItemToken from '@/components/BaseListGroupItemToken.vue';
-import BaseListGroupItemGasToken from '@/components/BaseListGroupItemGasToken.vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { UserProfile } from '@/store/modules/account';
 import { NetworkProvider } from '@/utils/network';
 import { IMemberships } from '@/store/modules/memberships';
+import { UserProfile } from '@/store/modules/account';
 
 @Component({
     components: {
         'base-list-group-item-token': BaseListGroupItemToken,
-        'base-list-group-item-gas-token': BaseListGroupItemGasToken,
     },
     computed: mapGetters({
-        web3: 'network/web3',
         profile: 'account/profile',
         privateKey: 'account/privateKey',
         memberships: 'memberships/all',
@@ -41,23 +34,11 @@ export default class Wallet extends Vue {
 
     @Prop() npid!: NetworkProvider;
 
-    web3!: Web3;
-    profile!: UserProfile;
-    privateKey!: string;
     memberships!: IMemberships;
+    profile!: UserProfile;
 
     async mounted() {
-        this.busy = true;
-
-        try {
-            await this.$store.dispatch('account/getProfile');
-            await this.$store.dispatch('network/setNetwork', { npid: this.npid, privateKey: this.privateKey });
-            await this.$store.dispatch('memberships/getAll');
-        } catch (error) {
-            this.error = (error as Error).toString();
-        } finally {
-            this.busy = false;
-        }
+        await this.$store.dispatch('memberships/getAll');
     }
 }
 </script>

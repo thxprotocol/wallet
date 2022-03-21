@@ -1,95 +1,105 @@
-import store from '@/store';
 import Vue from 'vue';
 import VueRouter, { RouteConfig } from 'vue-router';
+import {
+    assertAuthorization,
+    assertUserAgent,
+    redirectConfirmationLink,
+    redirectLoginLink,
+    redirectPasswordResetLink,
+    redirectSignin,
+    redirectSigninSilent,
+    redirectAccount,
+    redirectSignout,
+    redirectSignup,
+} from '@/utils/guards';
 
 Vue.use(VueRouter);
 
 const routes: Array<RouteConfig> = [
     {
         path: '/',
-        redirect: '/wallet',
+        redirect: '/memberships',
+    },
+    {
+        path: '/reset',
+        beforeEnter: redirectPasswordResetLink,
+    },
+    {
+        path: '/verify',
+        beforeEnter: redirectConfirmationLink,
+    },
+    {
+        path: '/login',
+        beforeEnter: redirectLoginLink,
+    },
+    {
+        path: '/claim',
+        beforeEnter: assertUserAgent,
+    },
+    {
+        path: '/silent-renew',
+        beforeEnter: redirectSigninSilent,
+    },
+    {
+        path: '/signin',
+        beforeEnter: redirectSignin,
+    },
+    {
+        path: '/signup',
+        beforeEnter: redirectSignup,
+    },
+    {
+        path: '/account',
+        beforeEnter: redirectAccount,
+    },
+    {
+        path: '/signout',
+        beforeEnter: redirectSignout,
     },
     {
         path: '/signin-oidc',
         component: () => import('../views/SigninRedirect.vue'),
     },
     {
-        path: '/silent-renew',
-        component: () => import('../views/SilentRenew.vue'),
-    },
-    {
-        path: '/signin',
-        component: () => import('../views/Signin.vue'),
-    },
-    {
-        path: '/signup',
-        name: 'Signup',
-        component: () => import('../views/Signup.vue'),
-    },
-    {
-        path: '/signout',
-        component: () => import('../views/Signout.vue'),
-    },
-    {
-        path: '/verify',
-        meta: {
-            requiresAuth: true,
-        },
-    },
-    {
-        path: '/memberships/:id',
-        name: 'Membership',
-        component: () => import('../views/Pool.vue'),
-        meta: {
-            requiresAuth: true,
-        },
+        path: '/user-agent-warning',
+        name: 'Warning',
+        component: () => import('../views/UserAgentWarning.vue'),
     },
     {
         path: '/wallet',
         name: 'Wallet',
         component: () => import('../views/Wallet.vue'),
-        meta: {
-            requiresAuth: true,
-        },
+        beforeEnter: assertAuthorization,
     },
     {
-        path: '/account',
+        path: '/memberships',
         name: 'Pools',
-        component: () => import('../views/Account.vue'),
-        meta: {
-            requiresAuth: true,
-        },
+        component: () => import('../views/Memberships.vue'),
+        beforeEnter: assertAuthorization,
+    },
+    {
+        path: '/memberships/:id',
+        name: 'Withdrawals',
+        component: () => import('../views/memberships/Withdrawals.vue'),
+        beforeEnter: assertAuthorization,
+    },
+    {
+        path: '/memberships/:id/withdrawals',
+        name: 'Withdrawals',
+        component: () => import('../views/memberships/Withdrawals.vue'),
+        beforeEnter: assertAuthorization,
+    },
+    {
+        path: '/memberships/:id/promotions',
+        name: 'Promotions',
+        component: () => import('../views/memberships/Promotions.vue'),
+        beforeEnter: assertAuthorization,
     },
 ];
 
 const router = new VueRouter({
     mode: 'history',
     routes,
-});
-
-router.beforeEach(async (to, from, next) => {
-    const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-
-    if (to.query.passwordResetToken || to.query.hash || to.query.authentication_token) {
-        await store.dispatch('account/signinRedirect', {
-            passwordResetToken: to.query.passwordResetToken || null,
-            rewardHash: to.query.hash || null,
-            token: to.query.authentication_token || null,
-            key: to.query.secure_key || null,
-        });
-    }
-
-    try {
-        const user = await store.dispatch('account/getUser');
-
-        if (requiresAuth && !user) {
-            await store.dispatch('account/signinRedirect', { signupToken: to.query.signup_token || null });
-        } else {
-            return next();
-        }
-    } catch (err) {
-        console.error(err);
-    }
 });
 
 export default router;

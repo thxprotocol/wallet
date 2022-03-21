@@ -20,45 +20,23 @@
             </span>
         </template>
         <b-dropdown-item size="sm" variant="dark" v-clipboard:copy="profile.address">
-            <span class="text-muted"> <i class="fas fa-copy mr-3"></i>Copy address </span>
-        </b-dropdown-item>
-        <b-dropdown-divider />
-        <b-dropdown-item to="/wallet">
-            Wallet
-        </b-dropdown-item>
-        <b-dropdown-item to="/account">
-            Pools
-        </b-dropdown-item>
-        <b-dropdown-divider />
-        <b-dropdown-item to="/signout">
-            Logout
+            <span class="text-muted"> <i class="fas fa-clipboard mr-3"></i>Copy address </span>
         </b-dropdown-item>
     </b-dropdown>
 </template>
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
-import { BDropdown, BDropdownDivider, BDropdownItem } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 
 @Component({
-    name: 'BaseNetworkSelect',
-    components: {
-        BDropdown,
-        BDropdownItem,
-        BDropdownDivider,
-    },
+    name: 'BaseDropdownAccount',
     computed: mapGetters({
         profile: 'account/profile',
     }),
 })
 export default class BaseDropdownAccount extends Vue {
     profile!: UserProfile;
-
-    async mounted() {
-        const { result, error } = await this.$store.dispatch('account/getProfile');
-        if (!result && error?.response?.status === 401) this.$router.push('/signin');
-    }
 }
 </script>

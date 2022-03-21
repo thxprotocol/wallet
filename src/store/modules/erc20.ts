@@ -1,11 +1,12 @@
 import Vue from 'vue';
 import Web3 from 'web3';
 import Artifacts from '@/utils/artifacts';
-import Contract from 'web3/eth/contract';
+import { Contract } from 'web3-eth-contract';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
-import { getERC20Contract, NetworkProvider, send } from '@/utils/network';
-import { fromWei, toWei } from 'web3-utils';
+import { NetworkProvider } from '@/utils/network';
+import { fromWei, toWei, toChecksumAddress } from 'web3-utils';
 import { UserProfile } from './account';
+import { Membership } from './memberships';
 
 export interface ERC20Token {
     network: NetworkProvider;
@@ -44,19 +45,22 @@ class ERC20Module extends VuexModule {
     }
 
     @Action
-    async get({ web3, address, profile }: { web3: Web3; address: string; profile: UserProfile }) {
+    async get({ web3, membership }: { web3: Web3; membership: Membership }) {
         try {
-            const abi: any = Artifacts.ERC20.abi;
-            const contract = new web3.eth.Contract(abi, address);
+            const contract = new web3.eth.Contract(
+                Artifacts.IERC20.abi as any,
+                toChecksumAddress(membership.token.address),
+            );
             const erc20 = new ERC20({
-                address,
+                address: membership.token.address,
                 contract,
-                name: await contract.methods.name().call(),
-                symbol: await contract.methods.symbol().call(),
-                balance: fromWei(await contract.methods.balanceOf(profile.address).call()),
-                totalSupply: await contract.methods.totalSupply().call(),
+                name: membership.token.name,
+                symbol: membership.token.symbol,
+                totalSupply: membership.token.totalSupply,
+                balance: membership.token.balance,
             });
             this.context.commit('set', erc20);
+
             return { erc20 };
         } catch (error) {
             return { error };
@@ -64,65 +68,50 @@ class ERC20Module extends VuexModule {
     }
 
     @Action
-    async updateBalance({ web3, address, profile }: { web3: Web3; address: string; profile: UserProfile }) {
+    async balanceOf({ token, profile }: { token: ERC20; profile: UserProfile }) {
         try {
-            const erc20 = this.context.getters['all'][address];
-            const abi: any = Artifacts.ERC20.abi;
-            const contract = new web3.eth.Contract(abi, address);
+            const wei = await token.contract.methods.balanceOf(profile.address).call();
 
-            erc20.balance = fromWei(await contract.methods.balanceOf(profile.address).call());
-
-            this.context.commit('set', erc20);
+            return { balance: fromWei(wei) };
         } catch (error) {
-            console.log(error);
+            return { error };
         }
     }
 
     @Action
-    async approve({
-        web3,
-        tokenAddress,
-        to,
-        amount,
-        privateKey,
-    }: {
-        web3: Web3;
-        tokenAddress: string;
-        to: string;
-        amount: string;
-        privateKey: string;
-    }) {
+    async allowance({ token, owner, spender }: { token: ERC20; owner: string; spender: string }) {
         try {
-            const contract: any = getERC20Contract(web3, tokenAddress);
-            const wei = toWei(amount);
-            const tx = await send(web3, contract, contract.methods.approve(to, wei), privateKey);
+            const wei = await token.contract.methods.allowance(owner, spender).call();
+
+            return { allowance: fromWei(wei, 'ether') };
+        } catch (error) {
+            throw { error };
+        }
+    }
+
+    @Action
+    async approve({ token, to, amount }: { token: ERC20; to: string; amount: string }) {
+        try {
+            console.log('approved owner', token.contract.defaultAccount);
+            console.log('approved spender', to);
+
+            const fn = token.contract.methods.approve(to, amount);
+            const gas = await fn.estimateGas();
+            const tx = await fn.send({ gas, from: token.contract.defaultAccount });
 
             return { tx };
         } catch (error) {
-            return {
-                error,
-            };
+            return { error };
         }
     }
 
     @Action
-    async transfer({
-        web3,
-        tokenAddress,
-        to,
-        amount,
-        privateKey,
-    }: {
-        web3: Web3;
-        tokenAddress: string;
-        to: string;
-        amount: string;
-        privateKey: string;
-    }) {
+    async transfer({ token, to, amount }: { token: ERC20; to: string; amount: string }) {
         try {
-            const contract: any = getERC20Contract(web3, tokenAddress);
             const wei = toWei(amount);
-            const tx = await send(web3, contract, contract.methods.transfer(to, wei), privateKey);
+            const fn = token.contract.methods.transfer(to, wei);
+            const gas = await fn.estimateGas();
+            const tx = await fn.send({ gas, from: token.contract.defaultAccount });
 
             return { tx };
         } catch (error) {

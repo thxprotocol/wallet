@@ -1,7 +1,7 @@
 <template>
     <b-list-group-item
-        :to="`/memberships/${membership.id}`"
-        v-if="membership"
+        :to="`/memberships/${membership.id}/withdrawals`"
+        v-if="membership && membership.token"
         class="d-flex justify-content-between align-items-center"
     >
         <div class="mr-auto">
@@ -16,73 +16,68 @@
         </div>
 
         <div class="h3 mr-3 m-0">{{ membership.token.balance }} {{ membership.token.symbol }}</div>
-        <b-button size="sm" :disabled="membership.network !== npid" variant="primary" v-on:click.prevent="onClick()">
-            <i class="fas fa-arrow-alt-circle-down ml-0 mr-md-2"></i>
-            <span class="d-none d-md-inline">Deposit</span>
-        </b-button>
-        <base-modal-deposit-pool :membership="membership" :web3="web3" />
+        <b-dropdown variant="white" no-caret toggle-class="d-flex align-items-center" v-if="profile">
+            <template #button-content>
+                <i class="fas fa-ellipsis-v p-1 ml-0 text-muted" aria-hidden="true" style="font-size: 1rem"></i>
+            </template>
+            <b-dropdown-item :to="`/memberships/${membership.id}/withdrawals`">
+                Withdrawals
+            </b-dropdown-item>
+            <b-dropdown-item disabled>
+                Deposits
+            </b-dropdown-item>
+            <b-dropdown-item :to="`/memberships/${membership.id}/promotions`">
+                Promotions
+            </b-dropdown-item>
+            <b-dropdown-divider />
+            <b-dropdown-item disabled class="text-danger" @click="remove()">
+                Remove
+            </b-dropdown-item>
+        </b-dropdown>
     </b-list-group-item>
 </template>
 
 <script lang="ts">
-import { BLink, BAlert, BButton, BSpinner, BListGroupItem, BListGroup, BBadge } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
-import BaseModalDepositPool from '@/components/modals/ModalDepositPool.vue';
-import Web3 from 'web3';
 import { IMemberships, Membership } from '@/store/modules/memberships';
 import { WithdrawalState } from '@/store/modules/withdrawals';
-import { NetworkProvider } from '@/utils/network';
 
 @Component({
-    components: {
-        'b-alert': BAlert,
-        'b-link': BLink,
-        'b-spinner': BSpinner,
-        'b-button': BButton,
-        'b-badge': BBadge,
-        'b-list-group': BListGroup,
-        'b-list-group-item': BListGroupItem,
-        'base-modal-deposit-pool': BaseModalDepositPool,
-    },
     computed: mapGetters({
         profile: 'account/profile',
         memberships: 'memberships/all',
-        web3: 'network/web3',
     }),
 })
 export default class BaseListGroupItemAssetPool extends Vue {
     busy = true;
     pendingWithdrawalCount = 0;
-    membership: Membership | null = null;
 
     // getters
     memberships!: IMemberships;
     profile!: UserProfile;
-    web3!: Web3;
 
-    @Prop() id!: string;
-    @Prop() npid!: NetworkProvider;
+    @Prop() membership!: Membership;
 
     onClick() {
         this.$bvModal.show(`modalDepositPool-${this.membership?.poolAddress}`);
     }
 
     async mounted() {
-        const membership = await this.$store.dispatch('memberships/get', this.id);
-        if (membership?.token) {
-            this.membership = membership;
-            this.$store
-                .dispatch('withdrawals/filter', {
-                    profile: this.profile,
-                    membership: this.membership,
-                    state: WithdrawalState.Pending,
-                })
-                .then(({ pagination }) => {
-                    this.pendingWithdrawalCount = pagination.total;
-                });
-        }
+        await this.$store
+            .dispatch('memberships/get', this.membership.id)
+            .then(async ({ membership }: { membership: Membership; error: Error }) => {
+                this.$store
+                    .dispatch('withdrawals/filter', {
+                        profile: this.profile,
+                        membership,
+                        state: WithdrawalState.Pending,
+                    })
+                    .then(({ pagination }) => {
+                        this.pendingWithdrawalCount = pagination?.total;
+                    });
+            });
     }
 }
 </script>

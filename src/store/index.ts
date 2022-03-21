@@ -11,6 +11,8 @@ import AssetPoolStore from './modules/assetPools';
 import MembershipStore from './modules/memberships';
 import ERC20Store from './modules/erc20';
 import WithdrawalStore from './modules/withdrawals';
+import PromoCodeStore from './modules/promocodes';
+import DepositStore from './modules/deposits';
 
 Vue.use(Vuex);
 
@@ -24,6 +26,8 @@ const modules = {
     memberships: MembershipStore,
     erc20: ERC20Store,
     withdrawals: WithdrawalStore,
+    promocodes: PromoCodeStore,
+    deposits: DepositStore,
 };
 
 export default new Vuex.Store({

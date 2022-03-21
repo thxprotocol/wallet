@@ -93,6 +93,49 @@ class WithdrawalModule extends VuexModule {
     }
 
     @Action
+    async withdraw({ membership, id }: any) {
+        try {
+            const r = await axios({
+                method: 'POST',
+                url: `/withdrawals/${id}/withdraw`,
+                headers: {
+                    AssetPool: membership.poolAddress,
+                },
+            });
+
+            if (r.status !== 200) {
+                throw Error('POST /withdrawals/:id/withdraw failed.');
+            }
+
+            return { withdrawal: r.data };
+        } catch (error) {
+            return { error };
+        }
+    }
+
+    @Action
+    async remove({ membership, withdrawal }: any) {
+        try {
+            const r = await axios({
+                method: 'DELETE',
+                url: `/withdrawals/${withdrawal.id}`,
+                headers: {
+                    AssetPool: membership.poolAddress,
+                },
+            });
+
+            if (r.status !== 204) {
+                throw Error('DELTE /withdrawals/:id failed.');
+            }
+
+            this.context.commit('unset', { membership, withdrawal });
+            return { withdrawal: r.data };
+        } catch (error) {
+            return { error };
+        }
+    }
+
+    @Action
     async filter({
         profile,
         membership,

@@ -121,13 +121,15 @@ class AccountModule extends VuexModule {
     }
 
     @Action
-    async signinRedirect(payload: {
-        signupToken: string;
-        rewardHash: string;
-        token: string;
-        key: string;
-        passwordResetToken: string;
-    }) {
+    async signinRedirect(
+        payload: {
+            signupToken?: string;
+            rewardHash?: string;
+            token?: string;
+            key?: string;
+            passwordResetToken?: string;
+        } = {},
+    ) {
         try {
             const extraQueryParams: any = {
                 return_url: BASE_URL,
@@ -187,6 +189,17 @@ class AccountModule extends VuexModule {
             return await this.userManager.signinRedirect({
                 prompt: 'create',
                 extraQueryParams: { return_url: BASE_URL },
+            });
+        } catch (e) {
+            return e;
+        }
+    }
+
+    @Action
+    async accountRedirect(path: string) {
+        try {
+            await this.userManager.signinRedirect({
+                extraQueryParams: { prompt: 'account-settings', return_url: BASE_URL + path },
             });
         } catch (e) {
             return e;
