@@ -48,6 +48,7 @@ import BaseListGroupItemWithdrawal from '@/components/BaseListGroupItemWithdrawa
     },
     computed: mapGetters({
         withdrawals: 'withdrawals/all',
+        profile: 'account/profile',
     }),
 })
 export default class MembershipWithdrawalsView extends Vue {
