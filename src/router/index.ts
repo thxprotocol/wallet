@@ -79,9 +79,7 @@ const routes: Array<RouteConfig> = [
     },
     {
         path: '/memberships/:id',
-        name: 'Withdrawals',
-        component: () => import('../views/memberships/Withdrawals.vue'),
-        beforeEnter: assertAuthorization,
+        redirect: '/memberships/:id/withdrawals',
     },
     {
         path: '/memberships/:id/withdrawals',
