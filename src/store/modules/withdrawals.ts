@@ -107,6 +107,8 @@ class WithdrawalModule extends VuexModule {
                 throw Error('POST /withdrawals/:id/withdraw failed.');
             }
 
+            this.context.commit('withdrawals/set', { withdrawal: r.data, membership: membership });
+
             return { withdrawal: r.data };
         } catch (error) {
             return { error };

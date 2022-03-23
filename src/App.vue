@@ -6,7 +6,7 @@
                     <img :src="require('@/assets/img/logo.png')" height="32" alt="" />
                 </b-button>
                 <base-network-select />
-                <div class="d-none d-md-flex flex-grow-1 justify-content-center">
+                <div class="d-none d-md-flex flex-grow-1 justify-content-center" v-if="profile">
                     <b-button-group size="md" class="mx-auto">
                         <b-button
                             to="/wallet"
@@ -41,6 +41,8 @@ import { Component, Vue } from 'vue-property-decorator';
 import BaseNetworkSelect from './components/BaseNetworkSelect.vue';
 import BaseDropdownAccount from './components/BaseDropdownAccount.vue';
 import BaseDropdownMenu from './components/BaseDropdownMenu.vue';
+import { mapGetters } from 'vuex';
+import { UserProfile } from './store/modules/account';
 
 @Component({
     components: {
@@ -48,8 +50,13 @@ import BaseDropdownMenu from './components/BaseDropdownMenu.vue';
         BaseDropdownAccount,
         BaseDropdownMenu,
     },
+    computed: mapGetters({
+        profile: 'account/profile',
+    }),
 })
 export default class App extends Vue {
+    profile!: UserProfile;
+
     created() {
         if (process.env.VUE_APP_GTM) {
             (function(w: any, d, s, l: any, i) {
@@ -66,6 +73,9 @@ export default class App extends Vue {
                 f.parentNode.insertBefore(j, f);
             })(window, document, 'script', 'dataLayer', process.env.VUE_APP_GTM);
         }
+    }
+    mounted() {
+        this.$store.dispatch('initialize');
     }
 }
 </script>

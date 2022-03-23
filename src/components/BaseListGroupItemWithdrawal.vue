@@ -71,8 +71,6 @@
 <script lang="ts">
 import { BLink, BAlert, BButton, BSpinner, BListGroupItem, BListGroup, BBadge } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-import { UserProfile } from '@/store/modules/account';
 import { Membership } from '@/store/modules/memberships';
 import { Withdrawal, WithdrawalType } from '@/store/modules/withdrawals';
 import { format } from 'date-fns';
@@ -87,12 +85,6 @@ import { format } from 'date-fns';
         'b-list-group': BListGroup,
         'b-list-group-item': BListGroupItem,
     },
-    computed: mapGetters({
-        profile: 'account/profile',
-        privateKey: 'account/privateKey',
-        memberships: 'memberships/all',
-        withdrawals: 'withdrawals/all',
-    }),
 })
 export default class BaseListGroupItemWithdrawal extends Vue {
     WithdrawalType = WithdrawalType;
@@ -100,48 +92,32 @@ export default class BaseListGroupItemWithdrawal extends Vue {
     error = '';
     format = format;
 
-    // getters
-    profile!: UserProfile;
-    privateKey!: string;
-
     @Prop() withdrawal!: Withdrawal;
     @Prop() membership!: Membership;
 
     async remove() {
         this.busy = true;
-        try {
-            const { error } = await this.$store.dispatch('withdrawals/remove', {
-                membership: this.membership,
-                withdrawal: this.withdrawal,
-            });
-            if (error) {
-                this.error = error;
-                return;
-            }
-        } catch (error) {
-            this.error = (error as Error).toString();
-        } finally {
-            this.busy = false;
+
+        const { error } = await this.$store.dispatch('withdrawals/remove', {
+            membership: this.membership,
+            withdrawal: this.withdrawal,
+        });
+        if (error) {
+            this.error = error;
         }
+        this.busy = false;
     }
 
     async withdraw() {
         this.busy = true;
-        try {
-            const { withdrawal, error } = await this.$store.dispatch('withdrawals/withdraw', {
-                membership: this.membership,
-                id: this.withdrawal.id,
-            });
-            if (error) {
-                this.error = error;
-                return;
-            }
-            this.$store.commit('withdrawals/set', { withdrawal, membership: this.membership });
-        } catch (error) {
-            this.error = (error as Error).toString();
-        } finally {
-            this.busy = false;
+        const { error } = await this.$store.dispatch('withdrawals/withdraw', {
+            membership: this.membership,
+            id: this.withdrawal.id,
+        });
+        if (error) {
+            this.error = error;
         }
+        this.busy = false;
     }
 }
 </script>

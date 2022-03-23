@@ -46,15 +46,13 @@ export default class BaseNetworkSelect extends Vue {
     privateKey!: string;
 
     async mounted() {
-        if (!this.profile) {
-            await this.$store.dispatch('account/getProfile');
-        }
-
         await this.getBalance(NetworkProvider.Test);
         await this.getBalance(NetworkProvider.Main);
     }
 
     async getBalance(npid: NetworkProvider) {
+        if (!this.profile) return;
+
         const web3 = this.networks[npid];
         this.balances[npid] = Number(fromWei(await web3.eth.getBalance(this.profile.address)));
     }

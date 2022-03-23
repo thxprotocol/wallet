@@ -1,4 +1,4 @@
-import Vuex from 'vuex';
+import Vuex, { ActionContext } from 'vuex';
 import { Vue } from 'vue-property-decorator';
 import { config } from 'vuex-module-decorators';
 
@@ -17,7 +17,14 @@ import DepositStore from './modules/deposits';
 Vue.use(Vuex);
 
 const mutations = {};
-const actions = {};
+const actions = {
+    initialize(context: any) {
+        console.log(context.getters['account/user']);
+        // if ( && false) {
+        //     context.dispatch('account/getProfile');
+        // }
+    },
+};
 const getters = {};
 const modules = {
     account: AccountStore,

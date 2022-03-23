@@ -68,20 +68,21 @@ class AccountModule extends VuexModule {
     @Action
     async getProfile() {
         try {
+            if (!this.context.getters.user) {
+                return;
+            }
             const r = await axios({
                 method: 'GET',
                 url: '/account',
+                validateStatus: () => true,
             });
 
-            if (r.status !== 200) {
-                return { error: Error('GET /account failed.') };
+            if (r.status === 200) {
+                this.context.commit('setUserProfile', r.data);
+                return r.data;
             }
-
-            this.context.commit('setUserProfile', r.data);
-
-            return { profile: r.data };
-        } catch (error) {
-            return { error };
+        } catch (e) {
+            return e;
         }
     }
 
@@ -172,11 +173,10 @@ class AccountModule extends VuexModule {
     async signinRedirectCallback() {
         try {
             const user = await this.userManager.signinRedirectCallback();
-
             this.context.commit('setUser', user);
-
             return user;
         } catch (e) {
+            debugger;
             return { error: e };
         }
     }
