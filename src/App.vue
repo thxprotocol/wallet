@@ -74,8 +74,5 @@ export default class App extends Vue {
             })(window, document, 'script', 'dataLayer', process.env.VUE_APP_GTM);
         }
     }
-    mounted() {
-        this.$store.dispatch('initialize');
-    }
 }
 </script>

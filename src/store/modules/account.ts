@@ -14,7 +14,7 @@ export interface UserProfile {
 @Module({ namespaced: true })
 class AccountModule extends VuexModule {
     userManager: UserManager = new UserManager(config);
-    _user!: User;
+    _user: User | null = null;
     _profile: UserProfile | null = null;
     _privateKey = '';
 
@@ -58,7 +58,7 @@ class AccountModule extends VuexModule {
             const user = await this.userManager.getUser();
 
             this.context.commit('setUser', user);
-
+            this.context.dispatch('getProfile');
             return user;
         } catch (e) {
             return e;
@@ -91,7 +91,7 @@ class AccountModule extends VuexModule {
         try {
             const privateKey = await getPrivateKeyForUser(user);
 
-            if (privateKey && isPrivateKey(privateKey)) {
+            if (privateKey && isPrivateKey(privateKey) && this.user) {
                 this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
             }
 
@@ -176,7 +176,6 @@ class AccountModule extends VuexModule {
             this.context.commit('setUser', user);
             return user;
         } catch (e) {
-            debugger;
             return { error: e };
         }
     }

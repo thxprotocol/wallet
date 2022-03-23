@@ -62,8 +62,8 @@ export default class Redirect extends Vue {
 
     async mounted() {
         await this.redirectCallback();
+
         if (!this.user) {
-            debugger;
             await this.$store.dispatch('account/signinRedirect');
         }
 
@@ -103,7 +103,7 @@ export default class Redirect extends Vue {
 
     async redirectCallback() {
         this.info = 'Authenticating your account...';
-        console.log(await this.$store.dispatch('account/signinRedirectCallback'));
+        await this.$store.dispatch('account/signinRedirectCallback');
     }
 
     async getMemberships() {

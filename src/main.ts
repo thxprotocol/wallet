@@ -16,7 +16,6 @@ axios.defaults.baseURL = process.env.VUE_APP_API_ROOT + '/v1';
 // Add a request interceptor
 axios.interceptors.request.use(async (config: AxiosRequestConfig) => {
     const user = store.getters['account/user'];
-    debugger;
     if (user && !user.expired) {
         config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${user.access_token}`;
