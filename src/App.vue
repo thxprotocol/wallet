@@ -55,7 +55,7 @@ import { UserProfile } from './store/modules/account';
     }),
 })
 export default class App extends Vue {
-    profile!: UserProfile;
+    profile!: UserProfile | null;
 
     created() {
         if (process.env.VUE_APP_GTM) {
