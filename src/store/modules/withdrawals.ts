@@ -112,7 +112,7 @@ class WithdrawalModule extends VuexModule {
     @Action
     async remove({ membership, withdrawal }: any) {
         try {
-            const r = await axios({
+            await axios({
                 method: 'DELETE',
                 url: `/withdrawals/${withdrawal.id}`,
                 headers: {
