@@ -19,11 +19,10 @@
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
-import { User } from 'oidc-client';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BaseListGroupItemAssetPool from '@/components/BaseListGroupItemAssetPool.vue';
-import { Membership } from '@/store/modules/memberships';
+import { IMemberships } from '@/store/modules/memberships';
 
 @Component({
     name: 'AccountView',
@@ -41,17 +40,8 @@ export default class PoolsView extends Vue {
     info = '';
 
     // getters
-    user!: User;
     profile!: UserProfile;
-    memberships!: { [id: string]: Membership };
-
-    onCopy(e: any) {
-        this.info = 'You just copied: ' + e.text;
-    }
-
-    onError() {
-        this.error = 'Failed to copy texts';
-    }
+    memberships!: IMemberships;
 
     async mounted() {
         this.busy = true;
