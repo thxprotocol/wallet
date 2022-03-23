@@ -26,8 +26,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { UserProfile } from '@/store/modules/account';
-import { IMemberships, Membership } from '@/store/modules/memberships';
+import { Membership } from '@/store/modules/memberships';
 import BaseListGroupItemPromotion from '@/components/BaseListGroupItemPromotion.vue';
 import { IPromoCodes } from '@/store/modules/promocodes';
 
@@ -48,9 +47,7 @@ export default class MembershipPromotionsView extends Vue {
     membership: Membership | null = null;
 
     // getters
-    memberships!: IMemberships;
     promocodes!: IPromoCodes;
-    profile!: UserProfile;
 
     get promotions() {
         if (!this.membership) return [];

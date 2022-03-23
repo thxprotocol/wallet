@@ -35,7 +35,7 @@ import { fromWei } from 'web3-utils';
     }),
 })
 export default class BaseNetworkSelect extends Vue {
-    balances: { [NetworkProvider.Test]: number; [NetworkProvider.Main]: number } = {
+    balances = {
         [NetworkProvider.Test]: 0,
         [NetworkProvider.Main]: 0,
     };
@@ -49,8 +49,6 @@ export default class BaseNetworkSelect extends Vue {
         if (!this.profile) {
             await this.$store.dispatch('account/getProfile');
         }
-        await this.$store.dispatch('network/setNetwork', { npid: NetworkProvider.Test, privateKey: this.privateKey });
-        await this.$store.dispatch('network/setNetwork', { npid: NetworkProvider.Main, privateKey: this.privateKey });
 
         await this.getBalance(NetworkProvider.Test);
         await this.getBalance(NetworkProvider.Main);

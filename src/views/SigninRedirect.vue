@@ -24,7 +24,7 @@
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { NetworkProvider } from '@/utils/network';
 import { User } from 'oidc-client';
@@ -59,8 +59,6 @@ export default class Redirect extends Vue {
     profile!: UserProfile;
     networks!: TNetworks;
     user!: User;
-
-    @Prop() npid!: NetworkProvider;
 
     async mounted() {
         await this.redirectCallback();

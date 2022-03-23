@@ -18,20 +18,22 @@ export type TNetworks = {
 class NetworkModule extends VuexModule {
     _web3: Web3 | null = null;
 
-    _testnet: Web3 = new Web3(TEST_CHILD_RPC);
-    _mainnet: Web3 = new Web3(MAIN_CHILD_RPC);
+    _networks = {
+        [NetworkProvider.Test]: new Web3(TEST_CHILD_RPC),
+        [NetworkProvider.Main]: new Web3(MAIN_CHILD_RPC),
+    };
 
     get all() {
-        return { [NetworkProvider.Test]: this._testnet, [NetworkProvider.Main]: this._mainnet };
+        return this._networks;
     }
 
     @Mutation
     setConfig({ npid, privateKey }: TNetworkConfig) {
-        const network = npid ? '_mainnet' : '_testnet';
-        const admin = this[network].eth.accounts.privateKeyToAccount(privateKey);
+        const network = this._networks[npid];
+        const admin = network.eth.accounts.privateKeyToAccount(privateKey);
 
-        this[network].eth.accounts.wallet.add(admin);
-        this[network].eth.defaultAccount = admin.address;
+        network.eth.accounts.wallet.add(admin);
+        network.eth.defaultAccount = admin.address;
     }
 
     @Action

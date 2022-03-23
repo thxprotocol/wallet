@@ -43,7 +43,6 @@ export default class PoolsView extends Vue {
     // getters
     user!: User;
     profile!: UserProfile;
-    privateKey!: string;
     memberships!: { [id: string]: Membership };
 
     onCopy(e: any) {

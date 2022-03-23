@@ -47,8 +47,6 @@ import BaseListGroupItemWithdrawal from '@/components/BaseListGroupItemWithdrawa
         BaseListGroupItemWithdrawal,
     },
     computed: mapGetters({
-        profile: 'account/profile',
-        memberships: 'memberships/all',
         withdrawals: 'withdrawals/all',
     }),
 })

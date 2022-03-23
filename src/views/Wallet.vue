@@ -12,9 +12,8 @@
 
 <script lang="ts">
 import BaseListGroupItemToken from '@/components/BaseListGroupItemToken.vue';
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { NetworkProvider } from '@/utils/network';
 import { IMemberships } from '@/store/modules/memberships';
 import { UserProfile } from '@/store/modules/account';
 
@@ -24,15 +23,12 @@ import { UserProfile } from '@/store/modules/account';
     },
     computed: mapGetters({
         profile: 'account/profile',
-        privateKey: 'account/privateKey',
         memberships: 'memberships/all',
     }),
 })
 export default class Wallet extends Vue {
     busy = false;
     error = '';
-
-    @Prop() npid!: NetworkProvider;
 
     memberships!: IMemberships;
     profile!: UserProfile;
