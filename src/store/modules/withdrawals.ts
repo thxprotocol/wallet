@@ -103,15 +103,9 @@ class WithdrawalModule extends VuexModule {
                 },
             });
 
-            if (r.status !== 200) {
-                throw Error('POST /withdrawals/:id/withdraw failed.');
-            }
-
             this.context.commit('withdrawals/set', { withdrawal: r.data, membership: membership });
-
-            return { withdrawal: r.data };
         } catch (error) {
-            return { error };
+            return error;
         }
     }
 
@@ -126,14 +120,9 @@ class WithdrawalModule extends VuexModule {
                 },
             });
 
-            if (r.status !== 204) {
-                throw Error('DELTE /withdrawals/:id failed.');
-            }
-
             this.context.commit('unset', { membership, withdrawal });
-            return { withdrawal: r.data };
         } catch (error) {
-            return { error };
+            return error;
         }
     }
 

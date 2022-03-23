@@ -59,28 +59,21 @@ class AccountModule extends VuexModule {
 
             this.context.commit('setUser', user);
             this.context.dispatch('getProfile');
-            return user;
+            return true;
         } catch (e) {
-            return e;
+            return false;
         }
     }
 
     @Action
     async getProfile() {
         try {
-            if (!this.context.getters.user) {
-                return;
-            }
             const r = await axios({
                 method: 'GET',
                 url: '/account',
-                validateStatus: () => true,
             });
 
-            if (r.status === 200) {
-                this.context.commit('setUserProfile', r.data);
-                return r.data;
-            }
+            this.context.commit('setUserProfile', r.data);
         } catch (e) {
             return e;
         }

@@ -98,7 +98,7 @@ export default class BaseListGroupItemWithdrawal extends Vue {
     async remove() {
         this.busy = true;
 
-        const { error } = await this.$store.dispatch('withdrawals/remove', {
+        const error = await this.$store.dispatch('withdrawals/remove', {
             membership: this.membership,
             withdrawal: this.withdrawal,
         });
@@ -110,7 +110,7 @@ export default class BaseListGroupItemWithdrawal extends Vue {
 
     async withdraw() {
         this.busy = true;
-        const { error } = await this.$store.dispatch('withdrawals/withdraw', {
+        const error = await this.$store.dispatch('withdrawals/withdraw', {
             membership: this.membership,
             id: this.withdrawal.id,
         });
