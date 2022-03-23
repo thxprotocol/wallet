@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import Web3 from 'web3';
-import Artifacts from '@/utils/artifacts';
+import { contractConfig } from '@thxnetwork/artifacts';
 import { Contract } from 'web3-eth-contract';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { NetworkProvider } from '@/utils/network';
@@ -48,7 +48,8 @@ class ERC20Module extends VuexModule {
     async get({ web3, membership }: { web3: Web3; membership: Membership }) {
         try {
             const contract = new web3.eth.Contract(
-                Artifacts.IERC20.abi as any,
+                // Get latest (hardhat) config for abi of TokenLimitedSupply which is similar to ERC20
+                contractConfig('hardhat', 'TokenLimitedSupply').abi,
                 toChecksumAddress(membership.token.address),
             );
             const erc20 = new ERC20({
