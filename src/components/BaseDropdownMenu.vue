@@ -9,9 +9,6 @@
         <b-dropdown-item to="/memberships">
             Memberships
         </b-dropdown-item>
-        <b-dropdown-item to="/account" disabled>
-            Account
-        </b-dropdown-item>
         <b-dropdown-divider />
         <b-dropdown-item to="/account">
             Account

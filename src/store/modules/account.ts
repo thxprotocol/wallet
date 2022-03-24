@@ -14,7 +14,7 @@ export interface UserProfile {
 @Module({ namespaced: true })
 class AccountModule extends VuexModule {
     userManager: UserManager = new UserManager(config);
-    _user!: User;
+    _user: User | null = null;
     _profile: UserProfile | null = null;
     _privateKey = '';
 
@@ -58,10 +58,10 @@ class AccountModule extends VuexModule {
             const user = await this.userManager.getUser();
 
             this.context.commit('setUser', user);
-
-            return user;
+            this.context.dispatch('getProfile');
+            return true;
         } catch (e) {
-            return e;
+            return false;
         }
     }
 
@@ -73,15 +73,9 @@ class AccountModule extends VuexModule {
                 url: '/account',
             });
 
-            if (r.status !== 200) {
-                return { error: Error('GET /account failed.') };
-            }
-
             this.context.commit('setUserProfile', r.data);
-
-            return { profile: r.data };
-        } catch (error) {
-            return { error };
+        } catch (e) {
+            return e;
         }
     }
 
@@ -90,7 +84,7 @@ class AccountModule extends VuexModule {
         try {
             const privateKey = await getPrivateKeyForUser(user);
 
-            if (privateKey && isPrivateKey(privateKey)) {
+            if (privateKey && isPrivateKey(privateKey) && this.user) {
                 this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
             }
 
@@ -172,9 +166,7 @@ class AccountModule extends VuexModule {
     async signinRedirectCallback() {
         try {
             const user = await this.userManager.signinRedirectCallback();
-
             this.context.commit('setUser', user);
-
             return user;
         } catch (e) {
             return { error: e };

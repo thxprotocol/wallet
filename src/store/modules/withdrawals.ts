@@ -103,20 +103,16 @@ class WithdrawalModule extends VuexModule {
                 },
             });
 
-            if (r.status !== 200) {
-                throw Error('POST /withdrawals/:id/withdraw failed.');
-            }
-
-            return { withdrawal: r.data };
+            this.context.commit('withdrawals/set', { withdrawal: r.data, membership: membership });
         } catch (error) {
-            return { error };
+            return error;
         }
     }
 
     @Action
     async remove({ membership, withdrawal }: any) {
         try {
-            const r = await axios({
+            await axios({
                 method: 'DELETE',
                 url: `/withdrawals/${withdrawal.id}`,
                 headers: {
@@ -124,14 +120,9 @@ class WithdrawalModule extends VuexModule {
                 },
             });
 
-            if (r.status !== 204) {
-                throw Error('DELTE /withdrawals/:id failed.');
-            }
-
             this.context.commit('unset', { membership, withdrawal });
-            return { withdrawal: r.data };
         } catch (error) {
-            return { error };
+            return error;
         }
     }
 

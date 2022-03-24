@@ -43,7 +43,6 @@ import { TNetworks } from '@/store/modules/network';
     },
     computed: mapGetters({
         profile: 'account/profile',
-        erc20: 'erc20/all',
         networks: 'network/all',
     }),
 })

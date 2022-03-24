@@ -141,10 +141,11 @@ export default class Redirect extends Vue {
         const { error } = await this.$store.dispatch('account/update', { address: account.address });
         if (error) this.error = error.message;
     }
+
     async getProfile() {
         this.info = 'Fetching your account details...';
-        const { error, result } = await this.$store.dispatch('account/getProfile');
-        if (!result && error?.response?.status === 401) this.$router.push('/signin');
+        const error = await this.$store.dispatch('account/getProfile');
+        if (error?.response?.status === 401) this.$router.push('/signin');
         if (error) this.error = error.message;
     }
 }
