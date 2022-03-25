@@ -33,8 +33,8 @@ export default class Wallet extends Vue {
     memberships!: IMemberships;
     profile!: UserProfile;
 
-    async mounted() {
-        await this.$store.dispatch('memberships/getAll');
+    mounted() {
+        this.$store.dispatch('memberships/getAll');
     }
 }
 </script>

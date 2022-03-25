@@ -57,10 +57,6 @@ class MembershipModule extends VuexModule {
                 url: '/memberships',
             });
 
-            if (r.status !== 200) {
-                throw new Error('GET /memberships failed.');
-            }
-
             r.data.forEach((id: string) => {
                 this.context.commit('set', { id });
             });

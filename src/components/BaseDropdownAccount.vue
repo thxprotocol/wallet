@@ -14,13 +14,12 @@
                 height="32"
                 alt="User identicon"
             />
-
             <span class="d-none d-md-block text-muted text-overflow-75">
                 {{ profile.address }}
             </span>
         </template>
         <b-dropdown-item size="sm" variant="dark" v-clipboard:copy="profile.address">
-            <span class="text-muted"> <i class="fas fa-clipboard mr-3"></i>Copy address </span>
+            <span class="text-muted"> <i class="fas fa-clipboard mr-3"></i> Copy address </span>
         </b-dropdown-item>
     </b-dropdown>
 </template>

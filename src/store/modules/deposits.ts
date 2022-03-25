@@ -40,12 +40,18 @@ class DepositsModule extends VuexModule {
     }
 
     @Action
-    async create({ membership, item, calldata }: { membership: Membership; item: string; calldata: any }) {
+    async create({
+        membership,
+        amount,
+        item,
+        calldata,
+    }: {
+        membership: Membership;
+        amount: number;
+        item: string;
+        calldata: any;
+    }) {
         try {
-            // 1. Subscribe for MATIC Transfer into account
-            // 2. Call API to topup account
-            // 3. Approve pool.token unlimited for API to spend
-            // 4. Call API to deposit into pool
             const { call, nonce, sig } = calldata;
             const { data } = await axios({
                 method: 'POST',
@@ -57,6 +63,7 @@ class DepositsModule extends VuexModule {
                     call,
                     nonce,
                     sig,
+                    amount,
                     item,
                 },
             });
