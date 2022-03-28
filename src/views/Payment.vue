@@ -1,46 +1,37 @@
 <template>
     <div>
-        <b-button @click="connect">
-            Connect metamask
-        </b-button>
+        {{ isConnected ? 'connected' : 'not connected' }}
+        {{ account }}
+        <b-button @click="connect" :disabled="isConnected">Connect metamask </b-button><br />
+        {{ chainId }}
+        <b-button @click="switchNetwork(networkExpected)" :disabled="!isConnected">Switch network </b-button>
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 
 @Component({
-    computed: mapGetters({
-        profile: 'account/profile',
-        memberships: 'memberships/all',
-    }),
+    computed: { ...mapState('metamask', ['account', 'chainId']), ...mapGetters('metamask', ['isConnected']) },
 })
 export default class Payment extends Vue {
+    account!: string;
+    chainId!: number;
+
     async connect() {
-        const provider = (window as any).ethereum || ((window as any).web3 && (window as any).web3.currentProvider);
+        this.$store.dispatch('metamask/connect');
+    }
+    async switchNetwork(networkId: number) {
+        this.$store.dispatch('metamask/requestSwitchNetwork', networkId);
+    }
 
-        let accounts = null;
-        let chainId = null;
-        try {
-            if (provider.request) {
-                accounts = await provider.request({
-                    method: 'eth_requestAccounts',
-                });
+    get networkExpected() {
+        return this.chainId === 31337 ? 1 : 31337;
+    }
 
-                chainId = await provider.request({ method: 'eth_chainId' });
-            }
-        } catch (err) {
-            if ((err as any).code === 4001) {
-                // EIP-1193 userRejectedRequest error
-                // If this happens, the user rejected the connection request.
-                console.log('Please connect to MetaMask.');
-            } else {
-                console.error(err);
-            }
-        }
-        console.log(accounts);
-        console.log(chainId);
+    created() {
+        this.$store.dispatch('metamask/checkPreviouslyConnected');
     }
 }
 </script>

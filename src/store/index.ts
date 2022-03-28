@@ -7,6 +7,7 @@ config.rawError = true;
 
 import AccountStore from './modules/account';
 import NetworkStore from './modules/network';
+import MetamaskStore from './modules/metamask';
 import AssetPoolStore from './modules/assetPools';
 import MembershipStore from './modules/memberships';
 import ERC20Store from './modules/erc20';
@@ -22,6 +23,7 @@ const getters = {};
 const modules = {
     account: AccountStore,
     network: NetworkStore,
+    metamask: MetamaskStore,
     assetpools: AssetPoolStore,
     memberships: MembershipStore,
     erc20: ERC20Store,
