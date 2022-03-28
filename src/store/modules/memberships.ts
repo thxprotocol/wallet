@@ -49,43 +49,36 @@ class MembershipModule extends VuexModule {
         Vue.delete(this._all, membership.id);
     }
 
-    @Action
+    @Action({ rawError: true })
     async getAll() {
-        try {
-            const r = await axios({
-                method: 'GET',
-                url: '/memberships',
-            });
+        const r = await axios({
+            method: 'GET',
+            url: '/memberships',
+        });
 
-            r.data.forEach((id: string) => {
-                this.context.commit('set', { id });
-            });
+        r.data.forEach((id: string) => {
+            this.context.commit('set', { id });
+        });
 
-            return r.data;
-        } catch (error) {
-            return { error };
-        }
+        return r.data;
     }
 
-    @Action
+    @Action({ rawError: true })
     async get(id: string) {
-        try {
-            const r = await axios({
-                method: 'GET',
-                url: '/memberships/' + id,
-            });
+        const r = await axios({
+            method: 'GET',
+            url: '/memberships/' + id,
+        });
 
-            if (r.status !== 200) {
-                throw new Error('GET /memberships/:id failed.');
-            }
-
-            this.context.commit('set', r.data);
-
-            const membership = new Membership(r.data);
-            return { membership };
-        } catch (error) {
-            return { error };
+        if (r.status !== 200) {
+            throw new Error('GET /memberships/:id failed.');
         }
+
+        this.context.commit('set', r.data);
+
+        const membership = new Membership(r.data);
+
+        return { membership };
     }
 }
 

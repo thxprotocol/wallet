@@ -52,49 +52,38 @@ class AccountModule extends VuexModule {
         this._profile = profile;
     }
 
-    @Action
+    @Action({ rawError: true })
     async getUser() {
-        try {
-            const user = await this.userManager.getUser();
+        const user = await this.userManager.getUser();
 
-            this.context.commit('setUser', user);
-            this.context.dispatch('getProfile');
-            return true;
-        } catch (e) {
-            return false;
-        }
+        this.context.commit('setUser', user);
+        this.context.dispatch('getProfile');
+
+        return user;
     }
 
-    @Action
+    @Action({ rawError: true })
     async getProfile() {
-        try {
-            const r = await axios({
-                method: 'GET',
-                url: '/account',
-            });
+        const r = await axios({
+            method: 'GET',
+            url: '/account',
+        });
 
-            this.context.commit('setUserProfile', r.data);
-        } catch (e) {
-            return e;
-        }
+        this.context.commit('setUserProfile', r.data);
     }
 
-    @Action
+    @Action({ rawError: true })
     async getPrivateKey(user: User) {
-        try {
-            const privateKey = await getPrivateKeyForUser(user);
+        const privateKey = await getPrivateKeyForUser(user);
 
-            if (privateKey && isPrivateKey(privateKey) && this.user) {
-                this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
-            }
-
-            return { privateKey };
-        } catch (error) {
-            return { error };
+        if (privateKey && isPrivateKey(privateKey) && this.user) {
+            this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
         }
+
+        return { privateKey };
     }
 
-    @Action
+    @Action({ rawError: true })
     async update(data: UserProfile) {
         try {
             const r = await axios({
@@ -114,7 +103,7 @@ class AccountModule extends VuexModule {
         }
     }
 
-    @Action
+    @Action({ rawError: true })
     async signinRedirect(
         payload: {
             signupToken?: string;
@@ -124,96 +113,71 @@ class AccountModule extends VuexModule {
             passwordResetToken?: string;
         } = {},
     ) {
-        try {
-            const extraQueryParams: any = {
-                return_url: BASE_URL,
-            };
+        const extraQueryParams: any = {
+            return_url: BASE_URL,
+        };
 
-            if (payload.signupToken) {
-                extraQueryParams['prompt'] = 'confirm';
-                extraQueryParams['signup_token'] = payload.signupToken;
-            }
-
-            if (payload.passwordResetToken) {
-                extraQueryParams['prompt'] = 'reset';
-                extraQueryParams['password_reset_token'] = payload.passwordResetToken;
-            }
-
-            if (payload.token) {
-                extraQueryParams['authentication_token'] = payload.token.replace(/\s/g, '+');
-            }
-
-            if (payload.key) {
-                extraQueryParams['secure_key'] = payload.key.replace(/\s/g, '+');
-            }
-
-            if (payload.rewardHash) {
-                extraQueryParams['reward_hash'] = payload.rewardHash;
-            }
-
-            await this.userManager.clearStaleState();
-
-            return await this.userManager.signinRedirect({
-                state: { toPath: window.location.href, rewardHash: payload.rewardHash },
-                extraQueryParams,
-            });
-        } catch (e) {
-            return { error: e };
+        if (payload.signupToken) {
+            extraQueryParams['prompt'] = 'confirm';
+            extraQueryParams['signup_token'] = payload.signupToken;
         }
+
+        if (payload.passwordResetToken) {
+            extraQueryParams['prompt'] = 'reset';
+            extraQueryParams['password_reset_token'] = payload.passwordResetToken;
+        }
+
+        if (payload.token) {
+            extraQueryParams['authentication_token'] = payload.token.replace(/\s/g, '+');
+        }
+
+        if (payload.key) {
+            extraQueryParams['secure_key'] = payload.key.replace(/\s/g, '+');
+        }
+
+        if (payload.rewardHash) {
+            extraQueryParams['reward_hash'] = payload.rewardHash;
+        }
+
+        await this.userManager.clearStaleState();
+
+        return await this.userManager.signinRedirect({
+            state: { toPath: window.location.href, rewardHash: payload.rewardHash },
+            extraQueryParams,
+        });
     }
 
-    @Action
+    @Action({ rawError: true })
     async signinRedirectCallback() {
-        try {
-            const user = await this.userManager.signinRedirectCallback();
-            this.context.commit('setUser', user);
-            return user;
-        } catch (e) {
-            return { error: e };
-        }
+        const user = await this.userManager.signinRedirectCallback();
+        this.context.commit('setUser', user);
+        return user;
     }
 
-    @Action
+    @Action({ rawError: true })
     async signupRedirect() {
-        try {
-            await this.userManager.clearStaleState();
-
-            return await this.userManager.signinRedirect({
-                prompt: 'create',
-                extraQueryParams: { return_url: BASE_URL },
-            });
-        } catch (e) {
-            return e;
-        }
+        await this.userManager.clearStaleState();
+        await this.userManager.signinRedirect({
+            prompt: 'create',
+            extraQueryParams: { return_url: BASE_URL },
+        });
     }
 
-    @Action
+    @Action({ rawError: true })
     async accountRedirect(path: string) {
-        try {
-            await this.userManager.signinRedirect({
-                extraQueryParams: { prompt: 'account-settings', return_url: BASE_URL + path },
-            });
-        } catch (e) {
-            return e;
-        }
+        await this.userManager.signinRedirect({
+            extraQueryParams: { prompt: 'account-settings', return_url: BASE_URL + path },
+        });
     }
 
-    @Action
+    @Action({ rawError: true })
     async signoutRedirect() {
-        try {
-            await this.userManager.signoutRedirect({});
-        } catch (e) {
-            return e;
-        }
+        await this.userManager.signoutRedirect({});
     }
 
-    @Action
+    @Action({ rawError: true })
     async signinSilent() {
-        try {
-            return await this.userManager.signinSilent();
-        } catch (e) {
-            return { error: e };
-        }
+        await this.userManager.signinSilent();
     }
 }
 

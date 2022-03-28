@@ -45,30 +45,26 @@ class PromoCodeModule extends VuexModule {
         Vue.set(this, '_all', {});
     }
 
-    @Action
+    @Action({ rawError: true })
     async filter({ membership, page = 1, limit = 10 }: { membership: Membership; page: number; limit: number }) {
-        try {
-            const params = new URLSearchParams();
-            params.append('page', String(page));
-            params.append('limit', String(limit));
+        const params = new URLSearchParams();
+        params.append('page', String(page));
+        params.append('limit', String(limit));
 
-            const r = await axios({
-                method: 'GET',
-                url: '/promo_codes',
-                params,
-                headers: { AssetPool: membership.poolAddress },
-            });
+        const r = await axios({
+            method: 'GET',
+            url: '/promo_codes',
+            params,
+            headers: { AssetPool: membership.poolAddress },
+        });
 
-            this.context.commit('clear');
+        this.context.commit('clear');
 
-            for (const promoCode of r.data.results) {
-                this.context.commit('set', { promoCode, membership });
-            }
-
-            return { pagination: r.data };
-        } catch (e) {
-            return e;
+        for (const promoCode of r.data.results) {
+            this.context.commit('set', { promoCode, membership });
         }
+
+        return { pagination: r.data };
     }
 }
 

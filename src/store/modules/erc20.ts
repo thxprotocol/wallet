@@ -44,7 +44,7 @@ class ERC20Module extends VuexModule {
         Vue.set(this._all, erc20.address, erc20);
     }
 
-    @Action
+    @Action({ rawError: true })
     async get({ web3, membership }: { web3: Web3; membership: Membership }) {
         try {
             const from = toChecksumAddress(this.context.rootGetters['account/profile'].address);
@@ -70,54 +70,37 @@ class ERC20Module extends VuexModule {
         }
     }
 
-    @Action
+    @Action({ rawError: true })
     async balanceOf({ token, profile }: { token: ERC20; profile: UserProfile }) {
-        try {
-            const wei = await token.contract.methods.balanceOf(profile.address).call();
-
-            return { balance: fromWei(wei) };
-        } catch (error) {
-            return { error };
-        }
+        const wei = await token.contract.methods.balanceOf(profile.address).call();
+        return { balance: fromWei(wei) };
     }
 
-    @Action
+    @Action({ rawError: true })
     async allowance({ token, owner, spender }: { token: ERC20; owner: string; spender: string }) {
-        try {
-            const wei = await token.contract.methods.allowance(owner, spender).call();
+        const wei = await token.contract.methods.allowance(owner, spender).call();
 
-            return { allowance: fromWei(wei, 'ether') };
-        } catch (error) {
-            throw { error };
-        }
+        return { allowance: fromWei(wei, 'ether') };
     }
 
-    @Action
+    @Action({ rawError: true })
     async approve({ token, to, amount }: { token: ERC20; to: string; amount: string }) {
-        try {
-            debugger;
-            const fn = token.contract.methods.approve(to, amount);
-            const gas = await fn.estimateGas();
-            const tx = await fn.send({ gas, from: token.contract.defaultAccount });
+        debugger;
+        const fn = token.contract.methods.approve(to, amount);
+        const gas = await fn.estimateGas();
+        const tx = await fn.send({ gas, from: token.contract.defaultAccount });
 
-            return { tx };
-        } catch (error) {
-            return { error };
-        }
+        return { tx };
     }
 
-    @Action
+    @Action({ rawError: true })
     async transfer({ token, to, amount }: { token: ERC20; to: string; amount: string }) {
-        try {
-            const wei = toWei(amount);
-            const fn = token.contract.methods.transfer(to, wei);
-            const gas = await fn.estimateGas();
-            const tx = await fn.send({ gas, from: token.contract.defaultAccount });
+        const wei = toWei(amount);
+        const fn = token.contract.methods.transfer(to, wei);
+        const gas = await fn.estimateGas();
+        const tx = await fn.send({ gas, from: token.contract.defaultAccount });
 
-            return { tx };
-        } catch (error) {
-            return { error };
-        }
+        return { tx };
     }
 }
 

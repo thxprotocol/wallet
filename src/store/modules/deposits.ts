@@ -39,7 +39,7 @@ class DepositsModule extends VuexModule {
         Vue.set(this, '_all', {});
     }
 
-    @Action
+    @Action({ rawError: true })
     async create({
         membership,
         amount,
@@ -51,29 +51,25 @@ class DepositsModule extends VuexModule {
         item: string;
         calldata: any;
     }) {
-        try {
-            const { call, nonce, sig } = calldata;
-            const { data } = await axios({
-                method: 'POST',
-                url: '/deposits',
-                headers: {
-                    AssetPool: membership.poolAddress,
-                },
-                data: {
-                    call,
-                    nonce,
-                    sig,
-                    amount,
-                    item,
-                },
-            });
+        const { call, nonce, sig } = calldata;
+        const { data } = await axios({
+            method: 'POST',
+            url: '/deposits',
+            headers: {
+                AssetPool: membership.poolAddress,
+            },
+            data: {
+                call,
+                nonce,
+                sig,
+                amount,
+                item,
+            },
+        });
 
-            this.context.commit('set', { deposit: data, membership });
+        this.context.commit('set', { deposit: data, membership });
 
-            return { deposit: data };
-        } catch (error) {
-            return { error };
-        }
+        return { deposit: data };
     }
 }
 

@@ -92,41 +92,33 @@ class WithdrawalModule extends VuexModule {
         Vue.set(this, '_all', {});
     }
 
-    @Action
+    @Action({ rawError: true })
     async withdraw({ membership, id }: any) {
-        try {
-            const r = await axios({
-                method: 'POST',
-                url: `/withdrawals/${id}/withdraw`,
-                headers: {
-                    AssetPool: membership.poolAddress,
-                },
-            });
+        const r = await axios({
+            method: 'POST',
+            url: `/withdrawals/${id}/withdraw`,
+            headers: {
+                AssetPool: membership.poolAddress,
+            },
+        });
 
-            this.context.commit('withdrawals/set', { withdrawal: r.data, membership: membership });
-        } catch (error) {
-            return error;
-        }
+        this.context.commit('withdrawals/set', { withdrawal: r.data, membership: membership });
     }
 
-    @Action
+    @Action({ rawError: true })
     async remove({ membership, withdrawal }: any) {
-        try {
-            await axios({
-                method: 'DELETE',
-                url: `/withdrawals/${withdrawal.id}`,
-                headers: {
-                    AssetPool: membership.poolAddress,
-                },
-            });
+        await axios({
+            method: 'DELETE',
+            url: `/withdrawals/${withdrawal.id}`,
+            headers: {
+                AssetPool: membership.poolAddress,
+            },
+        });
 
-            this.context.commit('unset', { membership, withdrawal });
-        } catch (error) {
-            return error;
-        }
+        this.context.commit('unset', { membership, withdrawal });
     }
 
-    @Action
+    @Action({ rawError: true })
     async filter({
         profile,
         membership,
@@ -140,37 +132,33 @@ class WithdrawalModule extends VuexModule {
         limit: number;
         state?: WithdrawalState;
     }) {
-        try {
-            const params = new URLSearchParams();
-            params.append('member', profile.address);
-            params.append('page', String(page));
-            params.append('limit', String(limit));
+        const params = new URLSearchParams();
+        params.append('member', profile.address);
+        params.append('page', String(page));
+        params.append('limit', String(limit));
 
-            if (state === WithdrawalState.Pending || state === WithdrawalState.Withdrawn) {
-                params.append('state', String(state));
-            }
-
-            const r = await axios({
-                method: 'get',
-                url: '/withdrawals',
-                params,
-                headers: { AssetPool: membership.poolAddress },
-            });
-
-            if (r.status !== 200) {
-                throw Error('Withdrawals READ failed.');
-            }
-
-            this.context.commit('clear');
-
-            for (const withdrawal of r.data.results) {
-                this.context.commit('set', { withdrawal: new Withdrawal(withdrawal, page), membership });
-            }
-
-            return { pagination: r.data };
-        } catch (e) {
-            return e;
+        if (state === WithdrawalState.Pending || state === WithdrawalState.Withdrawn) {
+            params.append('state', String(state));
         }
+
+        const r = await axios({
+            method: 'get',
+            url: '/withdrawals',
+            params,
+            headers: { AssetPool: membership.poolAddress },
+        });
+
+        if (r.status !== 200) {
+            throw Error('Withdrawals READ failed.');
+        }
+
+        this.context.commit('clear');
+
+        for (const withdrawal of r.data.results) {
+            this.context.commit('set', { withdrawal: new Withdrawal(withdrawal, page), membership });
+        }
+
+        return { pagination: r.data };
     }
 }
 

@@ -36,27 +36,19 @@ class NetworkModule extends VuexModule {
         network.eth.defaultAccount = admin.address;
     }
 
-    @Action
+    @Action({ rawError: true })
     async sendValue({ web3, to, amount }: { web3: Web3; to: string; amount: string }) {
-        try {
-            const value = toWei(amount);
-            const gas = await web3.eth.estimateGas({ to, value });
-            const tx = await web3.eth.sendTransaction({ gas, to, value });
+        const value = toWei(amount);
+        const gas = await web3.eth.estimateGas({ to, value });
+        const tx = await web3.eth.sendTransaction({ gas, to, value });
 
-            return { tx };
-        } catch (error) {
-            return { error };
-        }
+        return { tx };
     }
 
-    @Action
+    @Action({ rawError: true })
     async setNetwork(config: { npid: NetworkProvider; privateKey: string }) {
-        try {
-            if (isPrivateKey(config.privateKey)) {
-                this.context.commit('setConfig', config);
-            }
-        } catch (error) {
-            return { error };
+        if (isPrivateKey(config.privateKey)) {
+            this.context.commit('setConfig', config);
         }
     }
 }

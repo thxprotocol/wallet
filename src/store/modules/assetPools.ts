@@ -12,7 +12,7 @@ interface SignedCall {
 
 @Module({ namespaced: true })
 class AssetPoolModule extends VuexModule {
-    @Action
+    @Action({ rawError: true })
     async upgradeAddress({
         poolAddress,
         newAddress,
@@ -22,32 +22,26 @@ class AssetPoolModule extends VuexModule {
         newAddress: string;
         data: SignedCall;
     }) {
-        try {
-            const r = await axios({
-                method: 'POST',
-                url: '/gas_station/upgrade_address',
-                headers: {
-                    AssetPool: poolAddress,
-                },
-                data: {
-                    newAddress,
-                    ...data,
-                },
-            });
+        const r = await axios({
+            method: 'POST',
+            url: '/gas_station/upgrade_address',
+            headers: {
+                AssetPool: poolAddress,
+            },
+            data: {
+                newAddress,
+                ...data,
+            },
+        });
 
-            if (r.status !== 200) {
-                throw new Error('POST upgrade address failed.');
-            }
-
-            return r.data;
-        } catch (error) {
-            return {
-                error,
-            };
+        if (r.status !== 200) {
+            throw new Error('POST upgrade address failed.');
         }
+
+        return r.data;
     }
 
-    @Action
+    @Action({ rawError: true })
     async deposit({
         web3,
         poolAddress,
@@ -59,19 +53,13 @@ class AssetPoolModule extends VuexModule {
         amount: string;
         privateKey: string;
     }) {
-        try {
-            const wei = toWei(amount);
-            const contract = getAssetPoolContract(web3, poolAddress);
+        const wei = toWei(amount);
+        const contract = getAssetPoolContract(web3, poolAddress);
 
-            return await send(web3, contract as any, contract.methods.deposit(wei), privateKey);
-        } catch (error) {
-            return {
-                error,
-            };
-        }
+        return await send(web3, contract as any, contract.methods.deposit(wei), privateKey);
     }
 
-    @Action
+    @Action({ rawError: true })
     async withdraw({
         poolAddress,
         call,
@@ -83,49 +71,41 @@ class AssetPoolModule extends VuexModule {
         nonce: string;
         sig: SignedCall;
     }) {
-        try {
-            const r = await axios({
-                method: 'POST',
-                url: '/gas_station/call',
-                headers: {
-                    AssetPool: poolAddress,
-                },
-                data: {
-                    call,
-                    nonce,
-                    sig,
-                },
-            });
+        const r = await axios({
+            method: 'POST',
+            url: '/gas_station/call',
+            headers: {
+                AssetPool: poolAddress,
+            },
+            data: {
+                call,
+                nonce,
+                sig,
+            },
+        });
 
-            if (r.status !== 200) {
-                throw new Error('POST withdraw Poll call failed.');
-            }
-
-            return { withdrawal: r.data };
-        } catch (error) {
-            return { error };
+        if (r.status !== 200) {
+            throw new Error('POST withdraw Poll call failed.');
         }
+
+        return { withdrawal: r.data };
     }
 
-    @Action
+    @Action({ rawError: true })
     async claimReward(rewardHash: string) {
-        try {
-            const data = JSON.parse(atob(rewardHash));
-            const r = await axios({
-                method: 'POST',
-                url: `/rewards/${data.rewardId}/claim`,
-                headers: {
-                    AssetPool: data.poolAddress,
-                },
-            });
-            if (r.status !== 200) {
-                throw new Error('POST claim reward failed.');
-            }
-
-            return { withdrawal: { ...r.data, ...{ tokenSymbol: data.tokenSymbol } } };
-        } catch (error) {
-            return { error };
+        const data = JSON.parse(atob(rewardHash));
+        const r = await axios({
+            method: 'POST',
+            url: `/rewards/${data.rewardId}/claim`,
+            headers: {
+                AssetPool: data.poolAddress,
+            },
+        });
+        if (r.status !== 200) {
+            throw new Error('POST claim reward failed.');
         }
+
+        return { withdrawal: { ...r.data, ...{ tokenSymbol: data.tokenSymbol } } };
     }
 }
 
