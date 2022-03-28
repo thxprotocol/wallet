@@ -102,7 +102,7 @@ class WithdrawalModule extends VuexModule {
             },
         });
 
-        this.context.commit('withdrawals/set', { withdrawal: r.data, membership: membership });
+        this.context.commit('set', { withdrawal: r.data, membership: membership });
     }
 
     @Action({ rawError: true })

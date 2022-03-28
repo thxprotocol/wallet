@@ -1,7 +1,6 @@
 import axios from 'axios';
-import Web3 from 'web3';
 import { Module, VuexModule, Action } from 'vuex-module-decorators';
-import { getAssetPoolContract, send } from '@/utils/network';
+import { getAssetPoolContract, NetworkProvider, send } from '@/utils/network';
 import { toWei } from 'web3-utils';
 
 interface SignedCall {
@@ -42,21 +41,13 @@ class AssetPoolModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async deposit({
-        web3,
-        poolAddress,
-        amount,
-        privateKey,
-    }: {
-        web3: Web3;
-        poolAddress: string;
-        amount: string;
-        privateKey: string;
-    }) {
+    async deposit({ network, poolAddress, amount }: { network: NetworkProvider; poolAddress: string; amount: string }) {
         const wei = toWei(amount);
+        const web3 = this.context.rootGetters['network/all'][network];
+        const privateKey = this.context.rootGetters['account/privateKey'];
         const contract = getAssetPoolContract(web3, poolAddress);
 
-        return await send(web3, contract as any, contract.methods.deposit(wei), privateKey);
+        return await send(web3, poolAddress, contract.methods.deposit(wei), privateKey);
     }
 
     @Action({ rawError: true })

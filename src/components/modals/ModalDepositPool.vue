@@ -24,8 +24,11 @@
                 <b-form-input autofocus size="lg" v-model="amount" type="number" />
             </form>
             <p v-if="token" class="small text-muted mt-2 mb-0">
-                MATIC: {{ maticBalance }} <br />
-                {{ token.symbol }}: {{ balance }}
+                Your balance: <strong>{{ balance }} {{ token.symbol }}</strong> (
+                <b-link @click="amount = balance">
+                    Set Max
+                </b-link>
+                )
             </p>
         </template>
         <template v-slot:modal-footer>
@@ -111,6 +114,7 @@ export default class BaseModalDepositPool extends Vue {
 
     async deposit() {
         this.busy = true;
+
         const { allowance } = await this.$store.dispatch('erc20/allowance', {
             token: this.token,
             owner: this.profile.address,
@@ -121,6 +125,7 @@ export default class BaseModalDepositPool extends Vue {
         if (this.allowance < Number(this.amount)) {
             await this.$store.dispatch('erc20/approve', {
                 token: this.token,
+                network: this.membership.network,
                 to: this.membership.poolAddress,
                 amount: MAX_UINT256,
             });
