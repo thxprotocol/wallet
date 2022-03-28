@@ -47,7 +47,7 @@ class ERC20Module extends VuexModule {
     @Action
     async get({ web3, membership }: { web3: Web3; membership: Membership }) {
         try {
-            const from = this.context.rootGetters['account/profile'].address;
+            const from = toChecksumAddress(this.context.rootGetters['account/profile'].address);
             const contract = new web3.eth.Contract(
                 // Get latest (hardhat) config for abi of TokenLimitedSupply which is similar to ERC20
                 ERC20Abi as any,
@@ -95,6 +95,7 @@ class ERC20Module extends VuexModule {
     @Action
     async approve({ token, to, amount }: { token: ERC20; to: string; amount: string }) {
         try {
+            debugger;
             const fn = token.contract.methods.approve(to, amount);
             const gas = await fn.estimateGas();
             const tx = await fn.send({ gas, from: token.contract.defaultAccount });
