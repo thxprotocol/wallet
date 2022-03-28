@@ -138,7 +138,7 @@ export default class Redirect extends Vue {
         this.info = 'Updating your account details with a new address...';
         const web3 = new Web3();
         const account = web3.eth.accounts.privateKeyToAccount(this.privateKey);
-        const { error } = await this.$store.dispatch('account/update', { address: account.address });
+        const error = await this.$store.dispatch('account/update', { address: account.address });
         if (error) this.error = error.message;
     }
 

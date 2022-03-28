@@ -23,12 +23,13 @@ class AccountModule extends VuexModule {
     }
 
     get privateKey() {
-        if (!this._user) return;
+        return this._privateKey || this.getStoredKey();
+    }
 
+    getStoredKey() {
+        if (!this._user) return '';
         const encoded = sessionStorage.getItem(`thx:wallet:user:${this._user.profile.sub}`) as string;
-        const decoded = atob(encoded);
-
-        return this._privateKey || decoded;
+        return atob(encoded);
     }
 
     get profile() {
@@ -103,14 +104,9 @@ class AccountModule extends VuexModule {
                 data,
             });
 
-            if (r.status !== 200) {
-                throw Error('PATCH /account failed.');
-            }
-
             this.context.commit('setUserProfile', r.data);
-            return { account: r.data };
         } catch (error) {
-            return { error };
+            return error;
         }
     }
 
