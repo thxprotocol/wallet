@@ -14,6 +14,12 @@ class MetamaskStore extends VuexModule {
 
     @Mutation
     setAccount({ accounts, currentAccount }: { accounts: string[]; currentAccount?: string }) {
+        if (!accounts) {
+            this.account = '';
+            sessionStorage.removeItem('thx:wallet:metamask:currentAccount');
+            return;
+        }
+
         const keepAccount = currentAccount || this.account;
         if (!this.account || !keepAccount || !accounts.includes(keepAccount)) {
             this.account = accounts.includes(keepAccount) ? keepAccount : accounts[0];
