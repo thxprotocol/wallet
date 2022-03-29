@@ -72,7 +72,9 @@ class MembershipModule extends VuexModule {
                 url: '/memberships/' + id,
             });
         } catch (error) {
-            if ((error as AxiosError).response?.status === 404) return;
+            if ((error as AxiosError).response?.status === 404) {
+                return { membership: null };
+            }
             throw error;
         }
 
