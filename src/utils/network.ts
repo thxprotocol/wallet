@@ -78,8 +78,6 @@ export function isValidKey(privateKey: string) {
 }
 
 export function isPrivateKey(privateKey: string) {
-    const web3 = new Web3();
-
     try {
         if (!privateKey.startsWith('0x')) {
             throw new Error('Private key does not start with 0x');
@@ -88,9 +86,7 @@ export function isPrivateKey(privateKey: string) {
             throw new Error('Private key string lenght is not 66.');
         }
 
-        web3.eth.accounts.privateKeyToAccount(privateKey);
-
-        return true;
+        return isValidKey(privateKey);
     } catch (e) {
         console.log(e);
         return false;
