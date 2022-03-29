@@ -96,7 +96,7 @@ class AssetPoolModule extends VuexModule {
                 },
             });
         } catch (error) {
-            if ((error as AxiosError).response?.status === 403) return error;
+            if ((error as AxiosError).response?.status === 403) return { error };
             throw error;
         }
 
