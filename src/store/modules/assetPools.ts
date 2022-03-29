@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Module, VuexModule, Action } from 'vuex-module-decorators';
 import { getAssetPoolContract, NetworkProvider, send } from '@/utils/network';
 import { toWei } from 'web3-utils';
@@ -84,19 +84,23 @@ class AssetPoolModule extends VuexModule {
 
     @Action({ rawError: true })
     async claimReward(rewardHash: string) {
+        let res;
         const data = JSON.parse(atob(rewardHash));
-        const r = await axios({
-            method: 'POST',
-            url: `/rewards/${data.rewardId}/claim`,
-            headers: {
-                AssetPool: data.poolAddress,
-            },
-        });
-        if (r.status !== 200) {
-            throw new Error('POST claim reward failed.');
+
+        try {
+            res = await axios({
+                method: 'POST',
+                url: `/rewards/${data.rewardId}/claim`,
+                headers: {
+                    AssetPool: data.poolAddress,
+                },
+            });
+        } catch (error) {
+            if ((error as AxiosError).response?.status === 403) return error;
+            throw error;
         }
 
-        return { withdrawal: { ...r.data, ...{ tokenSymbol: data.tokenSymbol } } };
+        return { withdrawal: { ...res.data, ...{ tokenSymbol: data.tokenSymbol } } };
     }
 }
 
