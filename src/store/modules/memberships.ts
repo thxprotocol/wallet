@@ -1,5 +1,5 @@
 import { Vue } from 'vue-property-decorator';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { NetworkProvider } from '@/utils/network';
 
@@ -65,18 +65,20 @@ class MembershipModule extends VuexModule {
 
     @Action({ rawError: true })
     async get(id: string) {
-        const r = await axios({
-            method: 'GET',
-            url: '/memberships/' + id,
-        });
-
-        if (r.status !== 200) {
-            throw new Error('GET /memberships/:id failed.');
+        let res;
+        try {
+            res = await axios({
+                method: 'GET',
+                url: '/memberships/' + id,
+            });
+        } catch (error) {
+            if ((error as AxiosError).response?.status === 404) return;
+            throw error;
         }
 
-        this.context.commit('set', r.data);
+        this.context.commit('set', res.data);
 
-        const membership = new Membership(r.data);
+        const membership = new Membership(res.data);
 
         return { membership };
     }
