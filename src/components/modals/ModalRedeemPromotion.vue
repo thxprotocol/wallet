@@ -17,6 +17,10 @@
             <b-alert :show="hasInsufficientBalance" variant="warning">
                 You do not have enough {{ membership.token.symbol }} on this account.
             </b-alert>
+            <p>
+                Make a deposit of <strong>{{ promotion.price }} {{ membership.token.symbol }}</strong> into the pool to
+                unlock this promotion.
+            </p>
         </template>
         <template v-slot:modal-footer>
             <b-button
@@ -24,8 +28,7 @@
                 class="mt-3 btn-rounded"
                 block
                 variant="primary"
-                form="formAmount"
-                type="submit"
+                @click="deposit()"
             >
                 Deposit
             </b-button>
@@ -125,7 +128,7 @@ export default class BaseModalRedeemPromotion extends Vue {
             item: this.promotion.id,
         });
 
-        await this.getBalance();
+        this.$store.dispatch('promoCodes/get', this.promotion.id);
         this.$bvModal.hide(`modalDepositPool-${this.membership.id}`);
         this.busy = false;
     }
