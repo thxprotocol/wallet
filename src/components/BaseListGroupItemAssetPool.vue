@@ -20,11 +20,11 @@
             <template #button-content>
                 <i class="fas fa-ellipsis-v p-1 ml-0 text-muted" aria-hidden="true" style="font-size: 1rem"></i>
             </template>
+            <b-dropdown-item v-b-modal="`modalDepositPool-${membership.id}`">
+                Pool Deposit
+            </b-dropdown-item>
             <b-dropdown-item :to="`/memberships/${membership.id}/withdrawals`">
                 Withdrawals
-            </b-dropdown-item>
-            <b-dropdown-item disabled>
-                Deposits
             </b-dropdown-item>
             <b-dropdown-item :to="`/memberships/${membership.id}/promotions`">
                 Promotions
@@ -34,6 +34,7 @@
                 Remove
             </b-dropdown-item>
         </b-dropdown>
+        <base-modal-deposit-pool :membership="membership" />
     </b-list-group-item>
 </template>
 
@@ -43,8 +44,12 @@ import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import { IMemberships, Membership } from '@/store/modules/memberships';
 import { WithdrawalState } from '@/store/modules/withdrawals';
+import BaseModalDepositPool from './modals/ModalDepositPool.vue';
 
 @Component({
+    components: {
+        BaseModalDepositPool,
+    },
     computed: mapGetters({
         profile: 'account/profile',
         memberships: 'memberships/all',

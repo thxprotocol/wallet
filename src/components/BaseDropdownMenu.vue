@@ -9,18 +9,22 @@
         <b-dropdown-item to="/memberships">
             Memberships
         </b-dropdown-item>
-        <b-dropdown-divider />
         <b-dropdown-item to="/account">
             Account
         </b-dropdown-item>
-        <b-dropdown-item to="/signout">
-            Logout
+        <b-dropdown-divider />
+        <b-dropdown-item :href="dashboardUrl">
+            <span class="text-muted"><i class="fas fa-chart-line mr-3"></i>Go to Dashboard</span>
+        </b-dropdown-item>
+        <b-dropdown-item size="sm" variant="dark" to="/signout">
+            <span class="text-muted"><i class="fas fa-sign-out-alt mr-3"></i>Logout</span>
         </b-dropdown-item>
     </b-dropdown>
 </template>
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
+import { DASHBOARD_URL } from '@/utils/secrets';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 
@@ -32,5 +36,6 @@ import { mapGetters } from 'vuex';
 })
 export default class BaseDropdownMenu extends Vue {
     profile!: UserProfile;
+    dashboardUrl = DASHBOARD_URL;
 }
 </script>

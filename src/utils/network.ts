@@ -1,6 +1,5 @@
 import Web3 from 'web3';
 import { isAddress } from 'web3-utils';
-import { Contract } from 'web3-eth-contract';
 import { soliditySha3 } from 'web3-utils';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
 import { default as defaultPoolDiamondAbi } from '@thxnetwork/artifacts/dist/exports/abis/defaultPoolDiamond.json';
@@ -37,11 +36,10 @@ export async function signCall(web3: Web3, poolAddress: string, name: string, pa
     }
 }
 
-export async function send(web3: Web3, contract: Contract, fn: any, privateKey: string) {
+export async function send(web3: Web3, to: string, fn: any, privateKey: string) {
     const gasPrice = await web3.eth.getGasPrice();
     const [from] = await web3.eth.getAccounts();
-    const to = contract.options.address;
-    const data = fn.encodeABI(from);
+    const data = fn.encodeABI();
     const estimate = await fn.estimateGas();
     const gas = estimate < MINIMUM_GAS_LIMIT ? MINIMUM_GAS_LIMIT : estimate;
     const sig = await web3.eth.accounts.signTransaction(

@@ -5,7 +5,7 @@
         @show="onShow()"
         centered
         scrollable
-        title="Pool Deposit"
+        title="Deposit assets to this pool"
     >
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
@@ -17,18 +17,9 @@
             <b-alert :show="hasInsufficientBalance" variant="warning">
                 You do not have enough {{ membership.token.symbol }} on this account.
             </b-alert>
-            <b-alert :show="hasInsufficientMATICBalance" variant="warning">
-                A minimum of 0.5 MATIC is required for this wallet.
-            </b-alert>
-            <form @submit.prevent="deposit()" id="formAmount">
-                <b-form-input autofocus size="lg" v-model="amount" type="number" />
-            </form>
-            <p v-if="token" class="small text-muted mt-2 mb-0">
-                Your balance: <strong>{{ balance }} {{ token.symbol }}</strong> (
-                <b-link @click="amount = balance">
-                    Set Max
-                </b-link>
-                )
+            <p>
+                Make a deposit of <strong>{{ promotion.price }} {{ membership.token.symbol }}</strong> into the pool to
+                unlock this promotion.
             </p>
         </template>
         <template v-slot:modal-footer>
@@ -37,8 +28,7 @@
                 class="mt-3 btn-rounded"
                 block
                 variant="primary"
-                form="formAmount"
-                type="submit"
+                @click="deposit()"
             >
                 Deposit
             </b-button>
@@ -51,10 +41,11 @@ import { UserProfile } from '@/store/modules/account';
 import { ERC20 } from '@/store/modules/erc20';
 import { Membership } from '@/store/modules/memberships';
 import { TNetworks } from '@/store/modules/network';
+import { TPromoCode } from '@/store/modules/promocodes';
 import { MAX_UINT256, signCall } from '@/utils/network';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { fromWei, toWei } from 'web3-utils';
+import { toWei } from 'web3-utils';
 
 @Component({
     computed: mapGetters({
@@ -63,14 +54,12 @@ import { fromWei, toWei } from 'web3-utils';
         privateKey: 'account/privateKey',
     }),
 })
-export default class BaseModalDepositPool extends Vue {
+export default class BaseModalRedeemPromotion extends Vue {
     busy = false;
     error = '';
     balance = 0;
     allowance = 0;
-    token: ERC20 | null = null;
-    amount = 0;
-    maticBalance = 0;
+    token?: ERC20;
 
     // getters
     profile!: UserProfile;
@@ -78,13 +67,10 @@ export default class BaseModalDepositPool extends Vue {
     privateKey!: string;
 
     @Prop() membership!: Membership;
+    @Prop() promotion!: TPromoCode;
 
     get hasInsufficientBalance() {
-        return this.balance < this.amount;
-    }
-
-    get hasInsufficientMATICBalance() {
-        return this.maticBalance < 0.01;
+        return this.balance < this.promotion.price;
     }
 
     async onShow() {
@@ -92,9 +78,6 @@ export default class BaseModalDepositPool extends Vue {
             .dispatch('memberships/get', this.membership.id)
             .then(async ({ membership }: { membership: Membership; error: Error }) => {
                 const web3 = this.networks[membership.network];
-
-                this.maticBalance = Number(fromWei(await web3.eth.getBalance(this.profile.address)));
-
                 const { erc20 } = await this.$store.dispatch('erc20/get', {
                     web3,
                     membership,
@@ -114,7 +97,6 @@ export default class BaseModalDepositPool extends Vue {
 
     async deposit() {
         this.busy = true;
-
         const { allowance } = await this.$store.dispatch('erc20/allowance', {
             token: this.token,
             owner: this.profile.address,
@@ -122,7 +104,7 @@ export default class BaseModalDepositPool extends Vue {
         });
         this.allowance = Number(allowance);
 
-        if (this.allowance < Number(this.amount)) {
+        if (this.allowance < Number(this.promotion.price)) {
             await this.$store.dispatch('erc20/approve', {
                 token: this.token,
                 network: this.membership.network,
@@ -135,17 +117,18 @@ export default class BaseModalDepositPool extends Vue {
             this.networks[this.membership.network],
             this.membership.poolAddress,
             'deposit',
-            [toWei(String(this.amount), 'ether')],
+            [toWei(String(this.promotion.price), 'ether')],
             this.privateKey,
         );
 
         await this.$store.dispatch('deposits/create', {
             membership: this.membership,
             calldata,
-            amount: this.amount,
+            amount: this.promotion.price,
+            item: this.promotion.id,
         });
 
-        this.$store.dispatch('memberships/get', this.membership.id);
+        this.$store.dispatch('promoCodes/get', this.promotion.id);
         this.$bvModal.hide(`modalDepositPool-${this.membership.id}`);
         this.busy = false;
     }

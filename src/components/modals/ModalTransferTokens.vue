@@ -32,7 +32,6 @@ import { UserProfile } from '@/store/modules/account';
 import { ERC20 } from '@/store/modules/erc20';
 import { Membership } from '@/store/modules/memberships';
 import { TNetworks } from '@/store/modules/network';
-import { NetworkProvider } from '@/utils/network';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput, BFormGroup } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
@@ -89,22 +88,19 @@ export default class BaseModalTranferTokens extends Vue {
         this.busy = true;
 
         try {
-            const web3 = this.networks[this.membership.network as NetworkProvider];
             const { error } = await this.$store.dispatch('erc20/approve', {
-                web3,
-                tokenAddress: this.token.address,
+                token: this.token,
+                network: this.membership.network,
                 to: this.to,
                 amount: this.amount,
-                privateKey: this.privateKey,
             });
 
             if (!error) {
                 const { error } = await this.$store.dispatch('erc20/transfer', {
-                    web3,
-                    tokenAddress: this.token.address,
+                    token: this.token,
+                    network: this.membership.network,
                     to: this.to,
                     amount: this.amount,
-                    privateKey: this.privateKey,
                 });
                 if (!error) {
                     this.amount = 0;

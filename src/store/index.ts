@@ -2,7 +2,7 @@ import Vuex from 'vuex';
 import { Vue } from 'vue-property-decorator';
 import { config } from 'vuex-module-decorators';
 
-// Set rawError to true by default on all @Action decorators
+// Set rawError to true by default on all @Action({ rawError: true }) decorators
 config.rawError = true;
 
 import AccountStore from './modules/account';

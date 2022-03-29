@@ -45,6 +45,17 @@ Vue.use(ModalPlugin);
 Vue.use(ToastPlugin);
 Vue.use(VueClipboard);
 
+Vue.config.errorHandler = (error: Error, vm: Vue) => {
+    vm.$bvToast.toast(error.message, {
+        variant: 'danger',
+        title: 'Error',
+        noFade: true,
+        noAutoHide: true,
+        appendToast: true,
+        solid: true,
+    });
+};
+
 Vue.directive('b-tooltip', VBTooltip);
 
 // Set custom filters

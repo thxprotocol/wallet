@@ -18,7 +18,7 @@
         >
             Pay <strong>{{ promotion.price }} {{ membership.token.symbol }}</strong>
         </b-button>
-        <base-modal-deposit-pool :item="promotion.id" :amount="promotion.price" :membership="membership" />
+        <base-modal-redeem-promotion :promotion="promotion" :membership="membership" />
     </b-list-group-item>
 </template>
 
@@ -29,11 +29,11 @@ import { UserProfile } from '@/store/modules/account';
 import { Membership } from '@/store/modules/memberships';
 import { format } from 'date-fns';
 import { TPromoCode } from '@/store/modules/promocodes';
-import BaseModalDepositPool from '@/components/modals/ModalDepositPool.vue';
+import BaseModalRedeemPromotion from '@/components/modals/ModalRedeemPromotion.vue';
 
 @Component({
     components: {
-        'base-modal-deposit-pool': BaseModalDepositPool,
+        BaseModalRedeemPromotion,
     },
     computed: mapGetters({
         profile: 'account/profile',

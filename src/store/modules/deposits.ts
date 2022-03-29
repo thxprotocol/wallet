@@ -39,34 +39,37 @@ class DepositsModule extends VuexModule {
         Vue.set(this, '_all', {});
     }
 
-    @Action
-    async create({ membership, item, calldata }: { membership: Membership; item: string; calldata: any }) {
-        try {
-            // 1. Subscribe for MATIC Transfer into account
-            // 2. Call API to topup account
-            // 3. Approve pool.token unlimited for API to spend
-            // 4. Call API to deposit into pool
-            const { call, nonce, sig } = calldata;
-            const { data } = await axios({
-                method: 'POST',
-                url: '/deposits',
-                headers: {
-                    AssetPool: membership.poolAddress,
-                },
-                data: {
-                    call,
-                    nonce,
-                    sig,
-                    item,
-                },
-            });
+    @Action({ rawError: true })
+    async create({
+        membership,
+        amount,
+        item,
+        calldata,
+    }: {
+        membership: Membership;
+        amount: number;
+        item: string;
+        calldata: any;
+    }) {
+        const { call, nonce, sig } = calldata;
+        const { data } = await axios({
+            method: 'POST',
+            url: '/deposits',
+            headers: {
+                AssetPool: membership.poolAddress,
+            },
+            data: {
+                call,
+                nonce,
+                sig,
+                amount,
+                item,
+            },
+        });
 
-            this.context.commit('set', { deposit: data, membership });
+        this.context.commit('set', { deposit: data, membership });
 
-            return { deposit: data };
-        } catch (error) {
-            return { error };
-        }
+        return { deposit: data };
     }
 }
 
