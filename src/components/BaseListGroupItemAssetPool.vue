@@ -69,8 +69,8 @@ export default class BaseListGroupItemAssetPool extends Vue {
         this.$bvModal.show(`modalDepositPool-${this.membership?.poolAddress}`);
     }
 
-    async mounted() {
-        await this.$store
+    mounted() {
+        this.$store
             .dispatch('memberships/get', this.membership.id)
             .then(async ({ membership }: { membership: Membership; error: Error }) => {
                 if (!membership) return;

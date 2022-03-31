@@ -1,7 +1,7 @@
 <template>
     <b-list-group-item
         :to="`/memberships/${membership.id}/withdrawals`"
-        v-if="membership && membership.poolToken && token"
+        v-if="membership && token"
         class="d-flex justify-content-between align-items-center"
     >
         <div class="mr-auto">
@@ -57,7 +57,7 @@ export default class BaseListGroupItemToken extends Vue {
 
     @Prop() membership!: Membership;
 
-    async mounted() {
+    mounted() {
         this.$store
             .dispatch('memberships/get', this.membership.id)
             .then(async ({ membership }: { membership: Membership; error: Error }) => {
