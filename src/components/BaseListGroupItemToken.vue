@@ -61,6 +61,7 @@ export default class BaseListGroupItemToken extends Vue {
         this.$store
             .dispatch('memberships/get', this.membership.id)
             .then(async ({ membership }: { membership: Membership; error: Error }) => {
+                if (!membership) return;
                 const web3 = this.networks[membership.network];
                 const { erc20 } = await this.$store.dispatch('erc20/get', {
                     web3,
