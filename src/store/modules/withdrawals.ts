@@ -148,10 +148,6 @@ class WithdrawalModule extends VuexModule {
             headers: { AssetPool: membership.poolAddress },
         });
 
-        if (r.status !== 200) {
-            throw Error('Withdrawals READ failed.');
-        }
-
         this.context.commit('clear');
 
         for (const withdrawal of r.data.results) {

@@ -73,6 +73,7 @@ export default class BaseListGroupItemAssetPool extends Vue {
         await this.$store
             .dispatch('memberships/get', this.membership.id)
             .then(async ({ membership }: { membership: Membership; error: Error }) => {
+                if (!membership) return;
                 this.$store
                     .dispatch('withdrawals/filter', {
                         profile: this.profile,

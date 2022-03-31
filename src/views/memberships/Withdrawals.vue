@@ -86,6 +86,7 @@ export default class MembershipWithdrawalsView extends Vue {
         this.$store
             .dispatch('memberships/get', this.$route.params.id)
             .then(async ({ membership }: { membership: Membership; error: Error }) => {
+                if (!membership) return;
                 this.membership = membership;
                 await this.onChange(membership, this.currentPage);
             });
