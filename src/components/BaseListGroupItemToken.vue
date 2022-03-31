@@ -1,7 +1,7 @@
 <template>
     <b-list-group-item
         :to="`/memberships/${membership.id}/withdrawals`"
-        v-if="membership && token"
+        v-if="membership && membership.poolToken && token"
         class="d-flex justify-content-between align-items-center"
     >
         <div class="mr-auto">
