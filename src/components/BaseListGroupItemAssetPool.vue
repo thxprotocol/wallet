@@ -20,21 +20,14 @@
             <template #button-content>
                 <i class="fas fa-ellipsis-v p-1 ml-0 text-muted" aria-hidden="true" style="font-size: 1rem"></i>
             </template>
-            <b-dropdown-item v-b-modal="`modalDepositPool-${membership.id}`">
-                Pool Deposit
-            </b-dropdown-item>
-            <b-dropdown-item :to="`/memberships/${membership.id}/withdrawals`">
-                Withdrawals
-            </b-dropdown-item>
-            <b-dropdown-item :to="`/memberships/${membership.id}/promotions`">
-                Promotions
-            </b-dropdown-item>
+            <b-dropdown-item v-b-modal="`modalDepositPool-${membership.id}`"> Pool Deposit </b-dropdown-item>
+            <b-dropdown-item :to="`/memberships/${membership.id}/withdrawals`"> Withdrawals </b-dropdown-item>
+            <b-dropdown-item :to="`/memberships/${membership.id}/promotions`"> Promotions </b-dropdown-item>
             <b-dropdown-divider />
-            <b-dropdown-item disabled class="text-danger" @click="remove()">
-                Remove
-            </b-dropdown-item>
+            <b-dropdown-item class="text-danger" @click="remove()"> Remove </b-dropdown-item>
         </b-dropdown>
         <base-modal-deposit-pool :membership="membership" />
+        <modal-confirmation visible="true" />
     </b-list-group-item>
 </template>
 
@@ -45,10 +38,12 @@ import { UserProfile } from '@/store/modules/account';
 import { IMemberships, Membership } from '@/store/modules/memberships';
 import { WithdrawalState } from '@/store/modules/withdrawals';
 import BaseModalDepositPool from './modals/ModalDepositPool.vue';
+import ModalConfirmation from './modals/ModalConfirmation.vue';
 
 @Component({
     components: {
         BaseModalDepositPool,
+        ModalConfirmation,
     },
     computed: mapGetters({
         profile: 'account/profile',
@@ -67,6 +62,10 @@ export default class BaseListGroupItemAssetPool extends Vue {
 
     onClick() {
         this.$bvModal.show(`modalDepositPool-${this.membership?.poolAddress}`);
+    }
+
+    remove() {
+        this.$store.dispatch('memberships/delete', this.membership.id);
     }
 
     mounted() {

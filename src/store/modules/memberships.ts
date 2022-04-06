@@ -64,6 +64,17 @@ class MembershipModule extends VuexModule {
     }
 
     @Action({ rawError: true })
+    async delete(id: string) {
+        await axios({
+            method: 'DELETE',
+            url: `/memberships/${id}`,
+        });
+
+        this.context.commit('unset', { id });
+        return this._all;
+    }
+
+    @Action({ rawError: true })
     async get(id: string) {
         let res;
         try {
