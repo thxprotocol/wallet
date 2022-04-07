@@ -8,7 +8,7 @@
                 class="fas fa-code-branch mr-2"
                 :class="{ 'text-success': membership.network, 'text-muted': !membership.network }"
             ></i>
-            <strong v-if="!membership.token" class="text-danger mr-1">This Pool deleted by it owner</strong>
+            <strong v-if="!membership.token" class="text-danger mr-1">This Pool is deleted by it owner</strong>
             <small v-if="!membership.token" class="text-muted text-overflow-75">
                 {{ membership.id }}
             </small>
@@ -32,27 +32,22 @@
             <template #button-content>
                 <i class="fas fa-ellipsis-v p-1 ml-0 text-muted" aria-hidden="true" style="font-size: 1rem"></i>
             </template>
-            <b-dropdown-item v-b-modal="`modalDepositPool-${membership.id}`"> Pool Deposit </b-dropdown-item>
-            <b-dropdown-item :to="`/memberships/${membership.id}/withdrawals`"> Withdrawals </b-dropdown-item>
-            <b-dropdown-item :to="`/memberships/${membership.id}/promotions`"> Promotions </b-dropdown-item>
-            <b-dropdown-divider />
+            <b-dropdown-item v-if="membership.token" v-b-modal="`modalDepositPool-${membership.id}`">
+                Pool Deposit
+            </b-dropdown-item>
+            <b-dropdown-item v-if="membership.token" :to="`/memberships/${membership.id}/withdrawals`">
+                Withdrawals
+            </b-dropdown-item>
+            <b-dropdown-item v-if="membership.token" :to="`/memberships/${membership.id}/promotions`">
+                Promotions
+            </b-dropdown-item>
+            <b-dropdown-divider v-if="membership.token" />
             <b-dropdown-item v-b-modal="`modalDeleteMembership-${membership.id}`" class="text-danger">
                 Remove
             </b-dropdown-item>
         </b-dropdown>
         <base-modal-deposit-pool v-if="membership.token" :membership="membership" />
         <modal-delete :id="`modalDeleteMembership-${membership.id}`" :call="remove" :subject="membership.id" />
-
-        <b-modal
-            @ok="remove()"
-            :visible="deleting"
-            no-close-on-esc
-            no-close-on-backdrop
-            hide-header-close
-            centered
-            scrollable
-            >Are you sure you want to remove your membership from this pool?</b-modal
-        >
     </b-list-group-item>
 </template>
 
