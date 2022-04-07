@@ -24,10 +24,19 @@
             <b-dropdown-item :to="`/memberships/${membership.id}/withdrawals`"> Withdrawals </b-dropdown-item>
             <b-dropdown-item :to="`/memberships/${membership.id}/promotions`"> Promotions </b-dropdown-item>
             <b-dropdown-divider />
-            <b-dropdown-item class="text-danger" @click="remove()"> Remove </b-dropdown-item>
+            <b-dropdown-item class="text-danger" @click="toggleDeleteModal()"> Remove </b-dropdown-item>
         </b-dropdown>
         <base-modal-deposit-pool :membership="membership" />
-        <modal-confirmation visible="true" />
+        <b-modal
+            @ok="remove()"
+            :visible="deleting"
+            no-close-on-esc
+            no-close-on-backdrop
+            hide-header-close
+            centered
+            scrollable
+            >Are you sure you want to remove your membership from this pool?</b-modal
+        >
     </b-list-group-item>
 </template>
 
@@ -38,12 +47,10 @@ import { UserProfile } from '@/store/modules/account';
 import { IMemberships, Membership } from '@/store/modules/memberships';
 import { WithdrawalState } from '@/store/modules/withdrawals';
 import BaseModalDepositPool from './modals/ModalDepositPool.vue';
-import ModalConfirmation from './modals/ModalConfirmation.vue';
 
 @Component({
     components: {
         BaseModalDepositPool,
-        ModalConfirmation,
     },
     computed: mapGetters({
         profile: 'account/profile',
@@ -55,6 +62,7 @@ export default class BaseListGroupItemAssetPool extends Vue {
     pendingWithdrawalCount = 0;
 
     // getters
+    deleting = false;
     memberships!: IMemberships;
     profile!: UserProfile;
 
@@ -62,6 +70,10 @@ export default class BaseListGroupItemAssetPool extends Vue {
 
     onClick() {
         this.$bvModal.show(`modalDepositPool-${this.membership?.poolAddress}`);
+    }
+
+    toggleDeleteModal() {
+        this.deleting = !this.deleting;
     }
 
     remove() {
