@@ -7,7 +7,7 @@
             Wallet
         </b-dropdown-item>
         <b-dropdown-item to="/memberships">
-            Memberships
+            Pools
         </b-dropdown-item>
         <b-dropdown-item to="/account">
             Account

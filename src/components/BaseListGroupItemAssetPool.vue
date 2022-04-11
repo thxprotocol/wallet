@@ -15,7 +15,7 @@
             <small class="text-muted text-overflow-75">{{ membership.poolAddress }}</small>
         </div>
 
-        <div class="h3 mr-3 m-0">{{ membership.poolBalance }} {{ membership.token.symbol }}</div>
+        <div class="h3 mr-3 m-0">{{ membership.token.poolBalance }} {{ membership.token.symbol }}</div>
         <b-dropdown variant="white" no-caret toggle-class="d-flex align-items-center" v-if="profile">
             <template #button-content>
                 <i class="fas fa-ellipsis-v p-1 ml-0 text-muted" aria-hidden="true" style="font-size: 1rem"></i>
