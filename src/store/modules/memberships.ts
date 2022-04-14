@@ -1,5 +1,5 @@
 import { Vue } from 'vue-property-decorator';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { NetworkProvider } from '@/utils/network';
 
@@ -8,6 +8,7 @@ export type Membership = {
     network: NetworkProvider;
     poolAddress: string;
     token: any;
+    erc20: string;
     poolBalance: number;
     pendingBalance: number;
 };
@@ -61,22 +62,14 @@ class MembershipModule extends VuexModule {
 
     @Action({ rawError: true })
     async get(id: string) {
-        let res;
-        try {
-            res = await axios({
-                method: 'GET',
-                url: '/memberships/' + id,
-            });
-        } catch (error) {
-            if ((error as AxiosError).response?.status === 404) {
-                return { membership: null };
-            }
-            throw error;
-        }
+        const { data } = await axios({
+            method: 'GET',
+            url: '/memberships/' + id,
+        });
 
-        this.context.commit('set', res.data);
+        this.context.commit('set', data);
 
-        return { membership: res.data };
+        return { membership: data };
     }
 }
 

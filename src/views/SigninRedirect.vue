@@ -79,8 +79,8 @@ export default class Redirect extends Vue {
         await this.setNetwork(this.privateKey);
 
         // Check for first time login
-        if (this.profile && !this.profile.address) {
-            await this.setPrivateKey();
+        if (this.profile) {
+            await this.updateAccount();
         }
 
         // Check for reward hash in state
@@ -134,12 +134,16 @@ export default class Redirect extends Vue {
         }
     }
 
-    async setPrivateKey() {
+    async updateAccount() {
         this.info = 'Updating your account details with a new address...';
+
         const web3 = new Web3();
         const account = web3.eth.accounts.privateKeyToAccount(this.privateKey);
-        const error = await this.$store.dispatch('account/update', { address: account.address });
-        if (error) this.error = error.message;
+
+        if (!this.profile.address || this.profile.address !== account.address) {
+            const error = await this.$store.dispatch('account/update', { address: account.address });
+            if (error) this.error = error.message;
+        }
     }
 
     async getProfile() {
