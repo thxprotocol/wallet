@@ -33,7 +33,7 @@
                 Remove
             </b-dropdown-item>
         </b-dropdown>
-        <base-modal-deposit-pool v-if="membership.token" :membership="membership" />
+        <base-modal-deposit-pool v-if="token" :membership="membership" />
         <modal-delete :id="`modalDeleteMembership-${membership.id}`" :call="remove" :subject="membership.id" />
     </b-list-group-item>
 </template>

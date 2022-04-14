@@ -16,9 +16,9 @@
             :disabled="error || busy"
             v-b-modal="`modalDepositPool-${membership.id}`"
         >
-            Pay <strong>{{ promotion.price }} {{ membership.token.symbol }}</strong>
+            Pay <strong>{{ promotion.price }} {{ erc20.symbol }}</strong>
         </b-button>
-        <base-modal-redeem-promotion :promotion="promotion" :membership="membership" />
+        <base-modal-redeem-promotion :erc20="erc20" :promotion="promotion" :membership="membership" />
     </b-list-group-item>
 </template>
 
@@ -30,6 +30,7 @@ import { Membership } from '@/store/modules/memberships';
 import { format } from 'date-fns';
 import { TPromoCode } from '@/store/modules/promocodes';
 import BaseModalRedeemPromotion from '@/components/modals/ModalRedeemPromotion.vue';
+import { ERC20 } from '@/store/modules/erc20';
 
 @Component({
     components: {
@@ -52,5 +53,6 @@ export default class BaseListGroupItemWithdrawal extends Vue {
 
     @Prop() promotion!: TPromoCode;
     @Prop() membership!: Membership;
+    @Prop() erc20!: ERC20;
 }
 </script>

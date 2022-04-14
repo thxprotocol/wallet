@@ -12,6 +12,7 @@
             </b-alert>
             <div class="mb-auto">
                 <base-list-group-item-withdrawal
+                    :erc20="erc20"
                     :withdrawal="withdrawal"
                     :membership="membership"
                     :key="key"
@@ -41,6 +42,7 @@ import { UserProfile } from '@/store/modules/account';
 import { IWithdrawals, Withdrawal } from '@/store/modules/withdrawals';
 import { Membership } from '@/store/modules/memberships';
 import BaseListGroupItemWithdrawal from '@/components/BaseListGroupItemWithdrawal.vue';
+import { ERC20 } from '@/store/modules/erc20';
 
 @Component({
     components: {
@@ -62,6 +64,7 @@ export default class MembershipWithdrawalsView extends Vue {
     // getters
     profile!: UserProfile;
     withdrawals!: IWithdrawals;
+    erc20!: ERC20;
 
     get filteredWithdrawals() {
         if (!this.withdrawals[this.$router.currentRoute.params.id]) return [];
@@ -88,6 +91,8 @@ export default class MembershipWithdrawalsView extends Vue {
             .then(async ({ membership }: { membership: Membership; error: Error }) => {
                 if (!membership) return;
                 this.membership = membership;
+                const { erc20 } = await this.$store.dispatch('erc20/get', membership.erc20);
+                this.erc20 = erc20;
                 await this.onChange(membership, this.currentPage);
             });
     }

@@ -29,7 +29,7 @@
         <div class="mr-auto line-height-12">
             <strong class="font-weight-bold">
                 {{ withdrawal.amount }}
-                {{ membership.token.symbol }}
+                {{ erc20.symbol }}
                 <i
                     v-if="withdrawal.type === WithdrawalType.ClaimReward"
                     v-b-tooltip.hover
@@ -74,6 +74,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Membership } from '@/store/modules/memberships';
 import { Withdrawal, WithdrawalType } from '@/store/modules/withdrawals';
 import { format } from 'date-fns';
+import { ERC20 } from '@/store/modules/erc20';
 
 @Component({
     components: {
@@ -92,6 +93,7 @@ export default class BaseListGroupItemWithdrawal extends Vue {
     error = '';
     format = format;
 
+    @Prop() erc20!: ERC20;
     @Prop() withdrawal!: Withdrawal;
     @Prop() membership!: Membership;
 

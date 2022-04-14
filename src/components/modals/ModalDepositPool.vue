@@ -7,23 +7,23 @@
         scrollable
         title="Pool Deposit"
     >
-        <div class="w-100 text-center" v-if="busy">
+        <div class="w-100 text-center" v-if="busy && !token">
             <b-spinner variant="dark" />
         </div>
-        <template v-else>
+        <template v-if="!busy && token">
             <b-alert show variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
             <b-alert :show="hasInsufficientBalance" variant="warning">
-                You do not have enough {{ membership.token.symbol }} on this account.
+                You do not have enough {{ token.symbol }} on this account.
             </b-alert>
             <b-alert :show="hasInsufficientMATICBalance" variant="warning">
-                A minimum of 0.5 MATIC is required for this wallet.
+                A balance of <strong>{{ maticBalance }} MATIC</strong> is not enough to pay for gas.
             </b-alert>
             <form @submit.prevent="deposit()" id="formAmount">
                 <b-form-input autofocus size="lg" v-model="amount" type="number" />
             </form>
-            <p v-if="token" class="small text-muted mt-2 mb-0">
+            <p class="small text-muted mt-2 mb-0">
                 Your balance: <strong>{{ balance }} {{ token.symbol }}</strong> (
                 <b-link @click="amount = balance">
                     Set Max
@@ -95,21 +95,14 @@ export default class BaseModalDepositPool extends Vue {
 
                 this.maticBalance = Number(fromWei(await web3.eth.getBalance(this.profile.address)));
 
-                const { erc20 } = await this.$store.dispatch('erc20/get', {
-                    web3,
-                    membership,
-                });
+                const { erc20 } = await this.$store.dispatch('erc20/get', membership.erc20);
                 this.token = erc20;
                 this.getBalance();
             });
     }
 
     async getBalance() {
-        const { balance } = await this.$store.dispatch('erc20/balanceOf', {
-            token: this.token,
-            profile: this.profile,
-        });
-        this.balance = Number(balance);
+        this.balance = await this.$store.dispatch('erc20/balanceOf', this.token);
     }
 
     async deposit() {

@@ -4,7 +4,6 @@ import { Contract } from 'web3-eth-contract';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { NetworkProvider, send } from '@/utils/network';
 import { fromWei, toWei, toChecksumAddress } from 'web3-utils';
-import { UserProfile } from './account';
 import axios from 'axios';
 
 export interface ERC20 {
@@ -58,9 +57,10 @@ class ERC20Module extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async balanceOf({ token, profile }: { token: ERC20; profile: UserProfile }) {
-        const wei = await token.contract.methods.balanceOf(profile.address).call();
-        return { balance: fromWei(wei) };
+    async balanceOf(erc20: ERC20) {
+        const profile = this.context.rootGetters['account/profile'];
+        const wei = await erc20.contract.methods.balanceOf(profile.address).call();
+        return fromWei(wei);
     }
 
     @Action({ rawError: true })

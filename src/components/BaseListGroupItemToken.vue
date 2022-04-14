@@ -7,9 +7,6 @@
 
         <div class="h3 mr-3 m-0">
             {{ balance }}
-            <small class="text-muted" v-if="membership.pendingBalance > 0">
-                ({{ membership.pendingBalance | abbrNumber }})
-            </small>
         </div>
         <!-- <b-button variant="primary" size="sm" @click.stop="$bvModal.show(`modalTransferTokens-${token.address}`)">
             <i class="fas fa-exchange-alt ml-0 mr-md-2"></i>
@@ -54,9 +51,7 @@ export default class BaseListGroupItemToken extends Vue {
     async mounted() {
         this.$store.dispatch('erc20/get', this.membership.erc20).then(async ({ erc20 }: { erc20: ERC20 }) => {
             this.token = erc20;
-            this.balance = await erc20.contract.methods
-                .balanceOf(this.profile.address)
-                .call({ from: this.profile.address });
+            this.balance = await this.$store.dispatch('erc20/balanceOf', erc20);
         });
     }
 }
