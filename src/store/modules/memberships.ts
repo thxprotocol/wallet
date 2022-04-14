@@ -3,29 +3,14 @@ import axios, { AxiosError } from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { NetworkProvider } from '@/utils/network';
 
-interface MembershipData {
-    id: string;
-    network: number;
-    poolAddress: string;
-    token: any;
-    pendingBalance: number;
-}
-
-export class Membership {
+export type Membership = {
     id: string;
     network: NetworkProvider;
     poolAddress: string;
     token: any;
+    poolBalance: number;
     pendingBalance: number;
-
-    constructor({ id, network, poolAddress, token, pendingBalance }: MembershipData) {
-        this.id = id;
-        this.network = network;
-        this.poolAddress = poolAddress;
-        this.token = token;
-        this.pendingBalance = pendingBalance;
-    }
-}
+};
 
 export interface IMemberships {
     [id: string]: Membership;
@@ -90,9 +75,7 @@ class MembershipModule extends VuexModule {
 
         this.context.commit('set', res.data);
 
-        const membership = new Membership(res.data);
-
-        return { membership };
+        return { membership: res.data };
     }
 }
 

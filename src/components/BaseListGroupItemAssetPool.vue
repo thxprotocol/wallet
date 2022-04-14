@@ -24,9 +24,8 @@
             <br />
             <small class="text-muted text-overflow-75">{{ membership.poolAddress }}</small>
         </div>
-
         <div v-if="membership.token" class="h3 mr-3 m-0">
-            {{ membership.token.balance }} {{ membership.token.symbol }}
+            {{ membership.token.poolBalance }} {{ membership.token.symbol }}
         </div>
         <b-dropdown variant="white" no-caret toggle-class="d-flex align-items-center" v-if="profile">
             <template #button-content>
