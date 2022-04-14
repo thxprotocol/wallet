@@ -1,7 +1,7 @@
 <template>
     <b-modal
         v-if="membership"
-        :id="`modalDepositPool-${membership.id}`"
+        :id="`modalDepositPool-${promotion.id}`"
         @show="onShow()"
         centered
         scrollable
@@ -10,7 +10,7 @@
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
-        <template v-else>
+        <template v-if="!busy && erc20">
             <b-alert show variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
@@ -115,8 +115,8 @@ export default class BaseModalRedeemPromotion extends Vue {
             item: this.promotion.id,
         });
 
-        this.$store.dispatch('promoCodes/get', this.promotion.id);
-        this.$bvModal.hide(`modalDepositPool-${this.membership.id}`);
+        this.$store.dispatch('promocodes/filter', { membership: this.membership });
+        this.$bvModal.hide(`modalDepositPool-${this.promotion.id}`);
         this.busy = false;
     }
 }

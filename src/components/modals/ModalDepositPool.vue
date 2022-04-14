@@ -7,7 +7,7 @@
         scrollable
         title="Pool Deposit"
     >
-        <div class="w-100 text-center" v-if="busy && !token">
+        <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
         <template v-if="!busy && token">

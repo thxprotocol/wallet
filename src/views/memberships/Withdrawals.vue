@@ -3,7 +3,7 @@
         <div class="h-100 w-100 center-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
-        <div class="container pt-3 h-100 d-flex flex-column" v-if="!busy && membership">
+        <div class="container pt-3 h-100 d-flex flex-column" v-if="!busy && membership && erc20">
             <b-alert show dismissable variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
@@ -60,11 +60,11 @@ export default class MembershipWithdrawalsView extends Vue {
     perPage = 10;
     total = 0;
     membership: Membership | null = null;
+    erc20: ERC20 | null = null;
 
     // getters
     profile!: UserProfile;
     withdrawals!: IWithdrawals;
-    erc20!: ERC20;
 
     get filteredWithdrawals() {
         if (!this.withdrawals[this.$router.currentRoute.params.id]) return [];

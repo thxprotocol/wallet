@@ -8,11 +8,11 @@
         v-if="profile"
     >
         <template #button-content>
-            <img
+            <base-identicon
+                :size="32"
+                :rounded="true"
+                :uri="`https://avatars.dicebear.com/api/identicon/${profile.id}.svg`"
                 class="p-1 mr-md-2"
-                :src="`https://avatars.dicebear.com/api/identicon/${profile.id}.svg`"
-                height="32"
-                alt="User identicon"
             />
             <span class="d-none d-md-block text-muted text-overflow-75">
                 {{ profile.address }}
@@ -28,9 +28,12 @@
 import { UserProfile } from '@/store/modules/account';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
+import BaseIdenticon from './BaseIdenticon.vue';
 
 @Component({
-    name: 'BaseDropdownAccount',
+    components: {
+        BaseIdenticon,
+    },
     computed: mapGetters({
         profile: 'account/profile',
     }),

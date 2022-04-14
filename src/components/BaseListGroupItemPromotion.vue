@@ -8,13 +8,12 @@
             <br />
             {{ promotion.description }}
         </div>
-
         <b-alert v-if="promotion.value" class="m-0 mr-3" show variant="warning">{{ promotion.value }}</b-alert>
         <b-button
-            v-if="membership && !promotion.value"
+            v-if="membership && !promotion.value && erc20"
             variant="primary"
             :disabled="error || busy"
-            v-b-modal="`modalDepositPool-${membership.id}`"
+            v-b-modal="`modalDepositPool-${promotion.id}`"
         >
             Pay <strong>{{ promotion.price }} {{ erc20.symbol }}</strong>
         </b-button>
