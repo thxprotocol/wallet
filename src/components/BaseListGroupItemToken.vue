@@ -20,11 +20,11 @@
                 ({{ membership.pendingBalance | abbrNumber }})
             </small>
         </div>
-        <b-button variant="primary" size="sm" v-b-modal="`modalTransferTokens-${token.address}`">
+        <!-- <b-button variant="primary" size="sm" @click.stop="$bvModal.show(`modalTransferTokens-${token.address}`)">
             <i class="fas fa-exchange-alt ml-0 mr-md-2"></i>
             <span class="d-none d-md-inline">Transfer</span>
-        </b-button>
-        <base-modal-transfer-tokens :token="token" />
+        </b-button> -->
+        <!-- <base-modal-transfer-tokens :token="token" /> -->
     </b-list-group-item>
 </template>
 

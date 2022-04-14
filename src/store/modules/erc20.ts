@@ -54,14 +54,13 @@ class ERC20Module extends VuexModule {
                 toChecksumAddress(membership.token.address),
                 { from },
             );
-            const erc20 = new ERC20({
+            const erc20 = {
                 address: membership.token.address,
                 contract,
                 name: membership.token.name,
                 symbol: membership.token.symbol,
                 totalSupply: membership.token.totalSupply,
-                balance: membership.token.balance,
-            });
+            };
             this.context.commit('set', erc20);
 
             return { erc20 };
