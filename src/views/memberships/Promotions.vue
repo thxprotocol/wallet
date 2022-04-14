@@ -11,6 +11,7 @@
                 There are no promotions for this pool.
             </b-alert>
             <base-list-group-item-promotion
+                :erc20="erc20"
                 :promotion="promotion"
                 :membership="membership"
                 :key="promotion.id"
@@ -29,6 +30,7 @@ import { mapGetters } from 'vuex';
 import { Membership } from '@/store/modules/memberships';
 import BaseListGroupItemPromotion from '@/components/BaseListGroupItemPromotion.vue';
 import { IPromoCodes } from '@/store/modules/promocodes';
+import { ERC20 } from '@/store/modules/erc20';
 
 @Component({
     components: {
@@ -45,6 +47,7 @@ export default class MembershipPromotionsView extends Vue {
     perPage = 10;
     total = 0;
     membership: Membership | null = null;
+    erc20: ERC20 | null = null;
 
     // getters
     promocodes!: IPromoCodes;
@@ -60,6 +63,8 @@ export default class MembershipPromotionsView extends Vue {
             .dispatch('memberships/get', this.$route.params.id)
             .then(async ({ membership }: { membership: Membership; error: Error }) => {
                 this.membership = membership;
+                const { erc20 } = await this.$store.dispatch('erc20/get', membership.erc20);
+                this.erc20 = erc20;
                 await this.$store.dispatch('promocodes/filter', { membership: this.membership });
             });
     }

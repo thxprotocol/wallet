@@ -1,34 +1,19 @@
 import Vue from 'vue';
-import Web3 from 'web3';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
 import { Contract } from 'web3-eth-contract';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { NetworkProvider, send } from '@/utils/network';
 import { fromWei, toWei, toChecksumAddress } from 'web3-utils';
-import { UserProfile } from './account';
-import { Membership } from './memberships';
+import axios from 'axios';
 
-export interface ERC20Token {
-    network: NetworkProvider;
+export interface ERC20 {
     address: string;
-}
-
-export class ERC20 {
-    address!: string;
     contract: Contract;
-    name!: string;
-    symbol!: string;
-    balance!: string;
-    totalSupply!: string;
-
-    constructor(data: any) {
-        this.address = data.address;
-        this.contract = data.contract;
-        this.name = data.name;
-        this.symbol = data.symbol;
-        this.balance = data.balance;
-        this.totalSupply = data.totalSupply;
-    }
+    name: string;
+    symbol: string;
+    balance: string;
+    totalSupply: string;
+    logoURI: string;
 }
 
 @Module({ namespaced: true })
@@ -45,24 +30,26 @@ class ERC20Module extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async get({ web3, membership }: { web3: Web3; membership: Membership }) {
+    async get(id: string) {
         try {
-            const from = toChecksumAddress(this.context.rootGetters['account/profile'].address);
-            const contract = new web3.eth.Contract(
-                // Get latest (hardhat) config for abi of TokenLimitedSupply which is similar to ERC20
-                ERC20Abi as any,
-                toChecksumAddress(membership.token.address),
-                { from },
-            );
+            const { data } = await axios({
+                method: 'GET',
+                url: '/erc20/' + id,
+            });
+            const web3 = this.context.rootGetters['network/all'][data.network];
+            const from = this.context.rootGetters['account/profile'].address;
+            const contract = new web3.eth.Contract(ERC20Abi as any, data.address, { from });
+            const totalSupply = Number(fromWei(await contract.methods.totalSupply().call()));
             const erc20 = {
-                address: membership.token.address,
+                address: data.address,
+                name: data.name,
+                symbol: data.symbol,
                 contract,
-                name: membership.token.name,
-                symbol: membership.token.symbol,
-                totalSupply: membership.token.totalSupply,
+                totalSupply,
+                logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
             };
-            this.context.commit('set', erc20);
 
+            this.context.commit('set', erc20);
             return { erc20 };
         } catch (error) {
             return { error };
@@ -70,9 +57,10 @@ class ERC20Module extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async balanceOf({ token, profile }: { token: ERC20; profile: UserProfile }) {
-        const wei = await token.contract.methods.balanceOf(profile.address).call();
-        return { balance: fromWei(wei) };
+    async balanceOf(erc20: ERC20) {
+        const profile = this.context.rootGetters['account/profile'];
+        const wei = await erc20.contract.methods.balanceOf(profile.address).call();
+        return fromWei(wei);
     }
 
     @Action({ rawError: true })

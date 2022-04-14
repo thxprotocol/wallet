@@ -3,7 +3,7 @@
         <div class="h-100 w-100 center-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
-        <div class="container pt-3 h-100 d-flex flex-column" v-if="!busy && membership">
+        <div class="container pt-3 h-100 d-flex flex-column" v-if="!busy && membership && erc20">
             <b-alert show dismissable variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
@@ -12,6 +12,7 @@
             </b-alert>
             <div class="mb-auto">
                 <base-list-group-item-withdrawal
+                    :erc20="erc20"
                     :withdrawal="withdrawal"
                     :membership="membership"
                     :key="key"
@@ -41,6 +42,7 @@ import { UserProfile } from '@/store/modules/account';
 import { IWithdrawals, Withdrawal } from '@/store/modules/withdrawals';
 import { Membership } from '@/store/modules/memberships';
 import BaseListGroupItemWithdrawal from '@/components/BaseListGroupItemWithdrawal.vue';
+import { ERC20 } from '@/store/modules/erc20';
 
 @Component({
     components: {
@@ -58,6 +60,7 @@ export default class MembershipWithdrawalsView extends Vue {
     perPage = 10;
     total = 0;
     membership: Membership | null = null;
+    erc20: ERC20 | null = null;
 
     // getters
     profile!: UserProfile;
@@ -88,6 +91,8 @@ export default class MembershipWithdrawalsView extends Vue {
             .then(async ({ membership }: { membership: Membership; error: Error }) => {
                 if (!membership) return;
                 this.membership = membership;
+                const { erc20 } = await this.$store.dispatch('erc20/get', membership.erc20);
+                this.erc20 = erc20;
                 await this.onChange(membership, this.currentPage);
             });
     }

@@ -4,7 +4,7 @@
             <base-list-group-item-token
                 :membership="membership"
                 :key="membership.id"
-                v-for="membership in memberships"
+                v-for="membership in uniqueMembershipTokens"
             />
         </b-list-group>
     </div>
@@ -14,12 +14,12 @@
 import BaseListGroupItemToken from '@/components/BaseListGroupItemToken.vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { IMemberships } from '@/store/modules/memberships';
+import { IMemberships, Membership } from '@/store/modules/memberships';
 import { UserProfile } from '@/store/modules/account';
 
 @Component({
     components: {
-        'base-list-group-item-token': BaseListGroupItemToken,
+        BaseListGroupItemToken,
     },
     computed: mapGetters({
         profile: 'account/profile',
@@ -33,8 +33,25 @@ export default class Wallet extends Vue {
     memberships!: IMemberships;
     profile!: UserProfile;
 
+    get uniqueMembershipTokens() {
+        const filtered: Membership[] = [];
+        for (const id in this.memberships) {
+            if (
+                this.memberships[id].erc20 &&
+                filtered.findIndex((membership: Membership) => this.memberships[id].erc20 === membership.erc20) === -1
+            ) {
+                filtered.push(this.memberships[id]);
+            }
+        }
+        return filtered;
+    }
+
     mounted() {
-        this.$store.dispatch('memberships/getAll');
+        this.$store.dispatch('memberships/getAll').then(() => {
+            for (const id in this.memberships) {
+                this.$store.dispatch('memberships/get', id);
+            }
+        });
     }
 }
 </script>

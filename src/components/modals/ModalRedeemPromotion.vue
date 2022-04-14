@@ -1,7 +1,7 @@
 <template>
     <b-modal
         v-if="membership"
-        :id="`modalDepositPool-${membership.id}`"
+        :id="`modalDepositPool-${promotion.id}`"
         @show="onShow()"
         centered
         scrollable
@@ -10,16 +10,16 @@
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
-        <template v-else>
+        <template v-if="!busy && erc20">
             <b-alert show variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
             <b-alert :show="hasInsufficientBalance" variant="warning">
-                You do not have enough {{ membership.token.symbol }} on this account.
+                You do not have enough {{ erc20.symbol }} on this account.
             </b-alert>
             <p>
-                Make a deposit of <strong>{{ promotion.price }} {{ membership.token.symbol }}</strong> into the pool to
-                unlock this promotion.
+                Make a deposit of <strong>{{ promotion.price }} {{ erc20.symbol }}</strong> into the pool to unlock this
+                promotion.
             </p>
         </template>
         <template v-slot:modal-footer>
@@ -59,7 +59,6 @@ export default class BaseModalRedeemPromotion extends Vue {
     error = '';
     balance = 0;
     allowance = 0;
-    token?: ERC20;
 
     // getters
     profile!: UserProfile;
@@ -68,37 +67,25 @@ export default class BaseModalRedeemPromotion extends Vue {
 
     @Prop() membership!: Membership;
     @Prop() promotion!: TPromoCode;
+    @Prop() erc20!: ERC20;
 
     get hasInsufficientBalance() {
         return this.balance < this.promotion.price;
     }
 
     async onShow() {
-        this.$store
-            .dispatch('memberships/get', this.membership.id)
-            .then(async ({ membership }: { membership: Membership; error: Error }) => {
-                const web3 = this.networks[membership.network];
-                const { erc20 } = await this.$store.dispatch('erc20/get', {
-                    web3,
-                    membership,
-                });
-                this.token = erc20;
-                this.getBalance();
-            });
+        this.$store.dispatch('memberships/get', this.membership.id);
+        this.getBalance();
     }
 
     async getBalance() {
-        const { balance } = await this.$store.dispatch('erc20/balanceOf', {
-            token: this.token,
-            profile: this.profile,
-        });
-        this.balance = Number(balance);
+        this.balance = await this.$store.dispatch('erc20/balanceOf', this.erc20);
     }
 
     async deposit() {
         this.busy = true;
         const { allowance } = await this.$store.dispatch('erc20/allowance', {
-            token: this.token,
+            token: this.erc20,
             owner: this.profile.address,
             spender: this.membership.poolAddress,
         });
@@ -106,7 +93,7 @@ export default class BaseModalRedeemPromotion extends Vue {
 
         if (this.allowance < Number(this.promotion.price)) {
             await this.$store.dispatch('erc20/approve', {
-                token: this.token,
+                token: this.erc20,
                 network: this.membership.network,
                 to: this.membership.poolAddress,
                 amount: MAX_UINT256,
@@ -128,8 +115,8 @@ export default class BaseModalRedeemPromotion extends Vue {
             item: this.promotion.id,
         });
 
-        this.$store.dispatch('promoCodes/get', this.promotion.id);
-        this.$bvModal.hide(`modalDepositPool-${this.membership.id}`);
+        this.$store.dispatch('promocodes/filter', { membership: this.membership });
+        this.$bvModal.hide(`modalDepositPool-${this.promotion.id}`);
         this.busy = false;
     }
 }
