@@ -71,7 +71,6 @@ class MembershipModule extends VuexModule {
         });
 
         this.context.commit('unset', { id });
-        return this._all;
     }
 
     @Action({ rawError: true })
