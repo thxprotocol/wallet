@@ -66,6 +66,11 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/UserAgentWarning.vue'),
     },
     {
+        path: '/claim',
+        name: 'Claim',
+        component: () => import('../views/Claim.vue'),
+    },
+    {
         path: '/wallet',
         name: 'Wallet',
         component: () => import('../views/Wallet.vue'),
