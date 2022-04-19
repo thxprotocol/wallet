@@ -77,6 +77,11 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/Payment.vue'),
     },
     {
+        path: '/claims',
+        name: 'Claims',
+        component: () => import('../views/Claims.vue'),
+    },
+    {
         path: '/memberships',
         name: 'Pools',
         component: () => import('../views/Memberships.vue'),
