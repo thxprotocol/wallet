@@ -66,11 +66,6 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/UserAgentWarning.vue'),
     },
     {
-        path: '/claim',
-        name: 'Claim',
-        component: () => import('../views/Claim.vue'),
-    },
-    {
         path: '/wallet',
         name: 'Wallet',
         component: () => import('../views/Wallet.vue'),
@@ -80,6 +75,11 @@ const routes: Array<RouteConfig> = [
         path: '/payment',
         name: 'Payment',
         component: () => import('../views/Payment.vue'),
+    },
+    {
+        path: '/claims',
+        name: 'Claim',
+        component: () => import('../views/Claim.vue'),
     },
     {
         path: '/memberships',
