@@ -13,6 +13,8 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
+import Web3 from "web3";
+import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
 
 @Component({
     computed: { ...mapState('metamask', ['account', 'chainId']), ...mapGetters('metamask', ['isConnected']) },
@@ -20,10 +22,12 @@ import { mapGetters, mapState } from 'vuex';
 export default class Claims extends Vue {
     account!: string;
     chainId!: number;
+    web3!: Web3;
 
     async connect() {
         this.$store.dispatch('metamask/connect');
     }
+
     async switchNetwork(networkId: number) {
         this.$store.dispatch('metamask/requestSwitchNetwork', networkId);
     }
@@ -38,6 +42,8 @@ export default class Claims extends Vue {
 
     mounted() {
       // balance ophalen op voorhand.
+      this.web3 = new Web3(new Web3.providers.HttpProvider(''));
+      this.web3 =  new Web3(ERC20Abi as any, this.account as any);
       console.log("");
     }
 
