@@ -1,10 +1,9 @@
 <template>
     <div>
-        {{ isConnected ? 'You are connected with wallet: ': 'not connected'}}
-        {{ account }}
-        <b-button @click="connect" visable="isConnected">Connect metamask </b-button><br />
-        <b-button>Claim tokens </b-button><br />
-        <p>The current amount of tokens is:  {{ getCurrentAmountOfTokens }}</p>
+        {{ isConnected ? 'You are connected with wallet: ' + account : 'Not connected'}}
+        <b-button @click="connect" :hidden="isConnected">Connect metamask </b-button><br />
+        <b-button v-if="getCurrentAmountOfTokens() > 0">Claim tokens </b-button><br />
+        <p>The current amount of tokens is:  {{ getCurrentAmountOfTokens() }}</p>
     </div>
 </template>
 
@@ -30,16 +29,8 @@ export default class Claims extends Vue {
         this.$store.dispatch('metamask/connect');
     }
 
-    async switchNetwork(networkId: number) {
-        this.$store.dispatch('metamask/requestSwitchNetwork', networkId);
-    }
-
-    get networkExpected() {
-        return this.chainId === 31337 ? 1 : 31337;
-    }
-
     async getCurrentAmountOfTokens() {
-        return await this.contract.methods.getRewards.call();
+        return await this.contract.methods.getRewards().call();
     }
 
     mounted() {
