@@ -30,24 +30,20 @@ export default class Claims extends Vue {
   web3!: Web3;
   contract!: Contract;
 
-
   async connect() {
     await this.$store.dispatch('metamask/connect');
-    console.log("> " + this.account)
-    this.contract = await new this.web3.eth.Contract(ABIThx as any, this.account as any);
+    // TODO: insert abi from our smart contract
+    this.contract = new this.web3.eth.Contract(ABIThx as any, this.account as any);
+    //this.getCurrentAmountOfTokens();
   }
 
   async getCurrentAmountOfTokens() {
-    console.log("hierrr");
-    console.log(">>> " + await this.contract.methods.getWeightInputs().call())
-    return 5;
+    console.log(this.contract);
+    return await this.contract.methods.getRewards().call();
   }
 
   mounted() {
     this.web3 = new Web3(new Web3.providers.HttpProvider('HTTP://127.0.0.1:7545'));
-    // TODO: insert abi from our smart contract
-
-
   }
 
 }
