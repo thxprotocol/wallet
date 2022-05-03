@@ -1,43 +1,54 @@
 <template>
-    <div>
-        {{ isConnected ? 'You are connected with wallet: ' + account : 'Not connected'}}
-        <b-button @click="connect" :hidden="isConnected">Connect metamask </b-button><br />
-        <b-button v-if="getCurrentAmountOfTokens() > 0">Claim tokens </b-button><br />
-        <p>The current amount of tokens is:  {{ getCurrentAmountOfTokens() }}</p>
-    </div>
+  <div>
+    <b-container class="bv-example-row">
+      <b-row class="mb-2">
+        <b-col>{{ isConnected ? 'You are connected with wallet: ' + account : 'Not connected' }}</b-col>
+        <b-col><b-button class="float-right" @click="connect" :hidden="isConnected">Connect metamask</b-button></b-col>
+      </b-row>
+
+      <b-row class="mb-2" v-if="isConnected">
+        <b-col>{{getCurrentAmountOfTokens() > 0 ? 'You have ' + getCurrentAmountOfTokens() + ' tokens to claim' : 'You have no tokens to claim'}}</b-col>
+        <b-col><b-button class="float-right" v-if="getCurrentAmountOfTokens() > 0">Claim all tokens</b-button></b-col>
+      </b-row>
+    </b-container>
+  </div>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters, mapState } from 'vuex';
+import {Component, Vue} from 'vue-property-decorator';
+import {mapGetters, mapState} from 'vuex';
 import Web3 from "web3";
 // TODO: insert abi from our smart contract
-import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
+import {default as ABIThx} from '@thxnetwork/artifacts/dist/exports/abis/ABITHX.json';
 import {Contract} from "web3-eth-contract";
 
 @Component({
-    computed: { ...mapState('metamask', ['account', 'chainId']), ...mapGetters('metamask', ['isConnected']) },
+  computed: {...mapState('metamask', ['account', 'chainId']), ...mapGetters('metamask', ['isConnected'])},
 })
 export default class Claims extends Vue {
-    account!: string;
-    chainId!: number;
-    web3!: Web3;
-    contract!: Contract;
+  account!: string;
+  web3!: Web3;
+  contract!: Contract;
 
 
-    async connect() {
-        this.$store.dispatch('metamask/connect');
-    }
+  async connect() {
+    await this.$store.dispatch('metamask/connect');
+    console.log("> " + this.account)
+    this.contract = await new this.web3.eth.Contract(ABIThx as any, this.account as any);
+  }
 
-    async getCurrentAmountOfTokens() {
-        return await this.contract.methods.getRewards().call();
-    }
+  async getCurrentAmountOfTokens() {
+    console.log("hierrr");
+    console.log(">>> " + await this.contract.methods.getWeightInputs().call())
+    return 5;
+  }
 
-    mounted() {
-      this.web3 =  new Web3(new Web3.providers.HttpProvider(''));
-      // TODO: insert abi from our smart contract
-      this.contract = new this.web3.eth.Contract(ERC20Abi as any, this.account as any);
-    }
+  mounted() {
+    this.web3 = new Web3(new Web3.providers.HttpProvider('HTTP://127.0.0.1:7545'));
+    // TODO: insert abi from our smart contract
+
+
+  }
 
 }
 </script>
