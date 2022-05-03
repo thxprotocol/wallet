@@ -47,6 +47,7 @@ import { WithdrawalState } from '@/store/modules/withdrawals';
 import BaseModalDepositPool from './modals/ModalDepositPool.vue';
 import ModalDelete from './modals/ModalDelete.vue';
 import { ERC20 } from '@/store/modules/erc20';
+import { ERC721 } from '@/store/modules/erc721';
 
 @Component({
     components: {
@@ -57,6 +58,7 @@ import { ERC20 } from '@/store/modules/erc20';
         profile: 'account/profile',
         memberships: 'memberships/all',
         erc20s: 'erc20/all',
+        erc721s: 'erc20/all',
     }),
 })
 export default class BaseListGroupItemAssetPool extends Vue {
@@ -64,7 +66,7 @@ export default class BaseListGroupItemAssetPool extends Vue {
     pendingWithdrawalCount = 0;
     memberships!: IMemberships;
     profile!: UserProfile;
-    token: ERC20 | null = null;
+    token: ERC20 | ERC721 | null = null;
 
     @Prop() membership!: Membership;
 
@@ -76,17 +78,24 @@ export default class BaseListGroupItemAssetPool extends Vue {
         this.$store
             .dispatch('memberships/get', this.membership.id)
             .then(async ({ membership }: { membership: Membership; error: Error }) => {
-                const { erc20 } = await this.$store.dispatch('erc20/get', this.membership.erc20);
-                this.token = erc20;
-                this.$store
-                    .dispatch('withdrawals/filter', {
-                        profile: this.profile,
-                        membership,
-                        state: WithdrawalState.Pending,
-                    })
-                    .then(({ pagination }) => {
-                        this.pendingWithdrawalCount = pagination?.total;
-                    });
+                if (membership.erc20) {
+                    const { erc20 } = await this.$store.dispatch('erc20/get', this.membership.erc20);
+                    this.token = erc20;
+
+                    this.$store
+                        .dispatch('withdrawals/filter', {
+                            profile: this.profile,
+                            membership,
+                            state: WithdrawalState.Pending,
+                        })
+                        .then(({ pagination }) => {
+                            this.pendingWithdrawalCount = pagination?.total;
+                        });
+                }
+                if (membership.erc721) {
+                    const { erc721 } = await this.$store.dispatch('erc721/get', this.membership.erc721);
+                    this.token = erc721;
+                }
             });
     }
 }

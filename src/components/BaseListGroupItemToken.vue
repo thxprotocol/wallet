@@ -21,6 +21,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import { ERC20 } from '@/store/modules/erc20';
+import { ERC721 } from '@/store/modules/erc721';
 import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue';
 import { TNetworks } from '@/store/modules/network';
 import { Membership } from '@/store/modules/memberships';

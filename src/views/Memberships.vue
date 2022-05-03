@@ -28,7 +28,6 @@ import { IMemberships } from '@/store/modules/memberships';
     }),
 })
 export default class PoolsView extends Vue {
-    // getters
     profile!: UserProfile;
     memberships!: IMemberships;
 

@@ -42,7 +42,7 @@
         "lint": "vue-cli-service lint"
     },
     "dependencies": {
-        "@thxnetwork/artifacts": "^2.0.1",
+        "@thxnetwork/artifacts": "^3.1.5",
         "@toruslabs/customauth": "^7.0.3",
         "axios": "^0.26.1",
         "bootstrap": "^4.6.0",

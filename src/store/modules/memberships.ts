@@ -9,8 +9,9 @@ export type Membership = {
     poolAddress: string;
     token: any;
     erc20: string;
-    poolBalance: number;
-    pendingBalance: number;
+    erc721: string;
+    poolBalance?: number;
+    pendingBalance?: number;
 };
 
 export interface IMemberships {

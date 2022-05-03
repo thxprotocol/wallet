@@ -1,7 +1,8 @@
 <template>
     <div v-if="profile">
         <b-list-group>
-            <base-list-group-item-token
+            <component
+                :is="membership.erc721 ? 'BaseListGroupItemNft' : 'BaseListGroupItemToken'"
                 :membership="membership"
                 :key="membership.id"
                 v-for="membership in uniqueMembershipTokens"
@@ -12,6 +13,7 @@
 
 <script lang="ts">
 import BaseListGroupItemToken from '@/components/BaseListGroupItemToken.vue';
+import BaseListGroupItemNft from '@/components/BaseListGroupItemNFT.vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { IMemberships, Membership } from '@/store/modules/memberships';
@@ -20,6 +22,7 @@ import { UserProfile } from '@/store/modules/account';
 @Component({
     components: {
         BaseListGroupItemToken,
+        BaseListGroupItemNft,
     },
     computed: mapGetters({
         profile: 'account/profile',
@@ -36,11 +39,18 @@ export default class Wallet extends Vue {
     get uniqueMembershipTokens() {
         const filtered: Membership[] = [];
         for (const id in this.memberships) {
-            if (
-                this.memberships[id].erc20 &&
-                filtered.findIndex((membership: Membership) => this.memberships[id].erc20 === membership.erc20) === -1
-            ) {
-                filtered.push(this.memberships[id]);
+            if (this.memberships[id].erc20 || this.memberships[id].erc721) {
+                const cond1 =
+                    filtered.findIndex((membership: Membership) => this.memberships[id].erc20 === membership.erc20) ===
+                    -1;
+                const cond2 =
+                    filtered.findIndex(
+                        (membership: Membership) => this.memberships[id].erc721 === membership.erc721,
+                    ) === -1;
+
+                if (cond1 && cond2) {
+                    filtered.push(this.memberships[id]);
+                }
             }
         }
         return filtered;
