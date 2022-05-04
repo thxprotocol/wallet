@@ -19,6 +19,15 @@
                 <b-row class="mb-4" v-else>
                     <b-col>{{ 'You have no tokens to claim' }}</b-col>
                 </b-row>
+
+                <template v-for="item in tokenAndAmount">
+                    <b-row class="mb-4">
+                        <b-col>{{ item.token }}: {{ item.amount }}</b-col>
+                        <b-col>
+                            <b-button class="float-right" @click="payOneReward(item.token)">Claim token</b-button>
+                        </b-col>
+                    </b-row>
+                </template>
             </template>
         </b-container>
     </div>
@@ -39,29 +48,37 @@ export default class Claims extends Vue {
     account!: string;
     web3!: Web3;
     contract!: Contract;
-    reward!: any;
+    reward!: number;
     tokenAndAmount: Token[] = [];
 
+    /**
+     * Connects user to metamask, after that the reward variable is updated
+     */
     async connect() {
+        // set address of smart-contract, found in modules-solidity after command npx hardhat node
         const address = '0x5E0A87862f9175493Cc1d02199ad18Eff87Eb400';
         await this.$store.dispatch('metamask/connect');
         this.contract = new this.web3.eth.Contract(ABI_THX as any, address);
+        // when connected trough metamask update reward variable
         this.updateReward();
     }
 
+    /**
+     * Update the reward variable and get all unique tokens with their amount and stores it in the tokenAndAmount Object array
+     */
     async updateReward() {
         const positionAddress = 0;
         const positonAmount = 2;
         let _amount!: any;
-        let token!: any;
         this.reward = 0;
         try {
             const response = await this.contract.methods.getRewards().call();
+            // loop to set all unique tokens to the tokenAndAmount-array with their address and amount
             for (let i = 0; i < response.length; i++) {
+                // cast to Number, because response returns hexadecimal
                 _amount = Number(response[i][positonAmount]._hex.toString());
                 this.reward += _amount;
-                console.log(response[i][positionAddress].toString());
-                console.log(_amount);
+                // add all unique tokens to the tokenAndAmount-array including the amount of that specific token
                 this.tokenAndAmount.push({ token: response[i][positionAddress].toString(), amount: _amount });
             }
         } catch (err) {
@@ -70,11 +87,15 @@ export default class Claims extends Vue {
     }
 
     async payAllRewards() {
-        await this.contract.methods.withdraw().call();
+        await this.contract.methods.withdrawBulk().call();
     }
 
-    async payOneReward() {
-        await this.contract.methods.withdrawBulk().call();
+    /**
+     * Transfers the reward of one token
+     * @param {string} address - The address of the token
+     */
+    async payOneReward(address: string) {
+        await this.contract.methods.withdraw(address).call();
     }
 
     mounted() {
