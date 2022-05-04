@@ -39,7 +39,6 @@ import { mapGetters, mapState } from 'vuex';
 import Web3 from 'web3';
 import { default as ABI_THX } from '../json/ABITHX.json';
 import { Contract } from 'web3-eth-contract';
-import BigNumber from 'bignumber.js';
 
 @Component({
     computed: { ...mapState('metamask', ['account', 'chainId']), ...mapGetters('metamask', ['isConnected']) },
