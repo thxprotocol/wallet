@@ -19,7 +19,6 @@
                 <b-row class="mb-4" v-else>
                     <b-col>{{ 'You have no tokens to claim' }}</b-col>
                 </b-row>
-
             </template>
         </b-container>
     </div>
@@ -36,14 +35,12 @@ import BigNumber from 'bignumber.js';
 @Component({
     computed: { ...mapState('metamask', ['account', 'chainId']), ...mapGetters('metamask', ['isConnected']) },
 })
-
 export default class Claims extends Vue {
     account!: string;
     web3!: Web3;
     contract!: Contract;
     reward!: any;
     tokenAndAmount: Token[] = [];
-
 
     async connect() {
         const address = '0x5E0A87862f9175493Cc1d02199ad18Eff87Eb400';
@@ -63,8 +60,8 @@ export default class Claims extends Vue {
             for (let i = 0; i < response.length; i++) {
                 _amount = Number(response[i][positonAmount]._hex.toString());
                 this.reward += _amount;
-              console.log(response[i][positionAddress].toString())
-              console.log(_amount)
+                console.log(response[i][positionAddress].toString());
+                console.log(_amount);
                 this.tokenAndAmount.push({ token: response[i][positionAddress].toString(), amount: _amount });
             }
         } catch (err) {
@@ -85,13 +82,10 @@ export default class Claims extends Vue {
         this.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:8545'));
         this.updateReward();
     }
-
-
 }
 
 interface Token {
-  token: string;
-  amount: number;
+    token: string;
+    amount: number;
 }
-
 </script>
