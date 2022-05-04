@@ -12,10 +12,17 @@
         </div>
         <b-collapse id="collapse-1" class="mt-2">
             <hr />
-            <b-card variant="light" class="small mb-2" :key="token._id" v-for="token of membership.tokens">
+            <b-card bg-variant="light" class="small mb-2" :key="token._id" v-for="token of membership.tokens">
                 <b-row>
-                    <b-col md="4" :key="metadata._id" v-for="metadata of token.metadata">
-                        <b-form-group :label="metadata.key" label-class="text-muted pb-0">
+                    <b-col md="12">
+                        <strong>
+                            <b-badge variant="dark">#{{ token.tokenId }}</b-badge>
+                            {{ token.title }}
+                        </strong>
+                        <p class="small">{{ token.description }}</p>
+                    </b-col>
+                    <b-col md="4" :key="metadata._id" v-for="metadata of token.attributes">
+                        <b-form-group :label="metadata.key" label-class="text-muted pb-0" class="mb-md-0">
                             {{ metadata.value }}
                         </b-form-group>
                     </b-col>

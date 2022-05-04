@@ -1,7 +1,7 @@
 <template>
     <b-list-group-item
         v-if="token"
-        :to="`/memberships/${membership.id}/withdrawals`"
+        :to="membership.erc20 ? `/memberships/${membership.id}/withdrawals` : null"
         class="d-flex justify-content-between align-items-center"
     >
         <div class="mr-auto">
@@ -19,16 +19,16 @@
             <template #button-content>
                 <i class="fas fa-ellipsis-v p-1 ml-0 text-muted" aria-hidden="true" style="font-size: 1rem"></i>
             </template>
-            <b-dropdown-item v-b-modal="`modalDepositPool-${membership.id}`">
+            <b-dropdown-item v-b-modal="`modalDepositPool-${membership.id}`" v-if="membership.erc20">
                 Pool Deposit
             </b-dropdown-item>
-            <b-dropdown-item :to="`/memberships/${membership.id}/withdrawals`">
+            <b-dropdown-item :to="`/memberships/${membership.id}/withdrawals`" v-if="membership.erc20">
                 Withdrawals
             </b-dropdown-item>
-            <b-dropdown-item :to="`/memberships/${membership.id}/promotions`">
+            <b-dropdown-item :to="`/memberships/${membership.id}/promotions`" v-if="membership.erc20">
                 Promotions
             </b-dropdown-item>
-            <b-dropdown-divider />
+            <b-dropdown-divider v-if="membership.erc20" />
             <b-dropdown-item v-b-modal="`modalDeleteMembership-${membership.id}`" class="text-danger">
                 Remove
             </b-dropdown-item>
