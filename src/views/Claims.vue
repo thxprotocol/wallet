@@ -67,6 +67,7 @@ export default class Claims extends Vue {
         const positonAmount = 2;
         let _amount!: any;
         this.reward = 0;
+        this.tokenAndAmount = [];
         try {
             const response = await this.contract.methods.getRewards().call();
             // loop to set all unique tokens to the tokenAndAmount-array with their address and amount
