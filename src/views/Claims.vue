@@ -19,15 +19,12 @@
                 <b-row class="mb-4" v-else>
                     <b-col>{{ 'You have no tokens to claim' }}</b-col>
                 </b-row>
-
-                <template v-for="item in tokenAndAmount">
-                    <b-row class="mb-4">
-                        <b-col>{{ item.token }}: {{ item.amount }}</b-col>
-                        <b-col>
-                            <b-button class="float-right" @click="payOneReward(item.token)">Claim token</b-button>
-                        </b-col>
-                    </b-row>
-                </template>
+                <b-row class="mb-4" v-for="item in tokenAndAmount" :key="item">
+                    <b-col>{{ item.token }}: {{ item.amount }}</b-col>
+                    <b-col>
+                        <b-button class="float-right" @click="payOneReward(item.token)">Claim token</b-button>
+                    </b-col>
+                </b-row>
             </template>
         </b-container>
     </div>
