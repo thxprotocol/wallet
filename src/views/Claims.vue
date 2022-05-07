@@ -36,6 +36,7 @@ import { mapGetters, mapState } from 'vuex';
 import Web3 from 'web3';
 import { default as ABI_THX } from '../json/ABITHX.json';
 import { Contract } from 'web3-eth-contract';
+
 @Component({
     computed: { ...mapState('metamask', ['account', 'chainId']), ...mapGetters('metamask', ['isConnected']) },
 })
@@ -68,7 +69,7 @@ export default class Claims extends Vue {
         this.reward = 0;
         this.tokenAndAmount = [];
         try {
-            const response = await this.contract.methods.getRewards().call();
+            const response = await this.contract.methods.getRewards(this.account).call();
             // loop to set all unique tokens to the tokenAndAmount-array with their address and amount
             for (let i = 0; i < response.length; i++) {
                 // cast to Number, because response returns hexadecimal
@@ -84,9 +85,8 @@ export default class Claims extends Vue {
 
     async payAllRewards() {
         await this.contract.methods.withdrawBulk().send({
-              from: this.account
-            }
-        );
+            from: this.account,
+        });
     }
 
     /**
@@ -95,14 +95,12 @@ export default class Claims extends Vue {
      */
     async payOneReward(address: string) {
         await this.contract.methods.withdraw(address).send({
-              from: this.account
-            });
+            from: this.account,
+        });
     }
-
     mounted() {
         // web3 set to hardhat provider
         this.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:8545'));
-
         this.updateReward();
     }
 }
