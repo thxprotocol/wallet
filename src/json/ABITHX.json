@@ -44,7 +44,13 @@
     "type": "event"
   },
   {
-    "inputs": [],
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_target",
+        "type": "address"
+      }
+    ],
     "name": "getRewards",
     "outputs": [
       {
