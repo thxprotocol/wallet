@@ -83,7 +83,7 @@ export default class Claims extends Vue {
             }
         } catch (err) {
             this.error = true;
-            console.log('Error: ' + err);
+            console.error('Error: ' + err);
         }
     }
 
