@@ -9,6 +9,7 @@
             </b-row>
 
             <template v-if="isConnected">
+                <p v-if="error">Something went wrong!</p>
                 <b-row class="mb-4" v-if="reward > 0">
                     <b-col>{{ 'You have ' + tokenAndAmount.length + ' token(s) to claim' }}</b-col>
                     <b-col>
@@ -46,6 +47,7 @@ export default class Claims extends Vue {
     contract!: Contract;
     reward!: number;
     tokenAndAmount: Token[] = [];
+    error = false;
 
     /**
      * Connects user to metamask, after that the reward variable is updated
@@ -69,6 +71,7 @@ export default class Claims extends Vue {
         this.reward = 0;
         this.tokenAndAmount = [];
         try {
+            this.error = false;
             const response = await this.contract.methods.getRewards(this.account).call();
             // loop to set all unique tokens to the tokenAndAmount-array with their address and amount
             for (let i = 0; i < response.length; i++) {
@@ -79,6 +82,7 @@ export default class Claims extends Vue {
                 this.tokenAndAmount.push({ token: response[i][positionAddress].toString(), amount: _amount });
             }
         } catch (err) {
+            this.error = true;
             console.log('Error: ' + err);
         }
     }
