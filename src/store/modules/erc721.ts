@@ -2,7 +2,6 @@ import Vue from 'vue';
 import { default as ERC721Abi } from '@thxnetwork/artifacts/dist/exports/abis/NonFungibleToken.json';
 import { Contract } from 'web3-eth-contract';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
-import { fromWei } from 'web3-utils';
 import axios from 'axios';
 
 export interface ERC721 {
@@ -54,12 +53,10 @@ class ERC721Module extends VuexModule {
 
     @Action({ rawError: true })
     async getMetadata(erc721: ERC721) {
-        debugger;
         const { data } = await axios({
             method: 'GET',
             url: '/erc721/' + erc721._id + '/metadata/',
         });
-        debugger;
         const erc721metadata = {
             address: data.address,
             name: data.name,
