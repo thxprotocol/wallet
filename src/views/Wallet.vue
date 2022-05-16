@@ -36,28 +36,28 @@ export default class Wallet extends Vue {
     memberships!: IMemberships;
     profile!: UserProfile;
 
-    get uniqueMembershipTokens() {
-        const filtered: Membership[] = [];
-        for (const id in this.memberships) {
-            if (this.memberships[id].erc20 || this.memberships[id].erc721) {
-                const erc201Index = filtered.findIndex(
-                    (membership: Membership) => this.memberships[id].erc20 === membership.erc20,
-                );
-                const erc721Index = filtered.findIndex(
-                    (membership: Membership) => this.memberships[id].erc721 === membership.erc721,
-                );
-                if (erc201Index === -1 || erc721Index === -1) {
-                    filtered.push(this.memberships[id]);
-                }
-            }
-        }
-        return filtered;
-    }
+    uniqueMembershipTokens: Membership[] = [];
 
     mounted() {
-        this.$store.dispatch('memberships/getAll').then(() => {
+        this.$store.dispatch('memberships/getAll').then(async () => {
+            const promises = [];
+
             for (const id in this.memberships) {
-                this.$store.dispatch('memberships/get', id);
+                promises.push(this.$store.dispatch('memberships/get', id));
+            }
+
+            await Promise.all(promises);
+
+            for (const id in this.memberships) {
+                const erc201Index = this.uniqueMembershipTokens.findIndex(
+                    (membership: Membership) => this.memberships[id].erc20 === membership.erc20,
+                );
+                const erc721Index = this.uniqueMembershipTokens.findIndex(
+                    (membership: Membership) => this.memberships[id].erc721 === membership.erc721,
+                );
+                if (erc201Index === -1 && erc721Index === -1) {
+                    this.uniqueMembershipTokens.push(this.memberships[id]);
+                }
             }
         });
     }
