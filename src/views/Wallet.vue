@@ -49,13 +49,13 @@ export default class Wallet extends Vue {
             await Promise.all(promises);
 
             for (const id in this.memberships) {
-                const erc201Index = this.uniqueMembershipTokens.findIndex(
+                const erc20Index = this.uniqueMembershipTokens.findIndex(
                     (membership: Membership) => this.memberships[id].erc20 === membership.erc20,
                 );
                 const erc721Index = this.uniqueMembershipTokens.findIndex(
                     (membership: Membership) => this.memberships[id].erc721 === membership.erc721,
                 );
-                if (erc201Index === -1 && erc721Index === -1) {
+                if (erc20Index === -1 || erc721Index === -1) {
                     this.uniqueMembershipTokens.push(this.memberships[id]);
                 }
             }
