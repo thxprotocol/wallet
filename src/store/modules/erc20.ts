@@ -83,6 +83,19 @@ class ERC20Module extends VuexModule {
     }) {
         const web3 = this.context.rootGetters['network/all'][network];
         const privateKey = this.context.rootGetters['account/privateKey'];
+
+        // Check matic balance and approved amounts
+        await axios({
+            method: 'POST',
+            url: '/deposits/approve',
+            headers: {
+                AssetPool: to,
+            },
+            data: {
+                amount,
+            },
+        });
+
         const tx = await send(web3, token.address, token.contract.methods.approve(to, amount), privateKey);
 
         return { tx };

@@ -1,22 +1,33 @@
 <template>
-    <b-list-group-item class="d-flex align-items-center w-100">
-        <div class="mr-3">
-            <i class="fas fa-tags text-muted"></i>
+    <b-list-group-item>
+        <div class="d-flex align-items-center w-100 ">
+            <div class="mr-3">
+                <i class="fas fa-tags text-muted"></i>
+            </div>
+            <div class="mr-auto">
+                <strong>{{ promotion.title }}</strong>
+                <br />
+                <p>
+                    {{ promotion.description }}
+                </p>
+            </div>
         </div>
-        <div class="mr-auto">
-            <strong>{{ promotion.title }}</strong>
-            <br />
-            {{ promotion.description }}
+        <div class="text-center">
+            <b-button
+                v-if="membership && !promotion.value && erc20"
+                variant="primary"
+                :disabled="error || busy"
+                v-b-modal="`modalDepositPool-${promotion.id}`"
+            >
+                Pay <strong>{{ promotion.price }} {{ erc20.symbol }}</strong>
+            </b-button>
         </div>
-        <b-alert v-if="promotion.value" class="m-0 mr-3" show variant="warning">{{ promotion.value }}</b-alert>
-        <b-button
-            v-if="membership && !promotion.value && erc20"
-            variant="primary"
-            :disabled="error || busy"
-            v-b-modal="`modalDepositPool-${promotion.id}`"
-        >
-            Pay <strong>{{ promotion.price }} {{ erc20.symbol }}</strong>
-        </b-button>
+        <template v-if="promotion.value">
+            <b-alert class="w-100 m-0 mr-3" show variant="warning">
+                <strong>Promotion unlocked:</strong><br />
+                {{ promotion.value }}
+            </b-alert>
+        </template>
         <base-modal-redeem-promotion :erc20="erc20" :promotion="promotion" :membership="membership" />
     </b-list-group-item>
 </template>

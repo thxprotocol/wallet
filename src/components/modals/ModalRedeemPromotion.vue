@@ -21,6 +21,27 @@
                 Make a deposit of <strong>{{ promotion.price }} {{ erc20.symbol }}</strong> into the pool to unlock this
                 promotion.
             </p>
+            <b-form-group v-if="hasInsufficientAllowance">
+                <b-form-radio v-model="amount" name="a" :value="MAX_UINT256">
+                    <strong>Approve all deposits</strong>
+                    <p class="text-muted">We will always be able to spend {{ erc20.symbol }} on your behalf.</p>
+                </b-form-radio>
+                <b-form-radio v-model="amount" name="a" :value="promotion.price">
+                    <strong>Approve this deposit</strong>
+                    <p class="text-muted">
+                        We will spend {{ promotion.price }} {{ erc20.symbol }} on your behalf and ask for your approval
+                        again for your next deposit.
+                    </p>
+                </b-form-radio>
+            </b-form-group>
+            <p class="small text-muted mt-2 mb-0" v-else>
+                Your have allowed us to spend up to
+                <strong>
+                    {{ promotion.price }}
+                    {{ erc20.symbol }}
+                </strong>
+                on your behalf.
+            </p>
         </template>
         <template v-slot:modal-footer>
             <b-button
@@ -55,9 +76,11 @@ import { toWei } from 'web3-utils';
     }),
 })
 export default class BaseModalRedeemPromotion extends Vue {
+    MAX_UINT256 = MAX_UINT256;
     busy = false;
     error = '';
     balance = 0;
+    amount = MAX_UINT256;
     allowance = 0;
 
     // getters
@@ -73,9 +96,19 @@ export default class BaseModalRedeemPromotion extends Vue {
         return this.balance < this.promotion.price;
     }
 
+    get hasInsufficientAllowance() {
+        return this.allowance < this.promotion.price;
+    }
+
     async onShow() {
         this.$store.dispatch('memberships/get', this.membership.id);
         this.getBalance();
+        const { allowance } = await this.$store.dispatch('erc20/allowance', {
+            token: this.erc20,
+            owner: this.profile.address,
+            spender: this.membership.poolAddress,
+        });
+        this.allowance = Number(allowance);
     }
 
     async getBalance() {
@@ -84,12 +117,6 @@ export default class BaseModalRedeemPromotion extends Vue {
 
     async deposit() {
         this.busy = true;
-        const { allowance } = await this.$store.dispatch('erc20/allowance', {
-            token: this.erc20,
-            owner: this.profile.address,
-            spender: this.membership.poolAddress,
-        });
-        this.allowance = Number(allowance);
 
         if (this.allowance < Number(this.promotion.price)) {
             await this.$store.dispatch('erc20/approve', {
