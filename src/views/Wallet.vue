@@ -58,6 +58,7 @@ export default class Wallet extends Vue {
                 if (erc20Index === -1 || erc721Index === -1) {
                     this.uniqueMembershipTokens.push(this.memberships[id]);
                 }
+                console.log(this.uniqueMembershipTokens);
             }
         });
     }
