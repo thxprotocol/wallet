@@ -66,7 +66,7 @@ export default class Claims extends Vue {
      */
     async updateReward() {
         const positionAddress = 0;
-        const positonAmount = 2;
+        const positionAmount = 2;
         let _amount!: any;
         this.reward = 0;
         this.tokenAndAmount = [];
@@ -76,7 +76,7 @@ export default class Claims extends Vue {
             // loop to set all unique tokens to the tokenAndAmount-array with their address and amount
             for (let i = 0; i < response.length; i++) {
                 // cast to Number, because response returns hexadecimal
-                _amount = Number(response[i][positonAmount]._hex.toString());
+                _amount = Number(response[i][positionAmount]._hex.toString());
                 this.reward += _amount;
                 // add all unique tokens to the tokenAndAmount-array including the amount of that specific token
                 this.tokenAndAmount.push({ token: response[i][positionAddress].toString(), amount: _amount });
