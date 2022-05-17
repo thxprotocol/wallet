@@ -84,7 +84,7 @@ export default class BaseModalDepositPool extends Vue {
     }
 
     get hasInsufficientMATICBalance() {
-        return this.maticBalance < 0.01;
+        return this.maticBalance == 0;
     }
 
     async onShow() {
@@ -105,7 +105,7 @@ export default class BaseModalDepositPool extends Vue {
         this.balance = await this.$store.dispatch('erc20/balanceOf', this.token);
     }
 
-    async deposit() {
+    async deposit(amount: number) {
         this.busy = true;
 
         const { allowance } = await this.$store.dispatch('erc20/allowance', {
@@ -120,7 +120,7 @@ export default class BaseModalDepositPool extends Vue {
                 token: this.token,
                 network: this.membership.network,
                 to: this.membership.poolAddress,
-                amount: MAX_UINT256,
+                amount: amount || MAX_UINT256,
             });
         }
 
