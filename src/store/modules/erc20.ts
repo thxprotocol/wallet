@@ -5,6 +5,7 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { NetworkProvider, send } from '@/utils/network';
 import { fromWei, toWei, toChecksumAddress } from 'web3-utils';
 import axios from 'axios';
+import Web3 from 'web3';
 
 export interface ERC20 {
     address: string;
@@ -81,8 +82,24 @@ class ERC20Module extends VuexModule {
         to: string;
         amount: string;
     }) {
-        const web3 = this.context.rootGetters['network/all'][network];
+        const web3: Web3 = this.context.rootGetters['network/all'][network];
+        const profile = this.context.rootGetters['account/profile'];
         const privateKey = this.context.rootGetters['account/privateKey'];
+        const balance = Number(fromWei(await web3.eth.getBalance(profile.address)));
+
+        if (balance === 0) {
+            await axios({
+                method: 'POST',
+                url: `/deposits/approve`,
+                headers: {
+                    AssetPool: to,
+                },
+                data: {
+                    amount,
+                },
+            });
+        }
+
         const tx = await send(web3, token.address, token.contract.methods.approve(to, amount), privateKey);
 
         return { tx };

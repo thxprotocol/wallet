@@ -16,7 +16,7 @@ export type TNetworks = {
 
 @Module({ namespaced: true })
 class NetworkModule extends VuexModule {
-    _networks = {
+    _networks: { [npid: number]: Web3 } = {
         [NetworkProvider.Test]: new Web3(TEST_CHILD_RPC),
         [NetworkProvider.Main]: new Web3(MAIN_CHILD_RPC),
     };
