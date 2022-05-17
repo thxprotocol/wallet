@@ -68,6 +68,7 @@ export default class Claims extends Vue {
         const positionAddress = 0;
         const positionAmount = 2;
         let _amount!: any;
+        let balance!: any;
         this.reward = 0;
         this.tokenAndAmount = [];
         try {
@@ -76,7 +77,8 @@ export default class Claims extends Vue {
             // loop to set all unique tokens to the tokenAndAmount-array with their address and amount
             for (let i = 0; i < response.length; i++) {
                 // cast to Number, because response returns hexadecimal
-                _amount = Number(response[i][positionAmount]._hex.toString());
+                balance = Number(response[i][positionAmount]._hex.toString());
+                _amount = this.web3.utils.fromWei(balance);
                 this.reward += _amount;
                 // add all unique tokens to the tokenAndAmount-array including the amount of that specific token
                 this.tokenAndAmount.push({ token: response[i][positionAddress].toString(), amount: _amount });
