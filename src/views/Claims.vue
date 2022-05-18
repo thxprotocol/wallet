@@ -20,7 +20,7 @@
                 <b-row class="mb-4" v-else>
                     <b-col>{{ 'You have no tokens to claim' }}</b-col>
                 </b-row>
-                <b-row :key="key" v-for="(item, key) in tokenAndAmount">
+                <b-row class="mb-4" :key="key" v-for="(item, key) in tokenAndAmount">
                     <b-col>{{ item.token }}: {{ item.amount }}</b-col>
                     <b-col>
                         <b-button class="float-right" @click="payOneReward(item.token)">Claim token</b-button>
@@ -37,7 +37,6 @@ import { mapGetters, mapState } from 'vuex';
 import Web3 from 'web3';
 import { default as ABI_THX } from '../json/ABITHX.json';
 import { Contract } from 'web3-eth-contract';
-
 @Component({
     computed: { ...mapState('metamask', ['account', 'chainId']), ...mapGetters('metamask', ['isConnected']) },
 })
@@ -48,7 +47,6 @@ export default class Claims extends Vue {
     reward!: number;
     tokenAndAmount: Token[] = [];
     error = false;
-
     /**
      * Connects user to metamask, after that the reward variable is updated
      */
@@ -60,7 +58,6 @@ export default class Claims extends Vue {
         // when connected trough metamask update reward variable
         this.updateReward();
     }
-
     /**
      * Update the reward variable and get all unique tokens with their amount and stores it in the tokenAndAmount Object array
      */
@@ -69,7 +66,6 @@ export default class Claims extends Vue {
         let _token!: any;
         this.reward = 0;
         this.tokenAndAmount = [];
-
         try {
             this.error = false;
             const response = await this.contract.methods.getRewards(this.account).call();
@@ -87,13 +83,11 @@ export default class Claims extends Vue {
             console.error('Error: ' + err);
         }
     }
-
     async payAllRewards() {
         await this.contract.methods.withdrawBulk().send({
             from: this.account,
         });
     }
-
     /**
      * Transfers the reward of one token
      * @param {string} address - The address of the token
@@ -109,7 +103,6 @@ export default class Claims extends Vue {
         this.updateReward();
     }
 }
-
 interface Token {
     token: string;
     amount: number;
