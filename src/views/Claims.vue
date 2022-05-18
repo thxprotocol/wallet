@@ -10,7 +10,7 @@
 
             <template v-if="isConnected">
                 <p v-if="error">Something went wrong!</p>
-                <b-row class="mb-4" v-if="reward > 0">
+                <b-row class="mb-4" v-if="reward != 0">
                     <b-col>{{ 'You have ' + tokenAndAmount.length + ' token(s) to claim' }}</b-col>
                     <b-col>
                         <b-button class="float-right" @click="payAllRewards">Claim all tokens</b-button>
