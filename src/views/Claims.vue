@@ -54,7 +54,7 @@ export default class Claims extends Vue {
      */
     async connect() {
         // set address of smart-contract, found in modules-solidity after command npx hardhat node
-        const address = '0x5E0A87862f9175493Cc1d02199ad18Eff87Eb400';
+        const address = '0xe2092A19f37D2DBBfa9c41C9b83CBAAA1294548f';
         await this.$store.dispatch('metamask/connect');
         this.contract = new this.web3.eth.Contract(ABI_THX as any, address);
         // when connected trough metamask update reward variable
@@ -65,23 +65,22 @@ export default class Claims extends Vue {
      * Update the reward variable and get all unique tokens with their amount and stores it in the tokenAndAmount Object array
      */
     async updateReward() {
-        const positionAddress = 0;
-        const positionAmount = 2;
         let _amount!: any;
-        let balance!: any;
+        let _token!: any;
         this.reward = 0;
         this.tokenAndAmount = [];
+
         try {
             this.error = false;
             const response = await this.contract.methods.getRewards(this.account).call();
             // loop to set all unique tokens to the tokenAndAmount-array with their address and amount
             for (let i = 0; i < response.length; i++) {
                 // cast to Number, because response returns hexadecimal
-                balance = Number(response[i][positionAmount]._hex.toString());
-                _amount = this.web3.utils.fromWei(balance);
+                _amount = this.web3.utils.fromWei(response[i].amount);
+                _token = response[i].token;
                 this.reward += _amount;
                 // add all unique tokens to the tokenAndAmount-array including the amount of that specific token
-                this.tokenAndAmount.push({ token: response[i][positionAddress].toString(), amount: _amount });
+                this.tokenAndAmount.push({ token: _token, amount: _amount });
             }
         } catch (err) {
             this.error = true;
