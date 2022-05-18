@@ -95,37 +95,27 @@ export default class Redirect extends Vue {
         this.$router.push(this.redirectPath);
     }
 
-    async redirectCallback() {
-        this.info = 'Authenticating your account...';
-        await this.$store.dispatch('account/signinRedirectCallback');
-    }
-
-    async getProfile() {
-        this.info = 'Fetching your account details...';
-        await this.$store.dispatch('account/getProfile');
-    }
-
-    async getPrivateKey() {
-        this.info = 'Fetching private key from Web3Auth...';
-        await this.$store.dispatch('account/getPrivateKey', this.user);
-    }
-
     async setNetwork(privateKey: string) {
         this.info = 'Initializing blockchain networks...';
         await this.$store.dispatch('network/setNetwork', { npid: NetworkProvider.Test, privateKey });
         await this.$store.dispatch('network/setNetwork', { npid: NetworkProvider.Main, privateKey });
     }
 
-    async updateAccount() {
-        this.info = 'Updating your account details with a new address...';
+    async redirectCallback() {
+        this.info = 'Authenticating your account...';
+        await this.$store.dispatch('account/signinRedirectCallback');
+    }
 
-        const web3 = new Web3();
-        const account = web3.eth.accounts.privateKeyToAccount(this.privateKey);
+    async getMemberships() {
+        this.info = 'Fetching memberships for your account...';
+        const { error } = await this.$store.dispatch('memberships/getAll');
+        if (error) this.error = error.message;
+    }
 
-        if (!this.profile.address || this.profile.address !== account.address) {
-            const error = await this.$store.dispatch('account/update', { address: account.address });
-            if (error) this.error = error.message;
-        }
+    async getPrivateKey() {
+        this.info = 'Fetching private key from Web3Auth...';
+        const { error } = await this.$store.dispatch('account/getPrivateKey', this.user);
+        if (error) this.error = error.message;
     }
 
     async claimReward() {
@@ -142,6 +132,23 @@ export default class Redirect extends Vue {
         } else {
             this.withdrawal = withdrawal;
         }
+    }
+
+    async updateAccount() {
+        this.info = 'Updating your account details with a new address...';
+
+        const web3 = new Web3();
+        const account = web3.eth.accounts.privateKeyToAccount(this.privateKey);
+
+        if (!this.profile.address || this.profile.address !== account.address) {
+            const error = await this.$store.dispatch('account/update', { address: account.address });
+            if (error) this.error = error.message;
+        }
+    }
+
+    async getProfile() {
+        this.info = 'Fetching your account details...';
+        await this.$store.dispatch('account/getProfile');
     }
 }
 </script>
