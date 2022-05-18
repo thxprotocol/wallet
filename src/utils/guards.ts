@@ -47,6 +47,7 @@ export function redirectSigninSilent() {
 export async function assertAuthorization(to: any, from: any, next: any) {
     const user = await store.dispatch('account/getUser');
     if (!user) return redirectSignin();
+    await store.dispatch('account/getPrivateKey', user);
     next();
 }
 

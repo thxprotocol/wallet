@@ -23,10 +23,8 @@ class AccountModule extends VuexModule {
     }
 
     get privateKey() {
-        if (this._privateKey) return this._privateKey;
-        if (!this._user) return '';
-        const encoded = sessionStorage.getItem(`thx:wallet:user:${this._user.profile.sub}`) as string;
-        return atob(encoded);
+        if (!this._user || (this._user && !this._privateKey)) return '';
+        return this._privateKey;
     }
 
     get profile() {
@@ -39,9 +37,7 @@ class AccountModule extends VuexModule {
     }
 
     @Mutation
-    setPrivateKey({ sub, privateKey }: { sub: string; privateKey: string }) {
-        sessionStorage.setItem(`thx:wallet:user:${sub}`, btoa(privateKey));
-
+    setPrivateKey(privateKey: string) {
         this._privateKey = privateKey;
     }
 
@@ -75,10 +71,8 @@ class AccountModule extends VuexModule {
         const privateKey = await getPrivateKeyForUser(user);
 
         if (privateKey && isPrivateKey(privateKey) && this.user) {
-            this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
+            this.context.commit('setPrivateKey', privateKey);
         }
-
-        return { privateKey };
     }
 
     @Action({ rawError: true })
