@@ -35,8 +35,10 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
 import Web3 from 'web3';
-import { default as ABI_THX } from '../json/ABITHX.json';
+import { default as feeCollectorAbi } from '../abis/FeeCollector.json';
 import { Contract } from 'web3-eth-contract';
+import { AbiItem } from 'web3-utils';
+import { FEE_COLLECTOR_ADDRESS } from '@/utils/secrets';
 @Component({
     computed: { ...mapState('metamask', ['account', 'chainId']), ...mapGetters('metamask', ['isConnected']) },
 })
@@ -52,9 +54,8 @@ export default class Claims extends Vue {
      */
     async connect() {
         // set address of smart-contract, found in modules-solidity after command npx hardhat node
-        const address = '0xe2092A19f37D2DBBfa9c41C9b83CBAAA1294548f';
         await this.$store.dispatch('metamask/connect');
-        this.contract = new this.web3.eth.Contract(ABI_THX as any, address);
+        this.contract = new this.web3.eth.Contract(feeCollectorAbi as AbiItem[], FEE_COLLECTOR_ADDRESS);
         // when connected trough metamask update reward variable
         this.updateReward();
     }
@@ -99,7 +100,7 @@ export default class Claims extends Vue {
     }
     mounted() {
         // web3 set to hardhat provider
-        this.web3 = new Web3(new Web3.providers.HttpProvider('http://127.0.0.1:8545'));
+        this.web3 = new Web3(Web3.givenProvider || 'http://127.0.0.1:8545');
         this.updateReward();
     }
 }
