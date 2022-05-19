@@ -1,17 +1,21 @@
 <template>
     <b-list-group-item v-if="membership && token" class="d-flex justify-content-between align-items-center">
-        <div class="mr-auto d-flex align-items-center" v-b-tooltip :title="token.name">
+        <div
+            class="mr-auto d-flex align-items-center"
+            v-b-tooltip
+            :title="`${token.name} (${NetworkProvider[membership.network]})`"
+        >
             <base-identicon :rounded="true" variant="dark" :size="30" :uri="token.logoURI" class="mr-2" />
             <strong>{{ token.symbol }}</strong>
         </div>
         <div class="h3 mr-3 m-0">
             {{ balance }}
         </div>
-        <!-- <b-button variant="primary" size="sm" @click.stop="$bvModal.show(`modalTransferTokens-${token.address}`)">
-            <i class="fas fa-exchange-alt ml-0 mr-md-2"></i>
-            <span class="d-none d-md-inline">Transfer</span>
-        </b-button> -->
-        <!-- <base-modal-transfer-tokens :token="token" /> -->
+
+        <b-button variant="light" size="sm" @click.stop="$bvModal.show(`modalTransferTokens-${token.address}`)">
+            <i class="fas fa-exchange-alt ml-0"></i>
+        </b-button>
+        <base-modal-transfer-tokens :membership="membership" :token="token" />
     </b-list-group-item>
 </template>
 
@@ -24,6 +28,7 @@ import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue
 import { TNetworks } from '@/store/modules/network';
 import { Membership } from '@/store/modules/memberships';
 import BaseIdenticon from './BaseIdenticon.vue';
+import { NetworkProvider } from '@/utils/network';
 
 @Component({
     components: {
@@ -36,6 +41,7 @@ import BaseIdenticon from './BaseIdenticon.vue';
     }),
 })
 export default class BaseListGroupItemToken extends Vue {
+    NetworkProvider = NetworkProvider;
     busy = true;
     balance = 0;
 
