@@ -1,14 +1,18 @@
 <template>
     <div v-if="profile" class="d-flex align-items-center justify-content-center">
         <b-spinner v-if="loading" variant="primary" class="m-auto" />
-        <b-list-group v-if="!loading && Object.values(memberships).length" class="w-100">
-            <base-list-group-item-asset-pool
-                :membership="membership"
-                :key="membership.id"
-                v-for="membership of memberships"
-            />
-        </b-list-group>
-        <strong v-else class="text-gray text-center">You are not a member to any pools.</strong>
+        <template v-else>
+            <strong v-if="!Object.values(memberships).length" class="text-gray text-center">
+                You are not a member to any pools.
+            </strong>
+            <b-list-group v-else class="w-100 align-self-start">
+                <base-list-group-item-asset-pool
+                    :membership="membership"
+                    :key="membership.id"
+                    v-for="membership of memberships"
+                />
+            </b-list-group>
+        </template>
     </div>
 </template>
 

@@ -18,7 +18,11 @@
                 <h1 class="display-5 text-secondary">{{ $router.currentRoute.name || '' }}</h1>
                 <router-view class="main-container flex-grow-1 overflow-auto shadow-lg px-0 p-md-3" />
             </div>
-            <footer class="d-flex align-items-center container" style="height: 85px" v-if="$router.currentRoute.name">
+            <footer
+                v-if="$router.currentRoute.name"
+                class="d-flex align-items-center container flex-shrink-0"
+                style="height: 85px"
+            >
                 <base-main-menu v-if="profile" class="w-100 d-md-none" />
             </footer>
         </div>
@@ -31,7 +35,6 @@ import { mapGetters } from 'vuex';
 import { UserProfile } from './store/modules/account';
 import BaseNetworkSelect from './components/BaseNetworkSelect.vue';
 import BaseDropdownAccount from './components/BaseDropdownAccount.vue';
-import BaseDropdownMenu from './components/BaseDropdownMenu.vue';
 import BaseMainMenu from './components/BaseMainMenu.vue';
 
 @Component({
@@ -39,7 +42,6 @@ import BaseMainMenu from './components/BaseMainMenu.vue';
         BaseMainMenu,
         BaseNetworkSelect,
         BaseDropdownAccount,
-        BaseDropdownMenu,
     },
     computed: mapGetters({
         profile: 'account/profile',

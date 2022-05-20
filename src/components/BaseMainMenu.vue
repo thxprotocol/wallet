@@ -9,12 +9,16 @@
     </b-button-group>
 </template>
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
+import { Route } from 'vue-router';
 
 @Component({})
 export default class BaseMainMenu extends Vue {
-    get path() {
-        return this.$router.currentRoute.path;
+    path = '';
+
+    @Watch('$route', { immediate: true, deep: true })
+    onUrlChange(newRoute: Route) {
+        this.path = newRoute.path;
     }
 }
 </script>

@@ -1,15 +1,19 @@
 <template>
     <div v-if="profile" class="d-flex align-items-center justify-content-center">
         <b-spinner variant="primary" class="m-auto" v-if="loading" />
-        <b-list-group v-if="!loading && uniqueMembershipTokens.length" class="w-100">
-            <component
-                :is="membership.erc721 ? 'BaseListGroupItemNft' : 'BaseListGroupItemToken'"
-                :membership="membership"
-                :key="key"
-                v-for="(membership, key) in uniqueMembershipTokens"
-            />
-        </b-list-group>
-        <strong v-else class="text-gray text-center">No tokens are visible for your account.</strong>
+        <template v-else>
+            <strong v-if="!uniqueMembershipTokens.length" class="text-gray text-center">
+                No tokens are visible for your account.
+            </strong>
+            <b-list-group v-else class="w-100 align-self-start">
+                <component
+                    :is="membership.erc721 ? 'BaseListGroupItemNft' : 'BaseListGroupItemToken'"
+                    :membership="membership"
+                    :key="key"
+                    v-for="(membership, key) in uniqueMembershipTokens"
+                />
+            </b-list-group>
+        </template>
     </div>
 </template>
 

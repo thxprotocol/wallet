@@ -1,5 +1,5 @@
 <template>
-    <div class="center-center flex-column h-100">
+    <div class="d-flex align-items-center justify-content-center mb-2 bg-dark">
         <div class="flex-row text-center" v-if="isClaimInvalid || isClaimFailed">
             <b-alert show variant="info" v-if="isClaimInvalid">
                 {{ error }}
@@ -12,11 +12,11 @@
             </b-button>
             <b-button variant="link" @click="redirect()">Continue</b-button>
         </div>
-        <template v-else>
+        <div v-else class="d-flex flex-column align-items-center">
             <b-alert show variant="danger" v-if="error">{{ error }}</b-alert>
-            <b-spinner variant="primary" size="lg"></b-spinner><br />
+            <b-spinner variant="secondary" size="lg"></b-spinner>
             <span class="text-muted">{{ info }}</span>
-        </template>
+        </div>
         <modal-show-withdrawal @redirect="redirect()" :withdrawal="withdrawal" v-if="withdrawal" />
         <modal-decode-private-key @init="redirect()" />
     </div>
@@ -89,6 +89,7 @@ export default class Redirect extends Vue {
         }
 
         if (!this.error && !this.isClaimFailed && !this.isClaimInvalid && !this.withdrawal) this.redirect();
+        debugger;
     }
 
     redirect() {
