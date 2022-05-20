@@ -39,6 +39,7 @@ import { default as feeCollectorAbi } from '../abis/FeeCollector.json';
 import { Contract } from 'web3-eth-contract';
 import { AbiItem } from 'web3-utils';
 import { FEE_COLLECTOR_ADDRESS } from '@/utils/secrets';
+import axios from 'axios';
 @Component({
     computed: { ...mapState('metamask', ['account', 'chainId']), ...mapGetters('metamask', ['isConnected']) },
 })
@@ -53,10 +54,18 @@ export default class Claims extends Vue {
      * Connects user to metamask, after that the reward variable is updated
      */
     async connect() {
+        const getWalletUrl = 'http://localhost:3001/v1/claims/wallet';
         // set address of smart-contract, found in modules-solidity after command npx hardhat node
         await this.$store.dispatch('metamask/connect');
         this.contract = new this.web3.eth.Contract(feeCollectorAbi as AbiItem[], FEE_COLLECTOR_ADDRESS);
         // when connected trough metamask update reward variable
+        const walletExist = await axios({
+            method: 'post',
+            url: getWalletUrl,
+            data: {
+                wallet: this.account,
+            },
+        });
         this.updateReward();
     }
     /**
