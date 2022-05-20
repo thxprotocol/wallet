@@ -15,7 +15,7 @@
                 class="container container-md d-flex flex-column flex-grow-1 flex-md-grow-0 mt-0 my-md-auto"
                 style="max-width: 768px; min-height: 450px"
             >
-                <h1 class="display-5 text-secondary">{{ $router.currentRoute.name }}</h1>
+                <h1 class="display-5 text-secondary">{{ $router.currentRoute.name || '' }}</h1>
                 <router-view class="main-container flex-grow-1 overflow-auto shadow-lg px-0 p-md-3" />
             </div>
             <footer class="d-flex align-items-center container" style="height: 85px" v-if="$router.currentRoute.name">

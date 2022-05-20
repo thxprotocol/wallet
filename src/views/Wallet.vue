@@ -1,6 +1,7 @@
 <template>
-    <div v-if="profile">
-        <b-list-group>
+    <div v-if="profile" class="d-flex align-items-center justify-content-center">
+        <b-spinner variant="primary" class="m-auto" v-if="loading" />
+        <b-list-group v-if="!loading && uniqueMembershipTokens.length" class="w-100">
             <component
                 :is="membership.erc721 ? 'BaseListGroupItemNft' : 'BaseListGroupItemToken'"
                 :membership="membership"
@@ -8,6 +9,7 @@
                 v-for="(membership, key) in uniqueMembershipTokens"
             />
         </b-list-group>
+        <strong v-else class="text-gray text-center">No tokens are visible for your account.</strong>
     </div>
 </template>
 
@@ -30,12 +32,9 @@ import { UserProfile } from '@/store/modules/account';
     }),
 })
 export default class Wallet extends Vue {
-    busy = false;
-    error = '';
-
+    loading = true;
     memberships!: IMemberships;
     profile!: UserProfile;
-
     uniqueMembershipTokens: Membership[] = [];
 
     mounted() {
@@ -59,6 +58,7 @@ export default class Wallet extends Vue {
                     this.uniqueMembershipTokens.push(this.memberships[id]);
                 }
             }
+            this.loading = false;
         });
     }
 }

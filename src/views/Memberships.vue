@@ -1,12 +1,14 @@
 <template>
-    <div v-if="profile">
-        <b-list-group>
+    <div v-if="profile" class="d-flex align-items-center justify-content-center">
+        <b-spinner v-if="loading" variant="primary" class="m-auto" />
+        <b-list-group v-if="!loading && Object.values(memberships).length" class="w-100">
             <base-list-group-item-asset-pool
                 :membership="membership"
                 :key="membership.id"
                 v-for="membership of memberships"
             />
         </b-list-group>
+        <strong v-else class="text-gray text-center">You are not a member to any pools.</strong>
     </div>
 </template>
 
@@ -28,6 +30,7 @@ import { IMemberships } from '@/store/modules/memberships';
     }),
 })
 export default class PoolsView extends Vue {
+    loading = true;
     profile!: UserProfile;
     memberships!: IMemberships;
 
@@ -40,6 +43,7 @@ export default class PoolsView extends Vue {
             }
 
             Promise.all(promises);
+            this.loading = false;
         });
     }
 }
