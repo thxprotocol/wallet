@@ -29,7 +29,6 @@ import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 
 @Component({
-    name: 'BaseDropdownMenu',
     computed: mapGetters({
         profile: 'account/profile',
     }),

@@ -21,11 +21,22 @@
         <b-dropdown-item size="sm" variant="dark" v-clipboard:copy="profile.address">
             <span class="text-muted"> <i class="fas fa-clipboard mr-3"></i> Copy address </span>
         </b-dropdown-item>
+        <b-dropdown-item to="/account">
+            <span class="text-muted"><i class="fas fa-user-circle mr-3"></i></i>Account</span>
+        </b-dropdown-item>
+        <b-dropdown-item :href="dashboardUrl">
+            <span class="text-muted"><i class="fas fa-chart-line mr-3"></i>Go to Dashboard</span>
+        </b-dropdown-item>
+        <b-dropdown-divider />
+        <b-dropdown-item size="sm" variant="dark" to="/signout">
+            <span class="text-muted"><i class="fas fa-sign-out-alt mr-3"></i>Logout</span>
+        </b-dropdown-item>
     </b-dropdown>
 </template>
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
+import { DASHBOARD_URL } from '@/utils/secrets';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BaseIdenticon from './BaseIdenticon.vue';
@@ -40,5 +51,6 @@ import BaseIdenticon from './BaseIdenticon.vue';
 })
 export default class BaseDropdownAccount extends Vue {
     profile!: UserProfile;
+    dashboardUrl = DASHBOARD_URL;
 }
 </script>

@@ -1,51 +1,42 @@
 <template>
     <div id="app" class="d-flex flex-column h-100">
         <div class="flex-grow-1 overflow-auto d-flex flex-column">
-            <header class="pt-3 pb-3 container-fluid d-flex align-items-center" v-if="$router.currentRoute.name">
+            <header class="p-md-3 container-fluid d-flex align-items-center" v-if="$router.currentRoute.name">
                 <b-button to="/" variant="link" class="pl-0 mr-auto mr-md-0">
                     <img :src="require('@/assets/img/logo.png')" height="32" alt="" />
                 </b-button>
-                <base-network-select />
-                <div class="d-none d-md-flex flex-grow-1 justify-content-center" v-if="profile">
-                    <b-button-group size="md" class="mx-auto">
-                        <b-button
-                            to="/wallet"
-                            :variant="$router.currentRoute.path === '/wallet' ? 'secondary' : 'darker'"
-                            >Wallet</b-button
-                        >
-                        <b-button
-                            to="/memberships"
-                            :variant="$router.currentRoute.path === '/memberships' ? 'secondary' : 'darker'"
-                        >
-                            Pools
-                        </b-button>
-                    </b-button-group>
+                <base-network-select v-if="profile" />
+                <div class="d-none d-md-flex flex-grow-1 justify-content-center ">
+                    <base-main-menu v-if="profile" class="mx-auto" />
                 </div>
                 <base-dropdown-account class="ml-2 ml-md-auto" />
-                <base-dropdown-menu class="ml-2" />
             </header>
             <div
-                class="my-auto container container-md d-flex flex-column"
-                style="height:auto; min-height: 400px; max-height: 80vh; max-width: 768px;"
+                class="container container-md d-flex flex-column flex-grow-1 flex-md-grow-0 mt-0 my-md-auto"
+                style="max-width: 768px; min-height: 450px"
             >
                 <h1 class="display-5 text-secondary">{{ $router.currentRoute.name }}</h1>
-                <router-view class="main-container flex-grow-1 overflow-auto shadow-lg" />
+                <router-view class="main-container flex-grow-1 overflow-auto shadow-lg px-0 p-md-3" />
             </div>
-            <footer class="container-fluid" style="height: 85px" v-if="$router.currentRoute.name"></footer>
+            <footer class="d-flex align-items-center container" style="height: 85px" v-if="$router.currentRoute.name">
+                <base-main-menu v-if="profile" class="w-100 d-md-none" />
+            </footer>
         </div>
     </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
+import { UserProfile } from './store/modules/account';
 import BaseNetworkSelect from './components/BaseNetworkSelect.vue';
 import BaseDropdownAccount from './components/BaseDropdownAccount.vue';
 import BaseDropdownMenu from './components/BaseDropdownMenu.vue';
-import { mapGetters } from 'vuex';
-import { UserProfile } from './store/modules/account';
+import BaseMainMenu from './components/BaseMainMenu.vue';
 
 @Component({
     components: {
+        BaseMainMenu,
         BaseNetworkSelect,
         BaseDropdownAccount,
         BaseDropdownMenu,

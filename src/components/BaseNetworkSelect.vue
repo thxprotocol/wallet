@@ -1,5 +1,5 @@
 <template>
-    <b-dropdown size="sm" variant="darker" no-caret v-if="profile">
+    <b-dropdown size="sm" @show="getBalances()" variant="darker" no-caret v-if="profile">
         <template #button-content>
             <div class="d-flex align-items-center">
                 <i class="fas fa-code-branch p-1 mr-2 text-success" style="font-size: 1.5rem"></i>
@@ -30,7 +30,6 @@ import { fromWei } from 'web3-utils';
 @Component({
     computed: mapGetters({
         profile: 'account/profile',
-        privateKey: 'account/privateKey',
         networks: 'network/all',
     }),
 })
@@ -39,22 +38,20 @@ export default class BaseNetworkSelect extends Vue {
         [NetworkProvider.Test]: 0,
         [NetworkProvider.Main]: 0,
     };
-
-    // getters
     profile!: UserProfile;
     networks!: TNetworks;
-    privateKey!: string;
 
-    async mounted() {
-        await this.getBalance(NetworkProvider.Test);
-        await this.getBalance(NetworkProvider.Main);
+    mounted() {
+        this.getBalances();
+    }
+
+    getBalances() {
+        this.getBalance(NetworkProvider.Test);
+        this.getBalance(NetworkProvider.Main);
     }
 
     async getBalance(npid: NetworkProvider) {
-        if (!this.profile) return;
-
-        const web3 = this.networks[npid];
-        this.balances[npid] = Number(fromWei(await web3.eth.getBalance(this.profile.address)));
+        this.balances[npid] = Number(fromWei(await this.networks[npid].eth.getBalance(this.profile.address)));
     }
 }
 </script>
