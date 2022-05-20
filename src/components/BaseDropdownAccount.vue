@@ -22,7 +22,7 @@
             <span class="text-muted"> <i class="fas fa-clipboard mr-3"></i> Copy address </span>
         </b-dropdown-item>
         <b-dropdown-item to="/account">
-            <span class="text-muted"><i class="fas fa-user-circle mr-3"></i></i>Account</span>
+            <span class="text-muted"><i class="fas fa-user-circle mr-3"></i>Account</span>
         </b-dropdown-item>
         <b-dropdown-item :href="dashboardUrl">
             <span class="text-muted"><i class="fas fa-chart-line mr-3"></i>Go to Dashboard</span>
