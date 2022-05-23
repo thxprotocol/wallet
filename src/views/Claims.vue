@@ -1,6 +1,10 @@
 <template>
     <div>
         <b-container>
+            <div class="alert-danger">
+                {{ error }}
+            </div>
+
             <b-row class="mb-4">
                 <b-col>{{ isConnected ? 'You are connected with wallet: ' + account : 'Not connected' }}</b-col>
                 <b-col>
@@ -8,8 +12,19 @@
                 </b-col>
             </b-row>
 
-            <template v-if="isConnected">
-                <p v-if="error">Something went wrong!</p>
+            <b-spinner v-if="loading" label="Spinning"></b-spinner>
+            <template v-if="isConnected && !loading">
+                <b-row class="mb-4">
+                    <b-col>{{
+                        walletExist ? 'You are signed up for the pilot' : "You haven't signed up for the pilot"
+                    }}</b-col>
+                    <b-col>
+                        <b-button class="float-right" @click="insetWallet" :hidden="walletExist"
+                            >Sign up for the pilot</b-button
+                        >
+                    </b-col>
+                </b-row>
+
                 <b-row class="mb-4" v-if="reward != 0">
                     <b-col>{{ 'You have ' + tokenAndAmount.length + ' token(s) to claim' }}</b-col>
                     <b-col>
@@ -49,18 +64,27 @@ export default class Claims extends Vue {
     contract!: Contract;
     reward!: number;
     tokenAndAmount: Token[] = [];
-    error = false;
+    error = '';
+    walletExist = false;
+    loading = false;
     /**
      * Connects user to metamask, after that the reward variable is updated
      */
     async connect() {
+        this.loading = true;
         const getWalletUrl = 'http://localhost:3001/v1/claims/';
         // set address of smart-contract, found in modules-solidity after command npx hardhat node
         await this.$store.dispatch('metamask/connect');
         this.contract = new this.web3.eth.Contract(feeCollectorAbi as AbiItem[], FEE_COLLECTOR_ADDRESS);
         // when connected trough metamask update reward variable;
-        const walletExist = await axios.get(getWalletUrl + this.account);
-
+        let response;
+        try {
+            response = await axios.get(getWalletUrl + '0xaf9d56684466fcfcea0a2b7fc137ab864d642945');
+        } catch (e) {
+            this.error = 'Something went wrong while checking your wallet.';
+            console.error('Error check if wallet exists: ' + e);
+        }
+        this.walletExist = response?.data;
         this.updateReward();
     }
     /**
@@ -72,7 +96,7 @@ export default class Claims extends Vue {
         this.reward = 0;
         this.tokenAndAmount = [];
         try {
-            this.error = false;
+            this.error = '';
             const response = await this.contract.methods.getRewards(this.account).call();
             // loop to set all unique tokens to the tokenAndAmount-array with their address and amount
             for (let i = 0; i < response.length; i++) {
@@ -84,9 +108,10 @@ export default class Claims extends Vue {
                 this.tokenAndAmount.push({ token: _token, amount: _amount });
             }
         } catch (err) {
-            this.error = true;
+            this.error = 'Something went wrong!';
             console.error('Error: ' + err);
         }
+        this.loading = false;
     }
     async payAllRewards() {
         await this.contract.methods.withdrawBulk().send({
@@ -101,6 +126,19 @@ export default class Claims extends Vue {
         await this.contract.methods.withdraw(address).send({
             from: this.account,
         });
+    }
+    async insetWallet() {
+        const postURl = 'http://localhost:3001/v1/claims/wallet';
+        try {
+            await axios.post(postURl, {
+                data: {
+                    wallet: '0xcb002B1561e1AEd22C3335b2687515229462c4CF',
+                },
+            });
+        } catch (e) {
+            this.error = 'Something went wrong while signing up.';
+            console.error('Error while insering wallet: ' + e);
+        }
     }
     mounted() {
         // web3 set to hardhat provider
