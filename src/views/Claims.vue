@@ -58,14 +58,11 @@ export default class Claims extends Vue {
         // set address of smart-contract, found in modules-solidity after command npx hardhat node
         await this.$store.dispatch('metamask/connect');
         this.contract = new this.web3.eth.Contract(feeCollectorAbi as AbiItem[], FEE_COLLECTOR_ADDRESS);
-        // when connected trough metamask update reward variable
-        const walletExist = await axios({
-            method: 'post',
-            url: getWalletUrl,
-            data: {
-                wallet: this.account,
-            },
-        });
+        // when connected trough metamask update reward variable;
+        const walletExist = await axios.get(getWalletUrl, {params: {
+            wallet: this.account
+          }} )
+        console.log(walletExist.data);
         this.updateReward();
     }
     /**
