@@ -84,7 +84,6 @@ export default class Claims extends Vue {
         }
         this.walletExist = response?.data;
         this.updateReward();
-
     }
     /**
      * Update the reward variable and get all unique tokens with their amount and stores it in the tokenAndAmount Object array
@@ -131,8 +130,8 @@ export default class Claims extends Vue {
         const postURl = 'http://localhost:3001/v1/claims/wallet';
         try {
             await axios.post(postURl, {
-               wallet: this.account}
-            );
+                wallet: this.account,
+            });
         } catch (e) {
             this.error = 'Something went wrong while signing up.';
             console.error('Error while insering wallet: ' + e);
