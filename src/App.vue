@@ -24,10 +24,7 @@
                 <base-dropdown-account class="ml-2 ml-md-auto" />
                 <base-dropdown-menu class="ml-2" />
             </header>
-            <div
-                class="my-auto container container-md d-flex flex-column"
-                style="height:auto; min-height: 400px; max-height: 80vh; max-width: 768px;"
-            >
+            <div class="container-fluid">
                 <h1 class="display-5 text-secondary">{{ $router.currentRoute.name }}</h1>
                 <router-view class="main-container flex-grow-1 overflow-auto shadow-lg" />
             </div>

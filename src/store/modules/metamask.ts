@@ -40,13 +40,12 @@ class MetamaskStore extends VuexModule {
     @Action
     async connect(currentAccount = '') {
         const provider = (window as any).ethereum || ((window as any).web3 && (window as any).web3.currentProvider);
-        console.log(provider);
         try {
             if (provider.request) {
                 const accounts = await provider.request({
                     method: 'eth_requestAccounts',
                 });
-                debugger
+              
                 this.context.commit('setAccount', { accounts, currentAccount });
 
                 const chainId = await provider.request({ method: 'eth_chainId' });
