@@ -70,7 +70,6 @@ export default class Claims extends Vue {
      * Connects user to metamask, after that the reward variable is updated
      */
     async connect() {
-        this.loading = true;
         const getWalletUrl = 'http://localhost:3001/v1/claims/';
         // set address of smart-contract, found in modules-solidity after command npx hardhat node
         await this.$store.dispatch('metamask/connect');
@@ -78,7 +77,7 @@ export default class Claims extends Vue {
         // when connected trough metamask update reward variable;
         let response;
         try {
-            response = await axios.get(getWalletUrl + '0xaf9d56684466fcfcea0a2b7fc137ab864d642945');
+            response = await axios.get(getWalletUrl + this.account);
         } catch (e) {
             this.error = 'Something went wrong while checking your wallet.';
             console.error('Error check if wallet exists: ' + e);
@@ -91,17 +90,14 @@ export default class Claims extends Vue {
      * Update the reward variable and get all unique tokens with their amount and stores it in the tokenAndAmount Object array
      */
     async updateReward() {
-      console.log('hierrr')
+        this.loading = true;
         let _amount!: any;
         let _token!: any;
         this.reward = 0;
         this.tokenAndAmount = [];
         try {
             this.error = '';
-          console.log()
-          console.log(this.account)
             const response = await this.contract.methods.getRewards(this.account).call();
-          console.log(response)
             // loop to set all unique tokens to the tokenAndAmount-array with their address and amount
             for (let i = 0; i < response.length; i++) {
                 // cast to Number, because response returns hexadecimal
@@ -135,10 +131,8 @@ export default class Claims extends Vue {
         const postURl = 'http://localhost:3001/v1/claims/wallet';
         try {
             await axios.post(postURl, {
-                data: {
-                    wallet: '0xcb002B1561e1AEd22C3335b2687515229462c4CF',
-                },
-            });
+               wallet: this.account}
+            );
         } catch (e) {
             this.error = 'Something went wrong while signing up.';
             console.error('Error while insering wallet: ' + e);
@@ -147,6 +141,7 @@ export default class Claims extends Vue {
     mounted() {
         // web3 set to hardhat provider
         this.web3 = new Web3(Web3.givenProvider || 'http://127.0.0.1:8545');
+        this.connect();
     }
 }
 interface Token {
