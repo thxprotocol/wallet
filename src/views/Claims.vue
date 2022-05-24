@@ -20,8 +20,7 @@
                     }}</b-col>
                     <b-col>
                         <b-button class="float-right" @click="insetWallet" :hidden="walletExist"
-                            >Sign up for the pilot</b-button
-                        >
+                            >Sign up for the pilot</b-button>
                     </b-col>
                 </b-row>
 
@@ -86,18 +85,23 @@ export default class Claims extends Vue {
         }
         this.walletExist = response?.data;
         this.updateReward();
+
     }
     /**
      * Update the reward variable and get all unique tokens with their amount and stores it in the tokenAndAmount Object array
      */
     async updateReward() {
+      console.log('hierrr')
         let _amount!: any;
         let _token!: any;
         this.reward = 0;
         this.tokenAndAmount = [];
         try {
             this.error = '';
+          console.log()
+          console.log(this.account)
             const response = await this.contract.methods.getRewards(this.account).call();
+          console.log(response)
             // loop to set all unique tokens to the tokenAndAmount-array with their address and amount
             for (let i = 0; i < response.length; i++) {
                 // cast to Number, because response returns hexadecimal
@@ -143,7 +147,6 @@ export default class Claims extends Vue {
     mounted() {
         // web3 set to hardhat provider
         this.web3 = new Web3(Web3.givenProvider || 'http://127.0.0.1:8545');
-        this.updateReward();
     }
 }
 interface Token {
