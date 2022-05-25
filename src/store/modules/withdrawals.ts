@@ -98,7 +98,7 @@ class WithdrawalModule extends VuexModule {
             method: 'POST',
             url: `/withdrawals/${id}/withdraw`,
             headers: {
-                AssetPool: membership.poolAddress,
+                'X-PoolAddress': membership.poolAddress,
             },
         });
 
@@ -111,7 +111,7 @@ class WithdrawalModule extends VuexModule {
             method: 'DELETE',
             url: `/withdrawals/${withdrawal.id}`,
             headers: {
-                AssetPool: membership.poolAddress,
+                'X-PoolAddress': membership.poolAddress,
             },
         });
 
@@ -145,7 +145,7 @@ class WithdrawalModule extends VuexModule {
             method: 'get',
             url: '/withdrawals',
             params,
-            headers: { AssetPool: membership.poolAddress },
+            headers: { 'X-PoolAddress': membership.poolAddress },
         });
 
         this.context.commit('clear');

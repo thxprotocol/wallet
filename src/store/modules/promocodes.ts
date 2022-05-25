@@ -53,9 +53,9 @@ class PromoCodeModule extends VuexModule {
 
         const r = await axios({
             method: 'GET',
-            url: '/promo_codes',
+            url: '/promotions',
             params,
-            headers: { AssetPool: membership.poolAddress },
+            headers: { 'X-PoolAddress': membership.poolAddress },
         });
 
         this.context.commit('clear');

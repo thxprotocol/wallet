@@ -92,7 +92,7 @@ class ERC20Module extends VuexModule {
                 method: 'POST',
                 url: `/deposits/approve`,
                 headers: {
-                    AssetPool: to,
+                    'X-PoolAddress': to,
                 },
                 data: {
                     amount,

@@ -25,7 +25,7 @@ class AssetPoolModule extends VuexModule {
             method: 'POST',
             url: '/gas_station/upgrade_address',
             headers: {
-                AssetPool: poolAddress,
+                'X-PoolAddress': poolAddress,
             },
             data: {
                 newAddress,
@@ -66,7 +66,7 @@ class AssetPoolModule extends VuexModule {
             method: 'POST',
             url: '/gas_station/call',
             headers: {
-                AssetPool: poolAddress,
+                'X-PoolAddress': poolAddress,
             },
             data: {
                 call,
@@ -92,7 +92,7 @@ class AssetPoolModule extends VuexModule {
                 method: 'POST',
                 url: `/rewards/${data.rewardId}/claim`,
                 headers: {
-                    AssetPool: data.poolAddress,
+                    'X-PoolAddress': data.poolAddress,
                 },
             });
         } catch (error) {
