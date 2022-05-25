@@ -89,7 +89,6 @@ export default class Redirect extends Vue {
         }
 
         if (!this.error && !this.isClaimFailed && !this.isClaimInvalid && !this.withdrawal) this.redirect();
-        debugger;
     }
 
     redirect() {
