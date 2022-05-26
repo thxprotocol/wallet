@@ -13,7 +13,7 @@ import MembershipStore from './modules/memberships';
 import ERC20Store from './modules/erc20';
 import ERC721Store from './modules/erc721';
 import WithdrawalStore from './modules/withdrawals';
-import PromoCodeStore from './modules/promocodes';
+import PromotionStore from './modules/promotions';
 import DepositStore from './modules/deposits';
 
 Vue.use(Vuex);
@@ -30,7 +30,7 @@ const modules = {
     erc20: ERC20Store,
     erc721: ERC721Store,
     withdrawals: WithdrawalStore,
-    promocodes: PromoCodeStore,
+    promotions: PromotionStore,
     deposits: DepositStore,
 };
 

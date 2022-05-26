@@ -15,7 +15,7 @@
         <div v-else class="d-flex flex-column align-items-center">
             <b-alert show variant="danger" v-if="error">{{ error }}</b-alert>
             <b-spinner variant="secondary" size="lg"></b-spinner>
-            <span class="text-muted">{{ info }}</span>
+            <span class="text-muted mt-2">{{ info }}</span>
         </div>
         <modal-show-withdrawal @redirect="redirect()" :withdrawal="withdrawal" v-if="withdrawal" />
         <modal-decode-private-key @init="redirect()" />

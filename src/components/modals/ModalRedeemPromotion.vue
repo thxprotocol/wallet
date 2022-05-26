@@ -62,7 +62,7 @@ import { UserProfile } from '@/store/modules/account';
 import { ERC20 } from '@/store/modules/erc20';
 import { Membership } from '@/store/modules/memberships';
 import { TNetworks } from '@/store/modules/network';
-import { TPromoCode } from '@/store/modules/promocodes';
+import { TPromotion } from '@/store/modules/promotions';
 import { MAX_UINT256, signCall } from '@/utils/network';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
@@ -89,7 +89,7 @@ export default class BaseModalRedeemPromotion extends Vue {
     privateKey!: string;
 
     @Prop() membership!: Membership;
-    @Prop() promotion!: TPromoCode;
+    @Prop() promotion!: TPromotion;
     @Prop() erc20!: ERC20;
 
     get hasInsufficientBalance() {

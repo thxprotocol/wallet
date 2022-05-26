@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { Membership } from './memberships';
 
-export type TPromoCode = {
+export type TPromotion = {
     id: string;
     sub: string;
     title: string;
@@ -13,31 +13,31 @@ export type TPromoCode = {
     poolAddress: string;
 };
 
-export interface IPromoCodes {
+export interface IPromotions {
     [poolAddress: string]: {
-        [pollId: string]: TPromoCode;
+        [pollId: string]: TPromotion;
     };
 }
 
 @Module({ namespaced: true })
-class PromoCodeModule extends VuexModule {
-    _all: IPromoCodes = {};
+class PromotionModule extends VuexModule {
+    _all: IPromotions = {};
 
     get all() {
         return this._all;
     }
 
     @Mutation
-    set({ promoCode, membership }: { promoCode: TPromoCode; membership: Membership }) {
+    set({ promotion, membership }: { promotion: TPromotion; membership: Membership }) {
         if (!this._all[membership.id]) {
             Vue.set(this._all, membership.id, {});
         }
-        Vue.set(this._all[membership.id], promoCode.id, promoCode);
+        Vue.set(this._all[membership.id], promotion.id, promotion);
     }
 
     @Mutation
-    unset({ promoCode, membership }: { promoCode: TPromoCode; membership: Membership }) {
-        Vue.delete(this._all[membership.id], promoCode.id);
+    unset({ promotion, membership }: { promotion: TPromotion; membership: Membership }) {
+        Vue.delete(this._all[membership.id], promotion.id);
     }
 
     @Mutation
@@ -60,12 +60,12 @@ class PromoCodeModule extends VuexModule {
 
         this.context.commit('clear');
 
-        for (const promoCode of r.data.results) {
-            this.context.commit('set', { promoCode, membership });
+        for (const promotion of r.data.results) {
+            this.context.commit('set', { promotion, membership });
         }
 
         return { pagination: r.data };
     }
 }
 
-export default PromoCodeModule;
+export default PromotionModule;

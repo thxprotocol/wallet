@@ -1,7 +1,6 @@
 import { Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import { UserProfile } from './account';
 import { Membership } from './memberships';
 
 export enum WithdrawalState {
@@ -120,18 +119,17 @@ class WithdrawalModule extends VuexModule {
 
     @Action({ rawError: true })
     async filter({
-        profile,
         membership,
         page = 1,
         limit = 10,
         state,
     }: {
-        profile: UserProfile;
         membership: Membership;
         page: number;
         limit: number;
         state?: WithdrawalState;
     }) {
+        const profile = this.context.rootGetters['account/profile'];
         const params = new URLSearchParams();
         params.append('member', profile.address);
         params.append('page', String(page));

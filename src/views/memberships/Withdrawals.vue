@@ -1,14 +1,39 @@
 <template>
     <div>
         <div class="h-100 w-100 center-center" v-if="busy">
-            <b-spinner variant="dark" />
+            <b-spinner variant="primary" />
         </div>
-        <div class="container pt-3 h-100 d-flex flex-column" v-if="!busy && membership && erc20">
+        <div class="h-100 d-flex flex-column" v-if="!busy && membership && erc20">
             <b-alert show dismissable variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
+            <div class="mb-3 text-right">
+                <b-button-group>
+                    <b-button
+                        size="sm"
+                        :variant="state === WithdrawalState.Pending ? 'secondary' : 'dark'"
+                        @click="onChange(membership, currentPage, WithdrawalState.Pending)"
+                    >
+                        Pending
+                    </b-button>
+                    <b-button
+                        :variant="state === WithdrawalState.Withdrawn ? 'secondary' : 'dark'"
+                        size="sm"
+                        @click="onChange(membership, currentPage, WithdrawalState.Withdrawn)"
+                    >
+                        Withdrawn
+                    </b-button>
+                    <b-button
+                        size="sm"
+                        :variant="state === null ? 'secondary' : 'dark'"
+                        @click="onChange(membership, currentPage)"
+                    >
+                        All
+                    </b-button>
+                </b-button-group>
+            </div>
             <b-alert variant="info" show class="mb-3" v-if="!filteredWithdrawals.length">
-                You have no scheduled or pending withdrawals for this pool.
+                You have no pending withdrawals for this pool.
             </b-alert>
             <div class="mb-auto">
                 <base-list-group-item-withdrawal
@@ -28,7 +53,7 @@
                 :total-rows="total"
                 align="fill"
             ></b-pagination>
-            <b-button block variant="dark" to="/memberships" class="mt-3">
+            <b-button block variant="dark" to="/memberships" class="mx-3 w-auto m-md-0 mt-3">
                 Back
             </b-button>
         </div>
@@ -38,9 +63,8 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { UserProfile } from '@/store/modules/account';
-import { IWithdrawals, Withdrawal } from '@/store/modules/withdrawals';
-import { Membership } from '@/store/modules/memberships';
+import { IWithdrawals, Withdrawal, WithdrawalState } from '@/store/modules/withdrawals';
+import { IMemberships, Membership } from '@/store/modules/memberships';
 import BaseListGroupItemWithdrawal from '@/components/BaseListGroupItemWithdrawal.vue';
 import { ERC20 } from '@/store/modules/erc20';
 
@@ -50,21 +74,33 @@ import { ERC20 } from '@/store/modules/erc20';
     },
     computed: mapGetters({
         withdrawals: 'withdrawals/all',
-        profile: 'account/profile',
+        memberships: 'memberships/all',
+        erc20s: 'erc20/all',
     }),
 })
 export default class MembershipWithdrawalsView extends Vue {
-    busy = false;
+    WithdrawalState = WithdrawalState;
+    busy = true;
     error = '';
     currentPage = 1;
     perPage = 10;
     total = 0;
-    membership: Membership | null = null;
-    erc20: ERC20 | null = null;
+    state = null;
 
     // getters
-    profile!: UserProfile;
     withdrawals!: IWithdrawals;
+    memberships!: IMemberships;
+
+    erc20s!: { [id: string]: ERC20 };
+
+    get membership() {
+        return this.memberships[this.$router.currentRoute.params.id];
+    }
+
+    get erc20() {
+        if (!this.membership) return null;
+        return this.erc20s[this.membership.erc20];
+    }
 
     get filteredWithdrawals() {
         if (!this.withdrawals[this.$router.currentRoute.params.id]) return [];
@@ -73,28 +109,24 @@ export default class MembershipWithdrawalsView extends Vue {
         );
     }
 
-    async onChange(membership: Membership, page: number) {
+    async onChange(membership: Membership, page: number, state = null) {
         const { pagination, error } = await this.$store.dispatch('withdrawals/filter', {
-            profile: this.profile,
             membership,
             page,
             limit: this.perPage,
-            state: 0, // 0 = Pending, 1 = Withdrawn
+            state,
         });
+        this.state = state;
         this.total = pagination?.total;
         this.error = error;
     }
 
     async mounted() {
-        this.$store
-            .dispatch('memberships/get', this.$route.params.id)
-            .then(async ({ membership }: { membership: Membership; error: Error }) => {
-                if (!membership) return;
-                this.membership = membership;
-                const { erc20 } = await this.$store.dispatch('erc20/get', membership.erc20);
-                this.erc20 = erc20;
-                await this.onChange(membership, this.currentPage);
-            });
+        this.$store.dispatch('memberships/get', this.$route.params.id).then(async () => {
+            await this.$store.dispatch('erc20/get', this.membership.erc20);
+            this.onChange(this.membership, this.currentPage);
+            this.busy = false;
+        });
     }
 }
 </script>

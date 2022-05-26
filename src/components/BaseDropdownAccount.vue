@@ -1,12 +1,5 @@
 <template>
-    <b-dropdown
-        size="sm"
-        variant="darker"
-        no-caret
-        class="ml-2"
-        toggle-class="d-flex align-items-center"
-        v-if="profile"
-    >
+    <b-dropdown size="sm" variant="darker" no-caret toggle-class="d-flex align-items-center" v-if="profile">
         <template #button-content>
             <base-identicon
                 :size="32"

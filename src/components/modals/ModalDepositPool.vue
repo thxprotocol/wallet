@@ -93,13 +93,9 @@ export default class BaseModalDepositPool extends Vue {
     }
 
     async onShow() {
-        this.$store
-            .dispatch('memberships/get', this.membership.id)
-            .then(async ({ membership }: { membership: Membership; error: Error }) => {
-                const web3 = this.networks[membership.network];
-                this.maticBalance = Number(fromWei(await web3.eth.getBalance(this.profile.address)));
-                this.$store.dispatch('erc20/get', membership.erc20);
-            });
+        const web3 = this.networks[this.membership.network];
+        this.maticBalance = Number(fromWei(await web3.eth.getBalance(this.profile.address)));
+        this.$store.dispatch('erc20/get', this.membership.erc20);
     }
 
     getBalance() {

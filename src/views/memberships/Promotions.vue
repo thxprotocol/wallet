@@ -1,21 +1,22 @@
 <template>
     <div>
         <div class="h-100 w-100 center-center" v-if="busy">
-            <b-spinner variant="dark" />
+            <b-spinner variant="primary" />
         </div>
-        <div class="container pt-3 h-100 d-flex flex-column" v-if="!busy">
+        <div class="h-100 d-flex flex-column" v-if="!busy">
             <b-alert show dismissable variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
-            <b-alert variant="info" show class="mb-3" v-if="!promotions.length">
-                There are no promotions for this pool.
+            <b-alert variant="info" show class="mb-3" v-if="!Object.values(promotions).length">
+                There are no running promotions for this pool.
             </b-alert>
             <base-list-group-item-promotion
+                class="bg-dark"
                 :erc20="erc20"
                 :promotion="promotion"
                 :membership="membership"
                 :key="promotion.id"
-                v-for="promotion of promotions"
+                v-for="promotion of filteredPromotions"
             />
             <b-button block variant="dark" to="/memberships" class="mt-3">
                 Back
@@ -27,9 +28,9 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { Membership } from '@/store/modules/memberships';
+import { IMemberships } from '@/store/modules/memberships';
 import BaseListGroupItemPromotion from '@/components/BaseListGroupItemPromotion.vue';
-import { IPromoCodes } from '@/store/modules/promocodes';
+import { IPromotions } from '@/store/modules/promotions';
 import { ERC20 } from '@/store/modules/erc20';
 
 @Component({
@@ -37,36 +38,44 @@ import { ERC20 } from '@/store/modules/erc20';
         BaseListGroupItemPromotion,
     },
     computed: mapGetters({
-        promocodes: 'promocodes/all',
+        promotions: 'promotions/all',
+        memberships: 'memberships/all',
+        erc20s: 'erc20/all',
     }),
 })
 export default class MembershipPromotionsView extends Vue {
-    busy = false;
+    busy = true;
     error = '';
     currentPage = 1;
     perPage = 10;
     total = 0;
-    membership: Membership | null = null;
-    erc20: ERC20 | null = null;
 
     // getters
-    promocodes!: IPromoCodes;
+    promotions!: IPromotions;
+    memberships!: IMemberships;
+    erc20s!: { [id: string]: ERC20 };
 
-    get promotions() {
+    get membership() {
+        return this.memberships[this.$router.currentRoute.params.id];
+    }
+
+    get erc20() {
+        if (!this.membership) return null;
+        return this.erc20s[this.membership.erc20];
+    }
+
+    get filteredPromotions() {
         if (!this.membership) return [];
-        if (!this.promocodes[this.membership.id]) return [];
-        return Object.values(this.promocodes[this.membership.id]);
+        if (!this.promotions[this.membership.id]) return [];
+        return Object.values(this.promotions[this.membership.id]);
     }
 
     async mounted() {
-        this.$store
-            .dispatch('memberships/get', this.$route.params.id)
-            .then(async ({ membership }: { membership: Membership; error: Error }) => {
-                this.membership = membership;
-                const { erc20 } = await this.$store.dispatch('erc20/get', membership.erc20);
-                this.erc20 = erc20;
-                await this.$store.dispatch('promocodes/filter', { membership: this.membership });
-            });
+        this.$store.dispatch('memberships/get', this.$route.params.id).then(async () => {
+            await this.$store.dispatch('erc20/get', this.membership.erc20);
+            await this.$store.dispatch('promotions/filter', { membership: this.membership });
+            this.busy = false;
+        });
     }
 }
 </script>

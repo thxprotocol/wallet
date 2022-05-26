@@ -46,8 +46,6 @@ class MembershipModule extends VuexModule {
         r.data.forEach((id: string) => {
             this.context.commit('set', { id });
         });
-
-        return r.data;
     }
 
     @Action({ rawError: true })
@@ -66,7 +64,6 @@ class MembershipModule extends VuexModule {
             method: 'GET',
             url: '/memberships/' + id,
         });
-
         this.context.commit('set', data);
     }
 }

@@ -50,6 +50,7 @@
 @import './scss/jumbotron';
 @import './scss/forms';
 @import './scss/custom-forms';
+@import './scss/dark-mode';
 
 html,
 body {
@@ -62,7 +63,7 @@ body {
 }
 
 .main-container {
-    border-radius: 15px;
+    border-radius: 10px;
     background-color: $light;
     padding: 1rem 1rem 2rem 1rem;
 }
