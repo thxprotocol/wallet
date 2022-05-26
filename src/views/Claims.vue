@@ -38,14 +38,14 @@
                     <b-col>{{ 'You have no rewards to claim' }}</b-col>
                 </b-row>
                 <b-row class="mb-4" :key="key" v-for="(item, key) in tokenAndAmount">
-                    <b-col
-                        >{{ 'Token: ' + item.token }} <br />
-                        {{ 'Amount:' + item.amount }}</b-col
-                    >
                     <b-col>
-                        <b-button class="float-right" @click="payOneReward(item.token)">{{
-                            'Claim ' + item.token
-                        }}</b-button>
+                        {{ 'Token: ' + item.token }} <br />
+                        {{ 'Amount:' + item.amount }}
+                    </b-col>
+                    <b-col>
+                        <b-button class="float-right" @click="payOneReward(item.token)">
+                          {{ 'Claim ' + item.token }}
+                        </b-button>
                     </b-col>
                 </b-row>
             </template>
