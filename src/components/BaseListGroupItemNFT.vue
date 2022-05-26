@@ -1,27 +1,27 @@
 <template>
-    <b-list-group-item v-if="membership && token">
+    <b-list-group-item v-if="membership && erc721">
         <div class="d-flex justify-content-between align-items-center" v-b-toggle="`collapse-${membership.id}`">
-            <div class="mr-auto d-flex align-items-center" v-b-tooltip :title="token.name">
-                <base-identicon :rounded="true" variant="dark" :size="30" :uri="token.logoURI" class="mr-2" />
-                <strong class="mr-2">{{ token.symbol }}</strong>
+            <div class="mr-auto d-flex align-items-center" v-b-tooltip :title="erc721.name">
+                <base-identicon :rounded="true" variant="dark" :size="30" :uri="erc721.logoURI" class="mr-2" />
+                <strong class="mr-2">{{ erc721.symbol }}</strong>
                 <b-badge variant="primary">NFT</b-badge>
             </div>
             <div class="h3 mr-3 m-0">
-                {{ balance }}
+                {{ erc721.balance }}
             </div>
         </div>
         <b-collapse :id="`collapse-${membership.id}`" class="mt-2">
             <hr />
-            <b-card bg-variant="light" class="small mb-2" :key="token._id" v-for="token of membership.tokens">
+            <b-card bg-variant="light" class="small mb-2" :key="erc721._id" v-for="erc721 of membership.tokens">
                 <b-row>
                     <b-col md="12">
                         <strong>
-                            <b-badge variant="dark">#{{ token.tokenId }}</b-badge>
-                            {{ token.metadata.title }}
+                            <b-badge variant="dark">#{{ erc721.tokenId }}</b-badge>
+                            {{ erc721.metadata.title }}
                         </strong>
-                        <p class="small">{{ token.metadata.description }}</p>
+                        <p class="small">{{ erc721.metadata.description }}</p>
                     </b-col>
-                    <b-col md="4" :key="metadata._id" v-for="metadata of token.metadata.attributes">
+                    <b-col md="4" :key="metadata._id" v-for="metadata of erc721.metadata.attributes">
                         <b-form-group :label="metadata.key" label-class="text-muted pb-0" class="mb-md-0">
                             {{ metadata.value }}
                         </b-form-group>
@@ -50,25 +50,25 @@ import BaseIdenticon from './BaseIdenticon.vue';
     computed: mapGetters({
         profile: 'account/profile',
         networks: 'network/all',
+        erc721s: 'erc721/all',
     }),
 })
 export default class BaseListGroupItemNFT extends Vue {
     busy = true;
-    balance = 0;
 
     // getters
     profile!: UserProfile;
     networks!: TNetworks;
+    erc721s!: { [id: string]: ERC721 };
 
-    token: ERC721 | null = null;
+    get erc721() {
+        return this.erc721s[this.membership.erc721];
+    }
 
     @Prop() membership!: Membership;
 
-    async mounted() {
-        this.$store.dispatch('erc721/get', this.membership.erc721).then(async ({ erc721 }: { erc721: ERC721 }) => {
-            this.token = erc721;
-            this.balance = await erc721.contract.methods.balanceOf(this.profile.address).call();
-        });
+    mounted() {
+        this.$store.dispatch('erc721/get', this.membership.erc721);
     }
 }
 </script>

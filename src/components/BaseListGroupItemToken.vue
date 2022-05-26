@@ -1,21 +1,20 @@
 <template>
-    <b-list-group-item v-if="membership && token" class="d-flex justify-content-between align-items-center">
+    <b-list-group-item v-if="membership && erc20" class="d-flex justify-content-between align-items-center">
         <div
             class="mr-auto d-flex align-items-center"
             v-b-tooltip
-            :title="`${token.name} (${NetworkProvider[membership.network]})`"
+            :title="`${erc20.name} (${NetworkProvider[membership.network]})`"
         >
-            <base-identicon :rounded="true" variant="dark" :size="30" :uri="token.logoURI" class="mr-2" />
-            <strong>{{ token.symbol }}</strong>
+            <base-identicon :rounded="true" variant="dark" :size="30" :uri="erc20.logoURI" class="mr-2" />
+            <strong>{{ erc20.symbol }}</strong>
         </div>
         <div class="h3 mr-3 m-0">
-            {{ balance }}
+            {{ erc20.balance }}
         </div>
-
-        <b-button variant="light" size="sm" @click.stop="$bvModal.show(`modalTransferTokens-${token.address}`)">
+        <b-button variant="light" size="sm" @click.stop="$bvModal.show(`modalTransferTokens-${erc20.address}`)">
             <i class="fas fa-exchange-alt ml-0"></i>
         </b-button>
-        <base-modal-transfer-tokens :membership="membership" :token="token" />
+        <base-modal-transfer-tokens :membership="membership" :token="erc20" />
     </b-list-group-item>
 </template>
 
@@ -38,26 +37,26 @@ import { NetworkProvider } from '@/utils/network';
     computed: mapGetters({
         profile: 'account/profile',
         networks: 'network/all',
+        erc20s: 'erc20/all',
     }),
 })
 export default class BaseListGroupItemToken extends Vue {
     NetworkProvider = NetworkProvider;
     busy = true;
-    balance = 0;
 
     // getters
     profile!: UserProfile;
     networks!: TNetworks;
-
-    token: ERC20 | null = null;
+    erc20s!: { [id: string]: ERC20 };
 
     @Prop() membership!: Membership;
 
-    async mounted() {
-        this.$store.dispatch('erc20/get', this.membership.erc20).then(async ({ erc20 }: { erc20: ERC20 }) => {
-            this.token = erc20;
-            this.balance = await this.$store.dispatch('erc20/balanceOf', erc20);
-        });
+    get erc20() {
+        return this.erc20s[this.membership.erc20];
+    }
+
+    mounted() {
+        this.$store.dispatch('erc20/get', this.membership.erc20);
     }
 }
 </script>

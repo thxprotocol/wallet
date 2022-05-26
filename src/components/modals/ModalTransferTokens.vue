@@ -1,5 +1,5 @@
 <template>
-    <b-modal :id="`modalTransferTokens-${token.address}`" centered scrollable title="Transfer tokens">
+    <b-modal :id="`modalTransferTokens-${token.address}`" @show="reset" centered scrollable title="Transfer tokens">
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
@@ -39,6 +39,11 @@ export default class BaseModalTranferTokens extends Vue {
     @Prop() membership!: Membership;
     @Prop() token!: ERC20;
 
+    reset() {
+        this.amount = 0;
+        this.to = '';
+    }
+
     async transfer() {
         this.busy = true;
 
@@ -56,8 +61,9 @@ export default class BaseModalTranferTokens extends Vue {
             amount: this.amount,
         });
 
-        this.amount = 0;
-        this.to = '';
+        await this.$store.dispatch('erc20/balanceOf', this.token);
+
+        this.reset();
         this.$bvModal.hide(`modalTransferTokens-${this.token.address}`);
         this.busy = false;
     }

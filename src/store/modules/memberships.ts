@@ -68,8 +68,6 @@ class MembershipModule extends VuexModule {
         });
 
         this.context.commit('set', data);
-
-        return { membership: data };
     }
 }
 

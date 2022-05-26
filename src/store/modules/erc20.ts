@@ -8,6 +8,7 @@ import axios from 'axios';
 import Web3 from 'web3';
 
 export interface ERC20 {
+    _id: string;
     address: string;
     contract: Contract;
     name: string;
@@ -19,7 +20,7 @@ export interface ERC20 {
 
 @Module({ namespaced: true })
 class ERC20Module extends VuexModule {
-    _all: { [address: string]: ERC20 } = {};
+    _all: { [id: string]: ERC20 } = {};
 
     get all() {
         return this._all;
@@ -27,7 +28,12 @@ class ERC20Module extends VuexModule {
 
     @Mutation
     set(erc20: ERC20) {
-        Vue.set(this._all, erc20.address, erc20);
+        Vue.set(this._all, erc20._id, erc20);
+    }
+
+    @Mutation
+    setBalance(payload: { erc20: ERC20; balance: string }) {
+        Vue.set(this._all[payload.erc20._id], 'balance', payload.balance);
     }
 
     @Action({ rawError: true })
@@ -42,16 +48,15 @@ class ERC20Module extends VuexModule {
             const contract = new web3.eth.Contract(ERC20Abi as any, data.address, { from });
             const totalSupply = Number(fromWei(await contract.methods.totalSupply().call()));
             const erc20 = {
-                address: data.address,
-                name: data.name,
-                symbol: data.symbol,
+                ...data,
                 contract,
                 totalSupply,
+                balance: 0,
                 logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
             };
 
             this.context.commit('set', erc20);
-            return { erc20 };
+            this.context.dispatch('balanceOf', erc20);
         } catch (error) {
             return { error };
         }
@@ -61,7 +66,9 @@ class ERC20Module extends VuexModule {
     async balanceOf(erc20: ERC20) {
         const profile = this.context.rootGetters['account/profile'];
         const wei = await erc20.contract.methods.balanceOf(profile.address).call();
-        return fromWei(wei);
+        const balance = fromWei(wei);
+
+        this.context.commit('setBalance', { erc20, balance });
     }
 
     @Action({ rawError: true })

@@ -10,11 +10,11 @@
                 :class="{ 'text-success': membership.network, 'text-muted': !membership.network }"
             ></i>
             <strong class="mr-1">{{ token.symbol }} Pool</strong>
+            <b-badge v-if="membership.erc721" variant="primary">NFT</b-badge>
             <b-badge class="px-2" v-if="pendingWithdrawalCount" variant="danger">{{ pendingWithdrawalCount }}</b-badge>
             <br />
             <small class="text-muted text-overflow-75">{{ membership.poolAddress }}</small>
         </div>
-        <div class="h3 mr-3 m-0">{{ membership.poolBalance }} {{ token.symbol }}</div>
         <b-dropdown variant="white" no-caret toggle-class="d-flex align-items-center" v-if="profile">
             <template #button-content>
                 <i class="fas fa-ellipsis-v p-1 ml-0 text-muted" aria-hidden="true" style="font-size: 1rem"></i>
@@ -33,7 +33,7 @@
                 Remove
             </b-dropdown-item>
         </b-dropdown>
-        <base-modal-deposit-pool v-if="token" :membership="membership" />
+        <base-modal-deposit-pool :membership="membership" />
         <modal-delete :id="`modalDeleteMembership-${membership.id}`" :call="remove" :subject="membership.id" />
     </b-list-group-item>
 </template>
@@ -58,45 +58,49 @@ import { ERC721 } from '@/store/modules/erc721';
         profile: 'account/profile',
         memberships: 'memberships/all',
         erc20s: 'erc20/all',
-        erc721s: 'erc20/all',
+        erc721s: 'erc721/all',
     }),
 })
 export default class BaseListGroupItemAssetPool extends Vue {
     busy = true;
     pendingWithdrawalCount = 0;
-    memberships!: IMemberships;
+
     profile!: UserProfile;
-    token: ERC20 | ERC721 | null = null;
+    memberships!: IMemberships;
+    erc20s!: { [id: string]: ERC20 };
+    erc721s!: { [id: string]: ERC721 };
 
     @Prop() membership!: Membership;
+
+    get token() {
+        if (this.membership.erc20) return this.erc20s[this.membership.erc20];
+        if (this.membership.erc721) return this.erc721s[this.membership.erc721];
+        return null;
+    }
 
     remove() {
         this.$store.dispatch('memberships/delete', this.membership.id);
     }
 
     mounted() {
-        this.$store
-            .dispatch('memberships/get', this.membership.id)
-            .then(async ({ membership }: { membership: Membership; error: Error }) => {
-                if (membership.erc20) {
-                    const { erc20 } = await this.$store.dispatch('erc20/get', this.membership.erc20);
-                    this.token = erc20;
+        this.$store.dispatch('memberships/get', this.membership.id).then(async () => {
+            if (this.membership.erc20) {
+                await this.$store.dispatch('erc20/get', this.membership.erc20);
 
-                    this.$store
-                        .dispatch('withdrawals/filter', {
-                            profile: this.profile,
-                            membership,
-                            state: WithdrawalState.Pending,
-                        })
-                        .then(({ pagination }) => {
-                            this.pendingWithdrawalCount = pagination?.total;
-                        });
-                }
-                if (membership.erc721) {
-                    const { erc721 } = await this.$store.dispatch('erc721/get', this.membership.erc721);
-                    this.token = erc721;
-                }
-            });
+                this.$store
+                    .dispatch('withdrawals/filter', {
+                        profile: this.profile,
+                        membership: this.membership,
+                        state: WithdrawalState.Pending,
+                    })
+                    .then(({ pagination }) => {
+                        this.pendingWithdrawalCount = pagination?.total;
+                    });
+            }
+            if (this.membership.erc721) {
+                this.$store.dispatch('erc721/get', this.membership.erc721);
+            }
+        });
     }
 }
 </script>

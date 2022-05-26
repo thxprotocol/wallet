@@ -25,7 +25,20 @@ class ERC721Module extends VuexModule {
 
     @Mutation
     set(erc20: ERC721) {
-        Vue.set(this._all, erc20.address, erc20);
+        Vue.set(this._all, erc20._id, erc20);
+    }
+
+    @Mutation
+    setBalance(payload: { erc721: ERC721; balance: string }) {
+        Vue.set(this._all[payload.erc721._id], 'balance', payload.balance);
+    }
+
+    @Action({ rawError: true })
+    async balanceOf(erc721: ERC721) {
+        const profile = this.context.rootGetters['account/profile'];
+        const balance = await erc721.contract.methods.balanceOf(profile.address).call();
+
+        this.context.commit('setBalance', { erc721, balance });
     }
 
     @Action({ rawError: true })
@@ -38,17 +51,14 @@ class ERC721Module extends VuexModule {
         const from = this.context.rootGetters['account/profile'].address;
         const contract = new web3.eth.Contract(ERC721Abi as any, data.address, { from });
         const erc721 = {
-            _id: id,
-            address: data.address,
-            name: data.name,
-            symbol: data.symbol,
+            ...data,
             contract,
+            balance: 0,
             logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
         };
 
         this.context.commit('set', erc721);
-
-        return { erc721 };
+        this.context.dispatch('balanceOf', erc721);
     }
 
     @Action({ rawError: true })
