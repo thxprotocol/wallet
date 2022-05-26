@@ -106,13 +106,16 @@ export default class Claims extends Vue {
             console.error('Error: ' + err);
         }
 
+        // Retrieve all addresses from db
         const allTokens = await axios.get(`${VUE_APP_API_URL}/tokens/token`);
 
+        // Loop trough the rewards
         for (let i = 0; i < this.tokenAndAmount.length; i++) {
-            const match = allTokens.data.find((obj: { _id: string }) => {
-                return obj._id === this.tokenAndAmount[i].token;
+            // Replace the address with token type retrieved ealier from db
+            const tokenType = allTokens.data.find((address: { _id: string }) => {
+                return address._id === this.tokenAndAmount[i].token;
             });
-            this.tokenAndAmount[i].token = match.type;
+            this.tokenAndAmount[i].token = tokenType.type;
         }
 
         this.loading = false;
