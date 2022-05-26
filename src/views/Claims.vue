@@ -25,20 +25,27 @@
                     </b-col>
                 </b-row>
 
-                <b-row class="mb-4" v-if="reward != 0">
-                    <b-col>{{ 'You have ' + tokenAndAmount.length + ' token(s) to claim' }}</b-col>
+                <b-row class="mb-4" v-if="tokenAndAmount.length > 0">
+                    <b-col>
+                        {{ tokenAndAmount.length == 1 ? 'You have one reward to claim' : 'You have ' + tokenAndAmount.length + ' rewards to claim' }}
+                    </b-col>
                     <b-col>
                         <b-button class="float-right" @click="payAllRewards">Claim all tokens</b-button>
                     </b-col>
                 </b-row>
 
                 <b-row class="mb-4" v-else>
-                    <b-col>{{ 'You have no tokens to claim' }}</b-col>
+                    <b-col>{{ 'You have no rewards to claim' }}</b-col>
                 </b-row>
                 <b-row class="mb-4" :key="key" v-for="(item, key) in tokenAndAmount">
-                    <b-col>{{ item.token }}: {{ item.amount }}</b-col>
+                    <b-col
+                        >{{ 'Token: ' + item.token }} <br />
+                        {{ 'Amount:' + item.amount }}</b-col
+                    >
                     <b-col>
-                        <b-button class="float-right" @click="payOneReward(item.token)">Claim token</b-button>
+                        <b-button class="float-right" @click="payOneReward(item.token)">{{
+                            'Claim ' + item.token
+                        }}</b-button>
                     </b-col>
                 </b-row>
             </template>
@@ -62,7 +69,6 @@ export default class Claims extends Vue {
     account!: string;
     web3!: Web3;
     contract!: Contract;
-    reward!: number;
     tokenAndAmount: Token[] = [];
     error = '';
     walletExist = false;
@@ -86,7 +92,6 @@ export default class Claims extends Vue {
         this.loading = true;
         let _amount!: any;
         let _token!: any;
-        this.reward = 0;
         this.tokenAndAmount = [];
 
         try {
@@ -97,7 +102,6 @@ export default class Claims extends Vue {
                 // cast to Number, because response returns hexadecimal
                 _amount = this.web3.utils.fromWei(response[i].amount);
                 _token = response[i].token;
-                this.reward += _amount;
                 // add all unique tokens to the tokenAndAmount-array including the amount of that specific token
                 this.tokenAndAmount.push({ token: _token, amount: _amount });
             }
@@ -124,6 +128,7 @@ export default class Claims extends Vue {
         await this.contract.methods.withdrawBulk().send({
             from: this.account,
         });
+        window.location.reload();
     }
     /**
      * Transfers the reward of one token
@@ -133,6 +138,7 @@ export default class Claims extends Vue {
         await this.contract.methods.withdraw(address).send({
             from: this.account,
         });
+        window.location.reload();
     }
     async insetWallet() {
         try {
@@ -143,6 +149,7 @@ export default class Claims extends Vue {
             this.error = 'Something went wrong while signing up.';
             console.error('Error while insering wallet: ' + e);
         }
+        window.location.reload();
     }
     mounted() {
         // web3 set to hardhat provider
