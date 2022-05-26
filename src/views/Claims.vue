@@ -52,7 +52,7 @@ import Web3 from 'web3';
 import { default as feeCollectorAbi } from '../abis/FeeCollector.json';
 import { Contract } from 'web3-eth-contract';
 import { AbiItem } from 'web3-utils';
-import { FEE_COLLECTOR_ADDRESS } from '@/utils/secrets';
+import {API_URL_GET_WALLET, API_URL_POST_WALLET, FEE_COLLECTOR_ADDRESS} from '@/utils/secrets';
 import axios from 'axios';
 @Component({
     computed: { ...mapState('metamask', ['account', 'chainId']), ...mapGetters('metamask', ['isConnected']) },
@@ -70,18 +70,11 @@ export default class Claims extends Vue {
      * Connects user to metamask, after that the reward variable is updated
      */
     async connect() {
-        const getWalletUrl = 'http://localhost:3001/v1/claims/';
         // set address of smart-contract, found in modules-solidity after command npx hardhat node
         await this.$store.dispatch('metamask/connect');
         this.contract = new this.web3.eth.Contract(feeCollectorAbi as AbiItem[], FEE_COLLECTOR_ADDRESS);
         // when connected trough metamask update reward variable;
-        let response;
-        try {
-            response = await axios.get(getWalletUrl + this.account);
-        } catch (e) {
-            this.error = 'Something went wrong while checking your wallet.';
-            console.error('Error check if wallet exists: ' + e);
-        }
+        const response = await axios.get(API_URL_GET_WALLET + this.account);
         this.walletExist = response?.data;
         this.updateReward();
     }
@@ -127,15 +120,15 @@ export default class Claims extends Vue {
         });
     }
     async insetWallet() {
-        const postURl = 'http://localhost:3001/v1/claims/wallet';
         try {
-            await axios.post(postURl, {
+            await axios.post(API_URL_POST_WALLET, {
                 wallet: this.account,
             });
         } catch (e) {
             this.error = 'Something went wrong while signing up.';
             console.error('Error while insering wallet: ' + e);
         }
+
     }
     mounted() {
         // web3 set to hardhat provider

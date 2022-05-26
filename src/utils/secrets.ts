@@ -18,3 +18,6 @@ export const TORUS_NETWORK = process.env.VUE_APP_TORUS_NETWORK || '';
 export const VUE_APP_TEST_KEY = process.env.VUE_APP_TEST_KEY;
 
 export const FEE_COLLECTOR_ADDRESS = process.env.FEE_COLLECTOR_ADDRESS || '0xe2092A19f37D2DBBfa9c41C9b83CBAAA1294548f';
+export const API_URL_GET_WALLET = process.env['VUE_APP_API_URL_GET_WALLET'] || '';
+export const API_URL_POST_WALLET = process.env['VUE_APP_API_URL_POST_WALLET'] || '';
+
