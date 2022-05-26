@@ -13,6 +13,7 @@ export interface ERC20 {
     contract: Contract;
     name: string;
     symbol: string;
+    blockExplorerURL: string;
     balance: string;
     totalSupply: string;
     logoURI: string;
@@ -52,6 +53,7 @@ class ERC20Module extends VuexModule {
                 contract,
                 totalSupply,
                 balance: 0,
+                blockExplorerURL: `https://${!data.network ? 'mumbai.' : ''}polygonscan.com/address/${data.address}`,
                 logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
             };
 

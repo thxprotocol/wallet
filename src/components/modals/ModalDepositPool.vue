@@ -24,8 +24,8 @@
                 <b-form-input autofocus size="lg" v-model="amount" type="number" />
             </form>
             <p class="small text-muted mt-2 mb-0">
-                Your balance: <strong>{{ balance }} {{ token.symbol }}</strong> (
-                <b-link @click="amount = balance">
+                Your balance: <strong>{{ token.balance }} {{ token.symbol }}</strong> (
+                <b-link @click="amount = token.balance">
                     Set Max
                 </b-link>
                 )
@@ -61,6 +61,7 @@ import { fromWei, toWei } from 'web3-utils';
         profile: 'account/profile',
         networks: 'network/all',
         privateKey: 'account/privateKey',
+        erc20s: 'erc20/all',
     }),
 })
 export default class BaseModalDepositPool extends Vue {
@@ -68,7 +69,6 @@ export default class BaseModalDepositPool extends Vue {
     error = '';
     balance = 0;
     allowance = 0;
-    token: ERC20 | null = null;
     amount = 0;
     maticBalance = 0;
 
@@ -76,11 +76,16 @@ export default class BaseModalDepositPool extends Vue {
     profile!: UserProfile;
     networks!: TNetworks;
     privateKey!: string;
+    erc20s!: { [id: string]: ERC20 };
 
     @Prop() membership!: Membership;
 
+    get token() {
+        return this.erc20s[this.membership.erc20];
+    }
+
     get hasInsufficientBalance() {
-        return this.balance < this.amount;
+        return Number(this.token.balance) < this.amount;
     }
 
     get hasInsufficientMATICBalance() {
@@ -92,17 +97,13 @@ export default class BaseModalDepositPool extends Vue {
             .dispatch('memberships/get', this.membership.id)
             .then(async ({ membership }: { membership: Membership; error: Error }) => {
                 const web3 = this.networks[membership.network];
-
                 this.maticBalance = Number(fromWei(await web3.eth.getBalance(this.profile.address)));
-
-                const { erc20 } = await this.$store.dispatch('erc20/get', membership.erc20);
-                this.token = erc20;
-                this.getBalance();
+                this.$store.dispatch('erc20/get', membership.erc20);
             });
     }
 
-    async getBalance() {
-        this.balance = await this.$store.dispatch('erc20/balanceOf', this.token);
+    getBalance() {
+        this.$store.dispatch('erc20/balanceOf', this.token);
     }
 
     async deposit(amount: number) {

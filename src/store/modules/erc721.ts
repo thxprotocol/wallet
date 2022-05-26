@@ -54,6 +54,7 @@ class ERC721Module extends VuexModule {
             ...data,
             contract,
             balance: 0,
+            blockExplorerURL: `https://polygonscan.com/address/${data.address}`,
             logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
         };
 

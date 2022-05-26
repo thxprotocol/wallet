@@ -6,31 +6,55 @@
     >
         <div class="mr-auto">
             <i
-                class="fas fa-code-branch mr-2"
-                :class="{ 'text-success': membership.network, 'text-muted': !membership.network }"
+                v-b-tooltip
+                :title="membership.network ? 'Polygon' : 'Polygon Mumbai (Test net)'"
+                class="fas mr-2"
+                :class="{
+                    'text-success': membership.network,
+                    'text-muted': !membership.network,
+                    'fa-coins': membership.erc20,
+                    'fa-palette': membership.erc721,
+                }"
             ></i>
             <strong class="mr-1">{{ token.symbol }} Pool</strong>
-            <b-badge v-if="membership.erc721" variant="primary">NFT</b-badge>
             <b-badge class="px-2" v-if="pendingWithdrawalCount" variant="danger">{{ pendingWithdrawalCount }}</b-badge>
             <br />
-            <small class="text-muted text-overflow-75">{{ membership.poolAddress }}</small>
+            <small class="text-muted">{{ membership.poolBalance }} {{ token.symbol }}</small>
         </div>
         <b-dropdown variant="white" no-caret toggle-class="d-flex align-items-center" v-if="profile">
             <template #button-content>
                 <i class="fas fa-ellipsis-v p-1 ml-0 text-muted" aria-hidden="true" style="font-size: 1rem"></i>
             </template>
+            <b-dropdown-item-button @click.prevent="window.open(token.blockExplorerURL, '_blank')">
+                <span class="text-muted">
+                    <i class="fas fa-external-link-alt mr-2"></i>
+                    Block Explorer
+                </span>
+            </b-dropdown-item-button>
             <b-dropdown-item v-b-modal="`modalDepositPool-${membership.id}`" v-if="membership.erc20">
-                Pool Deposit
+                <span class="text-muted">
+                    <i class="fas fa-download mr-2"></i>
+                    Deposit
+                </span>
             </b-dropdown-item>
             <b-dropdown-item :to="`/memberships/${membership.id}/withdrawals`" v-if="membership.erc20">
-                Withdrawals
+                <span class="text-muted">
+                    <i class="fas fa-upload mr-2"></i>
+                    Withdrawals
+                </span>
             </b-dropdown-item>
             <b-dropdown-item :to="`/memberships/${membership.id}/promotions`" v-if="membership.erc20">
-                Promotions
+                <span class="text-muted">
+                    <i class="fas fa-tags mr-2"></i>
+                    Promotions
+                </span>
             </b-dropdown-item>
             <b-dropdown-divider v-if="membership.erc20" />
             <b-dropdown-item v-b-modal="`modalDeleteMembership-${membership.id}`" class="text-danger">
-                Remove
+                <span class="text-muted">
+                    <i class="fas fa-trash-alt mr-2"></i>
+                    Remove
+                </span>
             </b-dropdown-item>
         </b-dropdown>
         <base-modal-deposit-pool :membership="membership" />
@@ -62,6 +86,7 @@ import { ERC721 } from '@/store/modules/erc721';
     }),
 })
 export default class BaseListGroupItemAssetPool extends Vue {
+    window = window;
     busy = true;
     pendingWithdrawalCount = 0;
 
@@ -76,6 +101,10 @@ export default class BaseListGroupItemAssetPool extends Vue {
         if (this.membership.erc20) return this.erc20s[this.membership.erc20];
         if (this.membership.erc721) return this.erc721s[this.membership.erc721];
         return null;
+    }
+
+    openBlockExplorerURL() {
+        // token.blockExplorerURL;
     }
 
     remove() {
