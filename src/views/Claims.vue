@@ -20,7 +20,8 @@
                     }}</b-col>
                     <b-col>
                         <b-button class="float-right" @click="insetWallet" :hidden="walletExist"
-                            >Sign up for the pilot</b-button>
+                            >Sign up for the pilot</b-button
+                        >
                     </b-col>
                 </b-row>
 
@@ -87,6 +88,7 @@ export default class Claims extends Vue {
         let _token!: any;
         this.reward = 0;
         this.tokenAndAmount = [];
+
         try {
             this.error = '';
             const response = await this.contract.methods.getRewards(this.account).call();
@@ -103,6 +105,16 @@ export default class Claims extends Vue {
             this.error = 'Something went wrong!';
             console.error('Error: ' + err);
         }
+
+        const allTokens = await axios.get(`${VUE_APP_API_URL}/tokens/token`);
+
+        for (let i = 0; i < this.tokenAndAmount.length; i++) {
+            const match = allTokens.data.find((obj: { _id: string }) => {
+                return obj._id === this.tokenAndAmount[i].token;
+            });
+            this.tokenAndAmount[i].token = match.type;
+        }
+
         this.loading = false;
     }
     async payAllRewards() {
@@ -128,7 +140,6 @@ export default class Claims extends Vue {
             this.error = 'Something went wrong while signing up.';
             console.error('Error while insering wallet: ' + e);
         }
-
     }
     mounted() {
         // web3 set to hardhat provider
