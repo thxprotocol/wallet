@@ -25,20 +25,27 @@
                     </b-col>
                 </b-row>
 
-                <b-row v-if="reward !== 0" class="mb-4">
-                    <b-col>{{ 'You have ' + tokenAndAmount.length + ' token(s) to claim' }}</b-col>
+                <b-row class="mb-4" v-if="tokenAndAmount.length > 0">
+                    <b-col>
+                        {{ tokenAndAmount.length == 1 ? 'You have one reward to claim' : 'You have ' + tokenAndAmount.length + ' rewards to claim' }}
+                    </b-col>
                     <b-col>
                         <b-button class="float-right" @click="payAllRewards">Claim all tokens</b-button>
                     </b-col>
                 </b-row>
 
-                <b-row v-else class="mb-4">
-                    <b-col>{{ 'You have no tokens to claim' }}</b-col>
+                <b-row class="mb-4" v-else>
+                    <b-col>{{ 'You have no rewards to claim' }}</b-col>
                 </b-row>
-                <b-row v-for="(item, key) in tokenAndAmount" :key="key" class="mb-4">
-                    <b-col>{{ item.token }}: {{ item.amount }}</b-col>
+                <b-row class="mb-4" :key="key" v-for="(item, key) in tokenAndAmount">
                     <b-col>
-                        <b-button class="float-right" @click="payOneReward(item.token)">Claim token</b-button>
+                        {{ 'Token: ' + item.token }} <br />
+                        {{ 'Amount:' + item.amount }}
+                    </b-col>
+                    <b-col>
+                        <b-button class="float-right" @click="payOneReward(item.token)">
+                          {{ 'Claim ' + item.token }}
+                        </b-button>
                     </b-col>
                 </b-row>
             </template>
@@ -63,7 +70,6 @@ export default class Claims extends Vue {
     account!: string;
     web3!: Web3;
     contract!: Contract;
-    reward = 0;
     tokenAndAmount: Token[] = [];
     error = '';
     walletExist = false;
@@ -95,20 +101,34 @@ export default class Claims extends Vue {
         let _amount!: any;
         let _token!: any;
         this.tokenAndAmount = [];
+
         try {
+            this.error = '';
             const response = await this.contract.methods.getRewards(this.account).call();
             // loop to set all unique tokens to the tokenAndAmount-array with their address and amount
             for (let i = 0; i < response.length; i++) {
                 // cast to Number, because response returns hexadecimal
                 _amount = this.web3.utils.fromWei(response[i].amount);
                 _token = response[i].token;
-                this.reward += _amount;
                 // add all unique tokens to the tokenAndAmount-array including the amount of that specific token
                 this.tokenAndAmount.push({ token: _token, amount: _amount });
             }
         } catch (err) {
             await this.handleError(undefined, err as Error);
         }
+
+        // Retrieve all addresses from db
+        const allTokens = await axios.get(`${VUE_APP_API_URL}/tokens/token`);
+
+        // Loop trough the rewards
+        for (let i = 0; i < this.tokenAndAmount.length; i++) {
+            // Replace the address with token type retrieved ealier from db
+            const tokenType = allTokens.data.find((address: { _id: string }) => {
+                return address._id === this.tokenAndAmount[i].token;
+            });
+            this.tokenAndAmount[i].token = tokenType.type;
+        }
+
         this.loading = false;
     }
 
