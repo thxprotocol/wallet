@@ -27,10 +27,16 @@
 
                 <b-row class="mb-4" v-if="tokenAndAmount.length > 0">
                     <b-col>
-                        {{ tokenAndAmount.length == 1 ? 'You have one reward to claim' : 'You have ' + tokenAndAmount.length + ' rewards to claim' }}
+                        {{
+                            tokenAndAmount.length === 1
+                                ? `You have one reward to claim`
+                                : `You have ${tokenAndAmount.length} rewards to claim`
+                        }}
                     </b-col>
                     <b-col>
-                        <b-button class="float-right" @click="payAllRewards">Claim all tokens</b-button>
+                        <b-button :hidden="tokenAndAmount.length <= 1" class="float-right" @click="payAllRewards"
+                            >Claim all tokens
+                        </b-button>
                     </b-col>
                 </b-row>
 
@@ -44,7 +50,7 @@
                     </b-col>
                     <b-col>
                         <b-button class="float-right" @click="payOneReward(item.token)">
-                          {{ 'Claim ' + item.token }}
+                            {{ 'Claim ' + item.token }}
                         </b-button>
                     </b-col>
                 </b-row>
@@ -113,20 +119,9 @@ export default class Claims extends Vue {
                 // add all unique tokens to the tokenAndAmount-array including the amount of that specific token
                 this.tokenAndAmount.push({ token: _token, amount: _amount });
             }
+            await this.replaceToken();
         } catch (err) {
             await this.handleError(undefined, err as Error);
-        }
-
-        // Retrieve all addresses from db
-        const allTokens = await axios.get(`${VUE_APP_API_URL}/tokens/token`);
-
-        // Loop trough the rewards
-        for (let i = 0; i < this.tokenAndAmount.length; i++) {
-            // Replace the address with token type retrieved ealier from db
-            const tokenType = allTokens.data.find((address: { _id: string }) => {
-                return address._id === this.tokenAndAmount[i].token;
-            });
-            this.tokenAndAmount[i].token = tokenType.type;
         }
 
         this.loading = false;
@@ -163,6 +158,18 @@ export default class Claims extends Vue {
         this.connect();
     }
 
+    private async replaceToken() {
+        // Retrieve all addresses from db
+        const allTokens = await axios.get(`${VUE_APP_API_URL}/tokens/token`).catch(this.handleError);
+
+        // Loop trough the rewards
+        for (const entry of this.tokenAndAmount) {
+            // Replace the address with token type retrieved earlier from db
+            const tokenType = allTokens?.data.find((address: { _id: string }) => address._id === entry.token);
+            entry.token = tokenType.type;
+        }
+    }
+
     /**
      * Basic error handler for any scenario to display the provided error message.
      *
@@ -172,8 +179,8 @@ export default class Claims extends Vue {
     private async handleError(e?: AxiosError, err?: Error) {
         this.error = e?.response?.data.message || err?.message;
         console.error('Something went wrong... Stacktrace: ');
-        console.trace('1: \n', e);
-        console.trace('2: \n', err);
+        if (!e) console.trace('1: \n', e);
+        if (!err) console.trace('2: \n', err);
     }
 }
 
