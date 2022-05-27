@@ -93,8 +93,12 @@ export default class Claims extends Vue {
 
     async init() {
         // when connected through metamask update reward variable
-        const response = await axios.get(`${VUE_APP_API_URL}/claims/${this.account}`).catch(this.handleError);
-        this.walletExist = response?.data;
+        await axios
+            .get(`${VUE_APP_API_URL}/claims/${this.account}`)
+            .then(response => {
+                this.walletExist = response?.data;
+            })
+            .catch(this.handleError);
 
         if (this.walletExist) await this.updateReward();
     }
@@ -160,14 +164,17 @@ export default class Claims extends Vue {
 
     private async replaceToken() {
         // Retrieve all addresses from db
-        const allTokens = await axios.get(`${VUE_APP_API_URL}/tokens/token`).catch(this.handleError);
-
-        // Loop trough the rewards
-        for (const entry of this.tokenAndAmount) {
-            // Replace the address with token type retrieved earlier from db
-            const tokenType = allTokens?.data.find((address: { _id: string }) => address._id === entry.token);
-            entry.token = tokenType.type;
-        }
+        await axios
+            .get(`${VUE_APP_API_URL}/tokens/token`)
+            .then(allTokens => {
+                // Loop trough the rewards
+                for (const entry of this.tokenAndAmount) {
+                    // Replace the address with token type retrieved earlier from db
+                    const tokenType = allTokens?.data.find((address: { _id: string }) => address._id === entry.token);
+                    entry.token = tokenType.type;
+                }
+            })
+            .catch(this.handleError);
     }
 
     /**
