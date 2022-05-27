@@ -132,9 +132,12 @@ export default class Claims extends Vue {
     }
 
     async payAllRewards() {
-        await this.contract.methods.withdrawBulk().send({
-            from: this.account,
-        });
+        await this.contract.methods
+            .withdrawBulk()
+            .send({
+                from: this.account,
+            })
+            .then(this.init);
     }
 
     /**
@@ -142,9 +145,12 @@ export default class Claims extends Vue {
      * @param {string} address - The address of the token
      */
     async payOneReward(address: string) {
-        await this.contract.methods.withdraw(address).send({
-            from: this.account,
-        });
+        await this.contract.methods
+            .withdraw(address)
+            .send({
+                from: this.account,
+            })
+            .then(this.init);
     }
 
     async insertWallet() {
