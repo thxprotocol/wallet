@@ -105,7 +105,7 @@ export default class Claims extends Vue {
     async updateReward() {
         this.loading = true;
         let _amount!: any;
-        let _token!: any;
+        let _address!: any;
         this.tokenAndAmount = [];
 
         try {
@@ -115,9 +115,9 @@ export default class Claims extends Vue {
             for (let i = 0; i < response.length; i++) {
                 // cast to Number, because response returns hexadecimal
                 _amount = this.web3.utils.fromWei(response[i].amount);
-                _token = response[i].token;
+                _address = response[i].token;
                 // add all unique tokens to the tokenAndAmount-array including the amount of that specific token
-                this.tokenAndAmount.push({ token: _token, amount: _amount });
+                this.tokenAndAmount.push({ token: '', address: _address, amount: _amount });
             }
             await this.replaceToken();
         } catch (err) {
