@@ -176,7 +176,6 @@ export default class Claims extends Vue {
                         (address: { _id: string }) =>
                             address._id.toLocaleLowerCase() === entry.token.toLocaleLowerCase(),
                     );
-                    entry.address = entry.token;
                     entry.token = tokenType.type;
                 }
             })
