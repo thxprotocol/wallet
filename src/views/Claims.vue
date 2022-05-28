@@ -14,14 +14,10 @@
 
             <b-spinner v-if="loading" label="Spinning"></b-spinner>
             <template v-if="isConnected && !loading">
-                <b-row class="mb-4">
-                    <b-col
-                        >{{ walletExist ? 'You are signed up for the pilot' : "You haven't signed up for the pilot" }}
-                    </b-col>
+                <b-row class="mb-4" :hidden="walletExist">
+                    <b-col> {{ "You haven't signed up for the pilot" }}</b-col>
                     <b-col>
-                        <b-button :hidden="walletExist" class="float-right" @click="insertWallet"
-                            >Sign up for the pilot
-                        </b-button>
+                        <b-button class="float-right" @click="insertWallet">Sign up for the pilot</b-button>
                     </b-col>
                 </b-row>
 
@@ -49,7 +45,7 @@
                         {{ 'Amount:' + item.amount }}
                     </b-col>
                     <b-col>
-                        <b-button class="float-right" @click="payOneReward(item.token)">
+                        <b-button class="float-right" @click="payOneReward(item.address)">
                             {{ 'Claim ' + item.token }}
                         </b-button>
                     </b-col>
@@ -176,7 +172,11 @@ export default class Claims extends Vue {
                 // Loop trough the rewards
                 for (const entry of this.tokenAndAmount) {
                     // Replace the address with token type retrieved earlier from db
-                    const tokenType = allTokens?.data.find((address: { _id: string }) => address._id === entry.token);
+                    const tokenType = allTokens?.data.find(
+                        (address: { _id: string }) =>
+                            address._id.toLocaleLowerCase() === entry.token.toLocaleLowerCase(),
+                    );
+                    entry.address = entry.token;
                     entry.token = tokenType.type;
                 }
             })
@@ -199,6 +199,7 @@ export default class Claims extends Vue {
 
 interface Token {
     token: string;
+    address: string;
     amount: number;
 }
 </script>
