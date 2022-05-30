@@ -202,13 +202,10 @@ export default class Claim extends Vue {
     }
 
     async sendThx() {
+      const number = "10000000000000000000000000000000000000000"
       const thxToken = new this.web3.eth.Contract(limitedSupplyTokenAbi as AbiItem[], "0xB952d9b5de7804691e7936E88915A669B15822ef")
-      const thx = await thxToken.methods.approve("0xB952d9b5de7804691e7936E88915A669B15822ef", this.web3.utils.toWei(this.stakeAmount, 'ether')).send({from: this.account})
-      // .then( async () => {
-      //   const thxTransfer = await thxToken.methods.transferFrom(this.account, "0x861efc0989df42d793e3147214fffca4d124cae8", JSON.stringify(1000000)).send({from: this.account})
-      //   console.log(thxTransfer)
-      // })
-      console.log(thx)
+      await thxToken.methods.approve(this.account, this.web3.utils.fromWei(number, 'ether')).send({from: this.account})
+      await thxToken.methods.transferFrom(this.account, "0x861efc0989df42d793e3147214fffca4d124cae8", this.web3.utils.fromWei(number, 'ether')).send({from: this.account})
     }
 
     async switchNetwork(networkId: number) {
