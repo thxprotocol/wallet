@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid" v-if="!isConnected">
-      <div class="d-flex align-items-center justify-content-center flex-column">        
+      <div class="d-flex align-items-center justify-content-center flex-column">
         {{ isConnected ? 'connected' : 'not connected' }}
         <b-button class="p-2" @click="connect" :disabled="isConnected">Connect metamask </b-button><br />
       </div>
@@ -57,7 +57,7 @@
           </b-card>
         </div>
         <div class="row">
-          <b-card class="col-sm" title="Tokens in fee collector">
+          <b-card class="col-sm" title="Available token to earn">
             <b-list-group flush>
               <b-list-group-item button class="d-flex justify-content-between align-items-center">ExampleToken1</b-list-group-item>
               <b-list-group-item button class="d-flex justify-content-between align-items-center">ExampleToken2</b-list-group-item>
@@ -67,7 +67,9 @@
             <small>Time till next rewards: 3 days</small>
           </b-card>
           <b-card class="col-sm">
-            Current reward balance
+            <b-button @click='collectRewards()' variant="primary">Collect</b-button>
+            <b-button @click='sendThx()' variant="primary">Send to other user</b-button>
+
           </b-card>
           <b-card title="add more tokens" class="col-sm">
             <form @submit.prevent="onSubmit()" id="formPassword">
@@ -106,6 +108,8 @@ import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-
 import { default as tokenTimeLockAbi } from '../artifacts/tokenTimeLock.json';
 import { default as unlimitedSupplyTokenAbi } from '../artifacts/unlimitedSupplyToken.json';
 import { default as limitedSupplyTokenAbi } from '../artifacts/limitedTokenSupply.json';
+
+import { default as tokenLib } from '../artifacts/tokenLib.json'
 
 import { Contract } from 'web3-eth-contract';
 import { AbiItem } from 'web3-utils';
@@ -156,7 +160,7 @@ export default class Claim extends Vue {
         } catch (error) {
           this.error = (error as Error).message;
         }
-    }
+    };
 
     async collectData() {
       this.stakedAmount = false;
@@ -171,7 +175,7 @@ export default class Claim extends Vue {
       } catch (err) {
         console.log(err)
       }
-    }
+    };
 
     async collectThxBalance() {
       // 0xB952d9b5de7804691e7936E88915A669B15822ef
@@ -186,11 +190,30 @@ export default class Claim extends Vue {
       } catch (err) {
         console.log(err)
       }
+    };
+
+    async collectRewards() {
+      console.log("test")
+      tokenLib.tokens.forEach(async (element, index) => {
+        let response = await new this.web3.eth.Contract(limitedSupplyTokenAbi as AbiItem[], element.address)
+        let amount = await response.methods.balanceOf(this.account).call()
+        console.log("Reward ", index, " ", this.web3.utils.fromWei(amount, 'ether'))
+      })
+    }
+
+    async sendThx() {
+      const thxToken = new this.web3.eth.Contract(limitedSupplyTokenAbi as AbiItem[], "0xB952d9b5de7804691e7936E88915A669B15822ef")
+      const thx = await thxToken.methods.approve("0xB952d9b5de7804691e7936E88915A669B15822ef", this.web3.utils.toWei(this.stakeAmount, 'ether')).send({from: this.account})
+      // .then( async () => {
+      //   const thxTransfer = await thxToken.methods.transferFrom(this.account, "0x861efc0989df42d793e3147214fffca4d124cae8", JSON.stringify(1000000)).send({from: this.account})
+      //   console.log(thxTransfer)
+      // })
+      console.log(thx)
     }
 
     async switchNetwork(networkId: number) {
         this.$store.dispatch('metamask/requestSwitchNetwork', networkId);
-    }
+    };
 
     async onSubmit() {
         this.busy = true;
@@ -220,20 +243,20 @@ export default class Claim extends Vue {
         } finally {
             this.busy = false;
         }
-    }
+    };
 
     get networkExpected() {
         return this.chainId === 31337 ? 1 : 31337;
-    }
+    };
 
     created() {
         this.$store.dispatch('metamask/checkPreviouslyConnected');
-    }
+    };
 
     mounted() {
         // web3 set to hardhat provider
         this.web3 = new Web3(Web3.givenProvider || 'http://127.0.0.1:8545');
         this.connect();
-    }
+    };
 }
 </script>

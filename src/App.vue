@@ -25,7 +25,6 @@
                 <base-dropdown-menu class="ml-2" />
             </header>
             <div class="container-fluid">
-                <h1 class="display-5 text-secondary">{{ $router.currentRoute.name }}</h1>
                 <router-view class="main-container flex-grow-1 overflow-auto shadow-lg" />
             </div>
             <footer class="container-fluid" style="height: 85px" v-if="$router.currentRoute.name"></footer>
