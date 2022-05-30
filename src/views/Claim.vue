@@ -347,9 +347,22 @@ export default class Claim extends Vue {
                             .send({ from: this.account });
                     })
                     .then(async () => {
+                        // const stakedThxBalance = await stakedContract.methods.balanceOf(this.account).call();
+                        // const thxBalance = await thxSupplyToken.methods.balanceOf(this.account).call();
+                        // const lockTime = await this.contract.methods.lockTime(this.account).call()
+                        // const time = this.secondsToDhms(lockTime)
+                        // console.log("locktime", lockTime, time)
+                        // this.timeStamp = time;
+                        // if (stakedThxBalance) this.stakedAmount = true;
+                        // this.stakedThx = this.web3.utils.fromWei(stakedThxBalance, 'ether');
+                        // this.thxAmount = this.web3.utils.fromWei(thxBalance, 'ether');
+                        // return { stakedThxBalance, thxBalance };
+
                         const stakedThxBalance = await stakedContract.methods.balanceOf(this.account).call();
                         const thxBalance = await thxSupplyToken.methods.balanceOf(this.account).call();
-                        const lockTime = await this.contract.methods.lockTime(this.account).call()
+                        const contractTime = await this.contract.methods.lockTime(this.account).call();
+                        const secondsSinceEpoch = Math.round(Date.now() / 1000)
+                        const lockTime = contractTime-secondsSinceEpoch
                         const time = this.secondsToDhms(lockTime)
                         console.log("locktime", lockTime, time)
                         this.timeStamp = time;
