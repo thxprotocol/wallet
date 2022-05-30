@@ -116,7 +116,6 @@
                           <b-badge variant="secondary" pill>{{item.amount}}</b-badge>
                         </b-list-group-item>
                     </b-list-group>
-                    <b-button @click="collectRewards()" variant="primary">Collect</b-button>
                 </b-card>
               </div>
               <div class="col-sm mt-3">
