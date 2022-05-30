@@ -111,12 +111,10 @@
               <div class="col-sm mt-3">
                 <b-card title="Your rewards" class="col-sm mt-3">
                       <b-list-group flush>
-                        <b-list-group-item v-for="{amount} in tokens">
-                          hallo
+                        <b-list-group-item button class="d-flex justify-content-between align-items-center" v-for="item in tokens">
+                          {{item.token}}
+                          <b-badge variant="secondary" pill>{{item.amount}}</b-badge>
                         </b-list-group-item>
-                        <b-list-group-item button class="d-flex justify-content-between align-items-center"
-                            >ExampleToken1<b-badge variant="secondary" pill>25%</b-badge></b-list-group-item
-                        >
                     </b-list-group>
                     <b-button @click="collectRewards()" variant="primary">Collect</b-button>
                 </b-card>
@@ -190,7 +188,7 @@ export default class Claim extends Vue {
     stakedThx = '';
     thxAmount = '';
     timeStamp = '';
-    tokens : any = {};
+    tokens : any = [];
 
     account!: string;
     chainId!: number;
@@ -236,6 +234,8 @@ export default class Claim extends Vue {
                 this.thxAmount = this.web3.utils.fromWei(thxBalance, 'ether');
                 if (stakedThxBalance) this.stakedAmount = true;
                 this.stakedThx = this.web3.utils.fromWei(stakedThxBalance, 'ether');
+
+                this.collectRewards()
             }
         } catch (error) {
             this.error = (error as Error).message;
@@ -282,10 +282,14 @@ export default class Claim extends Vue {
         tokenLib.tokens.forEach(async (element, index) => {
             const response = await new this.web3.eth.Contract(limitedSupplyTokenAbi as AbiItem[], element.address);
             const amount = await response.methods.balanceOf(this.account).call();
-            console.log('Reward ', index, ' ', this.web3.utils.fromWei(amount, 'ether'));
-            this.tokens.push({'token': element.name, 'amount': amount})
+            console.log('Reward ', index, ' ', this.web3.utils.fromWei(amount, 'ether'), tokenLib.tokens.length);
+            this.tokens.push({'token': element.name, 'amount': this.web3.utils.fromWei(amount, 'ether')})
+
+            if (index === tokenLib.tokens.length - 1) {
+              var parsedobj = JSON.parse(JSON.stringify(this.tokens))
+              console.log(parsedobj)
+            }
         });
-        console.log(this.tokens)
     }
 
     async sendThx() {
