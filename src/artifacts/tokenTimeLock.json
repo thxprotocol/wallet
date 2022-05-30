@@ -212,6 +212,11 @@
         "internalType": "address",
         "name": "_tokenAddress",
         "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "rewards",
+        "type": "uint256"
       }
     ],
     "name": "payout",
