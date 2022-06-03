@@ -223,10 +223,12 @@ export default class Claim extends Vue {
                     '0xB952d9b5de7804691e7936E88915A669B15822ef',
                 );
                 this.stakedThx = this.web3.utils.fromWei(response, 'ether');
-                
+                this.tokens = [];
                 const stakedThxBalance = await stakedContract.methods.balanceOf(this.account).call();
                 const thxBalance = await thxSupplyToken.methods.balanceOf(this.account).call();
-                const lockTime = await this.contract.methods.lockTime(this.account).call()
+                const contractTime = await this.contract.methods.lockTime(this.account).call()
+                const secondsSinceEpoch = Math.round(Date.now() / 1000)
+                const lockTime = contractTime-secondsSinceEpoch
                 const time = this.secondsToDhms(lockTime)
                 console.log("locktime", lockTime, time)
                 this.timeStamp = time;
@@ -343,21 +345,10 @@ export default class Claim extends Vue {
                     .then(async (res: any) => {
                         console.log(res);
                         await this.contract.methods
-                            .deposit(this.web3.utils.toWei(this.stakeAmount, 'ether'), 1)
+                            .deposit(this.web3.utils.toWei(this.stakeAmount, 'ether'), this.timeAmount)
                             .send({ from: this.account });
                     })
                     .then(async () => {
-                        // const stakedThxBalance = await stakedContract.methods.balanceOf(this.account).call();
-                        // const thxBalance = await thxSupplyToken.methods.balanceOf(this.account).call();
-                        // const lockTime = await this.contract.methods.lockTime(this.account).call()
-                        // const time = this.secondsToDhms(lockTime)
-                        // console.log("locktime", lockTime, time)
-                        // this.timeStamp = time;
-                        // if (stakedThxBalance) this.stakedAmount = true;
-                        // this.stakedThx = this.web3.utils.fromWei(stakedThxBalance, 'ether');
-                        // this.thxAmount = this.web3.utils.fromWei(thxBalance, 'ether');
-                        // return { stakedThxBalance, thxBalance };
-
                         const stakedThxBalance = await stakedContract.methods.balanceOf(this.account).call();
                         const thxBalance = await thxSupplyToken.methods.balanceOf(this.account).call();
                         const contractTime = await this.contract.methods.lockTime(this.account).call();
