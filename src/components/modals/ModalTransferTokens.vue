@@ -26,7 +26,6 @@
 
 <script lang="ts">
 import { ERC20 } from '@/store/modules/erc20';
-import { Membership } from '@/store/modules/memberships';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component({})
@@ -36,7 +35,6 @@ export default class BaseModalTranferTokens extends Vue {
     amount = 0;
     to = '';
 
-    @Prop() membership!: Membership;
     @Prop() token!: ERC20;
 
     reset() {
@@ -49,14 +47,14 @@ export default class BaseModalTranferTokens extends Vue {
 
         await this.$store.dispatch('erc20/approve', {
             token: this.token,
-            network: this.membership.network,
+            network: this.token.network,
             to: this.to,
             amount: this.amount,
         });
 
         await this.$store.dispatch('erc20/transfer', {
             token: this.token,
-            network: this.membership.network,
+            network: this.token.network,
             to: this.to,
             amount: this.amount,
         });

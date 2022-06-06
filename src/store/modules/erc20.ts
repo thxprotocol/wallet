@@ -9,8 +9,10 @@ import Web3 from 'web3';
 
 export interface ERC20 {
     _id: string;
+    erc20Id: string;
     address: string;
     contract: Contract;
+    network: NetworkProvider;
     name: string;
     symbol: string;
     blockExplorerURL: string;
@@ -38,27 +40,35 @@ class ERC20Module extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async get(id: string) {
+    async getAll() {
+        const r = await axios({
+            method: 'GET',
+            url: '/erc20/token',
+        });
+
+        r.data.forEach((_id: string) => {
+            this.context.commit('set', { _id });
+        });
+    }
+
+    @Action({ rawError: true })
+    async getToken(id: string) {
         try {
             const { data } = await axios({
                 method: 'GET',
-                url: '/erc20/' + id,
+                url: '/erc20/token/' + id,
             });
             const web3 = this.context.rootGetters['network/all'][data.network];
             const from = this.context.rootGetters['account/profile'].address;
             const contract = new web3.eth.Contract(ERC20Abi as any, data.address, { from });
-            const totalSupply = Number(fromWei(await contract.methods.totalSupply().call()));
             const erc20 = {
                 ...data,
                 contract,
-                totalSupply,
-                balance: 0,
                 blockExplorerURL: `https://${!data.network ? 'mumbai.' : ''}polygonscan.com/address/${data.address}`,
-                logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
+                logoURI: `https://avatars.dicebear.com/api/identicon/${data.erc20Id}.svg`,
             };
 
             this.context.commit('set', erc20);
-            this.context.dispatch('balanceOf', erc20);
         } catch (error) {
             return { error };
         }

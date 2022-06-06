@@ -85,7 +85,7 @@ import { ERC721 } from '@/store/modules/erc721';
         erc721s: 'erc721/all',
     }),
 })
-export default class BaseListGroupItemAssetPool extends Vue {
+export default class BaseListGroupItemMembership extends Vue {
     window = window;
     busy = true;
     pendingWithdrawalCount = 0;
@@ -103,10 +103,6 @@ export default class BaseListGroupItemAssetPool extends Vue {
         return null;
     }
 
-    openBlockExplorerURL() {
-        // token.blockExplorerURL;
-    }
-
     remove() {
         this.$store.dispatch('memberships/delete', this.membership.id);
     }
@@ -114,8 +110,6 @@ export default class BaseListGroupItemAssetPool extends Vue {
     mounted() {
         this.$store.dispatch('memberships/get', this.membership.id).then(async () => {
             if (this.membership.erc20) {
-                await this.$store.dispatch('erc20/get', this.membership.erc20);
-
                 this.$store
                     .dispatch('withdrawals/filter', {
                         profile: this.profile,

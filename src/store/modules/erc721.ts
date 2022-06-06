@@ -6,26 +6,28 @@ import axios from 'axios';
 
 export interface ERC721 {
     _id: string;
-    address: string;
     contract: Contract;
-    name: string;
-    symbol: string;
+    erc721: {
+        address: string;
+        name: string;
+        symbol: string;
+        totalSupply: string;
+        logoURI: string;
+    };
     balance: string;
-    totalSupply: string;
-    logoURI: string;
 }
 
 @Module({ namespaced: true })
 class ERC721Module extends VuexModule {
-    _all: { [address: string]: ERC721 } = {};
+    _all: { [erc721Id: string]: ERC721 } = {};
 
     get all() {
         return this._all;
     }
 
     @Mutation
-    set(erc20: ERC721) {
-        Vue.set(this._all, erc20._id, erc20);
+    set(erc721: ERC721) {
+        Vue.set(this._all, erc721._id, erc721);
     }
 
     @Mutation
@@ -42,44 +44,55 @@ class ERC721Module extends VuexModule {
     }
 
     @Action({ rawError: true })
+    async getAll() {
+        const r = await axios({
+            method: 'GET',
+            url: '/erc721/token',
+        });
+
+        r.data.forEach((_id: string) => {
+            this.context.commit('set', { _id });
+        });
+    }
+
+    @Action({ rawError: true })
     async get(id: string) {
         const { data } = await axios({
             method: 'GET',
-            url: '/erc721/' + id,
+            url: '/erc721/token/' + id,
         });
-        const web3 = this.context.rootGetters['network/all'][data.network];
+        const web3 = this.context.rootGetters['network/all'][data.erc721.network];
         const from = this.context.rootGetters['account/profile'].address;
-        const contract = new web3.eth.Contract(ERC721Abi as any, data.address, { from });
+        const contract = new web3.eth.Contract(ERC721Abi as any, data.erc721.address, { from });
         const erc721 = {
             ...data,
             contract,
-            balance: 0,
-            blockExplorerURL: `https://polygonscan.com/address/${data.address}`,
-            logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
+            blockExplorerURL: `https://polygonscan.com/address/${data.erc721.address}`,
+            logoURI: `https://avatars.dicebear.com/api/identicon/${data.erc721._id}.svg`,
         };
 
         this.context.commit('set', erc721);
         this.context.dispatch('balanceOf', erc721);
     }
 
-    @Action({ rawError: true })
-    async getMetadata(erc721: ERC721) {
-        const { data } = await axios({
-            method: 'GET',
-            url: '/erc721/' + erc721._id + '/metadata/',
-        });
-        const erc721metadata = {
-            address: data.address,
-            name: data.name,
-            symbol: data.symbol,
-            metadata: data.metadata,
-            logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
-        };
+    // @Action({ rawError: true })
+    // async getMetadata(erc721: ERC721) {
+    //     const { data } = await axios({
+    //         method: 'GET',
+    //         url: '/erc721/' + erc721._id + '/metadata/',
+    //     });
+    //     const erc721metadata = {
+    //         address: data.address,
+    //         name: data.name,
+    //         symbol: data.symbol,
+    //         metadata: data.metadata,
+    //         logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
+    //     };
 
-        this.context.commit('setMetadata', erc721);
+    //     this.context.commit('setMetadata', erc721);
 
-        return { erc721metadata };
-    }
+    //     return { erc721metadata };
+    // }
 }
 
 export default ERC721Module;
