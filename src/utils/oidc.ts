@@ -1,5 +1,5 @@
 import { AUTH_URL, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, BASE_URL } from './secrets';
-export const USER_SCOPE = 'openid asset_pools:read asset_pools:write rewards:read withdrawals:read deposits:read deposits:write';
+
 export const config: any = {
     authority: AUTH_URL,
     client_id: OIDC_CLIENT_ID, // eslint-disable-line @typescript-eslint/camelcase
@@ -11,5 +11,6 @@ export const config: any = {
     silent_redirect_uri: `${BASE_URL}/silent-renew`, // eslint-disable-line @typescript-eslint/camelcase
     automaticSilentRenew: true,
     loadUserInfo: false,
-    scope: USER_SCOPE,
+    scope:
+        'openid offline_access rewards:read erc20:read erc721:read withdrawals:read deposits:read deposits:write account:read account:write memberships:read promotions:read relay:write',
 };
