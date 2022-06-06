@@ -11,5 +11,6 @@ export const config: any = {
     silent_redirect_uri: `${BASE_URL}/silent-renew`, // eslint-disable-line @typescript-eslint/camelcase
     automaticSilentRenew: true,
     loadUserInfo: false,
-    scope: 'openid user deposits:read deposits:write',
+    scope:
+        'openid offline_access rewards:read erc20:read erc721:read withdrawals:read deposits:read deposits:write account:read account:write memberships:read promotions:read relay:write',
 };
