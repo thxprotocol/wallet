@@ -9,6 +9,7 @@ import Web3 from 'web3';
 
 export interface ERC20 {
     _id: string;
+    erc20Id: string;
     address: string;
     contract: Contract;
     name: string;
@@ -40,16 +41,20 @@ class ERC20Module extends VuexModule {
     @Action({ rawError: true })
     async get(id: string) {
         try {
+            const res = await axios({
+                method: 'GET',
+                url: '/erc20/token/' + id,
+            });
             const { data } = await axios({
                 method: 'GET',
-                url: '/erc20/' + id,
+                url: '/erc20/' + res.data.erc20Id,
             });
             const web3 = this.context.rootGetters['network/all'][data.network];
             const from = this.context.rootGetters['account/profile'].address;
             const contract = new web3.eth.Contract(ERC20Abi as any, data.address, { from });
             const totalSupply = Number(fromWei(await contract.methods.totalSupply().call()));
             const erc20 = {
-                ...data,
+                ...res.data,
                 contract,
                 totalSupply,
                 balance: 0,
@@ -84,11 +89,13 @@ class ERC20Module extends VuexModule {
         token,
         network,
         to,
+        poolAddress,
         amount,
     }: {
         token: ERC20;
         network: NetworkProvider;
         to: string;
+        poolAddress: string;
         amount: string;
     }) {
         const web3: Web3 = this.context.rootGetters['network/all'][network];
@@ -101,7 +108,7 @@ class ERC20Module extends VuexModule {
                 method: 'POST',
                 url: `/deposits/approve`,
                 headers: {
-                    'X-PoolAddress': to,
+                    'X-PoolAddress': poolAddress,
                 },
                 data: {
                     amount,

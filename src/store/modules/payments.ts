@@ -1,4 +1,3 @@
-import { Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 
@@ -21,8 +20,11 @@ export type TPayment = {
     receiver: string;
     transactions: string[];
     state: PaymentState;
+    token: string;
     paymentUrl: string;
-    returnUrl: string;
+    successUrl: string;
+    failUrl: string;
+    cancelUrl: string;
     createdAt: Date;
     updatedAt: Date;
 };
@@ -42,6 +44,20 @@ class PaymentModule extends VuexModule {
             method: 'GET',
             url: '/payments/' + payload.paymentId,
             headers: { 'X-Payment-Token': payload.accessToken },
+        });
+
+        this.context.commit('set', r.data);
+    }
+
+    @Action({ rawError: true })
+    async pay(data: { call: string; nonce: string; sig: string; amount: string }) {
+        if (!this.payment) return;
+
+        const r = await axios({
+            method: 'POST',
+            url: '/payments/' + this.payment._id + '/pay',
+            headers: { 'X-PoolAddress': this.payment.receiver, 'X-Payment-Token': this.payment.token },
+            data,
         });
 
         this.context.commit('set', r.data);

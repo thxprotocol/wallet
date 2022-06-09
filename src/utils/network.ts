@@ -92,3 +92,30 @@ export function isPrivateKey(privateKey: string) {
         return false;
     }
 }
+
+export enum ChainId {
+    Hardhat = 31337,
+    Polygon = 137,
+    PolygonMumbai = 80001,
+}
+
+export function getChainInfoForId(chainId: number) {
+    switch (chainId) {
+        default:
+        case ChainId.Hardhat:
+            return {
+                chainId: ChainId[ChainId.Hardhat],
+                blockExplorer: 'https://blockexplorer.local',
+            };
+        case ChainId.PolygonMumbai:
+            return {
+                chainId: ChainId[ChainId.PolygonMumbai],
+                blockExplorer: 'https://mumbai.polygonscan.com',
+            };
+        case ChainId.Polygon:
+            return {
+                chainId: ChainId[ChainId.Polygon],
+                blockExplorer: 'https://polygonscan.com',
+            };
+    }
+}

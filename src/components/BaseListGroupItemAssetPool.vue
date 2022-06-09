@@ -10,7 +10,7 @@
                 :title="membership.network ? 'Polygon' : 'Polygon Mumbai (Test net)'"
                 class="fas mr-2"
                 :class="{
-                    'text-success': membership.network,
+                    'text-primary': membership.network,
                     'text-muted': !membership.network,
                     'fa-coins': membership.erc20,
                     'fa-palette': membership.erc721,

@@ -51,6 +51,7 @@ export default class BaseModalTranferTokens extends Vue {
             token: this.token,
             network: this.membership.network,
             to: this.to,
+            poolAddress: this.membership.poolAddress,
             amount: this.amount,
         });
 
