@@ -72,7 +72,7 @@ const routes: Array<RouteConfig> = [
         beforeEnter: assertAuthorization,
     },
     {
-        path: '/payment',
+        path: '/payment/:id',
         name: 'Payment',
         component: () => import('../views/Payment.vue'),
     },
