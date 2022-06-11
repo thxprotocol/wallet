@@ -100,10 +100,11 @@ class AccountModule extends VuexModule {
     async signinRedirect(
         payload: {
             signupToken?: string;
-            rewardHash?: string;
             token?: string;
             key?: string;
             passwordResetToken?: string;
+            rewardHash?: string;
+            toPath?: string;
         } = {},
     ) {
         const extraQueryParams: any = {
@@ -135,7 +136,7 @@ class AccountModule extends VuexModule {
         await this.userManager.clearStaleState();
 
         return await this.userManager.signinRedirect({
-            state: { toPath: window.location.href, rewardHash: payload.rewardHash },
+            state: { toPath: payload.toPath, rewardHash: payload.rewardHash },
             extraQueryParams,
         });
     }

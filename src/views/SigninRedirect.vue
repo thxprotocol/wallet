@@ -92,7 +92,8 @@ export default class Redirect extends Vue {
     }
 
     redirect() {
-        this.$router.push(this.redirectPath);
+        const path = this.user.state?.toPath || this.redirectPath;
+        this.$router.push(path);
     }
 
     async setNetwork(privateKey: string) {

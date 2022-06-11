@@ -15,6 +15,7 @@ import ERC721Store from './modules/erc721';
 import WithdrawalStore from './modules/withdrawals';
 import PromotionStore from './modules/promotions';
 import DepositStore from './modules/deposits';
+import PaymentStore from './modules/payments';
 
 Vue.use(Vuex);
 
@@ -29,9 +30,10 @@ const modules = {
     memberships: MembershipStore,
     erc20: ERC20Store,
     erc721: ERC721Store,
+    deposits: DepositStore,
     withdrawals: WithdrawalStore,
     promotions: PromotionStore,
-    deposits: DepositStore,
+    payments: PaymentStore,
 };
 
 export default new Vuex.Store({
