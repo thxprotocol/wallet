@@ -3,30 +3,15 @@
         <div class="d-flex flex-column h-100">
             <template v-if="payment">
                 <div class="flex-grow-1">
-                    <b-row v-if="!account && !profile">
-                        <b-col md="6">
-                            <b-button variant="primary" class="rounded-pill" @click="signin()">
-                                Connect THX Account
-                            </b-button>
-                        </b-col>
-                        <b-col md="6" class="text-right">
-                            <b-button variant="primary" class="rounded-pill" @click="connect()">
-                                Connect Metamask
-                            </b-button>
-                        </b-col>
-                        <b-col md="12">
-                            <hr />
-                        </b-col>
-                    </b-row>
                     <div>
-                        <b-alert variant="info" show>
+                        <b-alert variant="success" show>
                             <i class="fas fa-info-circle mr-2"></i>
                             The
                             <strong v-b-tooltip :title="payment.receiver">{{ payment.tokenSymbol }} Pool</strong> has
                             send you a payment request.
                         </b-alert>
                         <p class="text-left">
-                            <small>Receiver:</small><br />
+                            <small class="text-muted">Receiver:</small><br />
                             <b-badge
                                 :href="`${blockExplorer(payment.chainId)}/address/${payment.receiver}`"
                                 target="_blank"
@@ -42,10 +27,15 @@
                             </b-badge>
                         </p>
                         <p class="text-left">
-                            <small>Connected:</small><br />
-                            <b-badge variant="primary" class="rounded-pill" v-if="!account && !profile">
+                            <small class="text-muted">Connected:</small><br />
+                            <b-badge
+                                @click="$bvModal.show('modalPaymentConnect')"
+                                variant="primary"
+                                class="rounded-pill cursor-pointer"
+                                v-if="!account && !profile"
+                            >
                                 <i class="fas fa-exclamation-circle mx-1"></i>
-                                Disconnected
+                                Connect account
                             </b-badge>
                             <b-badge
                                 :href="`${blockExplorer(payment.chainId)}/address/${account}`"
@@ -96,6 +86,13 @@
                 <b-spinner variant="primary" />
             </div>
         </div>
+        <base-modal-payment-connect
+            :account="account"
+            is-connected="isConnected"
+            :profile="profile"
+            :chainId="chainId"
+            :payment="payment"
+        />
     </div>
 </template>
 
@@ -107,8 +104,12 @@ import { getChainInfoForId, NetworkProvider, signCall } from '@/utils/network';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
 import { fromWei } from 'web3-utils';
+import BaseModalPaymentConnect from '@/components/modals/ModalPaymentConnect.vue';
 
 @Component({
+    components: {
+        BaseModalPaymentConnect,
+    },
     computed: {
         ...mapState('metamask', ['account', 'chainId']),
         ...mapState('payments', ['payment']),
@@ -116,7 +117,7 @@ import { fromWei } from 'web3-utils';
             networks: 'network/all',
             profile: 'account/profile',
             privateKey: 'account/privateKey',
-            metamask: 'metamask/isConnected',
+            isConnected: 'metamask/isConnected',
         }),
     },
 })
@@ -134,10 +135,16 @@ export default class Payment extends Vue {
     blockExplorer = (chainId: number) => getChainInfoForId(chainId).blockExplorer;
 
     created() {
-        this.$store.dispatch('payments/read', {
-            paymentId: this.$route.params.id,
-            accessToken: this.$route.query.accessToken,
-        });
+        this.$store
+            .dispatch('payments/read', {
+                paymentId: this.$route.params.id,
+                accessToken: this.$route.query.accessToken,
+            })
+            .then(() => {
+                if (!this.account && !this.profile) {
+                    this.$bvModal.show('modalPaymentConnect');
+                }
+            });
     }
 
     async signin() {
@@ -147,14 +154,15 @@ export default class Payment extends Vue {
 
     async connect() {
         this.$store.dispatch('metamask/checkPreviouslyConnected');
-
         if (!this.isConnected) {
             await this.$store.dispatch('metamask/connect');
         }
 
         if (this.chainId !== this.payment.chainId) {
-            this.$store.dispatch('metamask/requestSwitchNetwork', this.payment.chainId);
+            await this.$store.dispatch('metamask/requestSwitchNetwork', this.payment.chainId);
         }
+
+        this.$bvModal.hide('modalPaymentConnect');
     }
 
     async pay() {
