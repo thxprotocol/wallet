@@ -49,7 +49,7 @@ export default class BaseModalTranferTokens extends Vue {
 
         await this.$store.dispatch('erc20/approve', {
             token: this.token,
-            network: this.membership.network,
+            chainId: this.membership.chainId,
             to: this.to,
             poolAddress: this.membership.poolAddress,
             amount: this.amount,
@@ -57,7 +57,7 @@ export default class BaseModalTranferTokens extends Vue {
 
         await this.$store.dispatch('erc20/transfer', {
             token: this.token,
-            network: this.membership.network,
+            chainId: this.membership.chainId,
             to: this.to,
             amount: this.amount,
         });

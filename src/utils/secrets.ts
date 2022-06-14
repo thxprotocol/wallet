@@ -9,9 +9,9 @@ export const OIDC_CLIENT_SECRET = process.env['VUE_APP_OIDC_CLIENT_SECRET'] || '
 export const INFURA_KEY = process.env['VUE_APP_INFURA_KEY'] || '';
 export const MATIC_TOKEN = process.env['VUE_APP_MATIC_ADDRESS'] || '';
 
-export const ROOT_RPC = process.env['VUE_APP_ROOT_RPC'] || '';
-export const MAIN_CHILD_RPC = process.env['VUE_APP_CHILD_RPC'] || '';
-export const TEST_CHILD_RPC = process.env['VUE_APP_TEST_CHILD_RPC'] || '';
+export const HARDHAT_RPC = process.env['VUE_APP_HARDHAT_RPC'] || '';
+export const POLYGON_MUMBAI_RPC = process.env['VUE_APP_POLYGON_MUMBAI_RPC'] || '';
+export const POLYGON_RPC = process.env['VUE_APP_POLYGON_RPC'] || '';
 
 export const TORUS_VERIFIER = process.env.VUE_APP_TORUS_VERIFIER || '';
 export const TORUS_NETWORK = process.env.VUE_APP_TORUS_NETWORK || '';

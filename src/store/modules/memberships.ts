@@ -1,11 +1,11 @@
 import { Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import { NetworkProvider } from '@/utils/network';
+import { ChainId } from '@/utils/network';
 
 export type Membership = {
     id: string;
-    network: NetworkProvider;
+    chainId: ChainId;
     poolAddress: string;
     token: any;
     erc20: string;

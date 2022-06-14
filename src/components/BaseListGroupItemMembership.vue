@@ -7,11 +7,9 @@
         <div class="mr-auto">
             <i
                 v-b-tooltip
-                :title="membership.network ? 'Polygon' : 'Polygon Mumbai (Test net)'"
+                :title="ChainId[membership.chainId]"
                 class="fas mr-2"
                 :class="{
-                    'text-primary': membership.network,
-                    'text-muted': !membership.network,
                     'fa-coins': membership.erc20,
                     'fa-palette': membership.erc721,
                 }"
@@ -25,7 +23,7 @@
             <template #button-content>
                 <i class="fas fa-ellipsis-v p-1 ml-0 text-muted" aria-hidden="true" style="font-size: 1rem"></i>
             </template>
-            <b-dropdown-item-button @click.prevent="window.open(token.blockExplorerURL, '_blank')">
+            <b-dropdown-item-button @click.prevent="window.open(token.blockExplorerUrl, '_blank')">
                 <span class="text-muted">
                     <i class="fas fa-external-link-alt mr-2"></i>
                     Block Explorer
@@ -72,6 +70,7 @@ import BaseModalDepositPool from './modals/ModalDepositPool.vue';
 import ModalDelete from './modals/ModalDelete.vue';
 import { ERC20 } from '@/store/modules/erc20';
 import { ERC721 } from '@/store/modules/erc721';
+import { ChainId } from '@/utils/network';
 
 @Component({
     components: {
@@ -85,8 +84,9 @@ import { ERC721 } from '@/store/modules/erc721';
         erc721s: 'erc721/all',
     }),
 })
-export default class BaseListGroupItemAssetPool extends Vue {
+export default class BaseListGroupItemMembership extends Vue {
     window = window;
+    ChainId = ChainId;
     busy = true;
     pendingWithdrawalCount = 0;
 
@@ -99,12 +99,7 @@ export default class BaseListGroupItemAssetPool extends Vue {
 
     get token() {
         if (this.membership.erc20) return this.erc20s[this.membership.erc20];
-        if (this.membership.erc721) return this.erc721s[this.membership.erc721];
-        return null;
-    }
-
-    openBlockExplorerURL() {
-        // token.blockExplorerURL;
+        return this.erc721s[this.membership.erc721];
     }
 
     remove() {

@@ -26,7 +26,7 @@
 import { UserProfile } from '@/store/modules/account';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { NetworkProvider } from '@/utils/network';
+import { ChainId } from '@/utils/network';
 import { User } from 'oidc-client';
 import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
 import ModalShowWithdrawal from '@/components/modals/ModalShowWithdrawal.vue';
@@ -98,8 +98,13 @@ export default class Redirect extends Vue {
 
     async setNetwork(privateKey: string) {
         this.info = 'Initializing blockchain networks...';
-        await this.$store.dispatch('network/setNetwork', { npid: NetworkProvider.Test, privateKey });
-        await this.$store.dispatch('network/setNetwork', { npid: NetworkProvider.Main, privateKey });
+
+        if (process.env.NODE_ENV !== 'production ') {
+            await this.$store.dispatch('network/setNetwork', { chainId: ChainId.Hardhat, privateKey });
+        }
+
+        await this.$store.dispatch('network/setNetwork', { chainId: ChainId.PolygonMumbai, privateKey });
+        await this.$store.dispatch('network/setNetwork', { chainId: ChainId.Polygon, privateKey });
     }
 
     async redirectCallback() {

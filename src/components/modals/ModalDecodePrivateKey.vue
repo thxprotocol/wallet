@@ -20,7 +20,7 @@
 
             <p>
                 Your new address:<br />
-                <code>{{ account.address }}</code>
+                <code v-if="account">{{ account.address }}</code>
             </p>
             <p>
                 You might have pending withdrawals in your emporary wallet. Please provide your password to transfer the
@@ -50,7 +50,7 @@ import { UserProfile } from '@/store/modules/account';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { isPrivateKey, NetworkProvider, signCall } from '@/utils/network';
+import { isPrivateKey, signCall } from '@/utils/network';
 import { Account } from 'web3-core/types/index';
 import { decryptString } from '@/utils/decrypt';
 import { IMemberships, Membership } from '@/store/modules/memberships';
@@ -89,8 +89,8 @@ export default class ModalDecodePrivateKey extends Vue {
     networks!: TNetworks;
 
     onShow() {
-        this.web3 = this.networks[NetworkProvider.Main];
-        this.account = this.web3.eth.accounts.privateKeyToAccount(this.privateKey) as any;
+        const web3 = new Web3();
+        this.account = web3.eth.accounts.privateKeyToAccount(this.privateKey) as any;
         this.busy = false;
     }
 
@@ -130,7 +130,7 @@ export default class ModalDecodePrivateKey extends Vue {
         try {
             if (this.tempAccount && this.account) {
                 await this.$store.dispatch('network/setNetwork', {
-                    npid: membership.network,
+                    chainId: membership.chainId,
                     privateKey: this.privateKey,
                 });
 
