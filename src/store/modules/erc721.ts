@@ -13,6 +13,7 @@ export interface ERC721 {
     balance: string;
     totalSupply: string;
     logoURI: string;
+    blockExplorerUrl?: string;
 }
 
 @Module({ namespaced: true })

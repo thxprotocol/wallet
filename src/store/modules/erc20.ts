@@ -2,7 +2,7 @@ import Vue from 'vue';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
 import { Contract } from 'web3-eth-contract';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
-import { NetworkProvider, send } from '@/utils/network';
+import { ChainId, send } from '@/utils/network';
 import { fromWei, toWei, toChecksumAddress } from 'web3-utils';
 import axios from 'axios';
 import Web3 from 'web3';
@@ -14,7 +14,7 @@ export interface ERC20 {
     contract: Contract;
     name: string;
     symbol: string;
-    blockExplorerURL: string;
+    blockExplorerUrl?: string;
     balance: string;
     totalSupply: string;
     logoURI: string;
@@ -49,7 +49,7 @@ class ERC20Module extends VuexModule {
                 method: 'GET',
                 url: '/erc20/' + res.data.erc20Id,
             });
-            const web3 = this.context.rootGetters['network/all'][data.network];
+            const web3 = this.context.rootGetters['network/all'][data.chainId];
             const from = this.context.rootGetters['account/profile'].address;
             const contract = new web3.eth.Contract(ERC20Abi as any, data.address, { from });
             const totalSupply = Number(fromWei(await contract.methods.totalSupply().call()));
@@ -58,7 +58,9 @@ class ERC20Module extends VuexModule {
                 contract,
                 totalSupply,
                 balance: 0,
-                blockExplorerURL: `https://${!data.network ? 'mumbai.' : ''}polygonscan.com/address/${data.address}`,
+                blockExplorerURL: `https://${data.chainId === 80001 ? 'mumbai.' : ''}polygonscan.com/address/${
+                    data.address
+                }`,
                 logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
             };
 
@@ -87,18 +89,18 @@ class ERC20Module extends VuexModule {
     @Action({ rawError: true })
     async approve({
         token,
-        network,
+        chainId,
         to,
         poolAddress,
         amount,
     }: {
         token: ERC20;
-        network: NetworkProvider;
+        chainId: ChainId;
         to: string;
         poolAddress: string;
         amount: string;
     }) {
-        const web3: Web3 = this.context.rootGetters['network/all'][network];
+        const web3: Web3 = this.context.rootGetters['network/all'][chainId];
         const profile = this.context.rootGetters['account/profile'];
         const privateKey = this.context.rootGetters['account/privateKey'];
         const balance = Number(fromWei(await web3.eth.getBalance(profile.address)));
@@ -122,19 +124,9 @@ class ERC20Module extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async transfer({
-        token,
-        network,
-        to,
-        amount,
-    }: {
-        token: ERC20;
-        network: NetworkProvider;
-        to: string;
-        amount: string;
-    }) {
+    async transfer({ token, chainId, to, amount }: { token: ERC20; chainId: ChainId; to: string; amount: string }) {
         const wei = toWei(amount);
-        const web3 = this.context.rootGetters['network/all'][network];
+        const web3 = this.context.rootGetters['network/all'][chainId];
         const privateKey = this.context.rootGetters['account/privateKey'];
         const tx = await send(
             web3,

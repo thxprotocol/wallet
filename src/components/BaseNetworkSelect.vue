@@ -8,21 +8,28 @@
                 </span>
             </div>
         </template>
+        <template v-if="env !== 'production'">
+            <b-dropdown-item target="_blank" :href="`https://hardhatscan.com/address/${profile.address}`">
+                <i class="fas fa-code-branch text-muted mr-2"></i> Hardhat<br />
+                <small class="text-muted">MATIC: {{ balances[ChainId.Hardhat] }}</small>
+            </b-dropdown-item>
+            <b-dropdown-divider
+        /></template>
         <b-dropdown-item target="_blank" :href="`https://mumbai.polygonscan.com/address/${profile.address}`">
             <i class="fas fa-code-branch text-muted mr-2"></i> Polygon Mumbai<br />
-            <small class="text-muted">MATIC: {{ balances[0] }}</small>
+            <small class="text-muted">MATIC: {{ balances[ChainId.PolygonMumbai] }}</small>
         </b-dropdown-item>
         <b-dropdown-divider />
         <b-dropdown-item target="_blank" :href="`https://polygonscan.com/address/${profile.address}`">
-            <i class="fas fa-code-branch text-success mr-2"></i> Polygon Mainnet<br />
-            <small class="text-muted">MATIC: {{ balances[1] }}</small>
+            <i class="fas fa-code-branch text-success mr-2"></i> Polygon <br />
+            <small class="text-muted">MATIC: {{ balances[ChainId.Polygon] }}</small>
         </b-dropdown-item>
     </b-dropdown>
 </template>
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { TNetworks } from '@/store/modules/network';
-import { NetworkProvider } from '@/utils/network';
+import { ChainId } from '@/utils/network';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { fromWei } from 'web3-utils';
@@ -34,9 +41,12 @@ import { fromWei } from 'web3-utils';
     }),
 })
 export default class BaseNetworkSelect extends Vue {
+    env = process.env.NODE_ENV;
+    ChainId = ChainId;
     balances = {
-        [NetworkProvider.Test]: 0,
-        [NetworkProvider.Main]: 0,
+        [ChainId.Hardhat]: 0,
+        [ChainId.PolygonMumbai]: 0,
+        [ChainId.Polygon]: 0,
     };
     profile!: UserProfile;
     networks!: TNetworks;
@@ -46,12 +56,15 @@ export default class BaseNetworkSelect extends Vue {
     }
 
     getBalances() {
-        this.getBalance(NetworkProvider.Test);
-        this.getBalance(NetworkProvider.Main);
+        if (this.env !== 'production') {
+            this.getBalance(ChainId.Hardhat);
+        }
+        this.getBalance(ChainId.PolygonMumbai);
+        this.getBalance(ChainId.Polygon);
     }
 
-    async getBalance(npid: NetworkProvider) {
-        this.balances[npid] = Number(fromWei(await this.networks[npid].eth.getBalance(this.profile.address)));
+    async getBalance(chainId: ChainId) {
+        this.balances[chainId] = Number(fromWei(await this.networks[chainId].eth.getBalance(this.profile.address)));
     }
 }
 </script>

@@ -121,14 +121,14 @@ export default class BaseModalRedeemPromotion extends Vue {
         if (this.allowance < Number(this.promotion.price)) {
             await this.$store.dispatch('erc20/approve', {
                 token: this.erc20,
-                network: this.membership.network,
+                chainId: this.membership.chainId,
                 to: this.membership.poolAddress,
                 amount: MAX_UINT256,
             });
         }
 
         const calldata = await signCall(
-            this.networks[this.membership.network],
+            this.networks[this.membership.chainId],
             this.membership.poolAddress,
             'deposit',
             [toWei(String(this.promotion.price), 'ether')],

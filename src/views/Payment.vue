@@ -88,7 +88,7 @@
         </div>
         <base-modal-payment-connect
             :account="account"
-            is-connected="isConnected"
+            :is-connected="isConnected"
             :profile="profile"
             :chainId="chainId"
             :payment="payment"
@@ -100,7 +100,7 @@
 import { UserProfile } from '@/store/modules/account';
 import { TNetworks } from '@/store/modules/network';
 import { TPayment } from '@/store/modules/payments';
-import { getChainInfoForId, NetworkProvider, signCall } from '@/utils/network';
+import { ChainId, getChainInfoForId, signCall } from '@/utils/network';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
 import { fromWei } from 'web3-utils';
@@ -124,7 +124,7 @@ import BaseModalPaymentConnect from '@/components/modals/ModalPaymentConnect.vue
 export default class Payment extends Vue {
     account!: string;
     privateKey!: string;
-    chainId!: number;
+    chainId!: ChainId;
     networks!: TNetworks;
     payment!: TPayment;
     profile!: UserProfile;
@@ -195,8 +195,7 @@ export default class Payment extends Vue {
     }
 
     async payDefault() {
-        const npid = this.payment.chainId === 31337 ? NetworkProvider.Main : this.payment.chainId; // TODO this is only here for testing purposes. Move to chainId usage soon
-        const web3 = this.networks[npid as NetworkProvider];
+        const web3 = this.networks[this.payment.chainId as ChainId];
         const { call, nonce, sig } = await signCall(
             web3,
             this.payment.receiver,

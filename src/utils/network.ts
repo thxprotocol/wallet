@@ -7,11 +7,6 @@ import { default as defaultPoolDiamondAbi } from '@thxnetwork/artifacts/dist/exp
 export const MINIMUM_GAS_LIMIT = 54680;
 export const MAX_UINT256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
-export enum NetworkProvider {
-    Test = 0,
-    Main = 1,
-}
-
 export async function signCall(web3: Web3, poolAddress: string, name: string, params: any[], privateKey: string) {
     try {
         const account = web3.eth.accounts.privateKeyToAccount(privateKey);

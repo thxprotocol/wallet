@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import { Module, VuexModule, Action } from 'vuex-module-decorators';
-import { getAssetPoolContract, NetworkProvider, send } from '@/utils/network';
+import { ChainId, getAssetPoolContract, send } from '@/utils/network';
 import { toWei } from 'web3-utils';
 
 interface SignedCall {
@@ -41,9 +41,9 @@ class AssetPoolModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async deposit({ network, poolAddress, amount }: { network: NetworkProvider; poolAddress: string; amount: string }) {
+    async deposit({ chainId, poolAddress, amount }: { chainId: ChainId; poolAddress: string; amount: string }) {
         const wei = toWei(amount);
-        const web3 = this.context.rootGetters['network/all'][network];
+        const web3 = this.context.rootGetters['network/all'][chainId];
         const privateKey = this.context.rootGetters['account/privateKey'];
         const contract = getAssetPoolContract(web3, poolAddress);
 

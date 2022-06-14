@@ -3,7 +3,7 @@
         <div
             class="mr-auto d-flex align-items-center"
             v-b-tooltip
-            :title="`${erc20.name} (${NetworkProvider[membership.network]})`"
+            :title="`${erc20.name} (${ChainId[membership.chainId]})`"
         >
             <base-identicon :rounded="true" variant="dark" :size="30" :uri="erc20.logoURI" class="mr-2" />
             <strong>{{ erc20.symbol }}</strong>
@@ -27,7 +27,7 @@ import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue
 import { TNetworks } from '@/store/modules/network';
 import { Membership } from '@/store/modules/memberships';
 import BaseIdenticon from './BaseIdenticon.vue';
-import { NetworkProvider } from '@/utils/network';
+import { ChainId } from '@/utils/network';
 
 @Component({
     components: {
@@ -41,7 +41,7 @@ import { NetworkProvider } from '@/utils/network';
     }),
 })
 export default class BaseListGroupItemToken extends Vue {
-    NetworkProvider = NetworkProvider;
+    ChainId = ChainId;
     busy = true;
 
     // getters

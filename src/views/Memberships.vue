@@ -6,7 +6,7 @@
                 You are not a member to any pools.
             </strong>
             <b-list-group v-else class="w-100 align-self-start">
-                <base-list-group-item-asset-pool
+                <base-list-group-item-membership
                     :membership="membership"
                     :key="membership.id"
                     v-for="membership of memberships"
@@ -20,13 +20,13 @@
 import { UserProfile } from '@/store/modules/account';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import BaseListGroupItemAssetPool from '@/components/BaseListGroupItemAssetPool.vue';
+import BaseListGroupItemMembership from '@/components/BaseListGroupItemMembership.vue';
 import { IMemberships } from '@/store/modules/memberships';
 
 @Component({
     name: 'AccountView',
     components: {
-        'base-list-group-item-asset-pool': BaseListGroupItemAssetPool,
+        BaseListGroupItemMembership,
     },
     computed: mapGetters({
         profile: 'account/profile',
