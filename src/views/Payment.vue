@@ -212,7 +212,7 @@ export default class Payment extends Vue {
 
     async getBalance() {
         const contract = new this.networks[this.chainId].eth.Contract(ERC20Abi as any, this.payment.tokenAddress);
-        const wei = await contract.methods.balanceOf(this.account).call();
+        const wei = await contract.methods.balanceOf(this.profile ? this.profile.address : this.account).call();
         this.balance = wei;
     }
 
