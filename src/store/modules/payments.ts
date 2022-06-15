@@ -1,9 +1,11 @@
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 
-enum PaymentState {
-    Pending = 0,
-    Completed = 1,
+export enum PaymentState {
+    Requested = 0,
+    Pending = 1,
+    Completed = 2,
+    Failed = 3,
 }
 
 export interface IPayments {

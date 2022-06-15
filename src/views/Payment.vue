@@ -2,85 +2,122 @@
     <div>
         <div class="d-flex flex-column h-100">
             <template v-if="payment">
-                <div class="flex-grow-1">
-                    <div>
-                        <b-alert variant="success" show>
-                            <i class="fas fa-info-circle mr-2"></i>
-                            The
-                            <strong v-b-tooltip :title="payment.receiver">{{ payment.tokenSymbol }} Pool</strong> has
-                            send you a payment request.
-                        </b-alert>
-                        <p class="text-left">
-                            <small class="text-muted">Receiver:</small><br />
-                            <b-badge
-                                :href="`${blockExplorer(payment.chainId)}/address/${payment.receiver}`"
-                                target="_blank"
-                                variant="primary"
-                                class="rounded-pill"
-                            >
-                                {{ payment.receiver }}
-                                <i
-                                    v-b-tooltip
-                                    title="View details of this account on the block explorer"
-                                    class="fas fa-external-link-alt mx-1"
-                                ></i>
-                            </b-badge>
-                        </p>
-                        <p class="text-left">
-                            <small class="text-muted">Connected:</small><br />
-                            <b-badge
-                                @click="$bvModal.show('modalPaymentConnect')"
-                                variant="primary"
-                                class="rounded-pill cursor-pointer"
-                                v-if="!account && !profile"
-                            >
-                                <i class="fas fa-exclamation-circle mx-1"></i>
-                                Connect account
-                            </b-badge>
-                            <b-badge
-                                :href="`${blockExplorer(payment.chainId)}/address/${account}`"
-                                target="_blank"
-                                variant="primary"
-                                class="rounded-pill"
-                                v-if="account"
-                            >
-                                {{ account }}
-                                <i
-                                    v-b-tooltip
-                                    title="View details of this account on the block explorer"
-                                    class="fas fa-external-link-alt mx-1"
-                                ></i>
-                            </b-badge>
-                            <b-badge
-                                :href="`${blockExplorer(payment.chainId)}/address/${profile.address}`"
-                                target="_blank"
-                                variant="primary"
-                                class="rounded-pill"
-                                v-if="profile"
-                            >
-                                {{ profile.address }}
-                                <i
-                                    v-b-tooltip
-                                    title="View details of this account on the block explorer"
-                                    class="fas fa-external-link-alt mx-1"
-                                ></i>
-                            </b-badge>
-                        </p>
+                <template v-if="payment.state === PaymentState.Requested">
+                    <div class="flex-grow-1">
+                        <div>
+                            <b-alert variant="danger" show v-if="error">
+                                <i class="fas fa-exclamation-circle mr-2"></i>
+                                {{ error }}
+                            </b-alert>
+                            <b-alert variant="success" show>
+                                <i class="fas fa-info-circle mr-2"></i>
+                                The
+                                <strong v-b-tooltip :title="payment.receiver">{{ payment.tokenSymbol }} Pool</strong>
+                                has send you a payment request.
+                            </b-alert>
+                            <p class="text-left">
+                                <small class="text-muted">Receiver:</small><br />
+                                <b-badge
+                                    :href="`${blockExplorer(payment.chainId)}/address/${payment.receiver}`"
+                                    target="_blank"
+                                    variant="primary"
+                                    class="rounded-pill"
+                                >
+                                    {{ payment.receiver }}
+                                    <i
+                                        v-b-tooltip
+                                        title="View details of this account on the block explorer"
+                                        class="fas fa-external-link-alt mx-1"
+                                    ></i>
+                                </b-badge>
+                            </p>
+                            <p class="text-left">
+                                <small class="text-muted">Connected:</small><br />
+                                <b-badge
+                                    @click="$bvModal.show('modalPaymentConnect')"
+                                    variant="primary"
+                                    class="rounded-pill cursor-pointer"
+                                    v-if="!account && !profile"
+                                >
+                                    <i class="fas fa-exclamation-circle mx-1"></i>
+                                    Connect account
+                                </b-badge>
+                                <b-badge
+                                    :href="`${blockExplorer(payment.chainId)}/address/${account}`"
+                                    target="_blank"
+                                    variant="primary"
+                                    class="rounded-pill"
+                                    v-if="account"
+                                >
+                                    {{ account }}
+                                    <i
+                                        v-b-tooltip
+                                        title="View details of this account on the block explorer"
+                                        class="fas fa-external-link-alt mx-1"
+                                    ></i>
+                                </b-badge>
+                                <b-badge
+                                    :href="`${blockExplorer(payment.chainId)}/address/${profile.address}`"
+                                    target="_blank"
+                                    variant="primary"
+                                    class="rounded-pill"
+                                    v-if="profile"
+                                >
+                                    {{ profile.address }}
+                                    <i
+                                        v-b-tooltip
+                                        title="View details of this account on the block explorer"
+                                        class="fas fa-external-link-alt mx-1"
+                                    ></i>
+                                </b-badge>
+                            </p>
+                            <p class="text-left">
+                                <small class="text-muted">Balance:</small><br />
+                                <strong class="text-primary">{{ fromWei(balance) }} {{ payment.tokenSymbol }}</strong>
+                            </p>
+                        </div>
+                    </div>
+                    <b-button
+                        :disabled="!profile && !account"
+                        @click="pay()"
+                        variant="primary"
+                        block
+                        class="rounded-pill mb-1"
+                    >
+                        Pay <strong> {{ fromWei(payment.amount, 'ether') }} {{ payment.tokenSymbol }} </strong>
+                    </b-button>
+                    <p class="text-muted text-center small m-0">
+                        <i class="fas fa-lock mr-1"></i>
+                        You only approve for the requested payment and transfers are securely relayed through our relay
+                        service.
+                    </p>
+                </template>
+                <div v-if="payment.state === PaymentState.Pending" class="flex-grow-1 center-center">
+                    <div class="text-center">
+                        <b-spinner variant="gray" class="mb-2" />
+                        <p class="text-gray">Payment is being processed</p>
                     </div>
                 </div>
-                <b-button
-                    :disabled="!profile && !account"
-                    @click="pay()"
-                    variant="primary"
-                    block
-                    class="rounded-pill mb-1"
-                >
-                    Pay <strong> {{ fromWei(payment.amount, 'ether') }} {{ payment.tokenSymbol }} </strong>
-                </b-button>
-                <p class="text-muted text-center small m-0">
-                    <i class="fas fa-lock mr-1"></i>
-                    You only approve for the amount requested and transfers are securely relayed through our relay hub.
-                </p>
+                <div v-if="payment.state === PaymentState.Completed" class="flex-grow-1 center-center">
+                    <div class="text-center">
+                        <i class="fas fa-thumbs-up text-success mb-3" style="font-size: 3rem;"></i>
+                        <p class="text-gray"><strong>THX!</strong> This payment has been completed.</p>
+                        <b-button class="rounded-pill" variant="primary" :href="payment.successUrl">
+                            Continue to merchant
+                            <i class="fas fa-chevron-right ml-2"></i>
+                        </b-button>
+                    </div>
+                </div>
+                <div v-if="payment.state === PaymentState.Failed" class="flex-grow-1 center-center">
+                    <div class="text-center">
+                        <i class="fas fa-exclamation-circle text-danger mb-3" style="font-size: 3rem;"></i>
+                        <p class="text-gray">Your payment has not been processed.</p>
+                        <b-button class="rounded-pill" variant="primary" :href="payment.failUrl">
+                            <i class="fas fa-chevron-left mr-2"></i>
+                            Back to merchant
+                        </b-button>
+                    </div>
+                </div>
             </template>
             <div class="flex-grow-1 d-flex align-items-center justify-content-center" v-else>
                 <b-spinner variant="primary" />
@@ -99,12 +136,14 @@
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { TNetworks } from '@/store/modules/network';
-import { TPayment } from '@/store/modules/payments';
+import { PaymentState, TPayment } from '@/store/modules/payments';
 import { ChainId, getChainInfoForId, signCall } from '@/utils/network';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
 import { fromWei } from 'web3-utils';
 import BaseModalPaymentConnect from '@/components/modals/ModalPaymentConnect.vue';
+import promisePoller from 'promise-poller';
+import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
 
 @Component({
     components: {
@@ -122,6 +161,7 @@ import BaseModalPaymentConnect from '@/components/modals/ModalPaymentConnect.vue
     },
 })
 export default class Payment extends Vue {
+    PaymentState = PaymentState;
     account!: string;
     privateKey!: string;
     chainId!: ChainId;
@@ -129,8 +169,10 @@ export default class Payment extends Vue {
     payment!: TPayment;
     profile!: UserProfile;
     isConnected!: boolean;
+    error = '';
     loading = false;
     fromWei = fromWei;
+    balance = '';
 
     blockExplorer = (chainId: number) => getChainInfoForId(chainId).blockExplorer;
 
@@ -141,6 +183,7 @@ export default class Payment extends Vue {
                 accessToken: this.$route.query.accessToken,
             })
             .then(() => {
+                if (this.payment.state !== 0) return;
                 if (!this.account && !this.profile) {
                     this.$bvModal.show('modalPaymentConnect');
                 }
@@ -154,6 +197,7 @@ export default class Payment extends Vue {
 
     async connect() {
         this.$store.dispatch('metamask/checkPreviouslyConnected');
+
         if (!this.isConnected) {
             await this.$store.dispatch('metamask/connect');
         }
@@ -162,9 +206,35 @@ export default class Payment extends Vue {
             await this.$store.dispatch('metamask/requestSwitchNetwork', this.payment.chainId);
         }
 
+        this.getBalance();
         this.$bvModal.hide('modalPaymentConnect');
     }
 
+    async getBalance() {
+        const contract = new this.networks[this.chainId].eth.Contract(ERC20Abi as any, this.payment.tokenAddress);
+        const wei = await contract.methods.balanceOf(this.account).call();
+        this.balance = wei;
+    }
+
+    async waitForPaymentCompleted() {
+        const taskFn = async () => {
+            await this.$store.dispatch('payments/read', {
+                paymentId: this.payment._id,
+                accessToken: this.payment.token,
+            });
+            if (this.payment.state === 1) {
+                return Promise.resolve(this.payment);
+            } else {
+                return Promise.reject(this.payment);
+            }
+        };
+
+        promisePoller({
+            taskFn,
+            interval: 1000,
+            retries: 50,
+        });
+    }
     async pay() {
         let data;
 
@@ -175,20 +245,13 @@ export default class Payment extends Vue {
 
         try {
             await this.$store.dispatch('payments/pay', data);
-
-            // TODO Start polling
+            await this.waitForPaymentCompleted();
+        } catch (error) {
+            this.error = error;
             await this.$store.dispatch('payments/read', {
                 paymentId: this.payment._id,
                 accessToken: this.payment.token,
             });
-
-            if (this.payment.state === 1) {
-                window.location.href = this.payment.successUrl;
-            }
-        } catch (error) {
-            console.log(error);
-            debugger;
-            // window.location.href = this.payment.failUrl;
         } finally {
             this.loading = false;
         }

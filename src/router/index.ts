@@ -73,7 +73,6 @@ const routes: Array<RouteConfig> = [
     },
     {
         path: '/payment/:id',
-        name: 'Payment',
         component: () => import('../views/Payment.vue'),
     },
     {

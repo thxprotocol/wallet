@@ -123,6 +123,7 @@ export default class BaseModalRedeemPromotion extends Vue {
                 token: this.erc20,
                 chainId: this.membership.chainId,
                 to: this.membership.poolAddress,
+                poolAddress: this.membership.poolAddress,
                 amount: MAX_UINT256,
             });
         }

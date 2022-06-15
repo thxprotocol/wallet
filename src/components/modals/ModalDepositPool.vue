@@ -117,6 +117,7 @@ export default class BaseModalDepositPool extends Vue {
                 token: this.token,
                 chainId: this.membership.chainId,
                 to: this.membership.poolAddress,
+                poolAddress: this.membership.poolAddress,
                 amount: amount || MAX_UINT256,
             });
         }

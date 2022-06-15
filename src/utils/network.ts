@@ -8,27 +8,21 @@ export const MINIMUM_GAS_LIMIT = 54680;
 export const MAX_UINT256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 
 export async function signCall(web3: Web3, poolAddress: string, name: string, params: any[], privateKey: string) {
-    try {
-        const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-        const solution = new web3.eth.Contract(defaultPoolDiamondAbi as any, poolAddress, {
-            from: account.address,
-        });
-        const abi: any = defaultPoolDiamondAbi.find(fn => fn.name === name);
-        const nonce = Number(await solution.methods.getLatestNonce(account.address).call()) + 1;
-        const call = web3.eth.abi.encodeFunctionCall(abi, params);
-        const hash = soliditySha3(call, nonce) || '';
-        const sig = web3.eth.accounts.sign(hash, account.privateKey).signature;
+    const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+    const solution = new web3.eth.Contract(defaultPoolDiamondAbi as any, poolAddress, {
+        from: account.address,
+    });
+    const abi: any = defaultPoolDiamondAbi.find(fn => fn.name === name);
+    const nonce = Number(await solution.methods.getLatestNonce(account.address).call()) + 1;
+    const call = web3.eth.abi.encodeFunctionCall(abi, params);
+    const hash = soliditySha3(call, nonce) || '';
+    const sig = web3.eth.accounts.sign(hash, account.privateKey).signature;
 
-        return {
-            call,
-            nonce,
-            sig,
-        };
-    } catch (e) {
-        return {
-            error: 'Could not sign the call',
-        };
-    }
+    return {
+        call,
+        nonce,
+        sig,
+    };
 }
 
 export async function send(web3: Web3, to: string, fn: any, privateKey: string) {
