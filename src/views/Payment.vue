@@ -222,10 +222,11 @@ export default class Payment extends Vue {
                 paymentId: this.payment._id,
                 accessToken: this.payment.token,
             });
-            if (this.payment.state === 1) {
-                return Promise.resolve(this.payment);
-            } else {
-                return Promise.reject(this.payment);
+            switch (this.payment.state) {
+                case PaymentState.Completed:
+                    return Promise.resolve(this.payment);
+                case PaymentState.Failed:
+                    return Promise.reject(this.payment);
             }
         };
 
