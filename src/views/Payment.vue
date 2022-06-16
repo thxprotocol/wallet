@@ -73,7 +73,7 @@
                             </p>
                             <p class="text-left">
                                 <small class="text-muted">Balance:</small><br />
-                                <strong class="text-primary">{{ fromWei(balance) }} {{ payment.tokenSymbol }}</strong>
+                                <strong class="text-primary">{{ balance }} {{ payment.tokenSymbol }}</strong>
                             </p>
                         </div>
                     </div>
@@ -172,7 +172,11 @@ export default class Payment extends Vue {
     error = '';
     loading = false;
     fromWei = fromWei;
-    balance = '';
+    balanceInWei = '';
+
+    get balance() {
+        return fromWei(this.balanceInWei);
+    }
 
     blockExplorer = (chainId: number) => getChainInfoForId(chainId).blockExplorer;
 
@@ -186,6 +190,8 @@ export default class Payment extends Vue {
                 if (this.payment.state !== 0) return;
                 if (!this.account && !this.profile) {
                     this.$bvModal.show('modalPaymentConnect');
+                } else {
+                    this.getBalance();
                 }
             });
     }
@@ -211,9 +217,10 @@ export default class Payment extends Vue {
     }
 
     async getBalance() {
-        const contract = new this.networks[this.chainId].eth.Contract(ERC20Abi as any, this.payment.tokenAddress);
+        const web3 = this.networks[this.chainId];
+        const contract = new web3.eth.Contract(ERC20Abi as any, this.payment.tokenAddress);
         const wei = await contract.methods.balanceOf(this.profile ? this.profile.address : this.account).call();
-        this.balance = wei;
+        this.balanceInWei = wei;
     }
 
     async waitForPaymentCompleted() {
