@@ -237,18 +237,16 @@ export default class Payment extends Vue {
         });
     }
     async pay() {
-        let data;
-
-        if (this.account) data = await this.payWithMetamask();
-        if (this.profile) data = await this.payDefault();
-
-        this.loading = true;
-
         try {
+            this.loading = true;
+            let data;
+            if (this.account) data = await this.payWithMetamask();
+            if (this.profile) data = await this.payDefault();
+
             await this.$store.dispatch('payments/pay', data);
             await this.waitForPaymentCompleted();
         } catch (error) {
-            this.error = error;
+            this.error = String(error);
             await this.$store.dispatch('payments/read', {
                 paymentId: this.payment._id,
                 accessToken: this.payment.token,
