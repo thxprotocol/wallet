@@ -28,7 +28,9 @@
         </template>
 
         <b-row v-if="withdrawal.erc721Id">
-            <b-col xs="12" md="6" class="img-treasure" :style="`background-image: url(${imgUrl});`"></b-col>
+            <b-col xs="12" md="6" class="d-flex align-items-center">
+                <b-img-lazy :src="imgUrl" class="d-block w-100" />
+            </b-col>
             <b-col xs="12" md="6">
                 <h2 class="text-secondary my-3">
                     <strong>Congratulations!</strong> You've earned NFT
