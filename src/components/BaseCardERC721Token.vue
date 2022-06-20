@@ -3,6 +3,15 @@
         <b-row>
             <b-col md="12">
                 <strong>
+                    <b-button
+                        class="d-block mb-3 float-md-right rounded-pill"
+                        size="sm"
+                        variant="primary"
+                        :href="erc721.baseURL + token.metadataId"
+                    >
+                        Metadata
+                        <i class="fas fa-external-link-alt ml-1"></i>
+                    </b-button>
                     <b-badge variant="dark">#{{ token.tokenId }}</b-badge>
                     {{ token.metadata.title }}
                 </strong>

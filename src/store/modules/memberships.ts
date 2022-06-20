@@ -8,6 +8,7 @@ export type Membership = {
     chainId: ChainId;
     poolAddress: string;
     token: any;
+    tokens: any;
     erc20: string;
     erc721: string;
     poolBalance?: number;

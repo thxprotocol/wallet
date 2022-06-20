@@ -8,6 +8,7 @@ export interface ERC721 {
     _id: string;
     address: string;
     contract: Contract;
+    baseURL: string;
     name: string;
     symbol: string;
     balance: string;

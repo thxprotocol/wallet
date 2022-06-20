@@ -8,7 +8,7 @@
             <i
                 v-b-tooltip
                 :title="ChainId[membership.chainId]"
-                class="fas mr-2"
+                class="fas mr-2 text-primary"
                 :class="{
                     'fa-coins': membership.erc20,
                     'fa-palette': membership.erc721,
