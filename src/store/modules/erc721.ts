@@ -48,7 +48,7 @@ class ERC721Module extends VuexModule {
             method: 'GET',
             url: '/erc721/' + id,
         });
-        const web3 = this.context.rootGetters['network/all'][data.network];
+        const web3 = this.context.rootGetters['network/all'][data.chainId];
         const from = this.context.rootGetters['account/profile'].address;
         const contract = new web3.eth.Contract(ERC721Abi as any, data.address, { from });
         const erc721 = {

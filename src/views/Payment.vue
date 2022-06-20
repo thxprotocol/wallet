@@ -187,12 +187,13 @@ export default class Payment extends Vue {
                 accessToken: this.$route.query.accessToken,
             })
             .then(() => {
-                if (this.payment.state !== 0) return;
+                if (this.payment.state !== PaymentState.Requested) return;
+
                 if (!this.account && !this.profile) {
-                    this.$bvModal.show('modalPaymentConnect');
-                } else {
-                    this.getBalance();
+                    return this.$bvModal.show('modalPaymentConnect');
                 }
+
+                this.getBalance();
             });
     }
 
