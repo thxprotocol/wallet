@@ -1,3 +1,4 @@
+import { ChainId } from '@/utils/network';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 
@@ -18,7 +19,7 @@ export type TPayment = {
     tokenSymbol: string;
     tokenAddress: string;
     poolId: string;
-    chainId: number;
+    chainId: ChainId;
     sender: string;
     receiver: string;
     transactions: string[];
