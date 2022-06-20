@@ -12,22 +12,12 @@
         </div>
         <b-collapse :id="`collapse-${membership.id}`" class="mt-2">
             <hr />
-            <b-card bg-variant="light" class="small mb-2" :key="erc721._id" v-for="erc721 of membership.tokens">
-                <b-row>
-                    <b-col md="12">
-                        <strong>
-                            <b-badge variant="dark">#{{ erc721.tokenId }}</b-badge>
-                            {{ erc721.metadata.title }}
-                        </strong>
-                        <p class="small">{{ erc721.metadata.description }}</p>
-                    </b-col>
-                    <b-col md="4" :key="metadata._id" v-for="metadata of erc721.metadata.attributes">
-                        <b-form-group :label="metadata.key" label-class="text-muted pb-0" class="mb-md-0">
-                            {{ metadata.value }}
-                        </b-form-group>
-                    </b-col>
-                </b-row>
-            </b-card>
+            <base-card-erc-721-token
+                :erc721="erc721"
+                :token="token"
+                :key="token._id"
+                v-for="token of membership.tokens"
+            />
         </b-collapse>
     </b-list-group-item>
 </template>
@@ -37,13 +27,15 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import { ERC721 } from '@/store/modules/erc721';
-import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue';
 import { TNetworks } from '@/store/modules/network';
 import { Membership } from '@/store/modules/memberships';
+import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue';
+import BaseCardErc721Token from '@/components/BaseCardERC721Token.vue';
 import BaseIdenticon from './BaseIdenticon.vue';
 
 @Component({
     components: {
+        BaseCardErc721Token,
         BaseModalTransferTokens,
         BaseIdenticon,
     },

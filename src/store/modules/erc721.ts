@@ -12,6 +12,7 @@ export interface ERC721 {
     symbol: string;
     balance: string;
     totalSupply: string;
+    properties: { propType: string; name: string; description: string }[];
     logoURI: string;
     blockExplorerUrl?: string;
 }
