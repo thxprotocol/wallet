@@ -7,9 +7,11 @@
         <div class="mr-auto">
             <i
                 v-b-tooltip
-                :title="ChainId[membership.chainId]"
-                class="fas mr-2 text-primary"
+                :title="membership.chainId ? 'Polygon' : 'Polygon Mumbai (Test net)'"
+                class="fas mr-2"
                 :class="{
+                    'text-success': membership.chainId,
+                    'text-muted': !membership.chainId,
                     'fa-coins': membership.erc20,
                     'fa-palette': membership.erc721,
                 }"
@@ -47,12 +49,6 @@
                     Promotions
                 </span>
             </b-dropdown-item>
-            <b-dropdown-item :to="`/memberships/${membership.id}/swaps`" v-if="membership.erc20">
-                <span class="text-muted">
-                    <i class="fas fa-tags mr-2"></i>
-                    Swaps
-                </span>
-            </b-dropdown-item>
             <b-dropdown-divider v-if="membership.erc20" />
             <b-dropdown-item v-b-modal="`modalDeleteMembership-${membership.id}`" class="text-danger">
                 <span class="text-muted">
@@ -76,7 +72,6 @@ import BaseModalDepositPool from './modals/ModalDepositPool.vue';
 import ModalDelete from './modals/ModalDelete.vue';
 import { ERC20 } from '@/store/modules/erc20';
 import { ERC721 } from '@/store/modules/erc721';
-import { ChainId } from '@/utils/network';
 
 @Component({
     components: {
@@ -90,9 +85,8 @@ import { ChainId } from '@/utils/network';
         erc721s: 'erc721/all',
     }),
 })
-export default class BaseListGroupItemMembership extends Vue {
+export default class BaseListGroupItemAssetPool extends Vue {
     window = window;
-    ChainId = ChainId;
     busy = true;
     pendingWithdrawalCount = 0;
 
@@ -105,7 +99,12 @@ export default class BaseListGroupItemMembership extends Vue {
 
     get token() {
         if (this.membership.erc20) return this.erc20s[this.membership.erc20];
-        return this.erc721s[this.membership.erc721];
+        if (this.membership.erc721) return this.erc721s[this.membership.erc721];
+        return null;
+    }
+
+    openBlockExplorerURL() {
+        // token.blockExplorerURL;
     }
 
     remove() {
