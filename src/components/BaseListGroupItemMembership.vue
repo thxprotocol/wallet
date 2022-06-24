@@ -47,9 +47,9 @@
                     Promotions
                 </span>
             </b-dropdown-item>
-            <b-dropdown-item :to="`/memberships/${membership.id}/swaps`" v-if="membership.erc20">
+            <b-dropdown-item :to="`/memberships/${membership.id}/erc20swaprules`" v-if="membership.erc20">
                 <span class="text-muted">
-                    <i class="fas fa-tags mr-2"></i>
+                    <i class="fas fas fa-sync"></i>
                     Swaps
                 </span>
             </b-dropdown-item>

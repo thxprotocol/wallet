@@ -56,7 +56,7 @@ export default class BaseListGroupItemToken extends Vue {
     }
 
     mounted() {
-        this.$store.dispatch('erc20/get', this.membership.erc20);
+        this.$store.dispatch('erc20/get', this.erc20._id);
     }
 }
 </script>

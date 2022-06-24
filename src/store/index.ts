@@ -16,6 +16,7 @@ import WithdrawalStore from './modules/withdrawals';
 import PromotionStore from './modules/promotions';
 import DepositStore from './modules/deposits';
 import PaymentStore from './modules/payments';
+import ERc20SwapruleStore from './modules/erc20swaprules';
 
 Vue.use(Vuex);
 
@@ -34,6 +35,7 @@ const modules = {
     withdrawals: WithdrawalStore,
     promotions: PromotionStore,
     payments: PaymentStore,
+    erc20swaprules: ERc20SwapruleStore,
 };
 
 export default new Vuex.Store({

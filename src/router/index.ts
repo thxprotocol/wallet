@@ -97,6 +97,12 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/memberships/Promotions.vue'),
         beforeEnter: assertAuthorization,
     },
+    {
+        path: '/memberships/:id/erc20swaprules',
+        name: 'Swaps',
+        component: () => import('../views/memberships/SwapRules.vue'),
+        beforeEnter: assertAuthorization,
+    },
 ];
 
 const router = new VueRouter({

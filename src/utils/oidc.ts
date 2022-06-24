@@ -12,5 +12,5 @@ export const config: any = {
     automaticSilentRenew: true,
     loadUserInfo: false,
     scope:
-        'openid offline_access rewards:read erc20:read erc721:read withdrawals:read withdrawals:write deposits:read deposits:write account:read account:write memberships:read memberships:write promotions:read relay:write',
+        'openid offline_access rewards:read erc20:read erc721:read withdrawals:read withdrawals:write deposits:read deposits:write account:read account:write memberships:read memberships:write promotions:read relay:write swaprule:read',
 };
