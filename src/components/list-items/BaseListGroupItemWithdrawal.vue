@@ -70,6 +70,8 @@ import { Withdrawal, WithdrawalState, WithdrawalType } from '@/store/modules/wit
 import { format } from 'date-fns';
 import { ERC20 } from '@/store/modules/erc20';
 import BasePopoverTransactions from '@/components/popovers/BasePopoverTransactions.vue';
+import { TransactionState, TTransaction } from '@/types/Transactions';
+import promisePoller from 'promise-poller';
 
 @Component({
     components: {
@@ -86,6 +88,42 @@ export default class BaseListGroupItemWithdrawal extends Vue {
     @Prop() erc20!: ERC20;
     @Prop() withdrawal!: Withdrawal;
     @Prop() membership!: Membership;
+
+    mounted() {
+        const result = this.withdrawal.transactions.filter((tx: TTransaction) => {
+            console.log(tx.state);
+            return [TransactionState.Scheduled, TransactionState.Sent, TransactionState.Failed].includes(tx.state);
+        });
+        // If there are Scheduled or Sent transactions that should get a status change soon, start polling
+        if (result.length) {
+            this.busy = true;
+            this.waitForTransactionMined();
+        }
+    }
+
+    waitForTransactionMined() {
+        const taskFn = async () => {
+            const pendingTransactions = this.withdrawal.transactions.filter((tx: TTransaction) =>
+                [TransactionState.Scheduled, TransactionState.Sent].includes(tx.state),
+            );
+            const id = pendingTransactions[0]._id;
+            const tx = await this.$store.dispatch('transactions/read', id);
+
+            switch (tx.state) {
+                case TransactionState.Mined: {
+                    this.busy = false;
+                    return Promise.resolve(tx);
+                }
+                case TransactionState.Failed:
+                case TransactionState.Scheduled:
+                case TransactionState.Sent: {
+                    return Promise.reject(tx);
+                }
+            }
+        };
+
+        promisePoller({ taskFn, interval: 1500, retries: 50 });
+    }
 
     async remove() {
         this.busy = true;
@@ -109,7 +147,7 @@ export default class BaseListGroupItemWithdrawal extends Vue {
         if (error) {
             this.error = error;
         }
-        this.busy = false;
+        this.waitForTransactionMined();
     }
 }
 </script>

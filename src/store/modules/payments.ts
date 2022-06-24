@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { TPayment } from '@/types/TPayment';
+import { TPayment } from '@/types/Payments';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 
 @Module({ namespaced: true })

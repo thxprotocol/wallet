@@ -4,11 +4,13 @@
         target="_blank"
         :variant="variant || 'primary'"
         class="rounded-pill d-inline-flex cursor-pointer"
-        v-b-tooltip
-        title="View details of this account on the block explorer"
     >
         <span class="text-overflow-75">{{ address }}</span>
-        <i class="fas fa-external-link-alt mx-1"></i>
+        <i
+            v-b-tooltip
+            title="View details of this account on the block explorer"
+            class="fas fa-external-link-alt mx-1"
+        ></i>
     </b-badge>
 </template>
 

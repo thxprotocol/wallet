@@ -34,6 +34,8 @@ class WithdrawalModule extends VuexModule {
         });
 
         this.context.commit('set', r.data);
+
+        return r.data;
     }
 }
 
