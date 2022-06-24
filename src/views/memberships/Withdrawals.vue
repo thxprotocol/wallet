@@ -85,7 +85,7 @@ export default class MembershipWithdrawalsView extends Vue {
     currentPage = 1;
     perPage = 10;
     total = 0;
-    state = null;
+    state: WithdrawalState | null = null;
 
     // getters
     withdrawals!: IWithdrawals;
@@ -109,7 +109,7 @@ export default class MembershipWithdrawalsView extends Vue {
         );
     }
 
-    async onChange(membership: Membership, page: number, state = null) {
+    async onChange(membership: Membership, page: number, state: WithdrawalState | null = null) {
         const { pagination, error } = await this.$store.dispatch('withdrawals/filter', {
             membership,
             page,

@@ -136,7 +136,7 @@
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { TNetworks } from '@/store/modules/network';
-import { PaymentState, TPayment } from '@/store/modules/payments';
+import { PaymentState, TPayment } from '@/types/TPayment';
 import { getChainInfoForId, signCall } from '@/utils/network';
 import { ChainId } from '@/types/enums/ChainId';
 import { Component, Vue } from 'vue-property-decorator';
@@ -188,6 +188,7 @@ export default class Payment extends Vue {
                 accessToken: this.$route.query.accessToken,
             })
             .then(() => {
+                if (this.payment.state === PaymentState.Pending) return this.waitForPaymentCompleted();
                 if (this.payment.state !== PaymentState.Requested) return;
 
                 if (!this.account && !this.profile) {
@@ -225,23 +226,29 @@ export default class Payment extends Vue {
         this.balanceInWei = wei;
     }
 
-    async waitForPaymentCompleted() {
+    waitForPaymentCompleted() {
         const taskFn = async () => {
-            await this.$store.dispatch('payments/read', {
+            const payment = await this.$store.dispatch('payments/read', {
                 paymentId: this.payment._id,
                 accessToken: this.payment.token,
             });
-            switch (this.payment.state) {
+
+            switch (payment.state) {
                 case PaymentState.Completed:
-                    return Promise.resolve(this.payment);
                 case PaymentState.Failed:
-                    return Promise.reject(this.payment);
+                case PaymentState.Requested: {
+                    this.loading = false;
+                    return Promise.resolve(payment);
+                }
+                case PaymentState.Pending: {
+                    return Promise.reject(payment);
+                }
             }
         };
 
         promisePoller({
             taskFn,
-            interval: 1000,
+            interval: 1500,
             retries: 50,
         });
     }
@@ -253,14 +260,14 @@ export default class Payment extends Vue {
             if (this.profile) data = await this.payDefault();
 
             await this.$store.dispatch('payments/pay', data);
-            await this.waitForPaymentCompleted();
+
+            this.waitForPaymentCompleted();
         } catch (error) {
             this.error = String(error);
             await this.$store.dispatch('payments/read', {
                 paymentId: this.payment._id,
                 accessToken: this.payment.token,
             });
-        } finally {
             this.loading = false;
         }
     }
