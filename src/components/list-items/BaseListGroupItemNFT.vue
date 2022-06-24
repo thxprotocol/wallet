@@ -31,7 +31,7 @@ import { TNetworks } from '@/store/modules/network';
 import { Membership } from '@/store/modules/memberships';
 import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue';
 import BaseCardErc721Token from '@/components/BaseCardERC721Token.vue';
-import BaseIdenticon from './BaseIdenticon.vue';
+import BaseIdenticon from '../BaseIdenticon.vue';
 
 @Component({
     components: {

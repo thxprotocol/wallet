@@ -29,7 +29,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { IMemberships } from '@/store/modules/memberships';
-import BaseListGroupItemPromotion from '@/components/BaseListGroupItemPromotion.vue';
+import BaseListGroupItemPromotion from '@/components/list-items/BaseListGroupItemPromotion.vue';
 import { IPromotions } from '@/store/modules/promotions';
 import { ERC20 } from '@/store/modules/erc20';
 

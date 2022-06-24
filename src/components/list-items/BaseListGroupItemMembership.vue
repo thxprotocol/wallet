@@ -66,11 +66,11 @@ import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import { IMemberships, Membership } from '@/store/modules/memberships';
 import { WithdrawalState } from '@/store/modules/withdrawals';
-import BaseModalDepositPool from './modals/ModalDepositPool.vue';
-import ModalDelete from './modals/ModalDelete.vue';
+import BaseModalDepositPool from '../modals/ModalDepositPool.vue';
+import ModalDelete from '../modals/ModalDelete.vue';
 import { ERC20 } from '@/store/modules/erc20';
 import { ERC721 } from '@/store/modules/erc721';
-import { ChainId } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
 
 @Component({
     components: {

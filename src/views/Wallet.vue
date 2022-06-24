@@ -18,8 +18,8 @@
 </template>
 
 <script lang="ts">
-import BaseListGroupItemToken from '@/components/BaseListGroupItemToken.vue';
-import BaseListGroupItemNft from '@/components/BaseListGroupItemNFT.vue';
+import BaseListGroupItemToken from '@/components/list-items/BaseListGroupItemToken.vue';
+import BaseListGroupItemNft from '@/components/list-items/BaseListGroupItemNFT.vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { IMemberships, Membership } from '@/store/modules/memberships';

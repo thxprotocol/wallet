@@ -1,30 +1,25 @@
 <template>
     <b-list-group-item class="d-flex align-items-center w-100">
+        <base-popover-transactions
+            :transactions="withdrawal.transactions"
+            :target="`popover-target-${withdrawal._id}`"
+        />
         <div
+            :id="`popover-target-${withdrawal._id}`"
             class="mr-3"
             :class="{
                 'text-muted': !withdrawal.withdrawalId && !withdrawal.failReason,
                 'text-primary': withdrawal.withdrawalId,
-                'text-danger': withdrawal.failReason,
             }"
         >
             <i
-                v-if="withdrawal.failReason"
-                v-b-tooltip.hover
-                :title="withdrawal.failReason"
-                class="fas fa-exclamation-circle"
-            ></i>
-            <i
-                v-else
-                v-b-tooltip.hover
-                :title="
-                    !withdrawal.withdrawalId
-                        ? `Withdrawal queued at ${format(new Date(withdrawal.createdAt), 'HH:mm MMMM dd, yyyy')}.`
-                        : 'Withdrawal is processed.'
-                "
-                :class="withdrawal.approved ? 'fas' : 'far'"
+                :class="{
+                    far: withdrawal.state === WithdrawalState.Pending,
+                    fas: withdrawal.state === WithdrawalState.Withdrawn,
+                }"
                 class="fa-check-circle"
-            ></i>
+            >
+            </i>
         </div>
         <div class="mr-auto line-height-12">
             <strong class="font-weight-bold">
@@ -69,26 +64,21 @@
 </template>
 
 <script lang="ts">
-import { BLink, BAlert, BButton, BSpinner, BListGroupItem, BListGroup, BBadge } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Membership } from '@/store/modules/memberships';
-import { Withdrawal, WithdrawalType } from '@/store/modules/withdrawals';
+import { Withdrawal, WithdrawalState, WithdrawalType } from '@/store/modules/withdrawals';
 import { format } from 'date-fns';
 import { ERC20 } from '@/store/modules/erc20';
+import BasePopoverTransactions from '@/components/popovers/BasePopoverTransactions.vue';
 
 @Component({
     components: {
-        'b-alert': BAlert,
-        'b-link': BLink,
-        'b-spinner': BSpinner,
-        'b-button': BButton,
-        'b-badge': BBadge,
-        'b-list-group': BListGroup,
-        'b-list-group-item': BListGroupItem,
+        BasePopoverTransactions,
     },
 })
 export default class BaseListGroupItemWithdrawal extends Vue {
     WithdrawalType = WithdrawalType;
+    WithdrawalState = WithdrawalState;
     busy = false;
     error = '';
     format = format;

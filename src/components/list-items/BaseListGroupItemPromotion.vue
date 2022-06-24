@@ -35,7 +35,6 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Membership } from '@/store/modules/memberships';
-import { format } from 'date-fns';
 import { TPromotion } from '@/store/modules/promotions';
 import BaseModalRedeemPromotion from '@/components/modals/ModalRedeemPromotion.vue';
 import { ERC20 } from '@/store/modules/erc20';
@@ -48,7 +47,6 @@ import { ERC20 } from '@/store/modules/erc20';
 export default class BaseListGroupItemWithdrawal extends Vue {
     busy = false;
     error = '';
-    format = format;
 
     @Prop() promotion!: TPromotion;
     @Prop() membership!: Membership;
