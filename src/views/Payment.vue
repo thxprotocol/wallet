@@ -136,7 +136,7 @@
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { TNetworks } from '@/store/modules/network';
-import { PaymentState, TPayment } from '@/types/TPayment';
+import { PaymentState, TPayment } from '@/types/Payments';
 import { getChainInfoForId, signCall } from '@/utils/network';
 import { ChainId } from '@/types/enums/ChainId';
 import { Component, Vue } from 'vue-property-decorator';

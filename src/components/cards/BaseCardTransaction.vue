@@ -6,17 +6,22 @@
         <div class="d-flex justify-content-between w-100 align-items-center">
             <base-badge-network :chainId="tx.chainId" class="mr-2" />
             <b-link v-if="tx.transactionHash" :href="`${chainInfo[tx.chainId].blockExplorer}/tx/${tx.transactionHash}`">
-                <i title="View details of this account on the block explorer" class="fas fa-external-link-alt mx-1"></i>
+                <i class="fas fa-external-link-alt mx-1"></i>
             </b-link>
         </div>
         <hr class="my-3" />
-        <p v-if="tx.failReason" class="text-danger">{{ tx.failReason }}</p>
         <b-row>
             <b-col>
                 <div class="text-muted">Status:</div>
             </b-col>
             <b-col>
                 <strong :class="`text-${state.variant}`">{{ state.label }}</strong>
+                <i
+                    v-b-tooltip
+                    :title="tx.failReason"
+                    v-if="tx.failReason && tx.state === TransactionState.Failed"
+                    class="fas fa-exclamation-circle ml-1 text-danger"
+                ></i>
             </b-col>
         </b-row>
         <b-row>
@@ -32,7 +37,7 @@
                 <div class="text-muted">Scheduled:</div>
             </b-col>
             <b-col>
-                <small>{{ format(new Date(tx.createdAt), 'HH:mm:ss MMMM dd') }}</small>
+                <small>{{ format(new Date(tx.createdAt), 'MMMM dd HH:mm:ss ') }}</small>
             </b-col>
         </b-row>
         <b-row>
@@ -40,7 +45,7 @@
                 <div class="text-muted">Updated:</div>
             </b-col>
             <b-col>
-                <small>{{ format(new Date(tx.updatedAt), 'HH:mm:ss MMMM dd') }}</small>
+                <small>{{ format(new Date(tx.updatedAt), 'MMMM dd HH:mm:ss') }}</small>
             </b-col>
         </b-row>
     </b-card>
@@ -76,7 +81,7 @@ export default class BaseCardTransaction extends Vue {
             case TransactionState.Sent:
                 return { variant: 'info', label: 'Sent' };
             case TransactionState.Failed:
-                return { variant: 'danger', label: this.tx.failReason };
+                return { variant: 'danger', label: 'Failed' };
             case TransactionState.Mined:
                 return { variant: 'success', label: 'Mined' };
         }
