@@ -89,13 +89,15 @@ export default class BaseListGroupItemWithdrawal extends Vue {
     @Prop() withdrawal!: Withdrawal;
     @Prop() membership!: Membership;
 
+    get pendingTransactions() {
+        return this.withdrawal.transactions.filter((tx: TTransaction) =>
+            [TransactionState.Scheduled, TransactionState.Sent].includes(tx.state),
+        );
+    }
+
     mounted() {
-        const result = this.withdrawal.transactions.filter((tx: TTransaction) => {
-            console.log(tx.state);
-            return [TransactionState.Scheduled, TransactionState.Sent, TransactionState.Failed].includes(tx.state);
-        });
         // If there are Scheduled or Sent transactions that should get a status change soon, start polling
-        if (result.length) {
+        if (this.pendingTransactions.length) {
             this.busy = true;
             this.waitForTransactionMined();
         }
@@ -103,22 +105,21 @@ export default class BaseListGroupItemWithdrawal extends Vue {
 
     waitForTransactionMined() {
         const taskFn = async () => {
-            const pendingTransactions = this.withdrawal.transactions.filter((tx: TTransaction) =>
-                [TransactionState.Scheduled, TransactionState.Sent].includes(tx.state),
-            );
-            const id = pendingTransactions[0]._id;
-            const tx = await this.$store.dispatch('transactions/read', id);
+            const tx = await this.$store.dispatch('transactions/read', this.pendingTransactions[0]._id);
 
             switch (tx.state) {
                 case TransactionState.Mined: {
+                    await this.$store.dispatch('withdrawals/read', {
+                        membership: this.membership,
+                        id: this.withdrawal._id,
+                    });
                     this.busy = false;
                     return Promise.resolve(tx);
                 }
                 case TransactionState.Failed:
                 case TransactionState.Scheduled:
-                case TransactionState.Sent: {
+                case TransactionState.Sent:
                     return Promise.reject(tx);
-                }
             }
         };
 
@@ -127,26 +128,19 @@ export default class BaseListGroupItemWithdrawal extends Vue {
 
     async remove() {
         this.busy = true;
-
-        const error = await this.$store.dispatch('withdrawals/remove', {
+        await this.$store.dispatch('withdrawals/remove', {
             membership: this.membership,
             withdrawal: this.withdrawal,
         });
-        if (error) {
-            this.error = error;
-        }
         this.busy = false;
     }
 
     async withdraw() {
         this.busy = true;
-        const error = await this.$store.dispatch('withdrawals/withdraw', {
+        await this.$store.dispatch('withdrawals/withdraw', {
             membership: this.membership,
             id: this.withdrawal.id,
         });
-        if (error) {
-            this.error = error;
-        }
         this.waitForTransactionMined();
     }
 }

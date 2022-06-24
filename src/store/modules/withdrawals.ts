@@ -51,7 +51,7 @@ export class Withdrawal {
 
 export interface IWithdrawals {
     [poolAddress: string]: {
-        [pollId: string]: Withdrawal;
+        [withdrawalId: string]: Withdrawal;
     };
 }
 
@@ -82,7 +82,17 @@ class WithdrawalModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async withdraw({ membership, id }: any) {
+    async read({ membership, id }: { membership: Membership; id: string }) {
+        const r = await axios({
+            method: 'GET',
+            url: '/withdrawals/' + id,
+            headers: { 'X-PoolAddress': membership.poolAddress },
+        });
+        this.context.commit('set', { withdrawal: r.data, membership: membership });
+    }
+
+    @Action({ rawError: true })
+    async withdraw({ membership, id }: { membership: Membership; id: string }) {
         const r = await axios({
             method: 'POST',
             url: `/withdrawals/${id}/withdraw`,
@@ -95,7 +105,7 @@ class WithdrawalModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async remove({ membership, withdrawal }: any) {
+    async remove({ membership, withdrawal }: { membership: Membership; withdrawal: Withdrawal }) {
         await axios({
             method: 'DELETE',
             url: `/withdrawals/${withdrawal.id}`,
