@@ -1,7 +1,7 @@
 import { Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import { ChainId } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
 
 export type Membership = {
     id: string;

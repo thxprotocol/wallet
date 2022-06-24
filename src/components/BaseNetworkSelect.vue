@@ -29,7 +29,7 @@
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { TNetworks } from '@/store/modules/network';
-import { ChainId } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { fromWei } from 'web3-utils';
@@ -44,6 +44,9 @@ export default class BaseNetworkSelect extends Vue {
     env = process.env.NODE_ENV;
     ChainId = ChainId;
     balances = {
+        [ChainId.Ethereum]: 0,
+        [ChainId.Arbitrum]: 0,
+        [ChainId.BinanceSmartChain]: 0,
         [ChainId.Hardhat]: 0,
         [ChainId.PolygonMumbai]: 0,
         [ChainId.Polygon]: 0,

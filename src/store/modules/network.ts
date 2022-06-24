@@ -3,7 +3,7 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { isPrivateKey, send } from '@/utils/network';
 import { HARDHAT_RPC, POLYGON_MUMBAI_RPC, POLYGON_RPC } from '@/utils/secrets';
 import { fromWei, toWei } from 'web3-utils';
-import { ChainId } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
 import axios from 'axios';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
 
@@ -13,6 +13,9 @@ export type TNetworkConfig = {
 };
 
 export type TNetworks = {
+    [ChainId.BinanceSmartChain]: Web3;
+    [ChainId.Ethereum]: Web3;
+    [ChainId.Arbitrum]: Web3;
     [ChainId.Hardhat]: Web3;
     [ChainId.PolygonMumbai]: Web3;
     [ChainId.Polygon]: Web3;

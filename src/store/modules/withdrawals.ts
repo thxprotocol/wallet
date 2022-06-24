@@ -2,6 +2,7 @@ import { Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { Membership } from './memberships';
+import { TTransaction } from '@/types/Transactions';
 
 export enum WithdrawalState {
     Pending = 0,
@@ -14,22 +15,8 @@ export enum WithdrawalType {
     ProposeWithdrawal = 2,
 }
 
-interface WithdrawalData {
-    id: number;
-    amount: string;
-    beneficiary: string;
-    approved: boolean;
-    state: number;
-    type: WithdrawalType;
-    poolAddress: string;
-    withdrawalId: number;
-    failReason?: string;
-    rewardId?: number;
-    createdAt: string;
-    updatedAt: string;
-}
-
 export class Withdrawal {
+    _id: string;
     id: number;
     amount: string;
     beneficiary: string;
@@ -41,10 +28,13 @@ export class Withdrawal {
     createdAt: string;
     updatedAt: string;
     page: number;
+    transactions: TTransaction[];
     type: WithdrawalType;
 
-    constructor(data: WithdrawalData, page: number) {
+    constructor(data: any, page: number) {
+        this.transactions = data.transactions;
         this.id = data.id;
+        this._id = data._id;
         this.amount = data.amount;
         this.state = data.state;
         this.beneficiary = data.beneficiary;

@@ -65,7 +65,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { IWithdrawals, Withdrawal, WithdrawalState } from '@/store/modules/withdrawals';
 import { IMemberships, Membership } from '@/store/modules/memberships';
-import BaseListGroupItemWithdrawal from '@/components/BaseListGroupItemWithdrawal.vue';
+import BaseListGroupItemWithdrawal from '@/components/list-items/BaseListGroupItemWithdrawal.vue';
 import { ERC20 } from '@/store/modules/erc20';
 
 @Component({

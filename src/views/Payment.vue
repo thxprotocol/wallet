@@ -137,7 +137,8 @@
 import { UserProfile } from '@/store/modules/account';
 import { TNetworks } from '@/store/modules/network';
 import { PaymentState, TPayment } from '@/store/modules/payments';
-import { ChainId, getChainInfoForId, signCall } from '@/utils/network';
+import { getChainInfoForId, signCall } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
 import { fromWei } from 'web3-utils';
@@ -218,7 +219,7 @@ export default class Payment extends Vue {
     }
 
     async getBalance() {
-        const web3 = this.networks[this.payment.chainId];
+        const web3 = this.networks[this.payment.chainId as ChainId];
         const contract = new web3.eth.Contract(ERC20Abi as any, this.payment.tokenAddress);
         const wei = await contract.methods.balanceOf(this.profile ? this.profile.address : this.account).call();
         this.balanceInWei = wei;

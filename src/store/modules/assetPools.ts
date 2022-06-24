@@ -1,6 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { Module, VuexModule, Action } from 'vuex-module-decorators';
-import { ChainId, getAssetPoolContract, send } from '@/utils/network';
+import { getAssetPoolContract, send } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
 import { toWei } from 'web3-utils';
 
 interface SignedCall {

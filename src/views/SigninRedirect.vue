@@ -26,7 +26,7 @@
 import { UserProfile } from '@/store/modules/account';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { ChainId } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
 import { User } from 'oidc-client';
 import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
 import ModalShowWithdrawal from '@/components/modals/ModalShowWithdrawal.vue';

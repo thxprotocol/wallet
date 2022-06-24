@@ -26,8 +26,8 @@ import { ERC20 } from '@/store/modules/erc20';
 import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue';
 import { TNetworks } from '@/store/modules/network';
 import { Membership } from '@/store/modules/memberships';
-import BaseIdenticon from './BaseIdenticon.vue';
-import { ChainId } from '@/utils/network';
+import BaseIdenticon from '../BaseIdenticon.vue';
+import { ChainId } from '@/types/enums/ChainId';
 
 @Component({
     components: {

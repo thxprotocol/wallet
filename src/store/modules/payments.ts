@@ -1,4 +1,4 @@
-import { ChainId } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 
