@@ -15,6 +15,7 @@
             </b-alert>
             <div class="mb-auto">
                 <base-list-group-item-swap-rule
+                    :membership="membership"
                     :swaprule="swaprule"
                     :key="key"
                     v-for="(swaprule, key) of filteredERC20SwapRules"
@@ -39,7 +40,7 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { ERC20SwapRulePaginated, IERC20SwapRules } from '@/store/modules/erc20swaprules';
+import { ERC20SwapRuleExtended, IERC20SwapRules } from '@/store/modules/erc20swaprules';
 import { IMemberships, Membership } from '@/store/modules/memberships';
 
 import { TNetworks } from '@/store/modules/network';
@@ -77,7 +78,7 @@ export default class MembershipERC20SwapRulesView extends Vue {
     get filteredERC20SwapRules() {
         if (!this.swaprules[this.$router.currentRoute.params.id]) return [];
         return Object.values(this.swaprules[this.$router.currentRoute.params.id]).filter(
-            (x: ERC20SwapRulePaginated) => x.page === this.currentPage,
+            (x: ERC20SwapRuleExtended) => x.page === this.currentPage,
         );
     }
 
@@ -87,7 +88,6 @@ export default class MembershipERC20SwapRulesView extends Vue {
             page,
             limit: this.perPage,
         });
-        console.log('PAGINATION', pagination);
         this.total = pagination?.total;
         this.error = error;
     }

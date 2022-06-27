@@ -8,14 +8,10 @@
             <!-- <base-identicon :rounded="true" variant="dark" :size="30" :uri="erc20.logoURI" class="mr-2" /> -->
             <strong>{{ swaprule.tokenInSymbol }}</strong>
         </div>
-        <b-button
-            variant="light"
-            size="sm"
-            @click.stop="$bvModal.show(`modalTransferTokens-${swaprule.tokenInAddress}`)"
-        >
+        <b-button variant="light" size="sm" @click.stop="$bvModal.show(`modalERC20Swap-${membership.id}`)">
             <i class="fas fa-sync ml-0"></i>
         </b-button>
-        <base-modal-erc20-swap :swaprule="swaprule" />
+        <BaseModalERC20Swap :swaprule="swaprule" :membership="membership" />
     </b-list-group-item>
 </template>
 
@@ -24,17 +20,20 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BaseIdenticon from './BaseIdenticon.vue';
 import { ChainId } from '@/utils/network';
-import { ERC20SwapRulePaginated } from '@/store/modules/erc20swaprules';
+import { ERC20SwapRuleExtended } from '@/store/modules/erc20swaprules';
+import { Membership } from '@/store/modules/memberships';
+import BaseModalERC20Swap from './modals/ModalSwap.vue';
 
 @Component({
     components: {
-        //BaseModalERC20Swap,
+        BaseModalERC20Swap,
         BaseIdenticon,
     },
     computed: mapGetters({}),
 })
 export default class BaseListGroupItemSwapRule extends Vue {
     ChainId = ChainId;
-    @Prop() swaprule!: ERC20SwapRulePaginated;
+    @Prop() swaprule!: ERC20SwapRuleExtended;
+    @Prop() membership!: Membership;
 }
 </script>

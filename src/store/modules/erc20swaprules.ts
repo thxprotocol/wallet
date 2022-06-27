@@ -10,6 +10,7 @@ export interface IERC20SwapRuleData {
     _id: string;
     chainId: ChainId;
     poolAddress: string;
+    tokenInId: string;
     tokenInAddress: string;
     tokenMultiplier: number;
     tokenInName: string;
@@ -17,10 +18,11 @@ export interface IERC20SwapRuleData {
     //tokenInlogoURI: string;
 }
 
-export class ERC20SwapRulePaginated {
+export class ERC20SwapRuleExtended {
     _id: string;
     chainId: ChainId;
     poolAddress: string;
+    tokenInId: string;
     tokenInAddress: string;
     tokenMultiplier: number;
     page: number;
@@ -28,10 +30,11 @@ export class ERC20SwapRulePaginated {
     tokenInSymbol: string;
     //tokenInlogoURI: string;
 
-    constructor(data: IERC20SwapRuleData, tokenName: string, tokenSymbol:string, page: number) {
+    constructor(data: IERC20SwapRuleData, tokenName: string, tokenSymbol: string, page: number) {
         this._id = data._id;
         this.chainId = data.chainId;
         this.poolAddress = data.poolAddress;
+        this.tokenInId = data.tokenInId;
         this.tokenInAddress = data.tokenInAddress;
         this.tokenMultiplier = data.tokenMultiplier;
         this.page = page;
@@ -43,7 +46,7 @@ export class ERC20SwapRulePaginated {
 
 export interface IERC20SwapRules {
     [poolAddress: string]: {
-        [pollId: string]: ERC20SwapRulePaginated;
+        [pollId: string]: ERC20SwapRuleExtended;
     };
 }
 
@@ -56,7 +59,7 @@ class ERC20SwapRuleModule extends VuexModule {
     }
 
     @Mutation
-    set({ swaprule, membership }: { swaprule: ERC20SwapRulePaginated; membership: Membership }) {
+    set({ swaprule, membership }: { swaprule: ERC20SwapRuleExtended; membership: Membership }) {
         if (!this._all[membership.id]) {
             Vue.set(this._all, membership.id, {});
         }
@@ -64,7 +67,7 @@ class ERC20SwapRuleModule extends VuexModule {
     }
 
     @Mutation
-    unset({ swaprule, membership }: { swaprule: ERC20SwapRulePaginated; membership: Membership }) {
+    unset({ swaprule, membership }: { swaprule: ERC20SwapRuleExtended; membership: Membership }) {
         Vue.delete(this._all[membership.id], swaprule._id);
     }
 
@@ -95,10 +98,10 @@ class ERC20SwapRuleModule extends VuexModule {
 
             const tokenName = await contract.methods.name().call();
             const tokenSymbol = await contract.methods.symbol().call();
-            const swaprulePaginated = new ERC20SwapRulePaginated(swaprule, tokenName, tokenSymbol, page)
+            const swaprulePaginated = new ERC20SwapRuleExtended(swaprule, tokenName, tokenSymbol, page);
             this.context.commit('set', { swaprule: swaprulePaginated, membership });
         }
-        
+
         return { pagination: r.data };
     }
 }

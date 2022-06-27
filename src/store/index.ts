@@ -17,6 +17,7 @@ import PromotionStore from './modules/promotions';
 import DepositStore from './modules/deposits';
 import PaymentStore from './modules/payments';
 import ERc20SwapruleStore from './modules/erc20swaprules';
+import ERc20Swaps from './modules/erc20swaps';
 
 Vue.use(Vuex);
 
@@ -36,6 +37,7 @@ const modules = {
     promotions: PromotionStore,
     payments: PaymentStore,
     erc20swaprules: ERc20SwapruleStore,
+    erc20swapa: ERc20Swaps,
 };
 
 export default new Vuex.Store({
