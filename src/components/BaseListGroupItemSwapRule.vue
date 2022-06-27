@@ -3,10 +3,10 @@
         <div
             class="mr-auto d-flex align-items-center"
             v-b-tooltip
-            :title="`${swaprule.tokenInName} (${ChainId[swaprule.chainId]})`"
+            :title="`${swaprule.erc20.name} (${ChainId[swaprule.chainId]})`"
         >
-            <!-- <base-identicon :rounded="true" variant="dark" :size="30" :uri="erc20.logoURI" class="mr-2" /> -->
-            <strong>{{ swaprule.tokenInSymbol }}</strong>
+            <base-identicon :rounded="true" variant="dark" :size="30" :uri="swaprule.erc20.logoURI" class="mr-2" />
+            <strong>{{ swaprule.erc20.symbol }}</strong>
         </div>
         <b-button variant="light" size="sm" @click.stop="$bvModal.show(`modalERC20Swap-${membership.id}`)">
             <i class="fas fa-sync ml-0"></i>
