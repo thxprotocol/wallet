@@ -52,11 +52,11 @@ export default class BaseListGroupItemToken extends Vue {
     @Prop() membership!: Membership;
 
     get erc20() {
-        return this.erc20s[this.membership.erc20];
+        return this.erc20s[this.membership.erc20Id];
     }
 
     mounted() {
-        this.$store.dispatch('erc20/get', this.membership.erc20);
+        this.$store.dispatch('erc20/get', this.membership.erc20Id);
     }
 }
 </script>

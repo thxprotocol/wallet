@@ -99,7 +99,7 @@ export default class MembershipWithdrawalsView extends Vue {
 
     get erc20() {
         if (!this.membership) return null;
-        return this.erc20s[this.membership.erc20];
+        return this.erc20s[this.membership.erc20Id];
     }
 
     get filteredWithdrawals() {
@@ -123,7 +123,7 @@ export default class MembershipWithdrawalsView extends Vue {
 
     async mounted() {
         this.$store.dispatch('memberships/get', this.$route.params.id).then(async () => {
-            await this.$store.dispatch('erc20/get', this.membership.erc20);
+            await this.$store.dispatch('erc20/get', this.membership.erc20Id);
             this.onChange(this.membership, this.currentPage);
             this.busy = false;
         });

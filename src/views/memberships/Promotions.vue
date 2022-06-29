@@ -61,7 +61,7 @@ export default class MembershipPromotionsView extends Vue {
 
     get erc20() {
         if (!this.membership) return null;
-        return this.erc20s[this.membership.erc20];
+        return this.erc20s[this.membership.erc20Id];
     }
 
     get filteredPromotions() {
@@ -72,7 +72,7 @@ export default class MembershipPromotionsView extends Vue {
 
     async mounted() {
         this.$store.dispatch('memberships/get', this.$route.params.id).then(async () => {
-            await this.$store.dispatch('erc20/get', this.membership.erc20);
+            await this.$store.dispatch('erc20/get', this.membership.erc20Id);
             await this.$store.dispatch('promotions/filter', { membership: this.membership });
             this.busy = false;
         });

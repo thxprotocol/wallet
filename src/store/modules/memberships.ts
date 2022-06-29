@@ -6,11 +6,12 @@ import { ChainId } from '@/types/enums/ChainId';
 export type Membership = {
     id: string;
     chainId: ChainId;
-    poolAddress: string;
     token: any;
     tokens: any;
-    erc20: string;
-    erc721: string;
+    poolId: string;
+    poolAddress: string;
+    erc20Id: string;
+    erc721Id: string;
     poolBalance?: number;
     pendingBalance?: number;
 };

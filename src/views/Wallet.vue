@@ -7,7 +7,7 @@
             </strong>
             <b-list-group v-else class="w-100 align-self-start">
                 <component
-                    :is="membership.erc721 ? 'BaseListGroupItemNft' : 'BaseListGroupItemToken'"
+                    :is="membership.erc721Id ? 'BaseListGroupItemNft' : 'BaseListGroupItemToken'"
                     :membership="membership"
                     :key="key"
                     v-for="(membership, key) in uniqueMembershipTokens"
@@ -51,10 +51,10 @@ export default class Wallet extends Vue {
 
             for (const id in this.memberships) {
                 const erc20Index = this.uniqueMembershipTokens.findIndex(
-                    (membership: Membership) => this.memberships[id].erc20 === membership.erc20,
+                    (membership: Membership) => this.memberships[id].erc20Id === membership.erc20Id,
                 );
                 const erc721Index = this.uniqueMembershipTokens.findIndex(
-                    (membership: Membership) => this.memberships[id].erc721 === membership.erc721,
+                    (membership: Membership) => this.memberships[id].erc721Id === membership.erc721Id,
                 );
                 if (erc20Index === -1 || erc721Index === -1) {
                     this.uniqueMembershipTokens.push(this.memberships[id]);

@@ -81,7 +81,7 @@ export default class BaseModalDepositPool extends Vue {
     @Prop() membership!: Membership;
 
     get token() {
-        return this.erc20s[this.membership.erc20];
+        return this.erc20s[this.membership.erc20Id];
     }
 
     get hasInsufficientBalance() {
@@ -95,7 +95,7 @@ export default class BaseModalDepositPool extends Vue {
     async onShow() {
         const web3 = this.networks[this.membership.chainId];
         this.maticBalance = Number(fromWei(await web3.eth.getBalance(this.profile.address)));
-        this.$store.dispatch('erc20/get', this.membership.erc20);
+        this.$store.dispatch('erc20/get', this.membership.erc20Id);
     }
 
     getBalance() {
