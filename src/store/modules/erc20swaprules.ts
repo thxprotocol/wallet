@@ -14,6 +14,7 @@ export interface IERC20SwapRuleData {
     tokenInAddress: string;
     tokenMultiplier: number;
     erc20: ERC20;
+    erc20Token: ERC20;
 }
 
 export class ERC20SwapRuleExtended {
@@ -111,7 +112,6 @@ class ERC20SwapRuleModule extends VuexModule {
                         });
                     });
                 } catch (err) {
-                    console.log('ERROR', err);
                     reject(err);
                 }
             });

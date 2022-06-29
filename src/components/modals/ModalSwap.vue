@@ -91,7 +91,7 @@ export default class BaseModalERC20Swap extends Vue {
     }
 
     get tokenIn() {
-        return this.erc20s[this.swaprule.erc20._id];
+        return this.swaprule.erc20; //this.erc20s[this.swaprule.erc20._id];
     }
 
     get hasInsufficientBalance() {
@@ -105,9 +105,8 @@ export default class BaseModalERC20Swap extends Vue {
     async onShow() {
         const web3 = this.networks[this.membership.chainId];
         this.maticBalance = Number(fromWei(await web3.eth.getBalance(this.profile.address)));
-        this.$store.dispatch('erc20/get', this.tokenIn._id);
-        console.log('this.ercs', this.erc20s[this.tokenIn._id]);
-        this.balance = Number(this.erc20s[this.tokenIn._id].balance);
+        const wei = await this.tokenIn.contract.methods.balanceOf(this.profile.address).call();
+        this.tokenIn.balance = fromWei(wei);
     }
 
     updateSwapProvisioning() {
@@ -118,19 +117,21 @@ export default class BaseModalERC20Swap extends Vue {
         this.busy = true;
 
         const { allowance } = await this.$store.dispatch('erc20/allowance', {
-            token: this.token,
+            token: this.tokenIn,
             owner: this.profile.address,
             spender: this.membership.poolAddress,
         });
         this.allowance = Number(allowance);
 
-        if (this.allowance < Number(this.amount)) {
+        const amountInToWei = toWei(String(this.amount));
+
+        if (this.allowance < Number(amountInToWei)) {
             await this.$store.dispatch('erc20/approve', {
-                token: this.token,
+                token: this.tokenIn,
                 chainId: this.membership.chainId,
                 to: this.membership.poolAddress,
                 poolAddress: this.membership.poolAddress,
-                amount: this.amount || MAX_UINT256,
+                amount: MAX_UINT256,
             });
         }
 
@@ -138,19 +139,21 @@ export default class BaseModalERC20Swap extends Vue {
             this.networks[this.membership.chainId],
             this.membership.poolAddress,
             'swap',
-            [toWei(String(this.amount), 'ether'), this.swaprule.tokenInAddress],
+            [amountInToWei, this.swaprule.tokenInAddress],
             this.privateKey,
         );
 
         await this.$store.dispatch('erc20swaps/create', {
             membership: this.membership,
             calldata,
-            amount: this.amount,
+            amountIn: this.amount,
+            tokenInAddress: this.swaprule.tokenInAddress,
         });
 
         this.$store.dispatch('memberships/get', this.membership.id);
         this.$bvModal.hide(`modalERC20Swap-${this.membership.id}`);
         this.busy = false;
+        this.$router.push({ path: '/wallet' });
     }
 }
 </script>

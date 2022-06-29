@@ -73,11 +73,9 @@ class ERC20Module extends VuexModule {
 
     @Action({ rawError: true })
     async balanceOf(erc20: ERC20) {
-        console.log('erc20', erc20);
         const profile = this.context.rootGetters['account/profile'];
         const wei = await erc20.contract.methods.balanceOf(profile.address).call();
         const balance = fromWei(wei);
-        console.log('BALANCE', balance);
         this.context.commit('setBalance', { erc20, balance });
     }
 

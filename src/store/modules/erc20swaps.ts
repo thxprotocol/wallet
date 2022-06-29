@@ -5,7 +5,17 @@ import { Membership } from './memberships';
 @Module({ namespaced: true })
 class ERC20SwapsModule extends VuexModule {
     @Action({ rawError: true })
-    async create({ membership, amountIn, calldata }: { membership: Membership; amountIn: number; calldata: any }) {
+    async create({
+        membership,
+        amountIn,
+        tokenInAddress,
+        calldata,
+    }: {
+        membership: Membership;
+        amountIn: number;
+        tokenInAddress: string;
+        calldata: any;
+    }) {
         const { call, nonce, sig } = calldata;
         await axios({
             method: 'POST',
@@ -18,6 +28,7 @@ class ERC20SwapsModule extends VuexModule {
                 nonce,
                 sig,
                 amountIn,
+                tokenInAddress,
             },
         });
 
