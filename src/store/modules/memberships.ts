@@ -13,6 +13,7 @@ export type Membership = {
     erc721: string;
     poolBalance?: number;
     pendingBalance?: number;
+    sub: string;
 };
 
 export interface IMemberships {

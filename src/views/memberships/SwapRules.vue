@@ -13,23 +13,23 @@
             <b-alert variant="info" show class="mb-3" v-if="!filteredERC20SwapRules.length">
                 There are no Swap Rules set yet.
             </b-alert>
-            <div class="mb-auto">
+            <div class="mb-auto" v-else>
                 <base-list-group-item-swap-rule
                     :membership="membership"
                     :swaprule="swaprule"
                     :key="key"
                     v-for="(swaprule, key) of filteredERC20SwapRules"
                 />
+                <b-pagination
+                    class="mt-3"
+                    v-if="total > perPage"
+                    @change="onChange"
+                    v-model="currentPage"
+                    :per-page="perPage"
+                    :total-rows="total"
+                    align="fill"
+                ></b-pagination>
             </div>
-            <b-pagination
-                class="mt-3"
-                v-if="total > perPage"
-                @change="onChange"
-                v-model="currentPage"
-                :per-page="perPage"
-                :total-rows="total"
-                align="fill"
-            ></b-pagination>
             <b-button block variant="dark" to="/memberships" class="mx-3 w-auto m-md-0 mt-3">
                 Back
             </b-button>
@@ -41,7 +41,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { ERC20SwapRuleExtended, IERC20SwapRules } from '@/store/modules/erc20swaprules';
-import { IMemberships, Membership } from '@/store/modules/memberships';
+import { IMemberships } from '@/store/modules/memberships';
 
 import { TNetworks } from '@/store/modules/network';
 import BaseListGroupItemSwapRule from '@/components/BaseListGroupItemSwapRule.vue';
@@ -77,14 +77,15 @@ export default class MembershipERC20SwapRulesView extends Vue {
 
     get filteredERC20SwapRules() {
         if (!this.swaprules[this.$router.currentRoute.params.id]) return [];
-        return Object.values(this.swaprules[this.$router.currentRoute.params.id]).filter(
+        const result = Object.values(this.swaprules[this.$router.currentRoute.params.id]).filter(
             (x: ERC20SwapRuleExtended) => x.page === this.currentPage,
         );
+        return result;
     }
 
-    async onChange(membership: Membership, page: number) {
+    async onChange(page: number) {
         const { pagination, error } = await this.$store.dispatch('erc20swaprules/filter', {
-            membership,
+            membership: this.membership,
             page,
             limit: this.perPage,
         });
@@ -93,7 +94,7 @@ export default class MembershipERC20SwapRulesView extends Vue {
     }
 
     async mounted() {
-        this.onChange(this.membership, this.currentPage);
+        this.onChange(this.currentPage);
         this.busy = false;
     }
 }

@@ -37,7 +37,7 @@ const modules = {
     promotions: PromotionStore,
     payments: PaymentStore,
     erc20swaprules: ERc20SwapruleStore,
-    erc20swapa: ERc20Swaps,
+    erc20swaps: ERc20Swaps,
 };
 
 export default new Vuex.Store({

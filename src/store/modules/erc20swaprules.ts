@@ -4,7 +4,6 @@ import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { Membership } from './memberships';
 import { ChainId } from '@/utils/network';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
-import { fromWei } from 'web3-utils';
 import { ERC20 } from './erc20';
 
 export interface IERC20SwapRuleData {
@@ -14,9 +13,7 @@ export interface IERC20SwapRuleData {
     tokenInId: string;
     tokenInAddress: string;
     tokenMultiplier: number;
-    tokenInName: string;
-    tokenInSymbol: string;
-    //tokenInlogoURI: string;
+    erc20: ERC20;
 }
 
 export class ERC20SwapRuleExtended {
@@ -42,8 +39,8 @@ export class ERC20SwapRuleExtended {
 }
 
 export interface IERC20SwapRules {
-    [poolAddress: string]: {
-        [pollId: string]: ERC20SwapRuleExtended;
+    [membershipId: string]: {
+        [_id: string]: ERC20SwapRuleExtended;
     };
 }
 
@@ -68,11 +65,6 @@ class ERC20SwapRuleModule extends VuexModule {
         Vue.delete(this._all[membership.id], swaprule._id);
     }
 
-    @Mutation
-    clear() {
-        Vue.set(this, '_all', {});
-    }
-
     @Action({ rawError: true })
     async filter({ membership, page = 1, limit = 10 }: { membership: Membership; page: number; limit: number }) {
         const params = new URLSearchParams();
@@ -86,36 +78,46 @@ class ERC20SwapRuleModule extends VuexModule {
             headers: { 'X-PoolAddress': membership.poolAddress },
         });
 
-        this.context.commit('clear');
+        const promises = [];
 
         for (const swaprule of swaprules.data.results) {
-            const res = await axios({
-                method: 'GET',
-                url: '/erc20/token/' + swaprule.tokenInId,
-            });
-            const { data } = await axios({
-                method: 'GET',
-                url: '/erc20/' + res.data.erc20Id,
-            });
-            const web3 = this.context.rootGetters['network/all'][data.chainId];
-            const from = this.context.rootGetters['account/profile'].address;
-            const contract = new web3.eth.Contract(ERC20Abi as any, data.address, { from });
-            const totalSupply = Number(fromWei(await contract.methods.totalSupply().call()));
-            const erc20 = {
-                ...res.data,
-                contract,
-                totalSupply,
-                balance: 0,
-                blockExplorerURL: `https://${data.chainId === 80001 ? 'mumbai.' : ''}polygonscan.com/address/${
-                    data.address
-                }`,
-                logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
-            };
+            const promise = new Promise((resolve, reject) => {
+                try {
+                    axios({
+                        method: 'GET',
+                        url: '/erc20/token/' + swaprule.tokenInId,
+                    }).then(res => {
+                        axios({
+                            method: 'GET',
+                            url: '/erc20/' + res.data.erc20Id,
+                        }).then(({ data }) => {
+                            const web3 = this.context.rootGetters['network/all'][data.chainId];
+                            const from = this.context.rootGetters['account/profile'].address;
+                            const contract = new web3.eth.Contract(ERC20Abi as any, data.address, { from });
 
-            const swaprulePaginated = new ERC20SwapRuleExtended(swaprule, erc20, page);
-            this.context.commit('set', { swaprule: swaprulePaginated, membership });
+                            const erc20 = {
+                                ...res.data,
+                                contract,
+                                balance: 0,
+                                blockExplorerURL: `https://${
+                                    data.chainId === 80001 ? 'mumbai.' : ''
+                                }polygonscan.com/address/${data.address}`,
+                                logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
+                            };
+
+                            const swaprulePaginated = new ERC20SwapRuleExtended(swaprule, erc20, page);
+                            this.context.commit('set', { swaprule: swaprulePaginated, membership });
+                            resolve(true);
+                        });
+                    });
+                } catch (err) {
+                    console.log('ERROR', err);
+                    reject(err);
+                }
+            });
+            promises.push(promise);
         }
-
+        await Promise.all(promises);
         return { pagination: swaprules.data };
     }
 }

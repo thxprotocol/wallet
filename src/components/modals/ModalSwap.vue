@@ -10,12 +10,12 @@
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
-        <template v-if="!busy && token">
+        <template v-if="!busy && tokenIn">
             <b-alert show variant="danger" v-if="error">
                 {{ error }}
             </b-alert>
             <b-alert :show="hasInsufficientBalance" variant="warning">
-                You do not have enough {{ token.symbol }} on this account.
+                You do not have enough {{ tokenIn.symbol }} on this account.
             </b-alert>
             <b-alert :show="hasInsufficientMATICBalance" variant="warning">
                 A balance of <strong>{{ maticBalance }} MATIC</strong> is not enough to pay for gas.
@@ -24,19 +24,19 @@
                 <b-form-input autofocus size="lg" v-model="amount" type="number" :v-on="updateSwapProvisioning()" />
             </form>
             <p class="small text-muted mt-2 mb-0">
-                Your balance: <strong>{{ token.balance }} {{ token.symbol }}</strong> (
-                <b-link @click="amount = Number(token.balance)">
+                Your balance: <strong>{{ tokenIn.balance }} {{ tokenIn.symbol }}</strong> (
+                <b-link @click="amount = Number(tokenIn.balance)">
                     Set Max
                 </b-link>
                 )
             </p>
             <p class="small text-muted mt-2 mb-0">
-                You receive: <strong>{{ tokenInPrevisionedAmount }} {{ tokenIn.symbol }}</strong>
+                You receive: <strong>{{ tokenInPrevisionedAmount }} {{ token.symbol }}</strong>
             </p>
         </template>
         <template v-slot:modal-footer>
             <b-button
-                :disabled="hasInsufficientBalance"
+                :disabled="hasInsufficientBalance || amount <= 0"
                 class="mt-3 btn-rounded"
                 block
                 variant="primary"
@@ -55,7 +55,7 @@ import { ERC20 } from '@/store/modules/erc20';
 import { ERC20SwapRuleExtended } from '@/store/modules/erc20swaprules';
 import { Membership } from '@/store/modules/memberships';
 import { TNetworks } from '@/store/modules/network';
-import { MAX_UINT256, signCall } from '@/utils/network';
+import { ChainId, MAX_UINT256, signCall } from '@/utils/network';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { fromWei, toWei } from 'web3-utils';
@@ -91,25 +91,23 @@ export default class BaseModalERC20Swap extends Vue {
     }
 
     get tokenIn() {
-        return this.erc20s[this.swaprule.tokenInId];
+        return this.erc20s[this.swaprule.erc20._id];
     }
 
     get hasInsufficientBalance() {
-        return Number(this.token.balance) < this.amount;
+        return Number(this.tokenIn.balance) < this.amount;
     }
 
     get hasInsufficientMATICBalance() {
-        return this.maticBalance == 0;
+        return this.membership.chainId != ChainId.Hardhat && this.maticBalance == 0;
     }
 
     async onShow() {
         const web3 = this.networks[this.membership.chainId];
         this.maticBalance = Number(fromWei(await web3.eth.getBalance(this.profile.address)));
-        this.$store.dispatch('erc20/get', this.membership.erc20);
-    }
-
-    getBalance() {
-        this.$store.dispatch('erc20/balanceOf', this.token);
+        this.$store.dispatch('erc20/get', this.tokenIn._id);
+        console.log('this.ercs', this.erc20s[this.tokenIn._id]);
+        this.balance = Number(this.erc20s[this.tokenIn._id].balance);
     }
 
     updateSwapProvisioning() {
