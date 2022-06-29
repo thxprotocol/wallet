@@ -92,13 +92,13 @@ class ERC20Module extends VuexModule {
         token,
         chainId,
         to,
-        poolAddress,
+        poolId,
         amount,
     }: {
         token: ERC20;
         chainId: ChainId;
         to: string;
-        poolAddress: string;
+        poolId: string;
         amount: string;
     }) {
         const web3: Web3 = this.context.rootGetters['network/all'][chainId];
@@ -111,7 +111,7 @@ class ERC20Module extends VuexModule {
                 method: 'POST',
                 url: `/deposits/approve`,
                 headers: {
-                    'X-PoolAddress': poolAddress,
+                    'X-PoolId': poolId,
                 },
                 data: {
                     amount,

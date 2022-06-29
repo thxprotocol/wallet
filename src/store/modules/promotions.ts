@@ -55,7 +55,7 @@ class PromotionModule extends VuexModule {
             method: 'GET',
             url: '/promotions',
             params,
-            headers: { 'X-PoolAddress': membership.poolAddress },
+            headers: { 'X-PoolId': membership.poolId },
         });
 
         this.context.commit('clear');

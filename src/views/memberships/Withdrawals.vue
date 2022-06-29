@@ -33,7 +33,15 @@
                 </b-button-group>
             </div>
             <b-alert variant="info" show class="mb-3" v-if="!filteredWithdrawals.length">
-                You have no pending withdrawals for this pool.
+                <span v-if="state === WithdrawalState.Pending">
+                    You have no pending withdrawals.
+                </span>
+                <span v-if="state === WithdrawalState.Withdrawn">
+                    You have no withdrawn withdrawals.
+                </span>
+                <span v-if="state === null">
+                    You have no withdrawals.
+                </span>
             </b-alert>
             <div class="mb-auto">
                 <base-list-group-item-withdrawal
@@ -85,7 +93,7 @@ export default class MembershipWithdrawalsView extends Vue {
     currentPage = 1;
     perPage = 10;
     total = 0;
-    state: WithdrawalState | null = null;
+    state: WithdrawalState | null = WithdrawalState.Pending;
 
     // getters
     withdrawals!: IWithdrawals;
@@ -124,7 +132,7 @@ export default class MembershipWithdrawalsView extends Vue {
     async mounted() {
         this.$store.dispatch('memberships/get', this.$route.params.id).then(async () => {
             await this.$store.dispatch('erc20/get', this.membership.erc20Id);
-            this.onChange(this.membership, this.currentPage);
+            this.onChange(this.membership, this.currentPage, this.state);
             this.busy = false;
         });
     }

@@ -31,7 +31,7 @@ class PaymentModule extends VuexModule {
         const r = await axios({
             method: 'POST',
             url: '/payments/' + this.payment._id + '/pay',
-            headers: { 'X-PoolAddress': this.payment.receiver, 'X-Payment-Token': this.payment.token },
+            headers: { 'X-PoolId': this.payment.poolId, 'X-Payment-Token': this.payment.token },
             data,
         });
 

@@ -71,7 +71,7 @@ import { format } from 'date-fns';
 import { ERC20 } from '@/store/modules/erc20';
 import BasePopoverTransactions from '@/components/popovers/BasePopoverTransactions.vue';
 import { TransactionState, TTransaction } from '@/types/Transactions';
-import promisePoller from 'promise-poller';
+import poll from 'promise-poller';
 
 @Component({
     components: {
@@ -123,7 +123,7 @@ export default class BaseListGroupItemWithdrawal extends Vue {
             }
         };
 
-        promisePoller({ taskFn, interval: 1500, retries: 50 });
+        poll({ taskFn, interval: 1500, retries: 50 });
     }
 
     async remove() {
@@ -139,7 +139,7 @@ export default class BaseListGroupItemWithdrawal extends Vue {
         this.busy = true;
         await this.$store.dispatch('withdrawals/withdraw', {
             membership: this.membership,
-            id: this.withdrawal.id,
+            id: this.withdrawal._id,
         });
         this.waitForTransactionMined();
     }

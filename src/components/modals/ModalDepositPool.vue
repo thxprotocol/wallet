@@ -25,7 +25,7 @@
             </form>
             <p class="small text-muted mt-2 mb-0">
                 Your balance: <strong>{{ token.balance }} {{ token.symbol }}</strong> (
-                <b-link @click="amount = token.balance">
+                <b-link @click="amount = Number(token.balance)">
                     Set Max
                 </b-link>
                 )
@@ -102,7 +102,7 @@ export default class BaseModalDepositPool extends Vue {
         this.$store.dispatch('erc20/balanceOf', this.token);
     }
 
-    async deposit(amount: number) {
+    async deposit() {
         this.busy = true;
 
         const { allowance } = await this.$store.dispatch('erc20/allowance', {
@@ -117,8 +117,8 @@ export default class BaseModalDepositPool extends Vue {
                 token: this.token,
                 chainId: this.membership.chainId,
                 to: this.membership.poolAddress,
-                poolAddress: this.membership.poolAddress,
-                amount: amount || MAX_UINT256,
+                amount: toWei(String(this.amount), 'ether') || MAX_UINT256,
+                poolId: this.membership.poolId,
             });
         }
 

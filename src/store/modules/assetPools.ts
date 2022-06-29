@@ -1,8 +1,5 @@
 import axios, { AxiosError } from 'axios';
 import { Module, VuexModule, Action } from 'vuex-module-decorators';
-import { getAssetPoolContract, send } from '@/utils/network';
-import { ChainId } from '@/types/enums/ChainId';
-import { toWei } from 'web3-utils';
 
 interface SignedCall {
     call: string;
@@ -13,25 +10,14 @@ interface SignedCall {
 @Module({ namespaced: true })
 class AssetPoolModule extends VuexModule {
     @Action({ rawError: true })
-    async upgradeAddress({
-        poolAddress,
-        newAddress,
-        data,
-    }: {
-        poolAddress: string;
-        newAddress: string;
-        data: SignedCall;
-    }) {
+    async upgradeAddress({ poolId, newAddress, data }: { poolId: string; newAddress: string; data: SignedCall }) {
         const r = await axios({
             method: 'POST',
             url: '/gas_station/upgrade_address',
             headers: {
-                'X-PoolAddress': poolAddress,
+                'X-PoolId': poolId,
             },
-            data: {
-                newAddress,
-                ...data,
-            },
+            data: { newAddress, ...data },
         });
 
         if (r.status !== 200) {
@@ -42,59 +28,16 @@ class AssetPoolModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async deposit({ chainId, poolAddress, amount }: { chainId: ChainId; poolAddress: string; amount: string }) {
-        const wei = toWei(amount);
-        const web3 = this.context.rootGetters['network/all'][chainId];
-        const privateKey = this.context.rootGetters['account/privateKey'];
-        const contract = getAssetPoolContract(web3, poolAddress);
-
-        return await send(web3, poolAddress, contract.methods.deposit(wei), privateKey);
-    }
-
-    @Action({ rawError: true })
-    async withdraw({
-        poolAddress,
-        call,
-        nonce,
-        sig,
-    }: {
-        poolAddress: string;
-        call: string;
-        nonce: string;
-        sig: SignedCall;
-    }) {
-        const r = await axios({
-            method: 'POST',
-            url: '/gas_station/call',
-            headers: {
-                'X-PoolAddress': poolAddress,
-            },
-            data: {
-                call,
-                nonce,
-                sig,
-            },
-        });
-
-        if (r.status !== 200) {
-            throw new Error('POST withdraw Poll call failed.');
-        }
-
-        return { withdrawal: r.data };
-    }
-
-    @Action({ rawError: true })
-    async claimReward(rewardHash: string) {
+    async claimReward(hash: string) {
         let res;
-        const data = JSON.parse(atob(rewardHash));
+        const data = JSON.parse(atob(hash));
 
         try {
             res = await axios({
                 method: 'POST',
                 url: `/rewards/${data.rewardId}/claim`,
-                headers: {
-                    'X-PoolAddress': data.poolAddress,
-                },
+                headers: { 'X-PoolId': data.poolId },
+                data: { hash },
             });
         } catch (error) {
             if ((error as AxiosError).response?.status === 403) return { error };

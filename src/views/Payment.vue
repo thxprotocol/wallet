@@ -282,12 +282,7 @@ export default class Payment extends Vue {
             this.privateKey,
         );
 
-        await this.$store.dispatch('network/approve', {
-            chainId: this.payment.chainId,
-            poolAddress: this.payment.receiver,
-            amount: this.payment.amount,
-            tokenAddress: this.payment.tokenAddress,
-        });
+        await this.$store.dispatch('network/approve', this.payment);
 
         return { call, nonce, sig };
     }

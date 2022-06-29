@@ -11,7 +11,6 @@
                 There are no running promotions for this pool.
             </b-alert>
             <base-list-group-item-promotion
-                class="bg-dark"
                 :erc20="erc20"
                 :promotion="promotion"
                 :membership="membership"
