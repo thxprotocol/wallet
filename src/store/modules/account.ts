@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import { User, UserManager } from 'oidc-client';
+import { User, UserManager } from 'oidc-client-ts';
 import { config } from '@/utils/oidc';
 import { getPrivateKeyForUser } from '@/utils/torus';
 import { isPrivateKey } from '@/utils/network';
@@ -41,7 +41,6 @@ class AccountModule extends VuexModule {
     @Mutation
     setPrivateKey({ sub, privateKey }: { sub: string; privateKey: string }) {
         sessionStorage.setItem(`thx:wallet:user:${sub}`, btoa(privateKey));
-
         this._privateKey = privateKey;
     }
 

@@ -8,7 +8,7 @@
             <b-list-group v-else class="w-100 align-self-start">
                 <base-list-group-item-membership
                     :membership="membership"
-                    :key="membership.id"
+                    :key="membership._id"
                     v-for="membership of memberships"
                 />
             </b-list-group>

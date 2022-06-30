@@ -1,7 +1,7 @@
 <template>
     <b-modal
         v-if="membership"
-        :id="`modalDepositPool-${membership.id}`"
+        :id="`modalDepositPool-${membership._id}`"
         @show="onShow()"
         centered
         scrollable
@@ -136,8 +136,8 @@ export default class BaseModalDepositPool extends Vue {
             amount: this.amount,
         });
 
-        this.$store.dispatch('memberships/get', this.membership.id);
-        this.$bvModal.hide(`modalDepositPool-${this.membership.id}`);
+        this.$store.dispatch('memberships/get', this.membership._id);
+        this.$bvModal.hide(`modalDepositPool-${this.membership._id}`);
         this.busy = false;
     }
 }

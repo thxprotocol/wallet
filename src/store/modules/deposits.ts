@@ -23,15 +23,15 @@ class DepositsModule extends VuexModule {
 
     @Mutation
     set({ deposit, membership }: { deposit: TDeposit; membership: Membership }) {
-        if (!this._all[membership.id]) {
-            Vue.set(this._all, membership.id, {});
+        if (!this._all[membership._id]) {
+            Vue.set(this._all, membership._id, {});
         }
-        Vue.set(this._all[membership.id], deposit.id, deposit);
+        Vue.set(this._all[membership._id], deposit.id, deposit);
     }
 
     @Mutation
     unset({ deposit, membership }: { deposit: TDeposit; membership: Membership }) {
-        Vue.delete(this._all[membership.id], deposit.id);
+        Vue.delete(this._all[membership._id], deposit.id);
     }
 
     @Mutation

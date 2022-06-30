@@ -101,7 +101,7 @@ export default class BaseModalRedeemPromotion extends Vue {
     }
 
     async onShow() {
-        this.$store.dispatch('memberships/get', this.membership.id);
+        this.$store.dispatch('memberships/get', this.membership._id);
         this.getBalance();
         const { allowance } = await this.$store.dispatch('erc20/allowance', {
             token: this.erc20,

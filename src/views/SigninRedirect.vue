@@ -27,7 +27,7 @@ import { UserProfile } from '@/store/modules/account';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { ChainId } from '@/types/enums/ChainId';
-import { User } from 'oidc-client';
+import { User } from 'oidc-client-ts';
 import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
 import ModalShowWithdrawal from '@/components/modals/ModalShowWithdrawal.vue';
 import { TNetworks } from '@/store/modules/network';
@@ -84,7 +84,8 @@ export default class Redirect extends Vue {
         }
 
         // Check for reward hash in state
-        if (this.user.state?.rewardHash) {
+        const state: any = this.user.state;
+        if (state.rewardHash) {
             await this.claimReward();
         }
 
@@ -92,7 +93,8 @@ export default class Redirect extends Vue {
     }
 
     redirect() {
-        const path = this.user.state?.toPath || this.redirectPath;
+        const state: any = this.user.state;
+        const path = state.toPath || this.redirectPath;
         this.$router.push(path);
     }
 
@@ -129,7 +131,8 @@ export default class Redirect extends Vue {
         this.isClaimInvalid = false;
         this.info = 'Claiming your token reward...';
 
-        const { withdrawal, error } = await this.$store.dispatch('assetpools/claimReward', this.user.state.rewardHash);
+        const state: any = this.user.state;
+        const { withdrawal, error } = await this.$store.dispatch('assetpools/claimReward', state.rewardHash);
 
         if (error) {
             this.error = error.response.data.error.message;

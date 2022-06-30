@@ -63,15 +63,15 @@ class WithdrawalModule extends VuexModule {
 
     @Mutation
     set({ withdrawal, membership }: { withdrawal: Withdrawal; membership: Membership }) {
-        if (!this._all[membership.id]) {
-            Vue.set(this._all, membership.id, {});
+        if (!this._all[membership._id]) {
+            Vue.set(this._all, membership._id, {});
         }
-        Vue.set(this._all[membership.id], withdrawal._id, withdrawal);
+        Vue.set(this._all[membership._id], withdrawal._id, withdrawal);
     }
 
     @Mutation
     unset({ withdrawal, membership }: { withdrawal: Withdrawal; membership: Membership }) {
-        Vue.delete(this._all[membership.id], withdrawal._id);
+        Vue.delete(this._all[membership._id], withdrawal._id);
     }
 
     @Mutation
