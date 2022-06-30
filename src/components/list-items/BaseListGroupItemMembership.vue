@@ -47,6 +47,12 @@
                     Promotions
                 </span>
             </b-dropdown-item>
+            <b-dropdown-item :to="`/memberships/${membership.id}/erc20swaprules`" v-if="membership.erc20Id">
+                <span class="text-muted">
+                    <i class="fas fa-sync mr-2"></i>
+                    Swaps
+                </span>
+            </b-dropdown-item>
             <b-dropdown-divider v-if="membership.erc20Id" />
             <b-dropdown-item v-b-modal="`modalDeleteMembership-${membership.id}`" class="text-danger">
                 <span class="text-muted">

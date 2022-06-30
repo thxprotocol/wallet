@@ -19,10 +19,10 @@
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import BaseIdenticon from './BaseIdenticon.vue';
-import { ChainId } from '@/utils/network';
 import { ERC20SwapRuleExtended } from '@/store/modules/erc20swaprules';
 import { Membership } from '@/store/modules/memberships';
 import BaseModalERC20Swap from './modals/ModalSwap.vue';
+import { ChainId } from '@/types/enums/ChainId';
 
 @Component({
     components: {

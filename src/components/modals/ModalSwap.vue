@@ -55,7 +55,8 @@ import { ERC20 } from '@/store/modules/erc20';
 import { ERC20SwapRuleExtended } from '@/store/modules/erc20swaprules';
 import { Membership } from '@/store/modules/memberships';
 import { TNetworks } from '@/store/modules/network';
-import { ChainId, MAX_UINT256, signCall } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
+import { MAX_UINT256, signCall } from '@/utils/network';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { fromWei, toWei } from 'web3-utils';
@@ -87,7 +88,7 @@ export default class BaseModalERC20Swap extends Vue {
     @Prop() swaprule!: ERC20SwapRuleExtended;
 
     get token() {
-        return this.erc20s[this.membership.erc20];
+        return this.erc20s[this.membership.erc20Id];
     }
 
     get tokenIn() {

@@ -2,7 +2,7 @@ import { Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { Membership } from './memberships';
-import { ChainId } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
 import { ERC20 } from './erc20';
 
