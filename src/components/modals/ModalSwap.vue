@@ -131,7 +131,7 @@ export default class BaseModalERC20Swap extends Vue {
                 token: this.tokenIn,
                 chainId: this.membership.chainId,
                 to: this.membership.poolAddress,
-                poolAddress: this.membership.poolAddress,
+                poolId: this.membership.poolId,
                 amount: MAX_UINT256,
             });
         }

@@ -21,7 +21,7 @@ class ERC20SwapsModule extends VuexModule {
             method: 'POST',
             url: '/swaps',
             headers: {
-                'X-PoolAddress': membership.poolAddress,
+                'X-PoolId': membership.poolId,
             },
             data: {
                 call,

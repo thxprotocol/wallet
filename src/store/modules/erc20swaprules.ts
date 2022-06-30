@@ -76,7 +76,7 @@ class ERC20SwapRuleModule extends VuexModule {
             method: 'get',
             url: '/swaprules',
             params,
-            headers: { 'X-PoolAddress': membership.poolAddress },
+            headers: { 'X-PoolId': membership.poolId },
         });
 
         const promises = [];
