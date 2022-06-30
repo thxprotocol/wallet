@@ -1,16 +1,17 @@
 import { Vue } from 'vue-property-decorator';
 import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import { ChainId } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
 
 export type Membership = {
     id: string;
     chainId: ChainId;
-    poolAddress: string;
     token: any;
     tokens: any;
-    erc20: string;
-    erc721: string;
+    poolId: string;
+    poolAddress: string;
+    erc20Id: string;
+    erc721Id: string;
     poolBalance?: number;
     pendingBalance?: number;
     sub: string;

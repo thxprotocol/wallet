@@ -11,7 +11,6 @@
                 There are no running promotions for this pool.
             </b-alert>
             <base-list-group-item-promotion
-                class="bg-dark"
                 :erc20="erc20"
                 :promotion="promotion"
                 :membership="membership"
@@ -29,7 +28,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { IMemberships } from '@/store/modules/memberships';
-import BaseListGroupItemPromotion from '@/components/BaseListGroupItemPromotion.vue';
+import BaseListGroupItemPromotion from '@/components/list-items/BaseListGroupItemPromotion.vue';
 import { IPromotions } from '@/store/modules/promotions';
 import { ERC20 } from '@/store/modules/erc20';
 
@@ -61,7 +60,7 @@ export default class MembershipPromotionsView extends Vue {
 
     get erc20() {
         if (!this.membership) return null;
-        return this.erc20s[this.membership.erc20];
+        return this.erc20s[this.membership.erc20Id];
     }
 
     get filteredPromotions() {
@@ -72,7 +71,7 @@ export default class MembershipPromotionsView extends Vue {
 
     async mounted() {
         this.$store.dispatch('memberships/get', this.$route.params.id).then(async () => {
-            await this.$store.dispatch('erc20/get', this.membership.erc20);
+            await this.$store.dispatch('erc20/get', this.membership.erc20Id);
             await this.$store.dispatch('promotions/filter', { membership: this.membership });
             this.busy = false;
         });

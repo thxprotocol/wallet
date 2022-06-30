@@ -31,7 +31,7 @@ import { TNetworks } from '@/store/modules/network';
 import { Membership } from '@/store/modules/memberships';
 import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue';
 import BaseCardErc721Token from '@/components/BaseCardERC721Token.vue';
-import BaseIdenticon from './BaseIdenticon.vue';
+import BaseIdenticon from '../BaseIdenticon.vue';
 
 @Component({
     components: {
@@ -54,13 +54,13 @@ export default class BaseListGroupItemNFT extends Vue {
     erc721s!: { [id: string]: ERC721 };
 
     get erc721() {
-        return this.erc721s[this.membership.erc721];
+        return this.erc721s[this.membership.erc721Id];
     }
 
     @Prop() membership!: Membership;
 
     mounted() {
-        this.$store.dispatch('erc721/get', this.membership.erc721);
+        this.$store.dispatch('erc721/get', this.membership.erc721Id);
     }
 }
 </script>

@@ -1,30 +1,25 @@
 <template>
     <b-list-group-item class="d-flex align-items-center w-100">
+        <base-popover-transactions
+            :transactions="withdrawal.transactions"
+            :target="`popover-target-${withdrawal._id}`"
+        />
         <div
+            :id="`popover-target-${withdrawal._id}`"
             class="mr-3"
             :class="{
                 'text-muted': !withdrawal.withdrawalId && !withdrawal.failReason,
                 'text-primary': withdrawal.withdrawalId,
-                'text-danger': withdrawal.failReason,
             }"
         >
             <i
-                v-if="withdrawal.failReason"
-                v-b-tooltip.hover
-                :title="withdrawal.failReason"
-                class="fas fa-exclamation-circle"
-            ></i>
-            <i
-                v-else
-                v-b-tooltip.hover
-                :title="
-                    !withdrawal.withdrawalId
-                        ? `Withdrawal queued at ${format(new Date(withdrawal.createdAt), 'HH:mm MMMM dd, yyyy')}.`
-                        : 'Withdrawal is processed.'
-                "
-                :class="withdrawal.approved ? 'fas' : 'far'"
+                :class="{
+                    far: withdrawal.state === WithdrawalState.Pending,
+                    fas: withdrawal.state === WithdrawalState.Withdrawn,
+                }"
                 class="fa-check-circle"
-            ></i>
+            >
+            </i>
         </div>
         <div class="mr-auto line-height-12">
             <strong class="font-weight-bold">
@@ -69,26 +64,23 @@
 </template>
 
 <script lang="ts">
-import { BLink, BAlert, BButton, BSpinner, BListGroupItem, BListGroup, BBadge } from 'bootstrap-vue';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { Membership } from '@/store/modules/memberships';
-import { Withdrawal, WithdrawalType } from '@/store/modules/withdrawals';
+import { Withdrawal, WithdrawalState, WithdrawalType } from '@/store/modules/withdrawals';
 import { format } from 'date-fns';
 import { ERC20 } from '@/store/modules/erc20';
+import BasePopoverTransactions from '@/components/popovers/BasePopoverTransactions.vue';
+import { TransactionState, TTransaction } from '@/types/Transactions';
+import poll from 'promise-poller';
 
 @Component({
     components: {
-        'b-alert': BAlert,
-        'b-link': BLink,
-        'b-spinner': BSpinner,
-        'b-button': BButton,
-        'b-badge': BBadge,
-        'b-list-group': BListGroup,
-        'b-list-group-item': BListGroupItem,
+        BasePopoverTransactions,
     },
 })
 export default class BaseListGroupItemWithdrawal extends Vue {
     WithdrawalType = WithdrawalType;
+    WithdrawalState = WithdrawalState;
     busy = false;
     error = '';
     format = format;
@@ -97,29 +89,59 @@ export default class BaseListGroupItemWithdrawal extends Vue {
     @Prop() withdrawal!: Withdrawal;
     @Prop() membership!: Membership;
 
+    get pendingTransactions() {
+        return this.withdrawal.transactions.filter((tx: TTransaction) =>
+            [TransactionState.Scheduled, TransactionState.Sent].includes(tx.state),
+        );
+    }
+
+    mounted() {
+        // If there are Scheduled or Sent transactions that should get a status change soon, start polling
+        if (this.pendingTransactions.length) {
+            this.busy = true;
+            this.waitForTransactionMined();
+        }
+    }
+
+    waitForTransactionMined() {
+        const taskFn = async () => {
+            const tx = await this.$store.dispatch('transactions/read', this.pendingTransactions[0]._id);
+
+            switch (tx.state) {
+                case TransactionState.Mined: {
+                    await this.$store.dispatch('withdrawals/read', {
+                        membership: this.membership,
+                        id: this.withdrawal._id,
+                    });
+                    this.busy = false;
+                    return Promise.resolve(tx);
+                }
+                case TransactionState.Failed:
+                case TransactionState.Scheduled:
+                case TransactionState.Sent:
+                    return Promise.reject(tx);
+            }
+        };
+
+        poll({ taskFn, interval: 1500, retries: 50 });
+    }
+
     async remove() {
         this.busy = true;
-
-        const error = await this.$store.dispatch('withdrawals/remove', {
+        await this.$store.dispatch('withdrawals/remove', {
             membership: this.membership,
             withdrawal: this.withdrawal,
         });
-        if (error) {
-            this.error = error;
-        }
         this.busy = false;
     }
 
     async withdraw() {
         this.busy = true;
-        const error = await this.$store.dispatch('withdrawals/withdraw', {
+        await this.$store.dispatch('withdrawals/withdraw', {
             membership: this.membership,
-            id: this.withdrawal.id,
+            id: this.withdrawal._id,
         });
-        if (error) {
-            this.error = error;
-        }
-        this.busy = false;
+        this.waitForTransactionMined();
     }
 }
 </script>

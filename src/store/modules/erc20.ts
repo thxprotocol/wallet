@@ -2,7 +2,8 @@ import Vue from 'vue';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
 import { Contract } from 'web3-eth-contract';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
-import { ChainId, send } from '@/utils/network';
+import { send } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
 import { fromWei, toWei, toChecksumAddress } from 'web3-utils';
 import axios from 'axios';
 import Web3 from 'web3';
@@ -90,13 +91,13 @@ class ERC20Module extends VuexModule {
         token,
         chainId,
         to,
-        poolAddress,
+        poolId,
         amount,
     }: {
         token: ERC20;
         chainId: ChainId;
         to: string;
-        poolAddress: string;
+        poolId: string;
         amount: string;
     }) {
         const web3: Web3 = this.context.rootGetters['network/all'][chainId];
@@ -109,7 +110,7 @@ class ERC20Module extends VuexModule {
                 method: 'POST',
                 url: `/deposits/approve`,
                 headers: {
-                    'X-PoolAddress': poolAddress,
+                    'X-PoolId': poolId,
                 },
                 data: {
                     amount,

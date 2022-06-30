@@ -33,7 +33,15 @@
                 </b-button-group>
             </div>
             <b-alert variant="info" show class="mb-3" v-if="!filteredWithdrawals.length">
-                You have no pending withdrawals for this pool.
+                <span v-if="state === WithdrawalState.Pending">
+                    You have no pending withdrawals.
+                </span>
+                <span v-if="state === WithdrawalState.Withdrawn">
+                    You have no withdrawn withdrawals.
+                </span>
+                <span v-if="state === null">
+                    You have no withdrawals.
+                </span>
             </b-alert>
             <div class="mb-auto">
                 <base-list-group-item-withdrawal
@@ -65,7 +73,7 @@ import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { IWithdrawals, Withdrawal, WithdrawalState } from '@/store/modules/withdrawals';
 import { IMemberships, Membership } from '@/store/modules/memberships';
-import BaseListGroupItemWithdrawal from '@/components/BaseListGroupItemWithdrawal.vue';
+import BaseListGroupItemWithdrawal from '@/components/list-items/BaseListGroupItemWithdrawal.vue';
 import { ERC20 } from '@/store/modules/erc20';
 
 @Component({
@@ -85,7 +93,7 @@ export default class MembershipWithdrawalsView extends Vue {
     currentPage = 1;
     perPage = 10;
     total = 0;
-    state = null;
+    state: WithdrawalState | null = WithdrawalState.Pending;
 
     // getters
     withdrawals!: IWithdrawals;
@@ -99,7 +107,7 @@ export default class MembershipWithdrawalsView extends Vue {
 
     get erc20() {
         if (!this.membership) return null;
-        return this.erc20s[this.membership.erc20];
+        return this.erc20s[this.membership.erc20Id];
     }
 
     get filteredWithdrawals() {
@@ -109,7 +117,7 @@ export default class MembershipWithdrawalsView extends Vue {
         );
     }
 
-    async onChange(membership: Membership, page: number, state = null) {
+    async onChange(membership: Membership, page: number, state: WithdrawalState | null = null) {
         const { pagination, error } = await this.$store.dispatch('withdrawals/filter', {
             membership,
             page,
@@ -123,8 +131,8 @@ export default class MembershipWithdrawalsView extends Vue {
 
     async mounted() {
         this.$store.dispatch('memberships/get', this.$route.params.id).then(async () => {
-            await this.$store.dispatch('erc20/get', this.membership.erc20);
-            this.onChange(this.membership, this.currentPage);
+            await this.$store.dispatch('erc20/get', this.membership.erc20Id);
+            this.onChange(this.membership, this.currentPage, this.state);
             this.busy = false;
         });
     }

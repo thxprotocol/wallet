@@ -30,7 +30,7 @@
 </template>
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
-import { TPayment } from '@/store/modules/payments';
+import { TPayment } from '@/types/Payments';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component({})

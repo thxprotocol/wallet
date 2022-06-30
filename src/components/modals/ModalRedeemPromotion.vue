@@ -143,7 +143,7 @@ export default class BaseModalRedeemPromotion extends Vue {
             item: this.promotion.id,
         });
 
-        this.$store.dispatch('promocodes/filter', { membership: this.membership });
+        this.$store.dispatch('promotions/filter', { membership: this.membership });
         this.$bvModal.hide(`modalDepositPool-${this.promotion.id}`);
         this.busy = false;
     }

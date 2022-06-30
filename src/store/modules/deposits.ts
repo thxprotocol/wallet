@@ -56,7 +56,7 @@ class DepositsModule extends VuexModule {
             method: 'POST',
             url: '/deposits',
             headers: {
-                'X-PoolAddress': membership.poolAddress,
+                'X-PoolId': membership.poolId,
             },
             data: {
                 call,

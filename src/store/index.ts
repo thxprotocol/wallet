@@ -18,6 +18,7 @@ import DepositStore from './modules/deposits';
 import PaymentStore from './modules/payments';
 import ERc20SwapruleStore from './modules/erc20swaprules';
 import ERc20Swaps from './modules/erc20swaps';
+import TransactionStore from './modules/transactions';
 
 Vue.use(Vuex);
 
@@ -38,6 +39,7 @@ const modules = {
     payments: PaymentStore,
     erc20swaprules: ERc20SwapruleStore,
     erc20swaps: ERc20Swaps,
+    transactions: TransactionStore,
 };
 
 export default new Vuex.Store({

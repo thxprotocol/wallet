@@ -143,7 +143,7 @@ export default class ModalDecodePrivateKey extends Vue {
                 );
 
                 await this.$store.dispatch('assetpools/upgradeAddress', {
-                    poolAddress: membership.poolAddress,
+                    poolId: membership.poolId,
                     newAddress: this.account.address,
                     data: calldata,
                 });

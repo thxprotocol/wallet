@@ -26,8 +26,8 @@ import { ERC20 } from '@/store/modules/erc20';
 import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue';
 import { TNetworks } from '@/store/modules/network';
 import { Membership } from '@/store/modules/memberships';
-import BaseIdenticon from './BaseIdenticon.vue';
-import { ChainId } from '@/utils/network';
+import BaseIdenticon from '../BaseIdenticon.vue';
+import { ChainId } from '@/types/enums/ChainId';
 
 @Component({
     components: {
@@ -52,11 +52,11 @@ export default class BaseListGroupItemToken extends Vue {
     @Prop() membership!: Membership;
 
     get erc20() {
-        return this.erc20s[this.membership.erc20];
+        return this.erc20s[this.membership.erc20Id];
     }
 
     mounted() {
-        this.$store.dispatch('erc20/get', this.erc20._id);
+        this.$store.dispatch('erc20/get', this.membership.erc20Id);
     }
 }
 </script>

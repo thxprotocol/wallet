@@ -1,37 +1,6 @@
-import { ChainId } from '@/utils/network';
 import axios from 'axios';
+import { TPayment } from '@/types/Payments';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-
-export enum PaymentState {
-    Requested = 0,
-    Pending = 1,
-    Completed = 2,
-    Failed = 3,
-}
-
-export interface IPayments {
-    [id: string]: TPayment;
-}
-
-export type TPayment = {
-    _id: string;
-    amount: string;
-    tokenSymbol: string;
-    tokenAddress: string;
-    poolId: string;
-    chainId: ChainId;
-    sender: string;
-    receiver: string;
-    transactions: string[];
-    state: PaymentState;
-    token: string;
-    paymentUrl: string;
-    successUrl: string;
-    failUrl: string;
-    cancelUrl: string;
-    createdAt: Date;
-    updatedAt: Date;
-};
 
 @Module({ namespaced: true })
 class PaymentModule extends VuexModule {
@@ -51,6 +20,8 @@ class PaymentModule extends VuexModule {
         });
 
         this.context.commit('set', r.data);
+
+        return r.data;
     }
 
     @Action({ rawError: true })
@@ -60,7 +31,7 @@ class PaymentModule extends VuexModule {
         const r = await axios({
             method: 'POST',
             url: '/payments/' + this.payment._id + '/pay',
-            headers: { 'X-PoolAddress': this.payment.receiver, 'X-Payment-Token': this.payment.token },
+            headers: { 'X-PoolId': this.payment.poolId, 'X-Payment-Token': this.payment.token },
             data,
         });
 

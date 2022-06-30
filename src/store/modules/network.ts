@@ -3,9 +3,10 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { isPrivateKey, send } from '@/utils/network';
 import { HARDHAT_RPC, POLYGON_MUMBAI_RPC, POLYGON_RPC } from '@/utils/secrets';
 import { fromWei, toWei } from 'web3-utils';
-import { ChainId } from '@/utils/network';
+import { ChainId } from '@/types/enums/ChainId';
 import axios from 'axios';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
+import { TPayment } from '@/types/Payments';
 
 export type TNetworkConfig = {
     chainId: ChainId;
@@ -13,6 +14,9 @@ export type TNetworkConfig = {
 };
 
 export type TNetworks = {
+    [ChainId.BinanceSmartChain]: Web3;
+    [ChainId.Ethereum]: Web3;
+    [ChainId.Arbitrum]: Web3;
     [ChainId.Hardhat]: Web3;
     [ChainId.PolygonMumbai]: Web3;
     [ChainId.Polygon]: Web3;
@@ -56,8 +60,8 @@ class NetworkModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async approve(payload: { chainId: ChainId; poolAddress: string; amount: string; tokenAddress: string }) {
-        const web3: Web3 = this._networks[payload.chainId];
+    async approve(payment: TPayment) {
+        const web3: Web3 = this._networks[payment.chainId];
         const profile = this.context.rootGetters['account/profile'];
         const privateKey = this.context.rootGetters['account/privateKey'];
         const balance = Number(fromWei(await web3.eth.getBalance(profile.address)));
@@ -67,19 +71,19 @@ class NetworkModule extends VuexModule {
                 method: 'POST',
                 url: `/deposits/approve`,
                 headers: {
-                    'X-PoolAddress': payload.poolAddress,
+                    'X-PoolId': payment.poolId,
                 },
                 data: {
-                    amount: payload.amount,
+                    amount: payment.amount,
                 },
             });
         }
 
-        const tokenContract = new web3.eth.Contract(ERC20Abi as any, payload.tokenAddress);
+        const tokenContract = new web3.eth.Contract(ERC20Abi as any, payment.tokenAddress);
         const receipt = await send(
             web3,
-            payload.tokenAddress,
-            tokenContract.methods.approve(payload.poolAddress, payload.amount),
+            payment.tokenAddress,
+            tokenContract.methods.approve(payment.receiver, payment.amount),
             privateKey,
         );
 

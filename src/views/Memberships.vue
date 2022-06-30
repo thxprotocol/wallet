@@ -20,7 +20,7 @@
 import { UserProfile } from '@/store/modules/account';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import BaseListGroupItemMembership from '@/components/BaseListGroupItemMembership.vue';
+import BaseListGroupItemMembership from '@/components/list-items/BaseListGroupItemMembership.vue';
 import { IMemberships } from '@/store/modules/memberships';
 
 @Component({
