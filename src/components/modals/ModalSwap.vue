@@ -1,7 +1,7 @@
 <template>
     <b-modal
-        v-if="membership"
-        :id="`modalERC20Swap-${membership.id}`"
+        v-if="membership && swaprule"
+        :id="`modalERC20Swap-${swaprule._id}`"
         @show="onShow()"
         centered
         scrollable
@@ -152,7 +152,7 @@ export default class BaseModalERC20Swap extends Vue {
         });
 
         this.$store.dispatch('memberships/get', this.membership.id);
-        this.$bvModal.hide(`modalERC20Swap-${this.membership.id}`);
+        this.$bvModal.hide(`modalERC20Swap-${this.swaprule._id}`);
         this.busy = false;
         this.$router.push({ path: '/wallet' });
     }
