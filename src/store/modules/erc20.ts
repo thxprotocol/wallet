@@ -7,6 +7,7 @@ import { ChainId } from '@/types/enums/ChainId';
 import { fromWei, toWei, toChecksumAddress } from 'web3-utils';
 import axios from 'axios';
 import Web3 from 'web3';
+import { chainInfo } from '@/utils/chains';
 
 export interface ERC20 {
     _id: string;
@@ -59,9 +60,7 @@ class ERC20Module extends VuexModule {
                 contract,
                 totalSupply,
                 balance: 0,
-                blockExplorerURL: `https://${data.chainId === 80001 ? 'mumbai.' : ''}polygonscan.com/address/${
-                    data.address
-                }`,
+                blockExplorerUrl: `${chainInfo[data.chainId].blockExplorer}/address/${data.address}`,
                 logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
             };
 

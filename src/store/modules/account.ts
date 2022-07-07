@@ -169,8 +169,13 @@ class AccountModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async signinSilent() {
-        await this.userManager.signinSilent();
+    signinSilent() {
+        this.userManager.signinSilent();
+    }
+
+    @Action({ rawError: true })
+    signinSilentCallback() {
+        this.userManager.signinSilentCallback();
     }
 }
 

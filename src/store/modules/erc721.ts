@@ -3,6 +3,8 @@ import { default as ERC721Abi } from '@thxnetwork/artifacts/dist/exports/abis/No
 import { Contract } from 'web3-eth-contract';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import axios from 'axios';
+import { ChainId } from '@/types/enums/ChainId';
+import { chainInfo } from '@/utils/chains';
 
 export interface ERC721 {
     _id: string;
@@ -57,7 +59,7 @@ class ERC721Module extends VuexModule {
             ...data,
             contract,
             balance: 0,
-            blockExplorerURL: `https://polygonscan.com/address/${data.address}`,
+            blockExplorerUrl: `${chainInfo[data.chainId].blockExplorer}/address/${data.address}`,
             logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
         };
 

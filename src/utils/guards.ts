@@ -40,7 +40,7 @@ export function redirectAccount(to: Route, from: Route) {
     return store.dispatch('account/accountRedirect', from.path);
 }
 
-export function redirectSigninSilent() {
+export async function redirectSigninSilent() {
     return store.dispatch('account/signinSilent');
 }
 
