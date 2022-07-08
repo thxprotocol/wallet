@@ -17,7 +17,9 @@
             <strong class="mr-1">{{ token.symbol }} Pool</strong>
             <b-badge class="px-2" v-if="pendingWithdrawalCount" variant="danger">{{ pendingWithdrawalCount }}</b-badge>
             <br />
-            <small class="text-muted">{{ membership.poolBalance }} {{ token.symbol }}</small>
+            <small v-if="membership.poolBalance" class="text-muted">
+                {{ membership.poolBalance }} {{ token.symbol }}
+            </small>
         </div>
         <b-dropdown variant="white" no-caret toggle-class="d-flex align-items-center" v-if="profile">
             <template #button-content>

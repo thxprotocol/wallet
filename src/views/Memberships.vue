@@ -45,10 +45,11 @@ export default class PoolsView extends Vue {
             for (const id in this.memberships) {
                 promises.push(this.$store.dispatch('memberships/get', id));
             }
-
-            await Promise.all(promises);
-
-            this.loading = false;
+            try {
+                await Promise.all(promises);
+            } finally {
+                this.loading = false;
+            }
         });
     }
 }
