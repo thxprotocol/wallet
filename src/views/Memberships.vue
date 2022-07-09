@@ -1,5 +1,6 @@
 <template>
     <div v-if="profile" class="d-flex align-items-center justify-content-center">
+        {{ memberships }}
         <b-spinner v-if="loading" variant="primary" class="m-auto" />
         <template v-else>
             <strong v-if="!Object.values(memberships).length" class="text-gray text-center">
@@ -8,8 +9,8 @@
             <b-list-group v-else class="w-100 align-self-start">
                 <base-list-group-item-membership
                     :membership="membership"
-                    :key="membership._id"
-                    v-for="membership of memberships"
+                    :key="key"
+                    v-for="(membership, key) of memberships"
                 />
             </b-list-group>
         </template>
