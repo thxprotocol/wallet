@@ -1,6 +1,5 @@
 <template>
     <div v-if="profile" class="d-flex align-items-center justify-content-center">
-        {{ memberships }}
         <b-spinner v-if="loading" variant="primary" class="m-auto" />
         <template v-else>
             <strong v-if="!Object.values(memberships).length" class="text-gray text-center">
