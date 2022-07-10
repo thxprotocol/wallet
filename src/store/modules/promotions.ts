@@ -29,15 +29,15 @@ class PromotionModule extends VuexModule {
 
     @Mutation
     set({ promotion, membership }: { promotion: TPromotion; membership: Membership }) {
-        if (!this._all[membership.id]) {
-            Vue.set(this._all, membership.id, {});
+        if (!this._all[membership._id]) {
+            Vue.set(this._all, membership._id, {});
         }
-        Vue.set(this._all[membership.id], promotion.id, promotion);
+        Vue.set(this._all[membership._id], promotion.id, promotion);
     }
 
     @Mutation
     unset({ promotion, membership }: { promotion: TPromotion; membership: Membership }) {
-        Vue.delete(this._all[membership.id], promotion.id);
+        Vue.delete(this._all[membership._id], promotion.id);
     }
 
     @Mutation

@@ -4,7 +4,8 @@ import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { ChainId } from '@/types/enums/ChainId';
 
 export type Membership = {
-    id: string;
+    _id: string;
+    sub: string;
     chainId: ChainId;
     token: any;
     tokens: any;
@@ -31,12 +32,12 @@ class MembershipModule extends VuexModule {
 
     @Mutation
     set(membership: Membership) {
-        Vue.set(this._all, membership.id, membership);
+        Vue.set(this._all, membership._id, membership);
     }
 
     @Mutation
     unset(membership: Membership) {
-        Vue.delete(this._all, membership.id);
+        Vue.delete(this._all, membership._id);
     }
 
     @Action({ rawError: true })
@@ -46,28 +47,32 @@ class MembershipModule extends VuexModule {
             url: '/memberships',
         });
 
-        r.data.forEach((id: string) => {
-            this.context.commit('set', { id });
+        r.data.forEach((_id: string) => {
+            this.context.commit('set', { _id });
         });
     }
 
     @Action({ rawError: true })
-    async delete(id: string) {
+    async delete(_id: string) {
         await axios({
             method: 'DELETE',
-            url: `/memberships/${id}`,
+            url: `/memberships/${_id}`,
         });
 
-        this.context.commit('unset', { id });
+        this.context.commit('unset', { _id });
     }
 
     @Action({ rawError: true })
-    async get(id: string) {
-        const { data } = await axios({
-            method: 'GET',
-            url: '/memberships/' + id,
-        });
-        this.context.commit('set', data);
+    async get(_id: string) {
+        try {
+            const { data } = await axios({
+                method: 'GET',
+                url: '/memberships/' + _id,
+            });
+            this.context.commit('set', data);
+        } catch {
+            //
+        }
     }
 }
 

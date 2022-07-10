@@ -1,7 +1,7 @@
 <template>
     <b-list-group-item
         v-if="token"
-        :to="membership.erc20Id ? `/memberships/${membership.id}/withdrawals` : null"
+        :to="membership.erc20Id ? `/memberships/${membership._id}/withdrawals` : null"
         class="d-flex justify-content-between align-items-center"
     >
         <div class="mr-auto">
@@ -17,7 +17,9 @@
             <strong class="mr-1">{{ token.symbol }} Pool</strong>
             <b-badge class="px-2" v-if="pendingWithdrawalCount" variant="danger">{{ pendingWithdrawalCount }}</b-badge>
             <br />
-            <small class="text-muted">{{ membership.poolBalance }} {{ token.symbol }}</small>
+            <small v-if="membership.poolBalance" class="text-muted">
+                {{ membership.poolBalance }} {{ token.symbol }}
+            </small>
         </div>
         <b-dropdown variant="white" no-caret toggle-class="d-flex align-items-center" v-if="profile">
             <template #button-content>
@@ -29,19 +31,19 @@
                     Block Explorer
                 </span>
             </b-dropdown-item-button>
-            <b-dropdown-item v-b-modal="`modalDepositPool-${membership.id}`" v-if="membership.erc20Id">
+            <b-dropdown-item v-b-modal="`modalDepositPool-${membership._id}`" v-if="membership.erc20Id">
                 <span class="text-muted">
                     <i class="fas fa-download mr-2"></i>
                     Deposit
                 </span>
             </b-dropdown-item>
-            <b-dropdown-item :to="`/memberships/${membership.id}/withdrawals`" v-if="membership.erc20Id">
+            <b-dropdown-item :to="`/memberships/${membership._id}/withdrawals`" v-if="membership.erc20Id">
                 <span class="text-muted">
                     <i class="fas fa-upload mr-2"></i>
                     Withdrawals
                 </span>
             </b-dropdown-item>
-            <b-dropdown-item :to="`/memberships/${membership.id}/promotions`" v-if="membership.erc20Id">
+            <b-dropdown-item :to="`/memberships/${membership._id}/promotions`" v-if="membership.erc20Id">
                 <span class="text-muted">
                     <i class="fas fa-tags mr-2"></i>
                     Promotions
@@ -54,7 +56,7 @@
                 </span>
             </b-dropdown-item>
             <b-dropdown-divider v-if="membership.erc20Id" />
-            <b-dropdown-item v-b-modal="`modalDeleteMembership-${membership.id}`" class="text-danger">
+            <b-dropdown-item v-b-modal="`modalDeleteMembership-${membership._id}`" class="text-danger">
                 <span class="text-muted">
                     <i class="fas fa-trash-alt mr-2"></i>
                     Remove
@@ -62,7 +64,7 @@
             </b-dropdown-item>
         </b-dropdown>
         <base-modal-deposit-pool :membership="membership" />
-        <modal-delete :id="`modalDeleteMembership-${membership.id}`" :call="remove" :subject="membership.id" />
+        <modal-delete :id="`modalDeleteMembership-${membership._id}`" :call="remove" :subject="membership._id" />
     </b-list-group-item>
 </template>
 
@@ -109,11 +111,11 @@ export default class BaseListGroupItemMembership extends Vue {
     }
 
     remove() {
-        this.$store.dispatch('memberships/delete', this.membership.id);
+        this.$store.dispatch('memberships/delete', this.membership._id);
     }
 
     mounted() {
-        this.$store.dispatch('memberships/get', this.membership.id).then(async () => {
+        this.$store.dispatch('memberships/get', this.membership._id).then(async () => {
             if (this.membership.erc20Id) {
                 await this.$store.dispatch('erc20/get', this.membership.erc20Id);
 

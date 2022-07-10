@@ -65,8 +65,8 @@ export default class MembershipPromotionsView extends Vue {
 
     get filteredPromotions() {
         if (!this.membership) return [];
-        if (!this.promotions[this.membership.id]) return [];
-        return Object.values(this.promotions[this.membership.id]);
+        if (!this.promotions[this.membership._id]) return [];
+        return Object.values(this.promotions[this.membership._id]);
     }
 
     async mounted() {

@@ -1,6 +1,6 @@
 <template>
     <b-list-group-item v-if="membership && erc721">
-        <div class="d-flex justify-content-between align-items-center" v-b-toggle="`collapse-${membership.id}`">
+        <div class="d-flex justify-content-between align-items-center" v-b-toggle="`collapse-${membership._id}`">
             <div class="mr-auto d-flex align-items-center" v-b-tooltip :title="erc721.name">
                 <base-identicon :rounded="true" variant="dark" :size="30" :uri="erc721.logoURI" class="mr-2" />
                 <strong class="mr-2">{{ erc721.symbol }}</strong>
@@ -10,7 +10,7 @@
                 {{ erc721.balance }}
             </div>
         </div>
-        <b-collapse :id="`collapse-${membership.id}`" class="mt-2">
+        <b-collapse :id="`collapse-${membership._id}`" class="mt-2">
             <hr />
             <base-card-erc-721-token
                 :erc721="erc721"

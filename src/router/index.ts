@@ -37,10 +37,6 @@ const routes: Array<RouteConfig> = [
         beforeEnter: assertUserAgent,
     },
     {
-        path: '/silent-renew',
-        beforeEnter: redirectSigninSilent,
-    },
-    {
         path: '/signin',
         beforeEnter: redirectSignin,
     },

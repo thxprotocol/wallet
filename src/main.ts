@@ -3,7 +3,6 @@ import App from './App.vue';
 import router from './router';
 import store from './store';
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import Web3 from 'web3';
 import { BootstrapVue, ModalPlugin, ToastPlugin, VBTooltip } from 'bootstrap-vue';
 import './main.scss';
 import VueClipboard from 'vue-clipboard2';
@@ -62,7 +61,7 @@ Vue.directive('b-tooltip', VBTooltip);
 Vue.filter('fromWei', (value: string) => {
     if (!value) return '';
     value = value.toString();
-    return new Web3().utils.fromWei(value);
+    return fromWei(value);
 });
 
 // Set custom filters
