@@ -8,7 +8,7 @@
             <base-identicon :rounded="true" variant="dark" :size="30" :uri="swaprule.erc20.logoURI" class="mr-2" />
             <strong>{{ swaprule.erc20.symbol }}</strong>
         </div>
-        <b-button variant="light" size="sm" @click.stop="$bvModal.show(`modalERC20Swap-${membership.id}`)">
+        <b-button variant="light" size="sm" @click.stop="$bvModal.show(`modalERC20Swap-${swaprule._id}`)">
             <i class="fas fa-sync ml-0"></i>
         </b-button>
         <BaseModalERC20Swap :swaprule="swaprule" :membership="membership" />
