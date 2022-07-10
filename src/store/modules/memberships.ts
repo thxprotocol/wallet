@@ -63,12 +63,15 @@ class MembershipModule extends VuexModule {
 
     @Action({ rawError: true })
     async get(_id: string) {
-        if (!_id) return;
-        const { data } = await axios({
-            method: 'GET',
-            url: '/memberships/' + _id,
-        });
-        this.context.commit('set', data);
+        try {
+            const { data } = await axios({
+                method: 'GET',
+                url: '/memberships/' + _id,
+            });
+            this.context.commit('set', data);
+        } catch {
+            //
+        }
     }
 }
 

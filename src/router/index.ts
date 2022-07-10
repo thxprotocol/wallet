@@ -53,10 +53,6 @@ const routes: Array<RouteConfig> = [
         beforeEnter: redirectSignout,
     },
     {
-        path: '/signin-silent',
-        beforeEnter: redirectSigninSilent,
-    },
-    {
         path: '/signin-oidc',
         component: () => import('../views/SigninRedirect.vue'),
     },

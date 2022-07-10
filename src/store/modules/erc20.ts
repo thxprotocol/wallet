@@ -41,6 +41,17 @@ class ERC20Module extends VuexModule {
     }
 
     @Action({ rawError: true })
+    async list() {
+        const { data } = await axios({
+            method: 'GET',
+            url: '/erc20/token',
+        });
+        data.forEach((_id: string) => {
+            this.context.commit('set', { _id });
+        });
+    }
+
+    @Action({ rawError: true })
     async get(id: string) {
         try {
             const res = await axios({
