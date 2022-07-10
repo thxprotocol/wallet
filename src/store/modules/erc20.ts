@@ -22,9 +22,13 @@ export interface ERC20 {
     logoURI: string;
 }
 
+export interface IERC20s {
+    [id: string]: ERC20;
+}
+
 @Module({ namespaced: true })
 class ERC20Module extends VuexModule {
-    _all: { [id: string]: ERC20 } = {};
+    _all: IERC20s = {};
 
     get all() {
         return this._all;
@@ -52,22 +56,42 @@ class ERC20Module extends VuexModule {
     }
 
     @Action({ rawError: true })
+    async getContract(id: string) {
+        const { data } = await axios({
+            method: 'GET',
+            url: '/erc20/' + id,
+        });
+        const web3 = this.context.rootGetters['network/all'][data.chainId];
+        const from = this.context.rootGetters['account/profile'].address;
+        const contract = new web3.eth.Contract(ERC20Abi as any, data.address, { from });
+        const totalSupply = Number(fromWei(await contract.methods.totalSupply().call()));
+        const erc20 = {
+            ...data,
+            contract,
+            totalSupply,
+            balance: 0,
+            blockExplorerUrl: `${chainInfo[data.chainId].blockExplorer}/address/${data.address}`,
+            logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
+        };
+
+        this.context.commit('set', erc20);
+        this.context.dispatch('balanceOf', erc20);
+    }
+
+    @Action({ rawError: true })
     async get(id: string) {
         try {
-            const res = await axios({
+            const { data } = await axios({
                 method: 'GET',
                 url: '/erc20/token/' + id,
             });
-            const { data } = await axios({
-                method: 'GET',
-                url: '/erc20/' + res.data.erc20Id,
-            });
+
             const web3 = this.context.rootGetters['network/all'][data.chainId];
             const from = this.context.rootGetters['account/profile'].address;
             const contract = new web3.eth.Contract(ERC20Abi as any, data.address, { from });
             const totalSupply = Number(fromWei(await contract.methods.totalSupply().call()));
             const erc20 = {
-                ...res.data,
+                ...data,
                 contract,
                 totalSupply,
                 balance: 0,

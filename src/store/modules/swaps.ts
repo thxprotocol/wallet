@@ -1,3 +1,5 @@
+import { TSwapRule } from '@/types/SwapRules';
+import { signCall } from '@/utils/network';
 import axios from 'axios';
 import { Module, VuexModule, Action } from 'vuex-module-decorators';
 import { Membership } from './memberships';
@@ -7,16 +9,25 @@ class ERC20SwapsModule extends VuexModule {
     @Action({ rawError: true })
     async create({
         membership,
-        amountIn,
+        swapRule,
+        amountInInWei,
         tokenInAddress,
-        calldata,
     }: {
         membership: Membership;
-        amountIn: number;
+        swapRule: TSwapRule;
+        amountInInWei: string;
         tokenInAddress: string;
-        calldata: any;
     }) {
-        const { call, nonce, sig } = calldata;
+        const web3 = this.context.rootGetters['network/all'][membership.chainId];
+        const privateKey = this.context.rootGetters['account/privateKey'];
+        const { call, nonce, sig } = await signCall(
+            web3,
+            membership.poolAddress,
+            'swap',
+            [amountInInWei, tokenInAddress],
+            privateKey,
+        );
+
         await axios({
             method: 'POST',
             url: '/swaps',
@@ -27,7 +38,8 @@ class ERC20SwapsModule extends VuexModule {
                 call,
                 nonce,
                 sig,
-                amountIn,
+                swapRuleId: swapRule._id,
+                amountIn: amountInInWei,
                 tokenInAddress,
             },
         });

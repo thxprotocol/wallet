@@ -7,7 +7,6 @@ import {
     redirectLoginLink,
     redirectPasswordResetLink,
     redirectSignin,
-    redirectSigninSilent,
     redirectAccount,
     redirectSignout,
     redirectSignup,

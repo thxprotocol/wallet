@@ -16,9 +16,9 @@
             <div class="mb-auto" v-else>
                 <base-list-group-item-swap-rule
                     :membership="membership"
-                    :swaprule="swaprule"
+                    :swap-rule="swapRule"
                     :key="key"
-                    v-for="(swaprule, key) of filteredERC20SwapRules"
+                    v-for="(swapRule, key) of filteredERC20SwapRules"
                 />
                 <b-pagination
                     class="mt-3"
@@ -40,12 +40,10 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { ERC20SwapRuleExtended, IERC20SwapRules } from '@/store/modules/erc20swaprules';
+import { ISwapRules, TSwapRule } from '@/types/SwapRules';
 import { IMemberships } from '@/store/modules/memberships';
-
-import { TNetworks } from '@/store/modules/network';
-import BaseListGroupItemSwapRule from '@/components/BaseListGroupItemSwapRule.vue';
 import { UserProfile } from '@/store/modules/account';
+import BaseListGroupItemSwapRule from '@/components/BaseListGroupItemSwapRule.vue';
 
 @Component({
     components: {
@@ -53,8 +51,7 @@ import { UserProfile } from '@/store/modules/account';
     },
     computed: mapGetters({
         profile: 'account/profile',
-        networks: 'network/all',
-        swaprules: 'erc20swaprules/all',
+        swaprules: 'swaprules/all',
         memberships: 'memberships/all',
     }),
 })
@@ -67,24 +64,23 @@ export default class MembershipERC20SwapRulesView extends Vue {
 
     // getters
     profile!: UserProfile;
-    swaprules!: IERC20SwapRules;
+    swaprules!: ISwapRules;
     memberships!: IMemberships;
-    networks!: TNetworks;
 
     get membership() {
-        return this.memberships[this.$router.currentRoute.params.id];
+        return this.memberships[this.$route.params.id];
     }
 
     get filteredERC20SwapRules() {
-        if (!this.swaprules[this.$router.currentRoute.params.id]) return [];
-        const result = Object.values(this.swaprules[this.$router.currentRoute.params.id]).filter(
-            (x: ERC20SwapRuleExtended) => x.page === this.currentPage,
+        if (!this.swaprules[this.$route.params.id]) return [];
+        const result = Object.values(this.swaprules[this.$route.params.id]).filter(
+            (swapRule: TSwapRule) => swapRule.page === this.currentPage,
         );
         return result;
     }
 
     async onChange(page: number) {
-        const { pagination, error } = await this.$store.dispatch('erc20swaprules/filter', {
+        const { pagination, error } = await this.$store.dispatch('swaprules/filter', {
             membership: this.membership,
             page,
             limit: this.perPage,
@@ -93,9 +89,12 @@ export default class MembershipERC20SwapRulesView extends Vue {
         this.error = error;
     }
 
-    async mounted() {
-        this.onChange(this.currentPage);
-        this.busy = false;
+    mounted() {
+        this.$store.dispatch('memberships/get', this.$route.params.id).then(async () => {
+            this.onChange(this.currentPage);
+            this.busy = false;
+            this.$store.dispatch('erc20/get', this.membership.erc20Id);
+        });
     }
 }
 </script>

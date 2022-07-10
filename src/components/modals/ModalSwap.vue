@@ -1,7 +1,7 @@
 <template>
     <b-modal
-        v-if="membership && swaprule"
-        :id="`modalERC20Swap-${swaprule._id}`"
+        v-if="membership && swapRule"
+        :id="`modalERC20Swap-${swapRule._id}`"
         @show="onShow()"
         centered
         scrollable
@@ -28,10 +28,8 @@
                 <b-link @click="amount = Number(tokenIn.balance)">
                     Set Max
                 </b-link>
-                )
-            </p>
-            <p class="small text-muted mt-2 mb-0">
-                You receive: <strong>{{ tokenInPrevisionedAmount }} {{ token.symbol }}</strong>
+                ) <br />
+                You receive: <strong>{{ tokenInPrevisionedAmount }} {{ tokenOut.symbol }}</strong>
             </p>
         </template>
         <template v-slot:modal-footer>
@@ -51,12 +49,12 @@
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
-import { ERC20 } from '@/store/modules/erc20';
-import { ERC20SwapRuleExtended } from '@/store/modules/erc20swaprules';
+import { IERC20s } from '@/store/modules/erc20';
 import { Membership } from '@/store/modules/memberships';
 import { TNetworks } from '@/store/modules/network';
 import { ChainId } from '@/types/enums/ChainId';
-import { MAX_UINT256, signCall } from '@/utils/network';
+import { TSwapRule } from '@/types/SwapRules';
+import { MAX_UINT256 } from '@/utils/network';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { fromWei, toWei } from 'web3-utils';
@@ -81,18 +79,17 @@ export default class BaseModalERC20Swap extends Vue {
     // getters
     profile!: UserProfile;
     networks!: TNetworks;
-    privateKey!: string;
-    erc20s!: { [id: string]: ERC20 };
+    erc20s!: IERC20s;
 
     @Prop() membership!: Membership;
-    @Prop() swaprule!: ERC20SwapRuleExtended;
+    @Prop() swapRule!: TSwapRule;
 
-    get token() {
+    get tokenOut() {
         return this.erc20s[this.membership.erc20Id];
     }
 
     get tokenIn() {
-        return this.swaprule.erc20; //this.erc20s[this.swaprule.erc20._id];
+        return this.erc20s[this.swapRule.tokenInId];
     }
 
     get hasInsufficientBalance() {
@@ -106,12 +103,13 @@ export default class BaseModalERC20Swap extends Vue {
     async onShow() {
         const web3 = this.networks[this.membership.chainId];
         this.maticBalance = Number(fromWei(await web3.eth.getBalance(this.profile.address)));
+
         const wei = await this.tokenIn.contract.methods.balanceOf(this.profile.address).call();
         this.tokenIn.balance = fromWei(wei);
     }
 
     updateSwapProvisioning() {
-        this.tokenInPrevisionedAmount = this.amount > 0 ? this.amount * this.swaprule.tokenMultiplier : 0;
+        this.tokenInPrevisionedAmount = this.amount > 0 ? this.amount * this.swapRule.tokenMultiplier : 0;
     }
 
     async swap() {
@@ -124,9 +122,8 @@ export default class BaseModalERC20Swap extends Vue {
         });
         this.allowance = Number(allowance);
 
-        const amountInToWei = toWei(String(this.amount));
-
-        if (this.allowance < Number(amountInToWei)) {
+        const amountInInWei = toWei(String(this.amount));
+        if (this.allowance < Number(amountInInWei)) {
             await this.$store.dispatch('erc20/approve', {
                 token: this.tokenIn,
                 chainId: this.membership.chainId,
@@ -136,23 +133,14 @@ export default class BaseModalERC20Swap extends Vue {
             });
         }
 
-        const calldata = await signCall(
-            this.networks[this.membership.chainId],
-            this.membership.poolAddress,
-            'swap',
-            [amountInToWei, this.swaprule.tokenInAddress],
-            this.privateKey,
-        );
-
-        await this.$store.dispatch('erc20swaps/create', {
+        await this.$store.dispatch('swaps/create', {
             membership: this.membership,
-            calldata,
-            amountIn: this.amount,
-            tokenInAddress: this.swaprule.tokenInAddress,
+            swapRule: this.swapRule,
+            amountInInWei,
+            tokenInAddress: this.tokenIn.address,
         });
 
-        this.$store.dispatch('memberships/get', this.membership.id);
-        this.$bvModal.hide(`modalERC20Swap-${this.swaprule._id}`);
+        this.$bvModal.hide(`modalERC20Swap-${this.swapRule._id}`);
         this.busy = false;
         this.$router.push({ path: '/wallet' });
     }
