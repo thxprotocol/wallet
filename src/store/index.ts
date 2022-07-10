@@ -16,6 +16,8 @@ import WithdrawalStore from './modules/withdrawals';
 import PromotionStore from './modules/promotions';
 import DepositStore from './modules/deposits';
 import PaymentStore from './modules/payments';
+import SwapRuleStore from './modules/swaprules';
+import SwapStore from './modules/swaps';
 import TransactionStore from './modules/transactions';
 
 Vue.use(Vuex);
@@ -35,6 +37,8 @@ const modules = {
     withdrawals: WithdrawalStore,
     promotions: PromotionStore,
     payments: PaymentStore,
+    swaprules: SwapRuleStore,
+    swaps: SwapStore,
     transactions: TransactionStore,
 };
 

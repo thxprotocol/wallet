@@ -4,6 +4,7 @@ const fs = require('fs');
 module.exports = {
     publicPath: '/',
     devServer: {
+        host:"localhost",
         https: true,
         port: 8083,
         key: process.env.VUE_APP_LOCAL_CERT_KEY ? fs.readFileSync(process.env.VUE_APP_LOCAL_CERT_KEY) : undefined,

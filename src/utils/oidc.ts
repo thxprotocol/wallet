@@ -13,7 +13,7 @@ const config: UserManagerSettings = {
     loadUserInfo: false,
     resource: API_ROOT,
     scope:
-        'openid offline_access rewards:read erc20:read erc721:read withdrawals:read withdrawals:write deposits:read deposits:write account:read account:write memberships:read memberships:write promotions:read transactions:read relay:write',
+        'openid offline_access rewards:read erc20:read erc721:read withdrawals:read withdrawals:write deposits:read deposits:write account:read account:write memberships:read memberships:write promotions:read transactions:read relay:write swaprule:read swap:read swap:write',
 };
 
 // Set the config in localstorage, so we can access it from the silent renew iframe
