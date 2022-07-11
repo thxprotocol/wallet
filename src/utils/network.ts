@@ -3,7 +3,6 @@ import { isAddress } from 'web3-utils';
 import { soliditySha3 } from 'web3-utils';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
 import { default as defaultPoolDiamondAbi } from '@thxnetwork/artifacts/dist/exports/abis/defaultPoolDiamond.json';
-import { ChainId } from '@/types/enums/ChainId';
 
 export const MINIMUM_GAS_LIMIT = 54680;
 export const MAX_UINT256 = '115792089237316195423570985008687907853269984665640564039457584007913129639935';
@@ -80,26 +79,5 @@ export function isPrivateKey(privateKey: string) {
     } catch (e) {
         console.log(e);
         return false;
-    }
-}
-
-export function getChainInfoForId(chainId: number) {
-    switch (chainId) {
-        default:
-        case ChainId.Hardhat:
-            return {
-                chainId: ChainId[ChainId.Hardhat],
-                blockExplorer: 'https://blockexplorer.local',
-            };
-        case ChainId.PolygonMumbai:
-            return {
-                chainId: ChainId[ChainId.PolygonMumbai],
-                blockExplorer: 'https://mumbai.polygonscan.com',
-            };
-        case ChainId.Polygon:
-            return {
-                chainId: ChainId[ChainId.Polygon],
-                blockExplorer: 'https://polygonscan.com',
-            };
     }
 }

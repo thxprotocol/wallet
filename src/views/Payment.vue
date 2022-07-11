@@ -137,7 +137,7 @@
 import { UserProfile } from '@/store/modules/account';
 import { TNetworks } from '@/store/modules/network';
 import { PaymentState, TPayment } from '@/types/Payments';
-import { getChainInfoForId, signCall } from '@/utils/network';
+import { signCall } from '@/utils/network';
 import { ChainId } from '@/types/enums/ChainId';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
@@ -145,6 +145,7 @@ import { fromWei } from 'web3-utils';
 import BaseModalPaymentConnect from '@/components/modals/ModalPaymentConnect.vue';
 import promisePoller from 'promise-poller';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
+import { chainInfo } from '@/utils/chains';
 
 @Component({
     components: {
@@ -179,7 +180,7 @@ export default class Payment extends Vue {
         return fromWei(this.balanceInWei);
     }
 
-    blockExplorer = (chainId: number) => getChainInfoForId(chainId).blockExplorer;
+    blockExplorer = (chainId: number) => chainInfo[chainId].blockExplorer;
 
     created() {
         this.$store

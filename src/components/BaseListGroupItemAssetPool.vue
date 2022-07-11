@@ -7,9 +7,11 @@
         <div class="mr-auto">
             <i
                 v-b-tooltip
-                :title="ChainId[membership.chainId]"
-                class="fas mr-2 text-primary"
+                :title="membership.chainId ? 'Polygon' : 'Polygon Mumbai (Test net)'"
+                class="fas mr-2"
                 :class="{
+                    'text-success': membership.chainId,
+                    'text-muted': !membership.chainId,
                     'fa-coins': membership.erc20Id,
                     'fa-palette': membership.erc721Id,
                 }"
@@ -17,9 +19,7 @@
             <strong class="mr-1">{{ token.symbol }} Pool</strong>
             <b-badge class="px-2" v-if="pendingWithdrawalCount" variant="danger">{{ pendingWithdrawalCount }}</b-badge>
             <br />
-            <small v-if="membership.poolBalance" class="text-muted">
-                {{ membership.poolBalance }} {{ token.symbol }}
-            </small>
+            <small class="text-muted">{{ membership.poolBalance }} {{ token.symbol }}</small>
         </div>
         <b-dropdown variant="white" no-caret toggle-class="d-flex align-items-center" v-if="profile">
             <template #button-content>
@@ -74,11 +74,10 @@ import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import { IMemberships, Membership } from '@/store/modules/memberships';
 import { WithdrawalState } from '@/store/modules/withdrawals';
-import BaseModalDepositPool from '../modals/ModalDepositPool.vue';
-import ModalDelete from '../modals/ModalDelete.vue';
+import BaseModalDepositPool from './modals/ModalDepositPool.vue';
+import ModalDelete from './modals/ModalDelete.vue';
 import { ERC20 } from '@/store/modules/erc20';
 import { ERC721 } from '@/store/modules/erc721';
-import { ChainId } from '@/types/enums/ChainId';
 
 @Component({
     components: {
@@ -92,9 +91,8 @@ import { ChainId } from '@/types/enums/ChainId';
         erc721s: 'erc721/all',
     }),
 })
-export default class BaseListGroupItemMembership extends Vue {
+export default class BaseListGroupItemAssetPool extends Vue {
     window = window;
-    ChainId = ChainId;
     busy = true;
     pendingWithdrawalCount = 0;
 
@@ -107,7 +105,12 @@ export default class BaseListGroupItemMembership extends Vue {
 
     get token() {
         if (this.membership.erc20Id) return this.erc20s[this.membership.erc20Id];
-        return this.erc721s[this.membership.erc721Id];
+        if (this.membership.erc721Id) return this.erc721s[this.membership.erc721Id];
+        return null;
+    }
+
+    openBlockExplorerURL() {
+        // token.blockExplorerURL;
     }
 
     remove() {
@@ -115,7 +118,6 @@ export default class BaseListGroupItemMembership extends Vue {
     }
 
     mounted() {
-        console.log('SONO QUI MOUNTED 1', this.membership);
         this.$store.dispatch('memberships/get', this.membership._id).then(async () => {
             if (this.membership.erc20Id) {
                 await this.$store.dispatch('erc20/get', this.membership.erc20Id);

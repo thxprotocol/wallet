@@ -7,7 +7,6 @@ import {
     redirectLoginLink,
     redirectPasswordResetLink,
     redirectSignin,
-    redirectSigninSilent,
     redirectAccount,
     redirectSignout,
     redirectSignup,
@@ -53,10 +52,6 @@ const routes: Array<RouteConfig> = [
         beforeEnter: redirectSignout,
     },
     {
-        path: '/signin-silent',
-        beforeEnter: redirectSigninSilent,
-    },
-    {
         path: '/signin-oidc',
         component: () => import('../views/SigninRedirect.vue'),
     },
@@ -95,6 +90,12 @@ const routes: Array<RouteConfig> = [
         path: '/memberships/:id/promotions',
         name: 'Promotions',
         component: () => import('../views/memberships/Promotions.vue'),
+        beforeEnter: assertAuthorization,
+    },
+    {
+        path: '/memberships/:id/erc20swaprules',
+        name: 'Swaps',
+        component: () => import('../views/memberships/SwapRules.vue'),
         beforeEnter: assertAuthorization,
     },
 ];
