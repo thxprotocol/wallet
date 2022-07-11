@@ -43,18 +43,14 @@ export default class Wallet extends Vue {
 
     mounted() {
         this.$store.dispatch('memberships/getAll').then(async () => {
-            console.log('this.memberships', this.memberships);
-            console.log('Object.keys(this.memberships)', Object.keys(this.memberships));
-            const promises = Object.keys(this.memberships).map((id: string) => {
-                if (id) {
-                    console.log('ID', id);
-                    return this.$store.dispatch('memberships/get', id);
+            const promises = Object.keys(this.memberships).map((_id: string) => {
+                if (_id) {
+                    return this.$store.dispatch('memberships/get', _id);
                 }
             });
 
             await Promise.all(promises);
 
-            console.log('SONO QUI MOUNTED 6', this.memberships);
             for (const id in this.memberships) {
                 const erc20Index = this.uniqueMembershipTokens.findIndex(
                     (membership: Membership) => this.memberships[id].erc20Id === membership.erc20Id,
