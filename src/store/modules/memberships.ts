@@ -26,11 +26,13 @@ class MembershipModule extends VuexModule {
     _all: IMemberships = {};
 
     get all() {
+        console.log('SONO QUI 00');
         return this._all;
     }
 
     @Mutation
     set(membership: Membership) {
+        console.log('SONO QUI, SET, ', membership);
         Vue.set(this._all, membership._id, membership);
     }
 
@@ -45,9 +47,10 @@ class MembershipModule extends VuexModule {
             method: 'GET',
             url: '/memberships',
         });
-
-        r.data.forEach((_id: string) => {
-            this.context.commit('set', { _id });
+        console.log('GET ALL MEMBERSHIPS ', r);
+        r.data.forEach((id: string) => {
+            console.log('MEMBER', id);
+            this.context.commit('set', { _id: id });
         });
     }
 
@@ -63,10 +66,12 @@ class MembershipModule extends VuexModule {
 
     @Action({ rawError: true })
     async get(_id: string) {
+        console.log('SONO QUI GET', _id);
         const { data } = await axios({
             method: 'GET',
             url: '/memberships/' + _id,
         });
+        console.log('SONO QUI 1');
         this.context.commit('set', data);
     }
 }

@@ -104,6 +104,7 @@ class AccountModule extends VuexModule {
             passwordResetToken?: string;
             rewardHash?: string;
             toPath?: string;
+            claimId?: string;
         } = {},
     ) {
         const extraQueryParams: any = {
@@ -135,7 +136,7 @@ class AccountModule extends VuexModule {
         await this.userManager.clearStaleState();
 
         return await this.userManager.signinRedirect({
-            state: { toPath: payload.toPath, rewardHash: payload.rewardHash },
+            state: { toPath: payload.toPath, rewardHash: payload.rewardHash, claimId: payload.claimId },
             extraQueryParams,
         });
     }

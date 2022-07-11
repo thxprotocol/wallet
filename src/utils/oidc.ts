@@ -13,5 +13,5 @@ export const config: UserManagerSettings = {
     loadUserInfo: false,
     resource: API_ROOT,
     scope:
-        'openid offline_access rewards:read erc20:read erc721:read withdrawals:read withdrawals:write deposits:read deposits:write account:read account:write memberships:read memberships:write promotions:read transactions:read relay:write',
+        'openid offline_access rewards:read erc20:read erc721:read withdrawals:read withdrawals:write deposits:read deposits:write account:read account:write memberships:read memberships:write promotions:read transactions:read relay:write claims:read',
 };

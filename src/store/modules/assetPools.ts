@@ -28,16 +28,29 @@ class AssetPoolModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async claimReward(hash: string) {
-        let res;
-        const data = JSON.parse(atob(hash));
+    async claimReward({ claimId, rewardHash }: { claimId: string; rewardHash: string }) {
+        let res, data;
+        if (rewardHash) {
+            data = JSON.parse(atob(rewardHash));
+        } else if (claimId) {
+            try {
+                res = await axios({
+                    method: 'GET',
+                    url: `/claims/${claimId}`,
+                });
+                data = res.data;
+            } catch (error) {
+                if ((error as AxiosError).response?.status === 403) return { error };
+                throw error;
+            }
+        }
 
         try {
             res = await axios({
                 method: 'POST',
                 url: `/rewards/${data.rewardId}/claim`,
                 headers: { 'X-PoolId': data.poolId },
-                data: { hash },
+                data: { claimId },
             });
         } catch (error) {
             if ((error as AxiosError).response?.status === 403) return { error };

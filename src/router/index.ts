@@ -33,7 +33,7 @@ const routes: Array<RouteConfig> = [
         beforeEnter: redirectLoginLink,
     },
     {
-        path: '/claim',
+        path: '/claim/:id',
         beforeEnter: assertUserAgent,
     },
     {
