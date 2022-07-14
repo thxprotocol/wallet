@@ -46,8 +46,8 @@ class MembershipModule extends VuexModule {
             url: '/memberships',
         });
 
-        r.data.forEach((_id: string) => {
-            this.context.commit('set', { _id });
+        r.data.forEach((id: string) => {
+            this.context.commit('set', { _id: id });
         });
     }
 
@@ -70,7 +70,7 @@ class MembershipModule extends VuexModule {
             });
             this.context.commit('set', data);
         } catch {
-            //
+            // Let it silently fail, so we dont break the Promise.all invoking this dispatcher
         }
     }
 }

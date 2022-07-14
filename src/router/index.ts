@@ -36,6 +36,10 @@ const routes: Array<RouteConfig> = [
         beforeEnter: assertUserAgent,
     },
     {
+        path: '/claim/:id',
+        beforeEnter: assertUserAgent,
+    },
+    {
         path: '/signin',
         beforeEnter: redirectSignin,
     },

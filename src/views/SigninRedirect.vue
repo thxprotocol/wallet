@@ -85,7 +85,7 @@ export default class Redirect extends Vue {
 
         // Check for reward hash in state
         const state: any = this.user.state;
-        if (state.rewardHash) {
+        if (state.rewardHash || state.claimId) {
             await this.claimReward();
         }
 
@@ -95,6 +95,7 @@ export default class Redirect extends Vue {
     redirect() {
         const state: any = this.user.state;
         const path = state.toPath || this.redirectPath;
+
         this.$router.push(path);
     }
 
@@ -132,7 +133,10 @@ export default class Redirect extends Vue {
         this.info = 'Claiming your token reward...';
 
         const state: any = this.user.state;
-        const { withdrawal, error } = await this.$store.dispatch('assetpools/claimReward', state.rewardHash);
+        const { withdrawal, error } = await this.$store.dispatch('assetpools/claimReward', {
+            claimId: state.claimId,
+            rewardHash: state.rewardHash,
+        });
 
         if (error) {
             this.error = error.response.data.error.message;

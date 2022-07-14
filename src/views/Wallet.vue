@@ -43,9 +43,11 @@ export default class Wallet extends Vue {
 
     mounted() {
         this.$store.dispatch('memberships/getAll').then(async () => {
-            const promises = Object.keys(this.memberships).map((id: string) =>
-                this.$store.dispatch('memberships/get', id),
-            );
+            const promises = Object.keys(this.memberships).map((_id: string) => {
+                if (_id) {
+                    return this.$store.dispatch('memberships/get', _id);
+                }
+            });
 
             await Promise.all(promises);
 

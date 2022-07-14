@@ -135,7 +135,6 @@ export default class BaseModalDepositPool extends Vue {
             calldata,
             amount: this.amount,
         });
-
         this.$store.dispatch('memberships/get', this.membership._id);
         this.$bvModal.hide(`modalDepositPool-${this.membership._id}`);
         this.busy = false;
