@@ -95,7 +95,7 @@ export default class Redirect extends Vue {
     redirect() {
         const state: any = this.user.state;
         const path = state.toPath || this.redirectPath;
-        console.log('REDIRECT PATH', path);
+
         this.$router.push(path);
     }
 
@@ -111,20 +111,17 @@ export default class Redirect extends Vue {
     }
 
     async redirectCallback() {
-        console.log('redirectCallback');
         this.info = 'Authenticating your account...';
         await this.$store.dispatch('account/signinRedirectCallback');
     }
 
     async getMemberships() {
-        console.log('getMemberships');
         this.info = 'Fetching memberships for your account...';
         const { error } = await this.$store.dispatch('memberships/getAll');
         if (error) this.error = error.message;
     }
 
     async getPrivateKey() {
-        console.log('getPrivateKey');
         this.info = 'Fetching private key from Web3Auth...';
         const { error } = await this.$store.dispatch('account/getPrivateKey', this.user);
         if (error) this.error = error.message;
@@ -137,8 +134,8 @@ export default class Redirect extends Vue {
 
         const state: any = this.user.state;
         const { withdrawal, error } = await this.$store.dispatch('assetpools/claimReward', {
-            rewardHash: state.rewardHash,
             claimId: state.claimId,
+            rewardHash: state.rewardHash,
         });
 
         if (error) {
@@ -163,7 +160,6 @@ export default class Redirect extends Vue {
     }
 
     async getProfile() {
-        console.log('getProfile');
         this.info = 'Fetching your account details...';
         await this.$store.dispatch('account/getProfile');
     }

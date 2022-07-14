@@ -133,6 +133,10 @@ class AccountModule extends VuexModule {
             extraQueryParams['reward_hash'] = payload.rewardHash;
         }
 
+        if (payload.claimId) {
+            extraQueryParams['claim_id'] = payload.claimId;
+        }
+
         await this.userManager.clearStaleState();
 
         return await this.userManager.signinRedirect({

@@ -115,7 +115,6 @@ export default class BaseListGroupItemMembership extends Vue {
     }
 
     mounted() {
-        console.log('SONO QUI MOUNTED 1', this.membership);
         this.$store.dispatch('memberships/get', this.membership._id).then(async () => {
             if (this.membership.erc20Id) {
                 await this.$store.dispatch('erc20/get', this.membership.erc20Id);

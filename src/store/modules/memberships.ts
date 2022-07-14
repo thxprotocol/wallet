@@ -26,13 +26,11 @@ class MembershipModule extends VuexModule {
     _all: IMemberships = {};
 
     get all() {
-        console.log('SONO QUI 00');
         return this._all;
     }
 
     @Mutation
     set(membership: Membership) {
-        console.log('SONO QUI, SET, ', membership);
         Vue.set(this._all, membership._id, membership);
     }
 
@@ -47,9 +45,8 @@ class MembershipModule extends VuexModule {
             method: 'GET',
             url: '/memberships',
         });
-        console.log('GET ALL MEMBERSHIPS ', r);
+
         r.data.forEach((id: string) => {
-            console.log('MEMBER', id);
             this.context.commit('set', { _id: id });
         });
     }
@@ -73,7 +70,7 @@ class MembershipModule extends VuexModule {
             });
             this.context.commit('set', data);
         } catch {
-            //
+            // Let it silently fail, so we dont break the Promise.all invoking this dispatcher
         }
     }
 }

@@ -26,38 +26,40 @@ class AssetPoolModule extends VuexModule {
 
         return r.data;
     }
+    @Action({ rawError: true })
+    async getClaim({ rewardHash, claimId }: { rewardHash: string; claimId: string }) {
+        if (rewardHash) {
+            const { data } = await axios({
+                method: 'GET',
+                url: `/claims/hash/${rewardHash}`,
+            });
+            return data;
+        }
+        if (claimId) {
+            const { data } = await axios({
+                method: 'GET',
+                url: `/claims/${claimId}`,
+            });
+            return data;
+        }
+    }
 
     @Action({ rawError: true })
-    async claimReward({ claimId, rewardHash }: { claimId: string; rewardHash: string }) {
-        let res, data;
-        if (rewardHash) {
-            data = JSON.parse(atob(rewardHash));
-        } else if (claimId) {
-            try {
-                res = await axios({
-                    method: 'GET',
-                    url: `/claims/${claimId}`,
-                });
-                data = res.data;
-            } catch (error) {
-                if ((error as AxiosError).response?.status === 403) return { error };
-                throw error;
-            }
-        }
+    async claimReward({ rewardHash, claimId }: { rewardHash: string; claimId: string }) {
+        const claim = await this.context.dispatch('getClaim', { rewardHash, claimId });
 
         try {
-            res = await axios({
+            const r = await axios({
                 method: 'POST',
-                url: `/rewards/${data.rewardId}/claim`,
-                headers: { 'X-PoolId': data.poolId },
-                data: { claimId },
+                url: `/claims/${claim._id}/collect`,
+                headers: { 'X-PoolId': claim.poolId },
             });
+
+            return { withdrawal: r.data };
         } catch (error) {
             if ((error as AxiosError).response?.status === 403) return { error };
             throw error;
         }
-
-        return { withdrawal: { ...res.data, ...{ tokenSymbol: data.tokenSymbol } } };
     }
 }
 
