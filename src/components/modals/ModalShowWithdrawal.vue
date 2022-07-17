@@ -32,10 +32,7 @@
                 <b-img-lazy :src="imgUrl" class="d-block w-100" />
             </b-col>
             <b-col xs="12" md="6">
-                <h2 class="text-secondary my-3">
-                    <strong>Congratulations!</strong> You've earned NFT
-                    <strong>#{{ withdrawal.tokenId }}</strong>
-                </h2>
+                <h2 class="text-secondary my-3"><strong>Congratulations!</strong> You've claimed an NFT.</h2>
                 <p class="lead">
                     {{ withdrawal.metadata.title }}<br />
                     <small class="text-muted">{{ withdrawal.metadata.description }}</small>
