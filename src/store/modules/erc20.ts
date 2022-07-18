@@ -11,6 +11,7 @@ import { chainInfo } from '@/utils/chains';
 
 export interface ERC20 {
     _id: string;
+    chainId: ChainId;
     erc20Id: string;
     address: string;
     contract: Contract;
@@ -36,7 +37,7 @@ class ERC20Module extends VuexModule {
 
     @Mutation
     set(erc20: ERC20) {
-        Vue.set(this._all, erc20._id, erc20);
+        Vue.set(this._all, erc20.erc20Id, erc20);
     }
 
     @Mutation
@@ -50,9 +51,27 @@ class ERC20Module extends VuexModule {
             method: 'GET',
             url: '/erc20/token',
         });
-        data.forEach((_id: string) => {
-            this.context.commit('set', { _id });
-        });
+        await Promise.all(
+            data.map(async (id: string) => {
+                const { data } = await axios({
+                    method: 'GET',
+                    url: '/erc20/token/' + id,
+                });
+                const web3 = this.context.rootGetters['network/all'][data.chainId];
+                const from = this.context.rootGetters['account/profile'].address;
+                const contract = new web3.eth.Contract(ERC20Abi as any, data.address, { from });
+                const totalSupply = Number(fromWei(await contract.methods.totalSupply().call()));
+                const erc20 = {
+                    ...data,
+                    contract,
+                    totalSupply,
+                    balance: 0,
+                    blockExplorerUrl: `${chainInfo[data.chainId].blockExplorer}/address/${data.address}`,
+                    logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
+                };
+                this.context.commit('set', erc20);
+            }),
+        );
     }
 
     @Action({ rawError: true })
@@ -139,7 +158,7 @@ class ERC20Module extends VuexModule {
         const privateKey = this.context.rootGetters['account/privateKey'];
         const balance = Number(fromWei(await web3.eth.getBalance(profile.address)));
 
-        if (balance === 0) {
+        if (poolId && balance === 0) {
             await axios({
                 method: 'POST',
                 url: `/deposits/approve`,

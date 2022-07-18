@@ -1,7 +1,10 @@
 <template>
     <b-button-group size="md">
-        <b-button to="/wallet" :variant="path === '/wallet' ? 'secondary' : 'darker'">
-            Wallet
+        <b-button to="/crypto" :variant="path === '/crypto' ? 'secondary' : 'darker'">
+            Crypto
+        </b-button>
+        <b-button to="/nft" :variant="path === '/nft' ? 'secondary' : 'darker'">
+            NFT
         </b-button>
         <b-button to="/memberships" :variant="path === '/memberships' ? 'secondary' : 'darker'">
             Pools
