@@ -58,13 +58,13 @@ export default class BaseListGroupItemNFT extends Vue {
     }
 
     firstImageURL(metadata: any) {
-        let url = '';
-        this.erc721.properties.forEach(p => {
-            if (p.propType === 'image') {
-                url = metadata.attributes.find((a: { value: string; key: string }) => a.key === p.name).value;
-            }
-        });
-        return url;
+        const allImageProps = this.erc721.properties.filter(p => p.propType === 'image');
+        if (!allImageProps.length) return;
+
+        const image = metadata.attributes.find((a: { value: string; key: string }) => a.key === allImageProps[0].name);
+        if (!image) return;
+
+        return image.value;
     }
 
     getPropType(key: string) {
