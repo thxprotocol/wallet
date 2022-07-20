@@ -49,7 +49,7 @@ class MembershipModule extends VuexModule {
         await Promise.all(
             data.map(async (id: string) => {
                 try {
-                    await this.context.dispatch('memberships/get', id);
+                    await this.context.dispatch('get', id);
                 } catch {
                     // Let it silently fail, so we dont break the Promise.all invoking this dispatcher
                 }
