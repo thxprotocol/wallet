@@ -40,15 +40,21 @@ class MembershipModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async getAll() {
-        const r = await axios({
+    async list() {
+        const { data } = await axios({
             method: 'GET',
             url: '/memberships',
         });
 
-        r.data.forEach((id: string) => {
-            this.context.commit('set', { _id: id });
-        });
+        await Promise.all(
+            data.map(async (id: string) => {
+                try {
+                    await this.context.dispatch('memberships/get', id);
+                } catch {
+                    // Let it silently fail, so we dont break the Promise.all invoking this dispatcher
+                }
+            }),
+        );
     }
 
     @Action({ rawError: true })
@@ -63,15 +69,11 @@ class MembershipModule extends VuexModule {
 
     @Action({ rawError: true })
     async get(_id: string) {
-        try {
-            const { data } = await axios({
-                method: 'GET',
-                url: '/memberships/' + _id,
-            });
-            this.context.commit('set', data);
-        } catch {
-            // Let it silently fail, so we dont break the Promise.all invoking this dispatcher
-        }
+        const { data } = await axios({
+            method: 'GET',
+            url: '/memberships/' + _id,
+        });
+        this.context.commit('set', data);
     }
 }
 

@@ -39,11 +39,7 @@ export default class PoolsView extends Vue {
     memberships!: IMemberships;
 
     mounted() {
-        this.$store.dispatch('memberships/getAll').then(async () => {
-            const promises = Object.keys(this.memberships).map((id: string) =>
-                this.$store.dispatch('memberships/get', id),
-            );
-            await Promise.all(promises);
+        this.$store.dispatch('memberships/list').then(() => {
             this.loading = false;
         });
     }

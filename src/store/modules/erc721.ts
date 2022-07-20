@@ -65,23 +65,29 @@ class ERC721Module extends VuexModule {
 
         await Promise.all(
             data.map(async (id: string) => {
-                const { data } = await axios({
-                    method: 'GET',
-                    url: '/erc721/token/' + id,
-                });
-                const web3 = this.context.rootGetters['network/all'][data.erc721.chainId];
-                const from = this.context.rootGetters['account/profile'].address;
-                const contract = new web3.eth.Contract(ERC721Abi as any, data.erc721.address, { from });
-                const erc721 = {
-                    ...data.erc721,
-                    contract,
-                    balance: 0,
-                    blockExplorerUrl: `${chainInfo[data.erc721.chainId].blockExplorer}/address/${data.erc721.address}`,
-                    logoURI: `https://avatars.dicebear.com/api/identicon/${data.erc721._id}.svg`,
-                };
-                this.context.commit('set', erc721);
-                this.context.commit('setToken', data);
-                this.context.dispatch('balanceOf', erc721);
+                try {
+                    const { data } = await axios({
+                        method: 'GET',
+                        url: '/erc721/token/' + id,
+                    });
+                    const web3 = this.context.rootGetters['network/all'][data.erc721.chainId];
+                    const from = this.context.rootGetters['account/profile'].address;
+                    const contract = new web3.eth.Contract(ERC721Abi as any, data.erc721.address, { from });
+                    const erc721 = {
+                        ...data.erc721,
+                        contract,
+                        balance: 0,
+                        blockExplorerUrl: `${chainInfo[data.erc721.chainId].blockExplorer}/address/${
+                            data.erc721.address
+                        }`,
+                        logoURI: `https://avatars.dicebear.com/api/identicon/${data.erc721._id}.svg`,
+                    };
+                    this.context.commit('set', erc721);
+                    this.context.commit('setToken', data);
+                    this.context.dispatch('balanceOf', erc721);
+                } catch {
+                    // Fail silent and do not break exec chain
+                }
             }),
         );
     }
