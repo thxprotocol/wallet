@@ -7,7 +7,7 @@
             NFT
         </b-button>
         <b-button to="/memberships" :variant="path === '/memberships' ? 'secondary' : 'darker'">
-            Pools
+            Memberships
         </b-button>
     </b-button-group>
 </template>

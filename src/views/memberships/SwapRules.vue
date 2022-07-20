@@ -43,7 +43,7 @@ import { mapGetters } from 'vuex';
 import { ISwapRules, TSwapRule } from '@/types/SwapRules';
 import { IMemberships } from '@/store/modules/memberships';
 import { UserProfile } from '@/store/modules/account';
-import BaseListGroupItemSwapRule from '@/components/BaseListGroupItemSwapRule.vue';
+import BaseListGroupItemSwapRule from '@/components/list-items/BaseListGroupItemSwapRule.vue';
 
 @Component({
     components: {
@@ -93,7 +93,7 @@ export default class MembershipERC20SwapRulesView extends Vue {
         this.$store.dispatch('memberships/get', this.$route.params.id).then(async () => {
             this.onChange(this.currentPage);
             this.busy = false;
-            this.$store.dispatch('erc20/get', this.membership.erc20Id);
+            this.$store.dispatch('erc20/getContract', this.membership.erc20Id);
         });
     }
 }

@@ -21,7 +21,7 @@
                 {{ membership.poolBalance }} {{ token.symbol }}
             </small>
         </div>
-        <b-dropdown variant="white" no-caret toggle-class="d-flex align-items-center" v-if="profile">
+        <b-dropdown variant="white" no-caret toggle-class="d-flex align-items-center">
             <template #button-content>
                 <i class="fas fa-ellipsis-v p-1 ml-0 text-muted" aria-hidden="true" style="font-size: 1rem"></i>
             </template>
@@ -106,8 +106,7 @@ export default class BaseListGroupItemMembership extends Vue {
     @Prop() membership!: Membership;
 
     get token() {
-        if (this.membership.erc20Id) return this.erc20s[this.membership.erc20Id];
-        return this.erc721s[this.membership.erc721Id];
+        return this.membership.erc20Id ? this.erc20s[this.membership.erc20Id] : this.erc721s[this.membership.erc721Id];
     }
 
     remove() {
@@ -115,24 +114,21 @@ export default class BaseListGroupItemMembership extends Vue {
     }
 
     mounted() {
-        this.$store.dispatch('memberships/get', this.membership._id).then(async () => {
-            if (this.membership.erc20Id) {
-                await this.$store.dispatch('erc20/get', this.membership.erc20Id);
-
-                this.$store
-                    .dispatch('withdrawals/filter', {
-                        profile: this.profile,
-                        membership: this.membership,
-                        state: WithdrawalState.Pending,
-                    })
-                    .then(({ pagination }) => {
-                        this.pendingWithdrawalCount = pagination?.total;
-                    });
-            }
-            if (this.membership.erc721Id) {
-                this.$store.dispatch('erc721/get', this.membership.erc721Id);
-            }
-        });
+        if (this.membership.erc20Id) {
+            this.$store.dispatch('erc20/getContract', this.membership.erc20Id);
+            this.$store
+                .dispatch('withdrawals/filter', {
+                    profile: this.profile,
+                    membership: this.membership,
+                    state: WithdrawalState.Pending,
+                })
+                .then(({ pagination }) => {
+                    this.pendingWithdrawalCount = pagination?.total;
+                });
+        }
+        if (this.membership.erc721Id) {
+            this.$store.dispatch('erc721/get', this.membership.erc721Id);
+        }
     }
 }
 </script>

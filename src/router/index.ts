@@ -82,7 +82,7 @@ const routes: Array<RouteConfig> = [
     },
     {
         path: '/memberships',
-        name: 'Pools',
+        name: 'Memberships',
         component: () => import('../views/Memberships.vue'),
         beforeEnter: assertAuthorization,
     },

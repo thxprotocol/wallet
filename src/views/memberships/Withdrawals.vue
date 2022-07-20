@@ -131,7 +131,7 @@ export default class MembershipWithdrawalsView extends Vue {
 
     async mounted() {
         this.$store.dispatch('memberships/get', this.$route.params.id).then(async () => {
-            await this.$store.dispatch('erc20/get', this.membership.erc20Id);
+            await this.$store.dispatch('erc20/getContract', this.membership.erc20Id);
             this.onChange(this.membership, this.currentPage, this.state);
             this.busy = false;
         });

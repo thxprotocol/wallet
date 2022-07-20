@@ -14,9 +14,9 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import BaseIdenticon from './BaseIdenticon.vue';
+import BaseIdenticon from '@/components/BaseIdenticon.vue';
 import { Membership } from '@/store/modules/memberships';
-import BaseModalERC20Swap from './modals/ModalSwap.vue';
+import BaseModalERC20Swap from '@/components/modals/ModalSwap.vue';
 import { ChainId } from '@/types/enums/ChainId';
 import { TSwapRule } from '@/types/SwapRules';
 import { IERC20s } from '@/store/modules/erc20';

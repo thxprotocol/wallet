@@ -24,7 +24,7 @@ import { UserProfile } from '@/store/modules/account';
 import { ERC721 } from '@/store/modules/erc721';
 import { TNetworks } from '@/store/modules/network';
 import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue';
-import BaseCardErc721Token from '@/components/BaseCardERC721Token.vue';
+import BaseCardErc721Token from '@/components/cards/BaseCardERC721Token.vue';
 import BaseIdenticon from '../BaseIdenticon.vue';
 
 @Component({
