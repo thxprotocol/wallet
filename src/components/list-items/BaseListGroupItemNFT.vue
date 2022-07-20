@@ -1,6 +1,6 @@
 <template>
-    <b-list-group-item v-if="membership && erc721">
-        <div class="d-flex justify-content-between align-items-center" v-b-toggle="`collapse-${membership._id}`">
+    <b-list-group-item v-if="erc721">
+        <div class="d-flex justify-content-between align-items-center" v-b-toggle="`collapse-${erc721._id}`">
             <div class="mr-auto d-flex align-items-center" v-b-tooltip :title="erc721.name">
                 <base-identicon :rounded="true" variant="dark" :size="30" :uri="erc721.logoURI" class="mr-2" />
                 <strong class="mr-2">{{ erc721.symbol }}</strong>
@@ -10,14 +10,9 @@
                 {{ erc721.balance }}
             </div>
         </div>
-        <b-collapse :id="`collapse-${membership._id}`" class="mt-2">
+        <b-collapse :id="`collapse-${erc721._id}`" class="mt-2">
             <hr />
-            <base-card-erc-721-token
-                :erc721="erc721"
-                :token="token"
-                :key="token._id"
-                v-for="token of membership.tokens"
-            />
+            <base-card-erc-721-token :erc721="erc721" :token="token" :key="token._id" v-for="token of tokens" />
         </b-collapse>
     </b-list-group-item>
 </template>
@@ -28,7 +23,6 @@ import { mapGetters } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
 import { ERC721 } from '@/store/modules/erc721';
 import { TNetworks } from '@/store/modules/network';
-import { Membership } from '@/store/modules/memberships';
 import BaseModalTransferTokens from '@/components/modals/ModalTransferTokens.vue';
 import BaseCardErc721Token from '@/components/BaseCardERC721Token.vue';
 import BaseIdenticon from '../BaseIdenticon.vue';
@@ -42,7 +36,7 @@ import BaseIdenticon from '../BaseIdenticon.vue';
     computed: mapGetters({
         profile: 'account/profile',
         networks: 'network/all',
-        erc721s: 'erc721/all',
+        erc721Tokens: 'erc721/tokens',
     }),
 })
 export default class BaseListGroupItemNFT extends Vue {
@@ -51,16 +45,13 @@ export default class BaseListGroupItemNFT extends Vue {
     // getters
     profile!: UserProfile;
     networks!: TNetworks;
-    erc721s!: { [id: string]: ERC721 };
+    erc721Tokens!: { [id: string]: any };
 
-    get erc721() {
-        return this.erc721s[this.membership.erc721Id];
+    get tokens() {
+        if (!this.erc721Tokens[this.erc721._id]) return [];
+        return this.erc721Tokens[this.erc721._id];
     }
 
-    @Prop() membership!: Membership;
-
-    mounted() {
-        this.$store.dispatch('erc721/get', this.membership.erc721Id);
-    }
+    @Prop() erc721!: ERC721;
 }
 </script>

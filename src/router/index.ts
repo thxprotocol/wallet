@@ -65,9 +65,15 @@ const routes: Array<RouteConfig> = [
         component: () => import('../views/UserAgentWarning.vue'),
     },
     {
-        path: '/wallet',
-        name: 'Wallet',
-        component: () => import('../views/Wallet.vue'),
+        path: '/crypto',
+        name: 'Crypto',
+        component: () => import('../views/Crypto.vue'),
+        beforeEnter: assertAuthorization,
+    },
+    {
+        path: '/nft',
+        name: 'NFT',
+        component: () => import('../views/NFT.vue'),
         beforeEnter: assertAuthorization,
     },
     {
