@@ -42,8 +42,8 @@ class ERC20Module extends VuexModule {
 
     @Mutation
     setBalance(payload: { erc20: ERC20; balance: string }) {
-        if (!this._all[payload.erc20._id]) Vue.set(this._all, payload.erc20._id, {});
-        Vue.set(this._all[payload.erc20._id], 'balance', payload.balance);
+        if (!this._all[payload.erc20.erc20Id]) Vue.set(this._all, payload.erc20.erc20Id, {});
+        Vue.set(this._all[payload.erc20.erc20Id], 'balance', payload.balance);
     }
 
     @Action({ rawError: true })
