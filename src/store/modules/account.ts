@@ -9,6 +9,7 @@ import { BASE_URL } from '@/utils/secrets';
 export interface UserProfile {
     address: string;
     privateKey: string;
+    signature: string;
 }
 
 @Module({ namespaced: true })
@@ -83,6 +84,16 @@ class AccountModule extends VuexModule {
     @Action({ rawError: true })
     async update(data: UserProfile) {
         try {
+            if (data.address !== this._user?.profile.address) {
+                // sign a message
+                // add to payload
+                // patch account
+                // in api only change address if
+                // - recoveredAddress !== account.address
+                // -
+                data.signature = '';
+            }
+
             const r = await axios({
                 method: 'PATCH',
                 url: '/account',

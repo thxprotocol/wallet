@@ -31,7 +31,6 @@ import { User } from 'oidc-client-ts';
 import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
 import ModalShowWithdrawal from '@/components/modals/ModalShowWithdrawal.vue';
 import { TNetworks } from '@/store/modules/network';
-import Web3 from 'web3';
 
 @Component({
     components: {
@@ -150,10 +149,11 @@ export default class Redirect extends Vue {
     async updateAccount() {
         this.info = 'Updating your account details with a new address...';
 
-        const web3 = new Web3();
-        const account = web3.eth.accounts.privateKeyToAccount(this.privateKey);
-
-        if (!this.profile.address || this.profile.address !== account.address) {
+        // If there is no address then sign a message and patch the account
+        // so the API can recoverAddress and update the account in db
+        if (!this.profile.address) {
+            const web3 = this.networks[ChainId.Polygon];
+            const account = web3.eth.accounts.privateKeyToAccount(this.privateKey);
             const error = await this.$store.dispatch('account/update', { address: account.address });
             if (error) this.error = error.message;
         }
