@@ -35,5 +35,9 @@ export default class BaseListGroupItemToken extends Vue {
     profile!: UserProfile;
 
     @Prop() erc20!: ERC20;
+
+    mounted() {
+        this.$store.dispatch('erc20/balanceOf', this.erc20);
+    }
 }
 </script>
