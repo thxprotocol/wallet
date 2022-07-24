@@ -101,7 +101,7 @@ export default class BaseModalDepositPool extends Vue {
     async deposit() {
         this.busy = true;
 
-        const { allowance } = await this.$store.dispatch('erc20/allowance', {
+        const allowance = await this.$store.dispatch('erc20/allowance', {
             token: this.token,
             owner: this.profile.address,
             spender: this.membership.poolAddress,
