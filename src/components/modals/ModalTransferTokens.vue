@@ -1,5 +1,5 @@
 <template>
-    <b-modal :id="`modalTransferTokens-${erc20.address}`" @show="reset" centered scrollable title="Transfer tokens">
+    <b-modal :id="`modalTransferTokens-${erc20.address}`" centered scrollable title="Transfer tokens">
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
