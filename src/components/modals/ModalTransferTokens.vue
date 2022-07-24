@@ -30,23 +30,15 @@
 
 <script lang="ts">
 import { ERC20 } from '@/store/modules/erc20';
-import { Membership } from '@/store/modules/memberships';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
 @Component({})
 export default class BaseModalTranferTokens extends Vue {
     busy = false;
-    error = '';
     amount = 0;
     to = '';
 
-    @Prop() membership!: Membership;
     @Prop() erc20!: ERC20;
-
-    reset() {
-        this.amount = 0;
-        this.to = '';
-    }
 
     async transfer() {
         this.busy = true;
@@ -60,15 +52,15 @@ export default class BaseModalTranferTokens extends Vue {
 
         await this.$store.dispatch('erc20/transfer', {
             token: this.erc20,
-            chainId: this.membership.chainId,
+            chainId: this.erc20.chainId,
             to: this.to,
             amount: this.amount,
         });
 
-        await this.$store.dispatch('erc20/balanceOf', this.erc20);
-
-        this.reset();
+        this.$store.dispatch('erc20/balanceOf', this.erc20);
         this.$bvModal.hide(`modalTransferTokens-${this.erc20.address}`);
+        this.amount = 0;
+        this.to = '';
         this.busy = false;
     }
 }
