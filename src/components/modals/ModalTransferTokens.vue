@@ -29,26 +29,41 @@
 </template>
 
 <script lang="ts">
+import { UserProfile } from '@/store/modules/account';
 import { ERC20 } from '@/store/modules/erc20';
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
-@Component({})
+@Component({
+    computed: mapGetters({
+        profile: 'account/profile',
+    }),
+})
 export default class BaseModalTranferTokens extends Vue {
     busy = false;
     amount = 0;
     to = '';
+    profile!: UserProfile;
 
     @Prop() erc20!: ERC20;
 
     async transfer() {
         this.busy = true;
 
-        await this.$store.dispatch('erc20/approve', {
+        const allowance = await this.$store.dispatch('erc20/allowance', {
             token: this.erc20,
-            chainId: this.erc20.chainId,
-            to: this.to,
-            amount: this.amount,
+            owner: this.profile.address,
+            spender: this.to,
         });
+
+        if (Number(allowance) < this.amount) {
+            await this.$store.dispatch('erc20/approve', {
+                token: this.erc20,
+                chainId: this.erc20.chainId,
+                to: this.to,
+                amount: this.amount,
+            });
+        }
 
         await this.$store.dispatch('erc20/transfer', {
             token: this.erc20,
@@ -61,6 +76,7 @@ export default class BaseModalTranferTokens extends Vue {
         this.$bvModal.hide(`modalTransferTokens-${this.erc20.address}`);
         this.amount = 0;
         this.to = '';
+
         this.busy = false;
     }
 }

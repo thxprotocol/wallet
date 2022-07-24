@@ -115,7 +115,7 @@ export default class BaseModalERC20Swap extends Vue {
     async swap() {
         this.busy = true;
 
-        const { allowance } = await this.$store.dispatch('erc20/allowance', {
+        const allowance = await this.$store.dispatch('erc20/allowance', {
             token: this.tokenIn,
             owner: this.profile.address,
             spender: this.membership.poolAddress,
