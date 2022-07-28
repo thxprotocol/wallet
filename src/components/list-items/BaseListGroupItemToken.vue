@@ -30,8 +30,6 @@ import { ChainId } from '@/types/enums/ChainId';
 })
 export default class BaseListGroupItemToken extends Vue {
     ChainId = ChainId;
-
-    // getters
     profile!: UserProfile;
 
     @Prop() erc20!: ERC20;

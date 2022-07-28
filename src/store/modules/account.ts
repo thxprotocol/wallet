@@ -5,11 +5,17 @@ import { config } from '@/utils/oidc';
 import { getPrivateKeyForUser } from '@/utils/torus';
 import { isPrivateKey } from '@/utils/network';
 import { BASE_URL } from '@/utils/secrets';
+import { ChainId } from '@/types/enums/ChainId';
+import Web3 from 'web3';
+
+const AUTH_REQUEST_TYPED_MESSAGE =
+    "Welcome! Please make sure you have selected your preferred account and sign this message to verify it's ownership.";
 
 export interface UserProfile {
     address: string;
     privateKey: string;
-    signature: string;
+    authRequestMessage: string;
+    authRequestSignature: string;
 }
 
 @Module({ namespaced: true })
@@ -82,28 +88,24 @@ class AccountModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async update(data: UserProfile) {
-        try {
-            if (data.address !== this._user?.profile.address) {
-                // sign a message
-                // add to payload
-                // patch account
-                // in api only change address if
-                // - recoveredAddress !== account.address
-                // -
-                data.signature = '';
-            }
-
-            const r = await axios({
-                method: 'PATCH',
-                url: '/account',
-                data,
-            });
-
-            this.context.commit('setUserProfile', r.data);
-        } catch (error) {
-            return error;
+    async update(payload: UserProfile) {
+        if (this._user && this._user.profile.address !== payload.address) {
+            const web3: Web3 & { eth: { ethSignTypedDataV4: any } } = this.context.rootGetters['network/all'][
+                ChainId.Polygon
+            ];
+            const account = web3.eth.accounts.privateKeyToAccount(this.privateKey);
+            const signature = await web3.eth.sign(AUTH_REQUEST_TYPED_MESSAGE, account.address);
+            payload.authRequestMessage = AUTH_REQUEST_TYPED_MESSAGE;
+            payload.authRequestSignature = signature;
         }
+
+        const r = await axios({
+            method: 'PATCH',
+            url: '/account',
+            data: payload,
+        });
+
+        this.context.commit('setUserProfile', r.data);
     }
 
     @Action({ rawError: true })

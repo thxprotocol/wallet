@@ -104,7 +104,6 @@ export default class Redirect extends Vue {
         if (process.env.NODE_ENV !== 'production ') {
             await this.$store.dispatch('network/setNetwork', { chainId: ChainId.Hardhat, privateKey });
         }
-
         await this.$store.dispatch('network/setNetwork', { chainId: ChainId.PolygonMumbai, privateKey });
         await this.$store.dispatch('network/setNetwork', { chainId: ChainId.Polygon, privateKey });
     }
@@ -152,10 +151,10 @@ export default class Redirect extends Vue {
         // If there is no address then sign a message and patch the account
         // so the API can recoverAddress and update the account in db
         if (!this.profile.address) {
-            const web3 = this.networks[ChainId.Polygon];
-            const account = web3.eth.accounts.privateKeyToAccount(this.privateKey);
-            const error = await this.$store.dispatch('account/update', { address: account.address });
-            if (error) this.error = error.message;
+            const web3 = this.$store.getters['network/all'][ChainId.Polygon];
+            const { address } = web3.eth.accounts.privateKeyToAccount(this.privateKey);
+
+            await this.$store.dispatch('account/update', { address });
         }
     }
 
