@@ -50,22 +50,24 @@
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { IERC20s } from '@/store/modules/erc20';
-import { Membership } from '@/store/modules/memberships';
+import { TMembership } from '@/store/modules/memberships';
 import { TNetworks } from '@/store/modules/network';
 import { ChainId } from '@/types/enums/ChainId';
 import { TSwapRule } from '@/types/SwapRules';
 import { MAX_UINT256 } from '@/utils/network';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { fromWei, toWei } from 'web3-utils';
 
 @Component({
-    computed: mapGetters({
-        profile: 'account/profile',
-        networks: 'network/all',
-        privateKey: 'account/privateKey',
-        erc20s: 'erc20/all',
-    }),
+    computed: {
+        ...mapState('erc20', ['erc20s']),
+        ...mapGetters({
+            profile: 'account/profile',
+            networks: 'network/all',
+            privateKey: 'account/privateKey',
+        }),
+    },
 })
 export default class BaseModalERC20Swap extends Vue {
     busy = false;
@@ -81,7 +83,7 @@ export default class BaseModalERC20Swap extends Vue {
     networks!: TNetworks;
     erc20s!: IERC20s;
 
-    @Prop() membership!: Membership;
+    @Prop() membership!: TMembership;
     @Prop() swapRule!: TSwapRule;
 
     get tokenOut() {

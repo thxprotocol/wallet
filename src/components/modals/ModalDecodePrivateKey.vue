@@ -53,7 +53,7 @@ import { mapGetters } from 'vuex';
 import { isPrivateKey, signCall } from '@/utils/network';
 import { Account } from 'web3-core/types/index';
 import { decryptString } from '@/utils/decrypt';
-import { IMemberships, Membership } from '@/store/modules/memberships';
+import { IMemberships, TMembership } from '@/store/modules/memberships';
 import { TNetworks } from '@/store/modules/network';
 
 @Component({
@@ -126,13 +126,10 @@ export default class ModalDecodePrivateKey extends Vue {
         }
     }
 
-    async transferOwnership(membership: Membership) {
+    async transferOwnership(membership: TMembership) {
         try {
             if (this.tempAccount && this.account) {
-                await this.$store.dispatch('network/setNetwork', {
-                    chainId: membership.chainId,
-                    privateKey: this.privateKey,
-                });
+                await this.$store.dispatch('network/connect', membership.chainId);
 
                 const calldata = await signCall(
                     this.web3,

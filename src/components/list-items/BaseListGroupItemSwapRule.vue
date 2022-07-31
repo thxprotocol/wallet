@@ -13,9 +13,9 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import BaseIdenticon from '@/components/BaseIdenticon.vue';
-import { Membership } from '@/store/modules/memberships';
+import { TMembership } from '@/store/modules/memberships';
 import BaseModalERC20Swap from '@/components/modals/ModalSwap.vue';
 import { ChainId } from '@/types/enums/ChainId';
 import { TSwapRule } from '@/types/SwapRules';
@@ -26,16 +26,14 @@ import { IERC20s } from '@/store/modules/erc20';
         BaseModalERC20Swap,
         BaseIdenticon,
     },
-    computed: mapGetters({
-        erc20s: 'erc20/all',
-    }),
+    computed: mapState('erc20', ['erc20s']),
 })
 export default class BaseListGroupItemSwapRule extends Vue {
     ChainId = ChainId;
     erc20s!: IERC20s;
 
     @Prop() swapRule!: TSwapRule;
-    @Prop() membership!: Membership;
+    @Prop() membership!: TMembership;
 
     get erc20() {
         return this.erc20s[this.swapRule.tokenInId];

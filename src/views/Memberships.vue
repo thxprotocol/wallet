@@ -24,7 +24,6 @@ import BaseListGroupItemMembership from '@/components/list-items/BaseListGroupIt
 import { IMemberships } from '@/store/modules/memberships';
 
 @Component({
-    name: 'AccountView',
     components: {
         BaseListGroupItemMembership,
     },
@@ -33,7 +32,7 @@ import { IMemberships } from '@/store/modules/memberships';
         memberships: 'memberships/all',
     }),
 })
-export default class PoolsView extends Vue {
+export default class Memberships extends Vue {
     loading = true;
     profile!: UserProfile;
     memberships!: IMemberships;

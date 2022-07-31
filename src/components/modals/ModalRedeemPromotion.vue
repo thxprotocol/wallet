@@ -59,8 +59,8 @@
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
-import { ERC20 } from '@/store/modules/erc20';
-import { Membership } from '@/store/modules/memberships';
+import { TERC20 } from '@/store/modules/erc20';
+import { TMembership } from '@/store/modules/memberships';
 import { TNetworks } from '@/store/modules/network';
 import { TPromotion } from '@/store/modules/promotions';
 import { MAX_UINT256, signCall } from '@/utils/network';
@@ -88,9 +88,9 @@ export default class BaseModalRedeemPromotion extends Vue {
     networks!: TNetworks;
     privateKey!: string;
 
-    @Prop() membership!: Membership;
+    @Prop() membership!: TMembership;
     @Prop() promotion!: TPromotion;
-    @Prop() erc20!: ERC20;
+    @Prop() erc20!: TERC20;
 
     get hasInsufficientBalance() {
         return this.balance < this.promotion.price;

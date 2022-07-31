@@ -56,34 +56,38 @@ const routes: Array<RouteConfig> = [
         beforeEnter: redirectSignout,
     },
     {
+        path: '/collect',
+        component: () => import(/* webpackChunkName: "collect" */ '../views/Collect.vue'),
+    },
+    {
         path: '/signin-oidc',
-        component: () => import('../views/SigninRedirect.vue'),
+        component: () => import(/* webpackChunkName: "signin-oidc" */ '../views/SigninRedirect.vue'),
     },
     {
         path: '/user-agent-warning',
         name: 'Warning',
-        component: () => import('../views/UserAgentWarning.vue'),
+        component: () => import(/* webpackChunkName: "user-agent-warning" */ '../views/UserAgentWarning.vue'),
     },
     {
         path: '/crypto',
         name: 'Crypto',
-        component: () => import('../views/Crypto.vue'),
+        component: () => import(/* webpackChunkName: "crypto" */ '../views/Crypto.vue'),
         beforeEnter: assertAuthorization,
     },
     {
         path: '/nft',
         name: 'NFT',
-        component: () => import('../views/NFT.vue'),
+        component: () => import(/* webpackChunkName: "nft" */ '../views/NFT.vue'),
         beforeEnter: assertAuthorization,
     },
     {
         path: '/payment/:id',
-        component: () => import('../views/Payment.vue'),
+        component: () => import(/* webpackChunkName: "payment" */ '../views/Payment.vue'),
     },
     {
         path: '/memberships',
         name: 'Memberships',
-        component: () => import('../views/Memberships.vue'),
+        component: () => import(/* webpackChunkName: "memberships" */ '../views/Memberships.vue'),
         beforeEnter: assertAuthorization,
     },
     {
@@ -93,19 +97,20 @@ const routes: Array<RouteConfig> = [
     {
         path: '/memberships/:id/withdrawals',
         name: 'Withdrawals',
-        component: () => import('../views/memberships/Withdrawals.vue'),
+        component: () =>
+            import(/* webpackChunkName: "memberships-withdrawals" */ '../views/memberships/Withdrawals.vue'),
         beforeEnter: assertAuthorization,
     },
     {
         path: '/memberships/:id/promotions',
         name: 'Promotions',
-        component: () => import('../views/memberships/Promotions.vue'),
+        component: () => import(/* webpackChunkName: "memberships-promotions" */ '../views/memberships/Promotions.vue'),
         beforeEnter: assertAuthorization,
     },
     {
         path: '/memberships/:id/erc20swaprules',
         name: 'Swaps',
-        component: () => import('../views/memberships/SwapRules.vue'),
+        component: () => import(/* webpackChunkName: "memberships-swaprules" */ '../views/memberships/SwapRules.vue'),
         beforeEnter: assertAuthorization,
     },
 ];

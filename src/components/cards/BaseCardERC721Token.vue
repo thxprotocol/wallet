@@ -46,7 +46,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator';
 import { ERC721 } from '@/store/modules/erc721';
 
 @Component({})
-export default class BaseListGroupItemNFT extends Vue {
+export default class BaseCardERC721Token extends Vue {
     url = '';
     type = '';
 

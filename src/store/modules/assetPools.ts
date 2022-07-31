@@ -1,4 +1,4 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { Module, VuexModule, Action } from 'vuex-module-decorators';
 
 interface SignedCall {
@@ -47,19 +47,13 @@ class AssetPoolModule extends VuexModule {
     @Action({ rawError: true })
     async claimReward({ rewardHash, claimId }: { rewardHash: string; claimId: string }) {
         const claim = await this.context.dispatch('getClaim', { rewardHash, claimId });
+        const r = await axios({
+            method: 'POST',
+            url: `/claims/${claim._id}/collect`,
+            headers: { 'X-PoolId': claim.poolId },
+        });
 
-        try {
-            const r = await axios({
-                method: 'POST',
-                url: `/claims/${claim._id}/collect`,
-                headers: { 'X-PoolId': claim.poolId },
-            });
-
-            return { withdrawal: r.data };
-        } catch (error) {
-            if ((error as AxiosError).response?.status === 403) return { error };
-            throw error;
-        }
+        return r.data;
     }
 }
 

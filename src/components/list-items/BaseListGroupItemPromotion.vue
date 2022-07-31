@@ -34,10 +34,10 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { Membership } from '@/store/modules/memberships';
+import { TMembership } from '@/store/modules/memberships';
 import { TPromotion } from '@/store/modules/promotions';
 import BaseModalRedeemPromotion from '@/components/modals/ModalRedeemPromotion.vue';
-import { ERC20 } from '@/store/modules/erc20';
+import { TERC20 } from '@/store/modules/erc20';
 
 @Component({
     components: {
@@ -49,7 +49,7 @@ export default class BaseListGroupItemWithdrawal extends Vue {
     error = '';
 
     @Prop() promotion!: TPromotion;
-    @Prop() membership!: Membership;
-    @Prop() erc20!: ERC20;
+    @Prop() membership!: TMembership;
+    @Prop() erc20!: TERC20;
 }
 </script>

@@ -70,21 +70,23 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { IWithdrawals, Withdrawal, WithdrawalState } from '@/store/modules/withdrawals';
-import { IMemberships, Membership } from '@/store/modules/memberships';
+import { IMemberships, TMembership } from '@/store/modules/memberships';
 import BaseListGroupItemWithdrawal from '@/components/list-items/BaseListGroupItemWithdrawal.vue';
-import { ERC20 } from '@/store/modules/erc20';
+import { TERC20 } from '@/store/modules/erc20';
 
 @Component({
     components: {
         BaseListGroupItemWithdrawal,
     },
-    computed: mapGetters({
-        withdrawals: 'withdrawals/all',
-        memberships: 'memberships/all',
-        erc20s: 'erc20/all',
-    }),
+    computed: {
+        ...mapState('erc20', ['contracts']),
+        ...mapGetters({
+            withdrawals: 'withdrawals/all',
+            memberships: 'memberships/all',
+        }),
+    },
 })
 export default class MembershipWithdrawalsView extends Vue {
     WithdrawalState = WithdrawalState;
@@ -99,7 +101,7 @@ export default class MembershipWithdrawalsView extends Vue {
     withdrawals!: IWithdrawals;
     memberships!: IMemberships;
 
-    erc20s!: { [id: string]: ERC20 };
+    contracts!: { [id: string]: TERC20 };
 
     get membership() {
         return this.memberships[this.$router.currentRoute.params.id];
@@ -107,7 +109,7 @@ export default class MembershipWithdrawalsView extends Vue {
 
     get erc20() {
         if (!this.membership) return null;
-        return this.erc20s[this.membership.erc20Id];
+        return this.contracts[this.membership.erc20Id];
     }
 
     get filteredWithdrawals() {
@@ -117,7 +119,7 @@ export default class MembershipWithdrawalsView extends Vue {
         );
     }
 
-    async onChange(membership: Membership, page: number, state: WithdrawalState | null = null) {
+    async onChange(membership: TMembership, page: number, state: WithdrawalState | null = null) {
         const { pagination, error } = await this.$store.dispatch('withdrawals/filter', {
             membership,
             page,

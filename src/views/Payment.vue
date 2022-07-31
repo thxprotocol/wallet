@@ -135,7 +135,6 @@
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
-import { TNetworks } from '@/store/modules/network';
 import { PaymentState, TPayment } from '@/types/Payments';
 import { signCall } from '@/utils/network';
 import { ChainId } from '@/types/enums/ChainId';
@@ -146,6 +145,7 @@ import BaseModalPaymentConnect from '@/components/modals/ModalPaymentConnect.vue
 import promisePoller from 'promise-poller';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
 import { chainInfo } from '@/utils/chains';
+import Web3 from 'web3';
 
 @Component({
     components: {
@@ -155,7 +155,7 @@ import { chainInfo } from '@/utils/chains';
         ...mapState('metamask', ['account', 'chainId']),
         ...mapState('payments', ['payment']),
         ...mapGetters({
-            networks: 'network/all',
+            web3: 'network/web3',
             profile: 'account/profile',
             privateKey: 'account/privateKey',
             isConnected: 'metamask/isConnected',
@@ -167,7 +167,7 @@ export default class Payment extends Vue {
     account!: string;
     privateKey!: string;
     chainId!: ChainId;
-    networks!: TNetworks;
+    web3!: Web3;
     payment!: TPayment;
     profile!: UserProfile;
     isConnected!: boolean;
@@ -221,8 +221,7 @@ export default class Payment extends Vue {
     }
 
     async getBalance() {
-        const web3 = this.networks[this.payment.chainId as ChainId];
-        const contract = new web3.eth.Contract(ERC20Abi as any, this.payment.tokenAddress);
+        const contract = new this.web3.eth.Contract(ERC20Abi as any, this.payment.tokenAddress);
         const wei = await contract.methods.balanceOf(this.profile ? this.profile.address : this.account).call();
         this.balanceInWei = wei;
     }
@@ -274,9 +273,8 @@ export default class Payment extends Vue {
     }
 
     async payDefault() {
-        const web3 = this.networks[this.payment.chainId as ChainId];
         const { call, nonce, sig } = await signCall(
-            web3,
+            this.web3,
             this.payment.receiver,
             'topup',
             [this.payment.amount],

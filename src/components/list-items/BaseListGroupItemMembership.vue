@@ -70,13 +70,13 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
-import { IMemberships, Membership } from '@/store/modules/memberships';
+import { IMemberships, TMembership } from '@/store/modules/memberships';
 import { WithdrawalState } from '@/store/modules/withdrawals';
 import BaseModalDepositPool from '../modals/ModalDepositPool.vue';
 import ModalDelete from '../modals/ModalDelete.vue';
-import { ERC20 } from '@/store/modules/erc20';
+import { TERC20 } from '@/store/modules/erc20';
 import { ERC721 } from '@/store/modules/erc721';
 import { ChainId } from '@/types/enums/ChainId';
 
@@ -85,12 +85,16 @@ import { ChainId } from '@/types/enums/ChainId';
         BaseModalDepositPool,
         ModalDelete,
     },
-    computed: mapGetters({
-        profile: 'account/profile',
-        memberships: 'memberships/all',
-        erc20s: 'erc20/all',
-        erc721s: 'erc721/all',
-    }),
+    computed: {
+        ...mapState({
+            erc20s: (state: any) => state.erc20.contracts,
+            erc721s: (state: any) => state.erc721.erc721s,
+        }),
+        ...mapGetters({
+            profile: 'account/profile',
+            memberships: 'memberships/all',
+        }),
+    },
 })
 export default class BaseListGroupItemMembership extends Vue {
     window = window;
@@ -100,10 +104,10 @@ export default class BaseListGroupItemMembership extends Vue {
 
     profile!: UserProfile;
     memberships!: IMemberships;
-    erc20s!: { [id: string]: ERC20 };
+    erc20s!: { [id: string]: TERC20 };
     erc721s!: { [id: string]: ERC721 };
 
-    @Prop() membership!: Membership;
+    @Prop() membership!: TMembership;
 
     get token() {
         return this.membership.erc20Id ? this.erc20s[this.membership.erc20Id] : this.erc721s[this.membership.erc721Id];
@@ -113,7 +117,7 @@ export default class BaseListGroupItemMembership extends Vue {
         this.$store.dispatch('memberships/delete', this.membership._id);
     }
 
-    mounted() {
+    async mounted() {
         if (this.membership.erc20Id) {
             this.$store.dispatch('erc20/getContract', this.membership.erc20Id);
             this.$store

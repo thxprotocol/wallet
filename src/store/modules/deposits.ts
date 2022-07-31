@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Vue } from 'vue-property-decorator';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import { Membership } from './memberships';
+import { TMembership } from './memberships';
 
 export type TDeposit = {
     id: string;
@@ -22,7 +22,7 @@ class DepositsModule extends VuexModule {
     }
 
     @Mutation
-    set({ deposit, membership }: { deposit: TDeposit; membership: Membership }) {
+    set({ deposit, membership }: { deposit: TDeposit; membership: TMembership }) {
         if (!this._all[membership._id]) {
             Vue.set(this._all, membership._id, {});
         }
@@ -30,7 +30,7 @@ class DepositsModule extends VuexModule {
     }
 
     @Mutation
-    unset({ deposit, membership }: { deposit: TDeposit; membership: Membership }) {
+    unset({ deposit, membership }: { deposit: TDeposit; membership: TMembership }) {
         Vue.delete(this._all[membership._id], deposit.id);
     }
 
@@ -46,7 +46,7 @@ class DepositsModule extends VuexModule {
         item,
         calldata,
     }: {
-        membership: Membership;
+        membership: TMembership;
         amount: number;
         item: string;
         calldata: any;

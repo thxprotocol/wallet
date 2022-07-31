@@ -25,25 +25,49 @@ export async function signCall(web3: Web3, poolAddress: string, name: string, pa
     };
 }
 
-export async function send(web3: Web3, to: string, fn: any, privateKey: string) {
+export async function send(web3: Web3, to: string, fn: any, privateKey?: string) {
+    const ethereum = (window as any).ethereum;
     const gasPrice = await web3.eth.getGasPrice();
     const [from] = await web3.eth.getAccounts();
     const data = fn.encodeABI();
     const estimate = await fn.estimateGas();
-    const gas = estimate < MINIMUM_GAS_LIMIT ? MINIMUM_GAS_LIMIT : estimate;
-    const sig = await web3.eth.accounts.signTransaction(
-        {
-            gas,
-            maxPriorityFeePerGas: gasPrice,
-            to,
-            from,
-            data,
-        },
-        privateKey,
-    );
+    const gas = String(estimate < MINIMUM_GAS_LIMIT ? MINIMUM_GAS_LIMIT : estimate);
 
-    if (sig.rawTransaction) {
-        return await web3.eth.sendSignedTransaction(sig.rawTransaction);
+    if (!privateKey && typeof ethereum !== undefined) {
+        try {
+            return await ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [
+                    {
+                        gas,
+                        gasPrice,
+                        from,
+                        to,
+                        data,
+                    },
+                ],
+            });
+        } catch (error) {
+            // TODO Check for error.code and return appropriately
+            console.error(error);
+        }
+    } else if (privateKey) {
+        const sig = await web3.eth.accounts.signTransaction(
+            {
+                gas,
+                gasPrice,
+                to,
+                from,
+                data,
+            },
+            privateKey,
+        );
+
+        if (sig.rawTransaction) {
+            return await web3.eth.sendSignedTransaction(sig.rawTransaction);
+        }
+    } else {
+        throw new Error('Please sign in again or install Metamask to use this account.');
     }
 }
 
@@ -59,7 +83,6 @@ export function isValidKey(privateKey: string) {
     try {
         const web3 = new Web3();
         const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-
         return isAddress(account.address);
     } catch (e) {
         return false;
@@ -68,16 +91,10 @@ export function isValidKey(privateKey: string) {
 
 export function isPrivateKey(privateKey: string) {
     try {
-        if (!privateKey.startsWith('0x')) {
-            throw new Error('Private key does not start with 0x');
-        }
-        if (privateKey.length !== 66) {
-            throw new Error('Private key string lenght is not 66.');
-        }
-
+        if (!privateKey.startsWith('0x')) throw new Error('Private key does not start with 0x');
+        if (privateKey.length !== 66) throw new Error('Private key string lenght is not 66.');
         return isValidKey(privateKey);
     } catch (e) {
-        console.log(e);
         return false;
     }
 }
