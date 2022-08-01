@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { TMembership } from './memberships';
 import { TTransaction } from '@/types/Transactions';
+import { TERC20 } from './erc20';
 
 export enum WithdrawalState {
     Pending = 0,
@@ -27,6 +28,7 @@ export class Withdrawal {
     createdAt: string;
     updatedAt: string;
     page: number;
+    erc20: TERC20;
     transactions: TTransaction[];
     type: WithdrawalType;
     unlockDate: Date;
@@ -34,6 +36,7 @@ export class Withdrawal {
     constructor(data: any, page: number) {
         this.transactions = data.transactions;
         this._id = data._id;
+        this.erc20 = data.erc20;
         this.amount = data.amount;
         this.state = data.state;
         this.beneficiary = data.beneficiary;

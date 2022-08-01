@@ -64,7 +64,8 @@ class AccountModule extends VuexModule {
     async update(payload: UserProfile) {
         if (this._user && this._user.profile.address !== payload.address) {
             const web3: Web3 & { eth: { ethSignTypedDataV4: any } } = this.context.rootState.network.web3;
-            const privateKey = this.context.rootGetters['network/privateKey'];
+            const privateKey = this.context.rootState.network.privateKey;
+
             if (privateKey) {
                 const account = web3.eth.accounts.privateKeyToAccount(privateKey);
                 const signature = await web3.eth.sign(AUTH_REQUEST_TYPED_MESSAGE, account.address);

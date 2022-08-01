@@ -111,6 +111,8 @@ export default class Collect extends Vue {
 
                 const imgUrl = this.firstImageURL(this.claim.metadata);
                 if (imgUrl) this.imgUrl = imgUrl;
+            } else if (this.claim && this.claim.erc20) {
+                await this.$store.dispatch('network/connect', this.claim.erc20.chainId);
             }
         } catch (e) {
             const res = (e as AxiosError).response;

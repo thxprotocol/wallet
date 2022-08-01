@@ -133,7 +133,7 @@ class ERC20Module extends VuexModule {
                 },
             });
         }
-        debugger;
+
         await this.context.dispatch(
             'network/send',
             {

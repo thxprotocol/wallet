@@ -12,33 +12,32 @@
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { User } from 'oidc-client-ts';
 import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
 import ModalShowWithdrawal from '@/components/modals/ModalShowWithdrawal.vue';
-import Web3 from 'web3';
+import { ChainId } from '@/types/enums/ChainId';
 
 @Component({
     components: {
         ModalShowWithdrawal,
         ModalDecodePrivateKey,
     },
-    computed: mapGetters({
-        privateKey: 'account/privateKey',
-        profile: 'account/profile',
-        user: 'account/user',
-        web3: 'network/web3',
-    }),
+    computed: {
+        ...mapState('network', ['address']),
+        ...mapGetters({
+            profile: 'account/profile',
+            user: 'account/user',
+        }),
+    },
 })
 export default class Redirect extends Vue {
     error = '';
     info = '';
     redirectPath = '/memberships';
 
-    // getters
-    privateKey!: string;
+    address!: string;
     profile!: UserProfile;
-    web3!: Web3;
     user!: User;
 
     async mounted() {
@@ -54,6 +53,9 @@ export default class Redirect extends Vue {
 
         // Get private key from Torus network if applicable
         await this.getPrivateKey();
+
+        // Connect to network
+        await this.$store.dispatch('network/connect', ChainId.Polygon);
 
         // Update account if necessary
         await this.updateAccount();
@@ -94,9 +96,7 @@ export default class Redirect extends Vue {
         // If there is no address then sign a message and patch the account
         // so the API can recoverAddress and update the account in db
         if (!this.profile.address) {
-            const web3 = this.$store.getters['network/web3'];
-            const { address } = web3.eth.accounts.privateKeyToAccount(this.privateKey);
-            await this.$store.dispatch('account/update', { address });
+            await this.$store.dispatch('account/update', { address: this.address });
         }
     }
 
