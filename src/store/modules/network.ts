@@ -1,17 +1,25 @@
 import Web3 from 'web3';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import { isPrivateKey, MINIMUM_GAS_LIMIT } from '@/utils/network';
-import { HARDHAT_RPC, NODE_ENV, POLYGON_MUMBAI_RPC, POLYGON_RPC } from '@/utils/secrets';
+import {
+    HARDHAT_RPC,
+    NODE_ENV,
+    POLYGON_MUMBAI_RPC,
+    POLYGON_RPC,
+    TORUS_VERIFIER,
+    VUE_APP_TEST_KEY,
+} from '@/utils/secrets';
 import { fromWei, toWei } from 'web3-utils';
 import { ChainId } from '@/types/enums/ChainId';
 import { toHex, toChecksumAddress } from 'web3-utils';
-import { getPrivateKeyForUser } from '@/utils/torus';
+import { mockPrivateKeyForSubject, torusClient } from '@/utils/torus';
 import { User } from 'oidc-client-ts';
 import { chainInfo } from '@/utils/chains';
 import { ChainInfo } from '@/types/ChainInfo';
 import { AccountVariant } from '@/types/Accounts';
 import { soliditySha3 } from 'web3-utils';
 import { default as defaultPoolDiamondAbi } from '@thxnetwork/artifacts/dist/exports/abis/defaultPoolDiamond.json';
+import { TorusKey } from '@toruslabs/customauth';
 
 export type TNetworkConfig = {
     chainId: ChainId;
@@ -44,12 +52,14 @@ class NetworkModule extends VuexModule {
     web3: Web3 = new Web3(networks[ChainId.Polygon]);
     privateKey = '';
     address = '';
-    _chainId: ChainId | null = null;
+    _chainId: ChainId = ChainId.Polygon;
 
     get chainId() {
         const sub = this.context.rootGetters['account/user'].profile.sub;
         const chainId = Number(localStorage.getItem(`thx:wallet:chain-id:${sub}`));
-        if (chainId && chainId !== this._chainId) return chainId;
+        if (Object.values(ChainId).includes(chainId)) {
+            return chainId;
+        }
         return this._chainId;
     }
 
@@ -94,7 +104,26 @@ class NetworkModule extends VuexModule {
 
     @Action({ rawError: true })
     async getPrivateKey(user: User) {
-        this.context.commit('setPrivateKey', await getPrivateKeyForUser(user));
+        // Early return for metamask users, they will bring their own
+        if (user.profile.variant === AccountVariant.Metamask) return;
+
+        // Fetch key from mockdata in localstorage
+        if (VUE_APP_TEST_KEY) {
+            this.context.commit('setPrivateKey', mockPrivateKeyForSubject(user.profile.sub));
+            return;
+        }
+
+        // Other cases should fetch their key from Torus
+        const torusKey: TorusKey = await torusClient.getTorusKey(
+            TORUS_VERIFIER,
+            user.profile.sub,
+            { verifier_id: user.profile.sub },
+            user.access_token,
+        );
+
+        if (!torusKey) throw new Error('Could not fetch private key from Torus network');
+
+        this.context.commit('setPrivateKey', `0x${torusKey.privateKey}`);
     }
 
     @Action({ rawError: true })
@@ -109,18 +138,19 @@ class NetworkModule extends VuexModule {
                 : // Use a local web3 instance as per requested chainId
                   new Web3(networks[chainId]);
 
-        // If private key is not available for a non Metamask account then fetch one from Torus
+        this.context.commit('setChainId', { sub: user.profile.sub, chainId });
+        this.context.commit('setWeb3', { web3, privateKey: this.privateKey });
+
+        // If private key is not available for a non Metamask account then request new access
+        // credentials and fetch key
         if (!isMetamaskAccount && !isValidPrivateKey) {
-            await this.context.dispatch('getPrivateKey', user);
+            await this.context.dispatch('account/signinRedirect', {}, { root: true });
         }
 
         // If metamask is available for metamask account request to switch chain if required
         if (isMetamaskAccount && isMetamaskInstalled) {
             await this.context.dispatch('requestSwitchChain', chainId);
         }
-
-        this.context.commit('setChainId', { sub: user.profile.sub, chainId });
-        this.context.commit('setWeb3', { web3, privateKey: this.privateKey });
     }
 
     @Action({ rawError: true })

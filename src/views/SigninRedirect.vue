@@ -17,6 +17,7 @@ import { User } from 'oidc-client-ts';
 import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
 import ModalShowWithdrawal from '@/components/modals/ModalShowWithdrawal.vue';
 import { ChainId } from '@/types/enums/ChainId';
+import { chainInfo } from '@/utils/chains';
 
 @Component({
     components: {
@@ -26,6 +27,7 @@ import { ChainId } from '@/types/enums/ChainId';
     computed: {
         ...mapState('network', ['address']),
         ...mapGetters({
+            chainId: 'network/chainId',
             profile: 'account/profile',
             user: 'account/user',
         }),
@@ -39,6 +41,7 @@ export default class Redirect extends Vue {
     address!: string;
     profile!: UserProfile;
     user!: User;
+    chainId!: ChainId;
 
     async mounted() {
         await this.redirectCallback();
@@ -55,7 +58,7 @@ export default class Redirect extends Vue {
         await this.getPrivateKey();
 
         // Connect to network
-        await this.$store.dispatch('network/connect', ChainId.Polygon);
+        await this.getNetwork();
 
         // Update account if necessary
         await this.updateAccount();
@@ -73,6 +76,11 @@ export default class Redirect extends Vue {
         }
 
         this.$router.push(path);
+    }
+
+    async getNetwork() {
+        this.info = `Connecting ${chainInfo[this.chainId].name}...`;
+        await this.$store.dispatch('network/connect', this.chainId);
     }
 
     async redirectCallback() {

@@ -69,7 +69,7 @@ export default class BaseNetworkSelect extends Vue {
         // Set a new web3 instance and update chainId
         await this.$store.dispatch('network/connect', chainId);
 
-        if (currentChainId && currentChainId !== this.chainId) {
+        if (currentChainId && currentChainId !== chainId) {
             window.location.reload();
         }
     }

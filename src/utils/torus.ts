@@ -1,10 +1,8 @@
 import Web3 from 'web3';
-import CustomAuth, { TorusKey, TORUS_NETWORK_TYPE } from '@toruslabs/customauth';
-import { User } from 'oidc-client-ts';
-import { TORUS_NETWORK, TORUS_VERIFIER, VUE_APP_TEST_KEY } from './secrets';
-import { AccountVariant } from '@/types/Accounts';
+import CustomAuth, { TORUS_NETWORK_TYPE } from '@toruslabs/customauth';
+import { TORUS_NETWORK } from './secrets';
 
-function mockPrivateKeyForSubject(subject: string) {
+export function mockPrivateKeyForSubject(subject: string) {
     const pkey = localStorage.getItem(`mock:privateKey:${subject}`);
     if (pkey) return pkey;
 
@@ -14,25 +12,8 @@ function mockPrivateKeyForSubject(subject: string) {
     return account.privateKey;
 }
 
-export async function getPrivateKeyForUser(user: User) {
-    if (user.profile.variant === AccountVariant.Metamask) return;
-
-    if (VUE_APP_TEST_KEY) {
-        return mockPrivateKeyForSubject(user.profile.sub);
-    }
-
-    const torus = new CustomAuth({
-        baseUrl: `${location.origin}/serviceworker`,
-        enableLogging: false,
-        network: TORUS_NETWORK as TORUS_NETWORK_TYPE,
-    });
-
-    const torusKey: TorusKey = await torus.getTorusKey(
-        TORUS_VERIFIER,
-        user.profile.sub,
-        { verifier_id: user.profile.sub }, // eslint-disable-line @typescript-eslint/camelcase
-        user.access_token,
-    );
-
-    return `0x${torusKey.privateKey}`;
-}
+export const torusClient = new CustomAuth({
+    baseUrl: `${location.origin}/serviceworker`,
+    enableLogging: false,
+    network: (TORUS_NETWORK as unknown) as TORUS_NETWORK_TYPE,
+});
