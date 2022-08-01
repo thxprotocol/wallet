@@ -65,10 +65,10 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { Membership } from '@/store/modules/memberships';
+import { TMembership } from '@/store/modules/memberships';
 import { Withdrawal, WithdrawalState, WithdrawalType } from '@/store/modules/withdrawals';
 import { format } from 'date-fns';
-import { ERC20 } from '@/store/modules/erc20';
+import { TERC20 } from '@/store/modules/erc20';
 import BasePopoverTransactions from '@/components/popovers/BasePopoverTransactions.vue';
 import { TransactionState, TTransaction } from '@/types/Transactions';
 import poll from 'promise-poller';
@@ -85,9 +85,9 @@ export default class BaseListGroupItemWithdrawal extends Vue {
     error = '';
     format = format;
 
-    @Prop() erc20!: ERC20;
+    @Prop() erc20!: TERC20;
     @Prop() withdrawal!: Withdrawal;
-    @Prop() membership!: Membership;
+    @Prop() membership!: TMembership;
 
     get pendingTransactions() {
         return this.withdrawal.transactions.filter((tx: TTransaction) =>

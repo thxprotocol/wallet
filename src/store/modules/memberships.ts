@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { ChainId } from '@/types/enums/ChainId';
 
-export type Membership = {
+export type TMembership = {
     _id: string;
     sub: string;
     chainId: ChainId;
@@ -18,7 +18,7 @@ export type Membership = {
 };
 
 export interface IMemberships {
-    [id: string]: Membership;
+    [id: string]: TMembership;
 }
 
 @Module({ namespaced: true })
@@ -30,12 +30,12 @@ class MembershipModule extends VuexModule {
     }
 
     @Mutation
-    set(membership: Membership) {
+    set(membership: TMembership) {
         Vue.set(this._all, membership._id, membership);
     }
 
     @Mutation
-    unset(membership: Membership) {
+    unset(membership: TMembership) {
         Vue.delete(this._all, membership._id);
     }
 
@@ -44,14 +44,15 @@ class MembershipModule extends VuexModule {
         const { data } = await axios({
             method: 'GET',
             url: '/memberships',
+            params: { chainId: this.context.rootGetters['network/chainId'] },
         });
 
         await Promise.all(
-            data.map(async (id: string) => {
+            data.map(async ({ _id }: TMembership) => {
                 try {
-                    await this.context.dispatch('get', id);
+                    await this.context.dispatch('get', _id);
                 } catch {
-                    // Let it silently fail, so we dont break the Promise.all invoking this dispatcher
+                    // Fail silently
                 }
             }),
         );

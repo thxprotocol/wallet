@@ -1,12 +1,9 @@
 import axios from 'axios';
+import Web3 from 'web3';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { User, UserManager } from 'oidc-client-ts';
 import { config } from '@/utils/oidc';
-import { getPrivateKeyForUser } from '@/utils/torus';
-import { isPrivateKey } from '@/utils/network';
 import { BASE_URL } from '@/utils/secrets';
-import { ChainId } from '@/types/enums/ChainId';
-import Web3 from 'web3';
 
 const AUTH_REQUEST_TYPED_MESSAGE =
     "Welcome! Please make sure you have selected your preferred account and sign this message to verify it's ownership.";
@@ -23,17 +20,9 @@ class AccountModule extends VuexModule {
     userManager: UserManager = new UserManager(config);
     _user: User | null = null;
     _profile: UserProfile | null = null;
-    _privateKey = '';
 
     get user() {
         return this._user;
-    }
-
-    get privateKey() {
-        if (this._privateKey) return this._privateKey;
-        if (!this._user) return '';
-        const encoded = sessionStorage.getItem(`thx:wallet:user:${this._user.profile.sub}`) as string;
-        return atob(encoded);
     }
 
     get profile() {
@@ -46,12 +35,6 @@ class AccountModule extends VuexModule {
     }
 
     @Mutation
-    setPrivateKey({ sub, privateKey }: { sub: string; privateKey: string }) {
-        sessionStorage.setItem(`thx:wallet:user:${sub}`, btoa(privateKey));
-        this._privateKey = privateKey;
-    }
-
-    @Mutation
     setUserProfile(profile: UserProfile) {
         this._profile = profile;
     }
@@ -59,6 +42,7 @@ class AccountModule extends VuexModule {
     @Action({ rawError: true })
     async getUser() {
         const user = await this.userManager.getUser();
+        if (user?.expired) return;
 
         this.context.commit('setUser', user);
         this.context.dispatch('getProfile');
@@ -77,26 +61,20 @@ class AccountModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async getPrivateKey(user: User) {
-        const privateKey = await getPrivateKeyForUser(user);
-
-        if (privateKey && isPrivateKey(privateKey) && this.user) {
-            this.context.commit('setPrivateKey', { sub: this.user.profile.sub, privateKey });
-        }
-
-        return { privateKey };
-    }
-
-    @Action({ rawError: true })
     async update(payload: UserProfile) {
         if (this._user && this._user.profile.address !== payload.address) {
-            const web3: Web3 & { eth: { ethSignTypedDataV4: any } } = this.context.rootGetters['network/all'][
-                ChainId.Polygon
-            ];
-            const account = web3.eth.accounts.privateKeyToAccount(this.privateKey);
-            const signature = await web3.eth.sign(AUTH_REQUEST_TYPED_MESSAGE, account.address);
-            payload.authRequestMessage = AUTH_REQUEST_TYPED_MESSAGE;
-            payload.authRequestSignature = signature;
+            const web3: Web3 & { eth: { ethSignTypedDataV4: any } } = this.context.rootState.network.web3;
+            const privateKey = this.context.rootState.network.privateKey;
+
+            if (privateKey) {
+                const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+                const signature = await web3.eth.sign(AUTH_REQUEST_TYPED_MESSAGE, account.address);
+                payload.authRequestMessage = AUTH_REQUEST_TYPED_MESSAGE;
+                payload.authRequestSignature = signature;
+            } else {
+                // Do metamask signature
+                debugger;
+            }
         }
 
         const r = await axios({

@@ -50,11 +50,13 @@
 <script lang="ts">
 import { ERC721 } from '@/store/modules/erc721';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 import { format } from 'date-fns';
 
 @Component({
-    computed: mapGetters({ erc721s: 'erc721/all' }),
+    computed: {
+        ...mapState('erc721', ['erc721s']),
+    },
 })
 export default class BaseModalShowWithdrawal extends Vue {
     imgUrl = require('@/assets/img/thx_treasure.png');

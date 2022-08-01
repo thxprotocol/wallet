@@ -1,37 +1,45 @@
 <template>
-    <div v-if="profile" class="d-flex align-items-center justify-content-center">
-        <b-spinner variant="primary" class="m-auto" v-if="loading" />
-        <template v-else>
-            <strong v-if="!Object.values(erc721s).length" class="text-gray text-center">
+    <div v-if="profile">
+        <b-container :class="loading || !hasTokens ? 'd-flex h-100 align-items-center justify-content-center' : ''">
+            <b-spinner v-if="loading" variant="primary" class="m-auto" />
+            <strong v-if="!loading && !hasTokens" class="text-gray text-center">
                 No tokens are visible for your account.
             </strong>
-            <b-list-group v-else class="w-100 align-self-start">
-                <base-list-group-item-nft :erc721="erc721" :key="key" v-for="(erc721, key) in erc721s" />
-            </b-list-group>
-        </template>
+            <b-row v-if="hasTokens">
+                <b-col md="4" :key="key" v-for="(token, key) in tokens">
+                    <base-card-nft :token="token" />
+                </b-col>
+            </b-row>
+        </b-container>
     </div>
 </template>
 
 <script lang="ts">
-import BaseListGroupItemNft from '@/components/list-items/BaseListGroupItemNFT.vue';
+import BaseCardNft from '@/components/cards/BaseCardNft.vue';
 import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { UserProfile } from '@/store/modules/account';
-import { ERC721 } from '@/store/modules/erc721';
+import { TERC721Token } from '@/store/modules/erc721';
 
 @Component({
     components: {
-        BaseListGroupItemNft,
+        BaseCardNft,
     },
-    computed: mapGetters({
-        profile: 'account/profile',
-        erc721s: 'erc721/all',
-    }),
+    computed: {
+        ...mapState('erc721', ['tokens']),
+        ...mapGetters({
+            profile: 'account/profile',
+        }),
+    },
 })
 export default class NFTView extends Vue {
     loading = true;
     profile!: UserProfile;
-    erc721s!: { [address: string]: ERC721 };
+    tokens!: { [_tokenId: string]: TERC721Token };
+
+    get hasTokens() {
+        return Object.values(this.tokens).length;
+    }
 
     mounted() {
         this.$store.dispatch('erc721/list').then(async () => {

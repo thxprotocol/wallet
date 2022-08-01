@@ -6,6 +6,7 @@ import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { BootstrapVue, ModalPlugin, ToastPlugin, VBTooltip } from 'bootstrap-vue';
 import './main.scss';
 import VueClipboard from 'vue-clipboard2';
+import VueConfetti from 'vue-confetti';
 import { fromWei } from 'web3-utils';
 
 // Set Axios default config
@@ -43,6 +44,7 @@ Vue.use(BootstrapVue);
 Vue.use(ModalPlugin);
 Vue.use(ToastPlugin);
 Vue.use(VueClipboard);
+Vue.use(VueConfetti);
 
 Vue.config.errorHandler = (error: Error, vm: Vue) => {
     vm.$bvToast.toast(error.message, {

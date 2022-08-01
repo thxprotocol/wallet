@@ -1,5 +1,5 @@
 <template>
-    <b-modal :id="`modalTransferTokens-${erc20.address}`" centered scrollable title="Transfer tokens">
+    <b-modal @show="onShow" :id="`modalTransferTokens-${erc20._id}`" centered scrollable title="Transfer tokens">
         <div class="w-100 text-center" v-if="busy">
             <b-spinner variant="dark" />
         </div>
@@ -7,9 +7,10 @@
             <p>
                 Transfer tokens from your THX Web Wallet to another wallet address.
             </p>
-            <b-alert variant="info" show>
-                Transactions out of your wallet are not covered by our gasless policy, so make sure to have some MATIC
-                in this account.
+            <b-alert variant="info" show v-if="balance > 0.01">
+                <i class="fas fa-info-circle mr-1"></i>
+                You hold <strong>{{ balance }} MATIC</strong> which is less than the <strong>0.01 MATIC</strong> we
+                suggest for this ERC20 transfer.
             </b-alert>
             <form @submit.prevent="transfer()" id="formTransfer">
                 <b-form-group>
@@ -30,9 +31,10 @@
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
-import { ERC20 } from '@/store/modules/erc20';
+import { TERC20 } from '@/store/modules/erc20';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
+import { toWei } from 'web3-utils';
 
 @Component({
     computed: mapGetters({
@@ -41,40 +43,43 @@ import { mapGetters } from 'vuex';
 })
 export default class BaseModalTranferTokens extends Vue {
     busy = false;
-    amount = 0;
+    amount = '0';
     to = '';
     profile!: UserProfile;
+    balance = 0;
 
-    @Prop() erc20!: ERC20;
+    @Prop() erc20!: TERC20;
+
+    async onShow() {
+        this.balance = await this.$store.dispatch('network/getBalance');
+    }
 
     async transfer() {
         this.busy = true;
 
-        const allowance = await this.$store.dispatch('erc20/allowance', {
-            token: this.erc20,
+        const allowance = this.$store.dispatch('erc20/allowance', {
+            erc20: this.erc20,
             owner: this.profile.address,
             spender: this.to,
         });
 
-        if (Number(allowance) < this.amount) {
+        if (Number(allowance) < Number(this.amount)) {
             await this.$store.dispatch('erc20/approve', {
-                token: this.erc20,
-                chainId: this.erc20.chainId,
+                erc20: this.erc20,
                 to: this.to,
-                amount: this.amount,
+                amount: toWei(this.amount, 'ether'),
             });
         }
 
         await this.$store.dispatch('erc20/transfer', {
-            token: this.erc20,
-            chainId: this.erc20.chainId,
+            erc20: this.erc20,
             to: this.to,
             amount: this.amount,
         });
 
         this.$store.dispatch('erc20/balanceOf', this.erc20);
-        this.$bvModal.hide(`modalTransferTokens-${this.erc20.address}`);
-        this.amount = 0;
+        this.$bvModal.hide(`modalTransferTokens-${this.erc20._id}`);
+        this.amount = '0';
         this.to = '';
 
         this.busy = false;

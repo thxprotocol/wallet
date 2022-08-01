@@ -59,11 +59,11 @@
 
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
-import { ERC20 } from '@/store/modules/erc20';
-import { Membership } from '@/store/modules/memberships';
+import { TERC20 } from '@/store/modules/erc20';
+import { TMembership } from '@/store/modules/memberships';
 import { TNetworks } from '@/store/modules/network';
 import { TPromotion } from '@/store/modules/promotions';
-import { MAX_UINT256, signCall } from '@/utils/network';
+import { MAX_UINT256 } from '@/utils/network';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
 import { toWei } from 'web3-utils';
@@ -88,9 +88,9 @@ export default class BaseModalRedeemPromotion extends Vue {
     networks!: TNetworks;
     privateKey!: string;
 
-    @Prop() membership!: Membership;
+    @Prop() membership!: TMembership;
     @Prop() promotion!: TPromotion;
-    @Prop() erc20!: ERC20;
+    @Prop() erc20!: TERC20;
 
     get hasInsufficientBalance() {
         return this.balance < this.promotion.price;
@@ -128,13 +128,11 @@ export default class BaseModalRedeemPromotion extends Vue {
             });
         }
 
-        const calldata = await signCall(
-            this.networks[this.membership.chainId],
-            this.membership.poolAddress,
-            'deposit',
-            [toWei(String(this.promotion.price), 'ether')],
-            this.privateKey,
-        );
+        const calldata = await this.$store.dispatch('network/sign', {
+            poolAddress: this.membership.poolAddress,
+            name: 'deposit',
+            params: [toWei(String(this.promotion.price), 'ether')],
+        });
 
         await this.$store.dispatch('deposits/create', {
             membership: this.membership,

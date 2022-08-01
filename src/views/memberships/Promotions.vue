@@ -26,21 +26,23 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { IMemberships } from '@/store/modules/memberships';
 import BaseListGroupItemPromotion from '@/components/list-items/BaseListGroupItemPromotion.vue';
 import { IPromotions } from '@/store/modules/promotions';
-import { ERC20 } from '@/store/modules/erc20';
+import { TERC20 } from '@/store/modules/erc20';
 
 @Component({
     components: {
         BaseListGroupItemPromotion,
     },
-    computed: mapGetters({
-        promotions: 'promotions/all',
-        memberships: 'memberships/all',
-        erc20s: 'erc20/all',
-    }),
+    computed: {
+        ...mapState('erc20', ['erc20s']),
+        ...mapGetters({
+            promotions: 'promotions/all',
+            memberships: 'memberships/all',
+        }),
+    },
 })
 export default class MembershipPromotionsView extends Vue {
     busy = true;
@@ -52,7 +54,7 @@ export default class MembershipPromotionsView extends Vue {
     // getters
     promotions!: IPromotions;
     memberships!: IMemberships;
-    erc20s!: { [id: string]: ERC20 };
+    erc20s!: { [id: string]: TERC20 };
 
     get membership() {
         return this.memberships[this.$router.currentRoute.params.id];

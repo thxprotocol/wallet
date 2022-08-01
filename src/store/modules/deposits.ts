@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { Vue } from 'vue-property-decorator';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
-import { Membership } from './memberships';
+import { TMembership } from './memberships';
+import { toWei } from 'web3-utils';
 
 export type TDeposit = {
     id: string;
@@ -22,7 +23,7 @@ class DepositsModule extends VuexModule {
     }
 
     @Mutation
-    set({ deposit, membership }: { deposit: TDeposit; membership: Membership }) {
+    set({ deposit, membership }: { deposit: TDeposit; membership: TMembership }) {
         if (!this._all[membership._id]) {
             Vue.set(this._all, membership._id, {});
         }
@@ -30,7 +31,7 @@ class DepositsModule extends VuexModule {
     }
 
     @Mutation
-    unset({ deposit, membership }: { deposit: TDeposit; membership: Membership }) {
+    unset({ deposit, membership }: { deposit: TDeposit; membership: TMembership }) {
         Vue.delete(this._all[membership._id], deposit.id);
     }
 
@@ -40,18 +41,19 @@ class DepositsModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async create({
-        membership,
-        amount,
-        item,
-        calldata,
-    }: {
-        membership: Membership;
-        amount: number;
-        item: string;
-        calldata: any;
-    }) {
-        const { call, nonce, sig } = calldata;
+    async create({ membership, amount, item }: { membership: TMembership; amount: string; item?: string }) {
+        const privateKey = this.context.rootGetters['network/privateKey'];
+        const { call, nonce, sig } = await this.context.dispatch(
+            'network/sign',
+            {
+                poolAddress: membership.poolAddress,
+                name: 'deposit',
+                params: [toWei(amount, 'ether')],
+                privateKey,
+            },
+            { root: true },
+        );
+
         const { data } = await axios({
             method: 'POST',
             url: '/deposits',
