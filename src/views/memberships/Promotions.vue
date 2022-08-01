@@ -37,7 +37,7 @@ import { TERC20 } from '@/store/modules/erc20';
         BaseListGroupItemPromotion,
     },
     computed: {
-        ...mapState('erc20', ['erc20s']),
+        ...mapState('erc20', ['contracts']),
         ...mapGetters({
             promotions: 'promotions/all',
             memberships: 'memberships/all',
@@ -54,7 +54,7 @@ export default class MembershipPromotionsView extends Vue {
     // getters
     promotions!: IPromotions;
     memberships!: IMemberships;
-    erc20s!: { [id: string]: TERC20 };
+    contracts!: { [id: string]: TERC20 };
 
     get membership() {
         return this.memberships[this.$router.currentRoute.params.id];
@@ -62,7 +62,7 @@ export default class MembershipPromotionsView extends Vue {
 
     get erc20() {
         if (!this.membership) return null;
-        return this.erc20s[this.membership.erc20Id];
+        return this.contracts[this.membership.erc20Id];
     }
 
     get filteredPromotions() {
