@@ -3,7 +3,6 @@ import axios from 'axios';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
 import { Contract } from 'web3-eth-contract';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
-import { send } from '@/utils/network';
 import { ChainId } from '@/types/enums/ChainId';
 import { fromWei, toWei, toChecksumAddress } from 'web3-utils';
 import { chainInfo } from '@/utils/chains';
@@ -33,18 +32,12 @@ export interface IERC20s {
 
 @Module({ namespaced: true })
 class ERC20Module extends VuexModule {
-    // tokens: IERC20s = {};
     contracts: IERC20s = {};
 
     @Mutation
     set(erc20: TERC20) {
         Vue.set(this.contracts, erc20._id, erc20);
     }
-
-    // @Mutation
-    // setToken(token: TERC20Token) {
-    //     Vue.set(this.tokens, token._id, token);
-    // }
 
     @Mutation
     setBalance({ erc20, balance }: { erc20: TERC20; balance: string }) {
@@ -70,7 +63,6 @@ class ERC20Module extends VuexModule {
             token.erc20.logoURI = `https://avatars.dicebear.com/api/identicon/${token.erc20.address}.svg`;
 
             this.context.commit('set', token.erc20);
-            // this.context.commit('setToken', token);
         });
     }
 
@@ -90,7 +82,6 @@ class ERC20Module extends VuexModule {
             data.erc20.logoURI = `https://avatars.dicebear.com/api/identicon/${data.erc20.address}.svg`;
 
             this.context.commit('set', data.erc20);
-            // this.context.commit('setToken', data);
         } catch (error) {
             return { error };
         }
@@ -142,19 +133,29 @@ class ERC20Module extends VuexModule {
                 },
             });
         }
-
-        const privateKey = this.context.rootGetters['network/privateKey'];
-
-        await send(web3, erc20.address, erc20.contract.methods.approve(to, amount), privateKey);
+        debugger;
+        await this.context.dispatch(
+            'network/send',
+            {
+                to: erc20.address,
+                fn: erc20.contract.methods.approve(to, amount),
+            },
+            { root: true },
+        );
     }
 
     @Action({ rawError: true })
     async transfer({ erc20, to, amount }: { erc20: TERC20; to: string; amount: string }) {
         const wei = toWei(amount);
-        const web3 = this.context.rootState.network.web3;
-        const privateKey = this.context.rootGetters['network/privateKey'];
 
-        await send(web3, erc20.address, erc20.contract.methods.transfer(toChecksumAddress(to), wei), privateKey);
+        await this.context.dispatch(
+            'network/send',
+            {
+                to: erc20.address,
+                fn: erc20.contract.methods.transfer(toChecksumAddress(to), wei),
+            },
+            { root: true },
+        );
     }
 }
 

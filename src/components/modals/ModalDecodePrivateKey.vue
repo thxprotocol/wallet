@@ -50,7 +50,7 @@ import { UserProfile } from '@/store/modules/account';
 import { BLink, BAlert, BButton, BSpinner, BModal, BFormInput } from 'bootstrap-vue';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters } from 'vuex';
-import { isPrivateKey, signCall } from '@/utils/network';
+import { isPrivateKey } from '@/utils/network';
 import { Account } from 'web3-core/types/index';
 import { decryptString } from '@/utils/decrypt';
 import { IMemberships, TMembership } from '@/store/modules/memberships';
@@ -131,13 +131,11 @@ export default class ModalDecodePrivateKey extends Vue {
             if (this.tempAccount && this.account) {
                 await this.$store.dispatch('network/connect', membership.chainId);
 
-                const calldata = await signCall(
-                    this.web3,
-                    membership.poolAddress,
-                    'upgradeAddress',
-                    [this.tempAccount.address, this.account.address],
-                    this.tempAccount.privateKey,
-                );
+                const calldata = await this.$store.dispatch('network/sign', {
+                    poolAddress: membership.poolAddress,
+                    name: 'upgradeAddress',
+                    params: [this.tempAccount.address, this.account.address],
+                });
 
                 await this.$store.dispatch('assetpools/upgradeAddress', {
                     poolId: membership.poolId,

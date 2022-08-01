@@ -25,7 +25,7 @@
             </form>
             <p class="small text-muted mt-2 mb-0">
                 Your balance: <strong>{{ erc20.balance }} {{ erc20.symbol }}</strong> (
-                <b-link @click="amount = Number(erc20.balance)">
+                <b-link @click="amount = erc20.balance">
                     Set Max
                 </b-link>
                 )
@@ -50,7 +50,7 @@
 import { UserProfile } from '@/store/modules/account';
 import { TERC20 } from '@/store/modules/erc20';
 import { TMembership } from '@/store/modules/memberships';
-import { MAX_UINT256, signCall } from '@/utils/network';
+import { MAX_UINT256 } from '@/utils/network';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
 import Web3 from 'web3';
@@ -72,7 +72,7 @@ export default class BaseModalDepositPool extends Vue {
     busy = false;
     error = '';
     allowance = 0;
-    amount = 0;
+    amount = '0';
     maticBalance = 0;
 
     // getters
@@ -88,7 +88,7 @@ export default class BaseModalDepositPool extends Vue {
     }
 
     get hasInsufficientBalance() {
-        return Number(this.erc20.balance) < this.amount;
+        return Number(this.erc20.balance) < Number(this.amount);
     }
 
     get hasInsufficientMATICBalance() {
@@ -114,24 +114,16 @@ export default class BaseModalDepositPool extends Vue {
             await this.$store.dispatch('erc20/approve', {
                 erc20: this.erc20,
                 to: this.membership.poolAddress,
-                amount: toWei(String(this.amount), 'ether') || MAX_UINT256,
+                amount: toWei(this.amount, 'ether') || MAX_UINT256,
                 poolId: this.membership.poolId,
             });
         }
 
-        const calldata = await signCall(
-            this.web3,
-            this.membership.poolAddress,
-            'deposit',
-            [toWei(String(this.amount), 'ether')],
-            this.privateKey,
-        );
-
         await this.$store.dispatch('deposits/create', {
             membership: this.membership,
-            calldata,
             amount: this.amount,
         });
+
         this.$store.dispatch('memberships/get', this.membership._id);
         this.$bvModal.hide(`modalDepositPool-${this.membership._id}`);
         this.busy = false;

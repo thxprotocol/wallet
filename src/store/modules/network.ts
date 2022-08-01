@@ -1,18 +1,17 @@
 import Web3 from 'web3';
 import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
-import { isPrivateKey, send } from '@/utils/network';
+import { isPrivateKey, MINIMUM_GAS_LIMIT } from '@/utils/network';
 import { HARDHAT_RPC, NODE_ENV, POLYGON_MUMBAI_RPC, POLYGON_RPC } from '@/utils/secrets';
 import { fromWei, toWei } from 'web3-utils';
 import { ChainId } from '@/types/enums/ChainId';
-import axios from 'axios';
-import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
-import { TPayment } from '@/types/Payments';
 import { toHex, toChecksumAddress } from 'web3-utils';
 import { getPrivateKeyForUser } from '@/utils/torus';
 import { User } from 'oidc-client-ts';
 import { chainInfo } from '@/utils/chains';
 import { ChainInfo } from '@/types/ChainInfo';
 import { AccountVariant } from '@/types/Accounts';
+import { soliditySha3 } from 'web3-utils';
+import { default as defaultPoolDiamondAbi } from '@thxnetwork/artifacts/dist/exports/abis/defaultPoolDiamond.json';
 
 export type TNetworkConfig = {
     chainId: ChainId;
@@ -38,11 +37,13 @@ const networks = {
 };
 
 const ethereum = (window as any).ethereum;
+const isMetamaskInstalled = typeof ethereum !== undefined;
 
 @Module({ namespaced: true })
 class NetworkModule extends VuexModule {
     web3: Web3 = new Web3(networks[ChainId.Polygon]);
     privateKey = '';
+    address = '';
     _chainId: ChainId | null = null;
 
     get chainId() {
@@ -71,7 +72,13 @@ class NetworkModule extends VuexModule {
             const account = this.web3.eth.accounts.privateKeyToAccount(privateKey);
             this.web3.eth.accounts.wallet.add(account);
             this.web3.eth.defaultAccount = account.address;
+            this.address = toChecksumAddress(account.address);
         }
+    }
+
+    @Mutation
+    setAddress(address: string) {
+        this.address = toChecksumAddress(address);
     }
 
     @Mutation
@@ -95,7 +102,6 @@ class NetworkModule extends VuexModule {
         const user = this.context.rootGetters['account/user'];
         const isValidPrivateKey = this.privateKey && isPrivateKey(this.privateKey);
         const isMetamaskAccount = user.profile.variant === AccountVariant.Metamask;
-        const isMetamaskInstalled = typeof ethereum !== undefined;
         const web3 =
             isMetamaskAccount && isMetamaskInstalled
                 ? // Bind window.ethereum as provider
@@ -123,10 +129,12 @@ class NetworkModule extends VuexModule {
 
         try {
             const [account] = await ethereum.request({ method: 'eth_requestAccounts' });
-            const address = toChecksumAddress(account);
+            this.context.commit('setAddress', account);
 
-            if (address !== profile.address) {
-                throw new Error(`Selected Metamask account ${address} does not equal the account used during signup.`);
+            if (this.address !== profile.address) {
+                throw new Error(
+                    `Selected Metamask account ${this.address} does not equal the account used during signup.`,
+                );
             } else {
                 await ethereum.request({
                     method: 'wallet_switchEthereumChain',
@@ -143,6 +151,80 @@ class NetworkModule extends VuexModule {
     }
 
     @Action({ rawError: true })
+    async sign({ poolAddress, name, params }: { poolAddress: string; name: string; params: any[] }) {
+        if (!this.web3) return;
+        const solution = new this.web3.eth.Contract(defaultPoolDiamondAbi as any, poolAddress, {
+            from: this.address,
+        });
+        const abi: any = defaultPoolDiamondAbi.find(fn => fn.name === name);
+        const nonce = Number(await solution.methods.getLatestNonce(this.address).call()) + 1;
+        const call = this.web3.eth.abi.encodeFunctionCall(abi, params);
+        const hash = soliditySha3(call, nonce) || '';
+
+        if (this.privateKey) {
+            const sig = this.web3.eth.accounts.sign(hash, this.privateKey).signature;
+            return { call, nonce, sig };
+        } else {
+            const provider = this.web3?.currentProvider as any;
+            const sig = await provider.request({
+                method: 'eth_sign',
+                params: [this.address, hash],
+            });
+            return { call, nonce, sig };
+        }
+    }
+
+    @Action({ rawError: true })
+    async send({ to, fn }: { to: string; fn: any }) {
+        if (!this.web3) return;
+
+        const user = this.context.rootGetters['account/user'];
+        const gasPrice = await this.web3.eth.getGasPrice();
+        const [from] = await this.web3.eth.getAccounts();
+        const data = fn.encodeABI();
+        const estimate = await fn.estimateGas();
+        const gas = String(estimate < MINIMUM_GAS_LIMIT ? MINIMUM_GAS_LIMIT : estimate);
+        const isMetamaskAccount = user.profile.variant === AccountVariant.Metamask;
+
+        if (this.privateKey) {
+            const sig = await this.web3.eth.accounts.signTransaction(
+                {
+                    gas,
+                    gasPrice,
+                    to,
+                    from,
+                    data,
+                },
+                this.privateKey,
+            );
+
+            if (sig.rawTransaction) {
+                return await this.web3.eth.sendSignedTransaction(sig.rawTransaction);
+            }
+        } else if (isMetamaskAccount && isMetamaskInstalled) {
+            try {
+                return await ethereum.request({
+                    method: 'eth_sendTransaction',
+                    params: [
+                        {
+                            gas,
+                            gasPrice,
+                            to,
+                            from,
+                            data,
+                        },
+                    ],
+                });
+            } catch (error) {
+                // TODO Check for error.code and return appropriately
+                console.error(error);
+            }
+        } else {
+            throw new Error('Please sign in again or install Metamask to use this account.');
+        }
+    }
+
+    @Action({ rawError: true })
     async sendValue({ web3, to, amount }: { web3: Web3; to: string; amount: string }) {
         const value = toWei(amount);
         const gas = await web3.eth.estimateGas({ to, value });
@@ -151,35 +233,6 @@ class NetworkModule extends VuexModule {
         return { tx };
     }
 
-    @Action({ rawError: true })
-    async approve(payment: TPayment) {
-        const profile = this.context.rootGetters['account/profile'];
-        const privateKey = this.context.rootGetters['account/privateKey'];
-        const balance = Number(fromWei(await this.web3.eth.getBalance(profile.address)));
-
-        if (balance === 0) {
-            await axios({
-                method: 'POST',
-                url: `/deposits/approve`,
-                headers: {
-                    'X-PoolId': payment.poolId,
-                },
-                data: {
-                    amount: payment.amount,
-                },
-            });
-        }
-
-        const tokenContract = new this.web3.eth.Contract(ERC20Abi as any, payment.tokenAddress);
-        const receipt = await send(
-            this.web3,
-            payment.tokenAddress,
-            tokenContract.methods.approve(payment.receiver, payment.amount),
-            privateKey,
-        );
-
-        return receipt;
-    }
     @Action({ rawError: true })
     async getBalance() {
         const profile = this.context.rootGetters['account/profile'];

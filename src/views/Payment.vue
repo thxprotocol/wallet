@@ -136,7 +136,6 @@
 <script lang="ts">
 import { UserProfile } from '@/store/modules/account';
 import { PaymentState, TPayment } from '@/types/Payments';
-import { signCall } from '@/utils/network';
 import { ChainId } from '@/types/enums/ChainId';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
@@ -273,15 +272,13 @@ export default class Payment extends Vue {
     }
 
     async payDefault() {
-        const { call, nonce, sig } = await signCall(
-            this.web3,
-            this.payment.receiver,
-            'topup',
-            [this.payment.amount],
-            this.privateKey,
-        );
+        const { call, nonce, sig } = await this.$store.dispatch('network/sign', {
+            poolAddress: this.payment.receiver,
+            name: 'topup',
+            params: [this.payment.amount],
+        });
 
-        await this.$store.dispatch('network/approve', this.payment);
+        await this.$store.dispatch('network/approve', this.payment); // TODO This got removed, make new implementation
 
         return { call, nonce, sig };
     }

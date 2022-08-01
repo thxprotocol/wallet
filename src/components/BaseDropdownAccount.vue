@@ -8,7 +8,7 @@
                 class="p-1 mr-md-2"
             />
             <span class="d-none d-md-block text-muted text-overflow-75">
-                {{ profile.address }}
+                {{ address }}
             </span>
         </template>
         <b-dropdown-item size="sm" variant="dark" v-clipboard:copy="profile.address">
@@ -31,18 +31,22 @@
 import { UserProfile } from '@/store/modules/account';
 import { DASHBOARD_URL } from '@/utils/secrets';
 import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import BaseIdenticon from './BaseIdenticon.vue';
 
 @Component({
     components: {
         BaseIdenticon,
     },
-    computed: mapGetters({
-        profile: 'account/profile',
-    }),
+    computed: {
+        ...mapState('network', ['address']),
+        ...mapGetters({
+            profile: 'account/profile',
+        }),
+    },
 })
 export default class BaseDropdownAccount extends Vue {
+    address!: string;
     profile!: UserProfile;
     dashboardUrl = DASHBOARD_URL;
 }
