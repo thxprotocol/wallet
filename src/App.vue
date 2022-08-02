@@ -5,7 +5,7 @@
                 <base-main-menu
                     v-if="profile"
                     class="d-none d-md-inline position-absolute text-center py-md-3"
-                    style="width: 300px; left: 50%; margin-left: -150px"
+                    style="width: 355px; left: 50%; margin-left: -150px"
                 />
                 <div class="mr-auto">
                     <b-button to="/" variant="link">

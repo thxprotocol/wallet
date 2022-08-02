@@ -120,10 +120,9 @@ export default class BaseModalRedeemPromotion extends Vue {
 
         if (this.allowance < Number(this.promotion.price)) {
             await this.$store.dispatch('erc20/approve', {
-                token: this.erc20,
-                chainId: this.membership.chainId,
+                contract: this.erc20.contract,
                 to: this.membership.poolAddress,
-                poolAddress: this.membership.poolAddress,
+                poolId: this.membership.poolId,
                 amount: MAX_UINT256,
             });
         }

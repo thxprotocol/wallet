@@ -69,14 +69,14 @@ const routes: Array<RouteConfig> = [
         component: () => import(/* webpackChunkName: "user-agent-warning" */ '../views/UserAgentWarning.vue'),
     },
     {
-        path: '/crypto',
-        name: 'Crypto',
+        path: '/tokens',
+        name: 'Tokens',
         component: () => import(/* webpackChunkName: "crypto" */ '../views/Crypto.vue'),
         beforeEnter: assertAuthorization,
     },
     {
-        path: '/nft',
-        name: 'NFT',
+        path: '/collectibles',
+        name: 'Collectibles',
         component: () => import(/* webpackChunkName: "nft" */ '../views/NFT.vue'),
         beforeEnter: assertAuthorization,
     },

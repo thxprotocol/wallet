@@ -55,11 +55,8 @@ class NetworkModule extends VuexModule {
     _chainId: ChainId = ChainId.Polygon;
 
     get chainId() {
-        const sub = this.context.rootGetters['account/user'].profile.sub;
-        const chainId = Number(localStorage.getItem(`thx:wallet:chain-id:${sub}`));
-        if (Object.values(ChainId).includes(chainId)) {
-            return chainId;
-        }
+        const chainId = Number(localStorage.getItem(`thx:wallet:chain-id`));
+        if (Object.values(ChainId).includes(chainId)) return chainId;
         return this._chainId;
     }
 
@@ -92,9 +89,9 @@ class NetworkModule extends VuexModule {
     }
 
     @Mutation
-    setChainId({ sub, chainId }: { sub: string; chainId: ChainId }) {
+    setChainId(chainId: ChainId) {
         this._chainId = chainId;
-        localStorage.setItem(`thx:wallet:chain-id:${sub}`, String(chainId));
+        localStorage.setItem(`thx:wallet:chain-id`, String(chainId));
     }
 
     @Mutation
@@ -130,50 +127,64 @@ class NetworkModule extends VuexModule {
     async connect(chainId: ChainId) {
         const user = this.context.rootGetters['account/user'];
         const isValidPrivateKey = this.privateKey && isPrivateKey(this.privateKey);
-        const isMetamaskAccount = user.profile.variant === AccountVariant.Metamask;
+        const isMetamaskAccount = user ? user.profile.variant === AccountVariant.Metamask : false;
         const web3 =
-            isMetamaskAccount && isMetamaskInstalled
-                ? // Bind window.ethereum as provider
-                  new Web3(ethereum)
-                : // Use a local web3 instance as per requested chainId
-                  new Web3(networks[chainId]);
+            user && !isMetamaskAccount
+                ? // Use a local web3 instance as per requested chainId
+                  new Web3(networks[chainId])
+                : // Bind window.ethereum as provider
+                  new Web3(ethereum);
 
-        this.context.commit('setChainId', { sub: user.profile.sub, chainId });
+        this.context.commit('setChainId', chainId);
         this.context.commit('setWeb3', { web3, privateKey: this.privateKey });
 
         // If private key is not available for a non Metamask account then request new access
         // credentials and fetch key
-        if (!isMetamaskAccount && !isValidPrivateKey) {
+        if (user && !isMetamaskAccount && !isValidPrivateKey) {
             await this.context.dispatch('account/signinRedirect', {}, { root: true });
         }
+        // If metamask is available request to switch chain if required
+        if (isMetamaskInstalled) {
+            await this.context.dispatch('requestAccounts', user);
+            if (user) {
+                await this.context.dispatch('requestSwitchChain', chainId);
+            }
+        }
+    }
 
-        // If metamask is available for metamask account request to switch chain if required
-        if (isMetamaskAccount && isMetamaskInstalled) {
-            await this.context.dispatch('requestSwitchChain', chainId);
+    @Action({ rawError: true })
+    async requestAccounts(user?: User) {
+        try {
+            const provider = this.web3?.currentProvider as any;
+            const [account] = await provider.request({ method: 'eth_requestAccounts' });
+            this.context.commit('setAddress', account);
+
+            if (user && this.address !== user.profile.address) {
+                throw new Error(
+                    `Selected Metamask account ${this.address} does not equal the account used during signup.`,
+                );
+            }
+        } catch (error) {
+            if ((error as { code: number }).code === 4001) {
+                throw new Error(`Please connect Metamask account`);
+            } else {
+                throw error;
+            }
         }
     }
 
     @Action({ rawError: true })
     async requestSwitchChain(chainId: ChainId) {
-        const profile = this.context.rootGetters['account/user'].profile;
+        const provider = this.web3?.currentProvider as any;
 
         try {
-            const [account] = await ethereum.request({ method: 'eth_requestAccounts' });
-            this.context.commit('setAddress', account);
-
-            if (this.address !== profile.address) {
-                throw new Error(
-                    `Selected Metamask account ${this.address} does not equal the account used during signup.`,
-                );
-            } else {
-                await ethereum.request({
-                    method: 'wallet_switchEthereumChain',
-                    params: [{ chainId: toHex(chainId) }],
-                });
-            }
+            await provider.request({
+                method: 'wallet_switchEthereumChain',
+                params: [{ chainId: toHex(chainId) }],
+            });
         } catch (error) {
             if ((error as { code: number }).code === 4001) {
-                throw new Error(`Please connect Metamask account ${profile.address}`);
+                throw new Error(`Please select ${chainInfo[chainId].name} RPC`);
             } else {
                 throw error;
             }
@@ -183,10 +194,12 @@ class NetworkModule extends VuexModule {
     @Action({ rawError: true })
     async sign({ poolAddress, name, params }: { poolAddress: string; name: string; params: any[] }) {
         if (!this.web3) return;
+
         const solution = new this.web3.eth.Contract(defaultPoolDiamondAbi as any, poolAddress, {
             from: this.address,
         });
         const abi: any = defaultPoolDiamondAbi.find(fn => fn.name === name);
+        console.log(abi);
         const nonce = Number(await solution.methods.getLatestNonce(this.address).call()) + 1;
         const call = this.web3.eth.abi.encodeFunctionCall(abi, params);
         const hash = soliditySha3(call, nonce) || '';
@@ -208,13 +221,11 @@ class NetworkModule extends VuexModule {
     async send({ to, fn }: { to: string; fn: any }) {
         if (!this.web3) return;
 
-        const user = this.context.rootGetters['account/user'];
         const gasPrice = await this.web3.eth.getGasPrice();
         const [from] = await this.web3.eth.getAccounts();
         const data = fn.encodeABI();
         const estimate = await fn.estimateGas();
         const gas = String(estimate < MINIMUM_GAS_LIMIT ? MINIMUM_GAS_LIMIT : estimate);
-        const isMetamaskAccount = user.profile.variant === AccountVariant.Metamask;
 
         if (this.privateKey) {
             const sig = await this.web3.eth.accounts.signTransaction(
@@ -231,9 +242,11 @@ class NetworkModule extends VuexModule {
             if (sig.rawTransaction) {
                 return await this.web3.eth.sendSignedTransaction(sig.rawTransaction);
             }
-        } else if (isMetamaskAccount && isMetamaskInstalled) {
+        } else {
             try {
-                return await ethereum.request({
+                const provider = this.web3?.currentProvider as any;
+
+                return await provider.request({
                     method: 'eth_sendTransaction',
                     params: [
                         {
@@ -249,8 +262,6 @@ class NetworkModule extends VuexModule {
                 // TODO Check for error.code and return appropriately
                 console.error(error);
             }
-        } else {
-            throw new Error('Please sign in again or install Metamask to use this account.');
         }
     }
 

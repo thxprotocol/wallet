@@ -127,8 +127,7 @@ export default class BaseModalERC20Swap extends Vue {
         const amountInInWei = toWei(String(this.amount));
         if (this.allowance < Number(amountInInWei)) {
             await this.$store.dispatch('erc20/approve', {
-                token: this.tokenIn,
-                chainId: this.membership.chainId,
+                contract: this.tokenIn.contract,
                 to: this.membership.poolAddress,
                 poolId: this.membership.poolId,
                 amount: MAX_UINT256,

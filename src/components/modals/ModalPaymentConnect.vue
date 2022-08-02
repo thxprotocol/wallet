@@ -29,17 +29,17 @@
     </b-modal>
 </template>
 <script lang="ts">
-import { UserProfile } from '@/store/modules/account';
+import { ChainId } from '@/types/enums/ChainId';
 import { TPayment } from '@/types/Payments';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 
-@Component({})
+@Component({
+    computed: {},
+})
 export default class Payment extends Vue {
-    @Prop() account!: string;
-    @Prop() profile!: UserProfile;
-    @Prop() chainId!: number;
-    @Prop() isConnected!: boolean;
+    @Prop() chainId!: ChainId;
     @Prop() payment!: TPayment;
+    @Prop() isConnected!: boolean;
 
     async signin() {
         const toPath = window.location.href.substring(window.location.origin.length);
@@ -47,15 +47,13 @@ export default class Payment extends Vue {
     }
 
     async connect() {
-        this.$store.dispatch('metamask/checkPreviouslyConnected');
-        if (!this.isConnected) {
-            await this.$store.dispatch('metamask/connect');
-        }
+        await this.$store.dispatch('network/connect', this.payment.chainId);
 
         if (this.chainId !== this.payment.chainId) {
-            await this.$store.dispatch('metamask/requestSwitchNetwork', this.payment.chainId);
+            await this.$store.dispatch('network/requestSwitchNetwork', this.payment.chainId);
         }
 
+        this.$emit('connected');
         this.$bvModal.hide('modalPaymentConnect');
     }
 }

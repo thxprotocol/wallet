@@ -116,10 +116,20 @@ class ERC20Module extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async approve({ erc20, to, poolId, amount }: { erc20: TERC20; to: string; poolId: string; amount: string }) {
+    async approve({
+        contract,
+        to,
+        poolId,
+        amount,
+    }: {
+        contract: Contract;
+        to: string;
+        poolId: string;
+        amount: string;
+    }) {
         const web3 = this.context.rootState.network.web3;
-        const profile = this.context.rootGetters['account/profile'];
-        const balance = Number(fromWei(await web3.eth.getBalance(profile.address)));
+        const address = this.context.rootState.network.address;
+        const balance = Number(fromWei(await web3.eth.getBalance(address)));
 
         if (poolId === to && balance === 0) {
             await axios({
@@ -137,8 +147,8 @@ class ERC20Module extends VuexModule {
         await this.context.dispatch(
             'network/send',
             {
-                to: erc20.address,
-                fn: erc20.contract.methods.approve(to, amount),
+                to: contract.options.address,
+                fn: contract.methods.approve(to, amount),
             },
             { root: true },
         );

@@ -112,7 +112,7 @@ export default class BaseModalDepositPool extends Vue {
 
         if (this.allowance < Number(this.amount)) {
             await this.$store.dispatch('erc20/approve', {
-                erc20: this.erc20,
+                contract: this.erc20.contract,
                 to: this.membership.poolAddress,
                 amount: toWei(this.amount, 'ether') || MAX_UINT256,
                 poolId: this.membership.poolId,

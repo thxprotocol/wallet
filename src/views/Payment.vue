@@ -2,6 +2,7 @@
     <div>
         <div class="d-flex flex-column h-100">
             <template v-if="payment">
+                {{ user }}
                 <template v-if="payment.state === PaymentState.Requested">
                     <div class="flex-grow-1">
                         <div>
@@ -18,7 +19,7 @@
                             <p class="text-left">
                                 <small class="text-muted">Receiver:</small><br />
                                 <b-badge
-                                    :href="`${blockExplorer(payment.chainId)}/address/${payment.receiver}`"
+                                    :href="`${chainInfo[payment.chainId].blockExplorer}/address/${payment.receiver}`"
                                     target="_blank"
                                     variant="primary"
                                     class="rounded-pill"
@@ -37,33 +38,19 @@
                                     @click="$bvModal.show('modalPaymentConnect')"
                                     variant="primary"
                                     class="rounded-pill cursor-pointer"
-                                    v-if="!account && !profile"
+                                    v-if="!address && !user"
                                 >
                                     <i class="fas fa-exclamation-circle mx-1"></i>
                                     Connect account
                                 </b-badge>
                                 <b-badge
-                                    :href="`${blockExplorer(payment.chainId)}/address/${account}`"
+                                    :href="`${chainInfo[payment.chainId].blockExplorer}/address/${address}`"
                                     target="_blank"
                                     variant="primary"
                                     class="rounded-pill"
-                                    v-if="account"
+                                    v-if="address"
                                 >
-                                    {{ account }}
-                                    <i
-                                        v-b-tooltip
-                                        title="View details of this account on the block explorer"
-                                        class="fas fa-external-link-alt mx-1"
-                                    ></i>
-                                </b-badge>
-                                <b-badge
-                                    :href="`${blockExplorer(payment.chainId)}/address/${profile.address}`"
-                                    target="_blank"
-                                    variant="primary"
-                                    class="rounded-pill"
-                                    v-if="profile"
-                                >
-                                    {{ profile.address }}
+                                    {{ address }}
                                     <i
                                         v-b-tooltip
                                         title="View details of this account on the block explorer"
@@ -78,7 +65,7 @@
                         </div>
                     </div>
                     <b-button
-                        :disabled="!profile && !account"
+                        :disabled="!user && !address"
                         @click="pay()"
                         variant="primary"
                         block
@@ -92,49 +79,17 @@
                         service.
                     </p>
                 </template>
-                <div v-if="payment.state === PaymentState.Pending" class="flex-grow-1 center-center">
-                    <div class="text-center">
-                        <b-spinner variant="gray" class="mb-2" />
-                        <p class="text-gray">Payment is being processed</p>
-                    </div>
-                </div>
-                <div v-if="payment.state === PaymentState.Completed" class="flex-grow-1 center-center">
-                    <div class="text-center">
-                        <i class="fas fa-thumbs-up text-success mb-3" style="font-size: 3rem;"></i>
-                        <p class="text-gray"><strong>THX!</strong> This payment has been completed.</p>
-                        <b-button class="rounded-pill" variant="primary" :href="payment.successUrl">
-                            Continue to merchant
-                            <i class="fas fa-chevron-right ml-2"></i>
-                        </b-button>
-                    </div>
-                </div>
-                <div v-if="payment.state === PaymentState.Failed" class="flex-grow-1 center-center">
-                    <div class="text-center">
-                        <i class="fas fa-exclamation-circle text-danger mb-3" style="font-size: 3rem;"></i>
-                        <p class="text-gray">Your payment has not been processed.</p>
-                        <b-button class="rounded-pill" variant="primary" :href="payment.failUrl">
-                            <i class="fas fa-chevron-left mr-2"></i>
-                            Back to merchant
-                        </b-button>
-                    </div>
-                </div>
+                <base-payment-state :payment="payment" />
             </template>
             <div class="flex-grow-1 d-flex align-items-center justify-content-center" v-else>
                 <b-spinner variant="primary" />
             </div>
         </div>
-        <base-modal-payment-connect
-            :account="account"
-            :is-connected="isConnected"
-            :profile="profile"
-            :chainId="chainId"
-            :payment="payment"
-        />
+        <base-modal-payment-connect :chain-id="chainId" :payment="payment" @connected="onConnected" />
     </div>
 </template>
 
 <script lang="ts">
-import { UserProfile } from '@/store/modules/account';
 import { PaymentState, TPayment } from '@/types/Payments';
 import { ChainId } from '@/types/enums/ChainId';
 import { Component, Vue } from 'vue-property-decorator';
@@ -145,31 +100,33 @@ import promisePoller from 'promise-poller';
 import { default as ERC20Abi } from '@thxnetwork/artifacts/dist/exports/abis/ERC20.json';
 import { chainInfo } from '@/utils/chains';
 import Web3 from 'web3';
+import BasePaymentState from '@/components/BasePaymentState.vue';
+import { User } from 'oidc-client-ts';
 
 @Component({
     components: {
+        BasePaymentState,
         BaseModalPaymentConnect,
     },
     computed: {
-        ...mapState('metamask', ['account', 'chainId']),
         ...mapState('payments', ['payment']),
+        ...mapState('network', ['web3', 'address']),
         ...mapGetters({
-            web3: 'network/web3',
-            profile: 'account/profile',
-            privateKey: 'account/privateKey',
-            isConnected: 'metamask/isConnected',
+            chainId: 'network/chainId',
+            user: 'account/user',
         }),
     },
 })
 export default class Payment extends Vue {
     PaymentState = PaymentState;
-    account!: string;
-    privateKey!: string;
+    chainInfo = chainInfo;
+
+    user!: User;
+    address!: string;
     chainId!: ChainId;
     web3!: Web3;
     payment!: TPayment;
-    profile!: UserProfile;
-    isConnected!: boolean;
+
     error = '';
     loading = false;
     fromWei = fromWei;
@@ -179,7 +136,9 @@ export default class Payment extends Vue {
         return fromWei(this.balanceInWei);
     }
 
-    blockExplorer = (chainId: number) => chainInfo[chainId].blockExplorer;
+    get contract() {
+        return new this.web3.eth.Contract(ERC20Abi as any, this.payment.tokenAddress);
+    }
 
     created() {
         this.$store
@@ -187,42 +146,26 @@ export default class Payment extends Vue {
                 paymentId: this.$route.params.id,
                 accessToken: this.$route.query.accessToken,
             })
-            .then(() => {
+            .then(async () => {
                 if (this.payment.state === PaymentState.Pending) return this.waitForPaymentCompleted();
                 if (this.payment.state !== PaymentState.Requested) return;
 
-                if (!this.account && !this.profile) {
+                if (!this.user && !this.address) {
                     return this.$bvModal.show('modalPaymentConnect');
                 }
 
+                await this.$store.dispatch('network/connect', this.payment.chainId);
                 this.getBalance();
             });
     }
 
-    async signin() {
-        const toPath = window.location.href.substring(window.location.origin.length);
-        this.$store.dispatch('account/signinRedirect', { toPath });
-    }
-
-    async connect() {
-        this.$store.dispatch('metamask/checkPreviouslyConnected');
-
-        if (!this.isConnected) {
-            await this.$store.dispatch('metamask/connect');
-        }
-
-        if (this.chainId !== this.payment.chainId) {
-            await this.$store.dispatch('metamask/requestSwitchNetwork', this.payment.chainId);
-        }
-
+    onConnected() {
         this.getBalance();
-        this.$bvModal.hide('modalPaymentConnect');
     }
 
     async getBalance() {
-        const contract = new this.web3.eth.Contract(ERC20Abi as any, this.payment.tokenAddress);
-        const wei = await contract.methods.balanceOf(this.profile ? this.profile.address : this.account).call();
-        this.balanceInWei = wei;
+        const address = this.user ? this.user.profile.address : this.address;
+        this.balanceInWei = await this.contract.methods.balanceOf(address).call();
     }
 
     waitForPaymentCompleted() {
@@ -251,52 +194,36 @@ export default class Payment extends Vue {
             retries: 50,
         });
     }
+
     async pay() {
         try {
             this.loading = true;
-            let data;
-            if (this.account) data = await this.payWithMetamask();
-            if (this.profile) data = await this.payDefault();
+
+            await this.$store.dispatch('erc20/approve', {
+                contract: this.contract,
+                to: this.payment.receiver,
+                amount: this.payment.amount,
+            });
+
+            const data = await this.$store.dispatch('network/sign', {
+                poolAddress: this.payment.receiver,
+                name: 'topup',
+                params: [this.payment.amount],
+            });
 
             await this.$store.dispatch('payments/pay', data);
 
             this.waitForPaymentCompleted();
         } catch (error) {
             this.error = String(error);
+
             await this.$store.dispatch('payments/read', {
                 paymentId: this.payment._id,
                 accessToken: this.payment.token,
             });
+
             this.loading = false;
         }
-    }
-
-    async payDefault() {
-        const { call, nonce, sig } = await this.$store.dispatch('network/sign', {
-            poolAddress: this.payment.receiver,
-            name: 'topup',
-            params: [this.payment.amount],
-        });
-
-        await this.$store.dispatch('network/approve', this.payment); // TODO This got removed, make new implementation
-
-        return { call, nonce, sig };
-    }
-
-    async payWithMetamask() {
-        const { call, nonce, sig } = await this.$store.dispatch('metamask/sign', {
-            poolAddress: this.payment.receiver,
-            method: 'topup',
-            params: [this.payment.amount],
-        });
-
-        await this.$store.dispatch('metamask/approve', {
-            amount: this.payment.amount,
-            spender: this.payment.receiver,
-            tokenAddress: this.payment.tokenAddress,
-        });
-
-        return { call, nonce, sig };
     }
 }
 </script>

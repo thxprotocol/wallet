@@ -65,7 +65,7 @@ export default class BaseModalTranferTokens extends Vue {
 
         if (Number(allowance) < Number(this.amount)) {
             await this.$store.dispatch('erc20/approve', {
-                erc20: this.erc20,
+                contract: this.erc20.contract,
                 to: this.to,
                 amount: toWei(this.amount, 'ether'),
             });
