@@ -119,13 +119,13 @@ class ERC20Module extends VuexModule {
     async approve({
         contract,
         to,
-        poolId,
         amount,
+        poolId,
     }: {
         contract: Contract;
         to: string;
-        poolId: string;
         amount: string;
+        poolId: string;
     }) {
         const web3 = this.context.rootState.network.web3;
         const address = this.context.rootState.network.address;
@@ -147,7 +147,7 @@ class ERC20Module extends VuexModule {
         await this.context.dispatch(
             'network/send',
             {
-                to: contract.options.address,
+                to,
                 fn: contract.methods.approve(to, amount),
             },
             { root: true },

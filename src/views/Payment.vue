@@ -137,7 +137,7 @@ export default class Payment extends Vue {
     }
 
     get contract() {
-        return new this.web3.eth.Contract(ERC20Abi as any, this.payment.tokenAddress);
+        return new this.web3.eth.Contract(ERC20Abi as any, this.payment.tokenAddress, { from: this.address as string });
     }
 
     created() {
