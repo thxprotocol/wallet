@@ -129,25 +129,38 @@ class ERC20Module extends VuexModule {
     }) {
         const web3 = this.context.rootState.network.web3;
         const address = this.context.rootState.network.address;
-        const balance = Number(fromWei(await web3.eth.getBalance(address)));
+        const allowance = Number(
+            await this.context.dispatch('allowance', {
+                erc20: { contract },
+                owner: address,
+                spender: to,
+            }),
+        );
 
-        if (poolId === to && balance === 0) {
-            await axios({
-                method: 'POST',
-                url: `/deposits/approve`,
-                headers: {
-                    'X-PoolId': poolId,
-                },
-                data: {
-                    amount,
-                },
-            });
+        // Early return if allowance is sufficient
+        if (allowance >= Number(amount)) return;
+
+        if (poolId) {
+            const balance = Number(fromWei(await web3.eth.getBalance(address)));
+            if (balance === 0) {
+                await axios({
+                    method: 'POST',
+                    url: `/deposits/approve`,
+                    headers: {
+                        'X-PoolId': poolId,
+                    },
+                    data: {
+                        amount,
+                    },
+                });
+            }
         }
 
+        // TODO should listen and wait for MATIC transfer and balance increase
         await this.context.dispatch(
             'network/send',
             {
-                to,
+                to: contract.options.address,
                 fn: contract.methods.approve(to, amount),
             },
             { root: true },

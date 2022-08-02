@@ -140,15 +140,17 @@ class NetworkModule extends VuexModule {
 
         // If private key is not available for a non Metamask account then request new access
         // credentials and fetch key
-        if (user && !isMetamaskAccount && !isValidPrivateKey) {
-            await this.context.dispatch('account/signinRedirect', {}, { root: true });
+        if (user && !isMetamaskAccount) {
+            if (!isValidPrivateKey) {
+                await this.context.dispatch('account/signinRedirect', {}, { root: true });
+            }
+            return;
         }
+
         // If metamask is available request to switch chain if required
         if (isMetamaskInstalled) {
             await this.context.dispatch('requestAccounts', user);
-            if (user) {
-                await this.context.dispatch('requestSwitchChain', chainId);
-            }
+            await this.context.dispatch('requestSwitchChain', chainId);
         }
     }
 
@@ -193,14 +195,12 @@ class NetworkModule extends VuexModule {
 
     @Action({ rawError: true })
     async sign({ poolAddress, name, params }: { poolAddress: string; name: string; params: any[] }) {
-        if (!this.web3) return;
-
         const solution = new this.web3.eth.Contract(defaultPoolDiamondAbi as any, poolAddress, {
             from: this.address,
         });
         const abi: any = defaultPoolDiamondAbi.find(fn => fn.name === name);
-        console.log(abi);
         const nonce = Number(await solution.methods.getLatestNonce(this.address).call()) + 1;
+        console.log(this.address, nonce);
         const call = this.web3.eth.abi.encodeFunctionCall(abi, params);
         const hash = soliditySha3(call, nonce) || '';
 
@@ -219,10 +219,8 @@ class NetworkModule extends VuexModule {
 
     @Action({ rawError: true })
     async send({ to, fn }: { to: string; fn: any }) {
-        if (!this.web3) return;
-
         const gasPrice = await this.web3.eth.getGasPrice();
-        const [from] = await this.web3.eth.getAccounts();
+        const from = this.address;
         const data = fn.encodeABI();
         const estimate = await fn.estimateGas();
         const gas = String(estimate < MINIMUM_GAS_LIMIT ? MINIMUM_GAS_LIMIT : estimate);

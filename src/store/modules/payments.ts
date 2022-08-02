@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { TPayment } from '@/types/Payments';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
+import { AccountVariant } from '@/types/Accounts';
 
 @Module({ namespaced: true })
 class PaymentModule extends VuexModule {
@@ -27,12 +28,16 @@ class PaymentModule extends VuexModule {
     @Action({ rawError: true })
     async pay(data: { call: string; nonce: string; sig: string; amount: string }) {
         if (!this.payment) return;
-
+        const user = this.context.rootGetters['account/user'];
+        const isMetamaskAccount = user ? user.profile.variant === AccountVariant.Metamask : false;
         const r = await axios({
             method: 'POST',
             url: '/payments/' + this.payment._id + '/pay',
             headers: { 'X-PoolId': this.payment.poolId, 'X-Payment-Token': this.payment.token },
-            data,
+            data: {
+                ...data,
+                isMetamaskAccount,
+            },
         });
 
         this.context.commit('set', r.data);

@@ -2,7 +2,6 @@
     <div>
         <div class="d-flex flex-column h-100">
             <template v-if="payment">
-                {{ user }}
                 <template v-if="payment.state === PaymentState.Requested">
                     <div class="flex-grow-1">
                         <div>
@@ -199,10 +198,12 @@ export default class Payment extends Vue {
         try {
             this.loading = true;
 
+            // Check allowance
             await this.$store.dispatch('erc20/approve', {
                 contract: this.contract,
                 to: this.payment.receiver,
                 amount: this.payment.amount,
+                poolId: this.payment.poolId,
             });
 
             const data = await this.$store.dispatch('network/sign', {
