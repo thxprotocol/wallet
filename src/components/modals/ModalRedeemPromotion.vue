@@ -65,15 +65,17 @@ import { TNetworks } from '@/store/modules/network';
 import { TPromotion } from '@/store/modules/promotions';
 import { MAX_UINT256 } from '@/utils/network';
 import { Component, Prop, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
-import { toWei } from 'web3-utils';
+import { mapGetters, mapState } from 'vuex';
 
 @Component({
-    computed: mapGetters({
-        profile: 'account/profile',
-        networks: 'network/all',
-        privateKey: 'account/privateKey',
-    }),
+    computed: {
+        ...mapState('network', ['address']),
+        ...mapGetters({
+            profile: 'account/profile',
+            networks: 'network/all',
+            privateKey: 'account/privateKey',
+        }),
+    },
 })
 export default class BaseModalRedeemPromotion extends Vue {
     MAX_UINT256 = MAX_UINT256;
@@ -83,7 +85,7 @@ export default class BaseModalRedeemPromotion extends Vue {
     amount = MAX_UINT256;
     allowance = 0;
 
-    // getters
+    address!: string;
     profile!: UserProfile;
     networks!: TNetworks;
     privateKey!: string;
@@ -103,11 +105,13 @@ export default class BaseModalRedeemPromotion extends Vue {
     async onShow() {
         this.$store.dispatch('memberships/get', this.membership._id);
         this.getBalance();
+
         const allowance = await this.$store.dispatch('erc20/allowance', {
-            token: this.erc20,
-            owner: this.profile.address,
+            contract: this.erc20.contract,
+            owner: this.address,
             spender: this.membership.poolAddress,
         });
+
         this.allowance = Number(allowance);
     }
 
@@ -127,15 +131,8 @@ export default class BaseModalRedeemPromotion extends Vue {
             });
         }
 
-        const calldata = await this.$store.dispatch('network/sign', {
-            poolAddress: this.membership.poolAddress,
-            name: 'deposit',
-            params: [toWei(String(this.promotion.price), 'ether')],
-        });
-
         await this.$store.dispatch('deposits/create', {
             membership: this.membership,
-            calldata,
             amount: this.promotion.price,
             item: this.promotion.id,
         });

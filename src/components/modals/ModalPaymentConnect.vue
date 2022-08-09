@@ -11,35 +11,46 @@
         hide-header
         hide-header-close
     >
-        <b-form-group class="mb-0">
+        <b-form-group>
             <b-form-radio @change="signin()">
-                <strong class="text-primary">Connect THX Account</strong>
-                <p>Use your THX account for this payment and we'll cover your gas costs.</p>
+                <strong class="text-primary">E-mail + Password</strong>
+                <p>Use a traditional e-mail and password combination to authenticate for this payment.</p>
             </b-form-radio>
-            <b-form-radio @change="connect()" class="mb-0">
-                <strong class="text-primary"> Connect Metamask <b-badge variant="primary">Beta</b-badge> </strong>
+            <b-form-radio @change="signin()">
+                <strong class="text-primary">Social Sign-in</strong>
+                <p>Use one of our integrated SSO providers to authenticate for for this payment.</p>
+            </b-form-radio>
+            <b-form-radio @change="signin()" class="mb-0">
+                <strong class="text-primary"> Metamask <b-badge variant="primary">Beta</b-badge> </strong>
                 <p>
-                    Use your Metamask wallet to sign the payment and we will cover your gas costs.
+                    Use a Metamask account to authenticate for this payment.
                 </p>
-                <small class="text-muted">
-                    A small MATIC fee does apply when you need to approve us to do the transfer.
-                </small>
             </b-form-radio>
         </b-form-group>
+        <small class="text-muted" v-if="payment">
+            A small MATIC fee does apply when you need to approve us to do the transfer. You only have to do this once
+            for the {{ payment.tokenSymbol }} token.
+        </small>
     </b-modal>
 </template>
 <script lang="ts">
 import { ChainId } from '@/types/enums/ChainId';
 import { TPayment } from '@/types/Payments';
+import { User } from 'oidc-client-ts';
 import { Component, Prop, Vue } from 'vue-property-decorator';
+import { mapGetters } from 'vuex';
 
 @Component({
-    computed: {},
+    computed: mapGetters({
+        user: 'accounts/user',
+    }),
 })
 export default class Payment extends Vue {
     @Prop() chainId!: ChainId;
     @Prop() payment!: TPayment;
     @Prop() isConnected!: boolean;
+
+    user!: User;
 
     async signin() {
         const toPath = window.location.href.substring(window.location.origin.length);

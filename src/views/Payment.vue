@@ -136,7 +136,7 @@ export default class Payment extends Vue {
     }
 
     get contract() {
-        return new this.web3.eth.Contract(ERC20Abi as any, this.payment.tokenAddress, { from: this.address as string });
+        return new this.web3.eth.Contract(ERC20Abi as any, this.payment.tokenAddress, { from: this.address });
     }
 
     created() {
@@ -198,21 +198,14 @@ export default class Payment extends Vue {
         try {
             this.loading = true;
 
-            // Check allowance
             await this.$store.dispatch('erc20/approve', {
                 contract: this.contract,
-                to: this.payment.receiver,
+                to: chainInfo[this.payment.chainId].relayer,
                 amount: this.payment.amount,
                 poolId: this.payment.poolId,
             });
 
-            const data = await this.$store.dispatch('network/sign', {
-                poolAddress: this.payment.receiver,
-                name: 'topup',
-                params: [this.payment.amount],
-            });
-
-            await this.$store.dispatch('payments/pay', data);
+            await this.$store.dispatch('payments/pay');
 
             this.waitForPaymentCompleted();
         } catch (error) {

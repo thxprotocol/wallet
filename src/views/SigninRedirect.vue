@@ -15,13 +15,11 @@ import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
 import { User } from 'oidc-client-ts';
 import ModalDecodePrivateKey from '@/components/modals/ModalDecodePrivateKey.vue';
-import ModalShowWithdrawal from '@/components/modals/ModalShowWithdrawal.vue';
 import { ChainId } from '@/types/enums/ChainId';
 import { chainInfo } from '@/utils/chains';
 
 @Component({
     components: {
-        ModalShowWithdrawal,
         ModalDecodePrivateKey,
     },
     computed: {

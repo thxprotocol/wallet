@@ -42,18 +42,6 @@ class DepositsModule extends VuexModule {
 
     @Action({ rawError: true })
     async create({ membership, amount, item }: { membership: TMembership; amount: string; item?: string }) {
-        const privateKey = this.context.rootGetters['network/privateKey'];
-        const { call, nonce, sig } = await this.context.dispatch(
-            'network/sign',
-            {
-                poolAddress: membership.poolAddress,
-                name: 'deposit',
-                params: [toWei(amount, 'ether')],
-                privateKey,
-            },
-            { root: true },
-        );
-
         const { data } = await axios({
             method: 'POST',
             url: '/deposits',
@@ -61,9 +49,6 @@ class DepositsModule extends VuexModule {
                 'X-PoolId': membership.poolId,
             },
             data: {
-                call,
-                nonce,
-                sig,
                 amount,
                 item,
             },

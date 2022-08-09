@@ -95,6 +95,7 @@ class ERC20Module extends VuexModule {
         });
         const web3 = this.context.rootState.network.web3;
         const from = this.context.rootGetters['account/profile'].address;
+
         data.contract = new web3.eth.Contract(ERC20Abi as any, data.address, { from });
         data.blockExplorerUrl = `${chainInfo[data.chainId].blockExplorer}/address/${data.address}`;
         data.logoURI = `https://avatars.dicebear.com/api/identicon/${data.address}.svg`;
@@ -111,8 +112,8 @@ class ERC20Module extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async allowance({ erc20, owner, spender }: { erc20: TERC20; owner: string; spender: string }) {
-        return await erc20.contract.methods.allowance(owner, spender).call({ from: owner });
+    async allowance({ contract, owner, spender }: { contract: Contract; owner: string; spender: string }) {
+        return await contract.methods.allowance(owner, spender).call({ from: owner });
     }
 
     @Action({ rawError: true })
@@ -127,20 +128,18 @@ class ERC20Module extends VuexModule {
         amount: string;
         poolId: string;
     }) {
-        const web3 = this.context.rootState.network.web3;
-        const address = this.context.rootState.network.address;
-        const allowance = Number(
-            await this.context.dispatch('allowance', {
-                erc20: { contract },
-                owner: address,
-                spender: to,
-            }),
-        );
+        const { web3, address } = this.context.rootState.network;
+        const user = this.context.rootGetters['account/user'];
+        const allowance = await this.context.dispatch('allowance', {
+            contract,
+            owner: address,
+            spender: to,
+        });
 
-        // Early return if allowance is sufficient
-        if (allowance >= Number(amount)) return;
+        // Early return if allowance is already sufficient
+        if (Number(allowance) >= Number(amount)) return;
 
-        if (poolId) {
+        if (user && poolId) {
             const balance = Number(fromWei(await web3.eth.getBalance(address)));
             if (balance === 0) {
                 await axios({
@@ -153,10 +152,10 @@ class ERC20Module extends VuexModule {
                         amount,
                     },
                 });
+                // TODO Await the balance increase here
             }
         }
 
-        // TODO should listen and wait for MATIC transfer and balance increase
         await this.context.dispatch(
             'network/send',
             {

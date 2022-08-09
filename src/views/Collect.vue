@@ -17,11 +17,11 @@
             </template>
 
             <template v-if="claim">
-                <template v-if="claim.rewardId">
+                <template v-if="claim.erc20">
                     <div class="img-treasure" :style="`background-image: url(${imgUrl});`"></div>
                     <h2 class="text-secondary text-center my-3">
                         <strong>Congratulations!</strong> You've earned
-                        <strong>{{ claim.amount }} {{ claim.tokenSymbol }}</strong>
+                        <strong>{{ claim.amount }} {{ claim.erc20.symbol }}</strong>
                     </h2>
                     <p class="lead text-center">
                         Collect, swap or redeem these tokens for promotions.<br />
@@ -98,12 +98,12 @@ export default class Collect extends Vue {
 
         try {
             const state: any = this.user.state;
-            const withdrawal = await this.$store.dispatch('assetpools/claimReward', {
+            this.claim = await this.$store.dispatch('assetpools/claimReward', {
                 claimId: state.claimId,
                 rewardHash: state.rewardHash,
             });
+
             this.startConfetti();
-            this.claim = withdrawal;
 
             if (this.claim && this.claim.erc721Id) {
                 await this.$store.dispatch('network/connect', this.claim.erc721.chainId);

@@ -20,6 +20,7 @@ import { AccountVariant } from '@/types/Accounts';
 import { soliditySha3 } from 'web3-utils';
 import { default as defaultPoolDiamondAbi } from '@thxnetwork/artifacts/dist/exports/abis/defaultPoolDiamond.json';
 import { TorusKey } from '@toruslabs/customauth';
+import { createTypedMessage } from '@/utils/typedData';
 
 export type TNetworkConfig = {
     chainId: ChainId;
@@ -194,26 +195,21 @@ class NetworkModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async sign({ poolAddress, name, params }: { poolAddress: string; name: string; params: any[] }) {
-        const solution = new this.web3.eth.Contract(defaultPoolDiamondAbi as any, poolAddress, {
-            from: this.address,
-        });
-        const abi: any = defaultPoolDiamondAbi.find(fn => fn.name === name);
-        const nonce = Number(await solution.methods.getLatestNonce(this.address).call()) + 1;
-        console.log(this.address, nonce);
-        const call = this.web3.eth.abi.encodeFunctionCall(abi, params);
-        const hash = soliditySha3(call, nonce) || '';
-
+    async sign(msg: string) {
         if (this.privateKey) {
-            const sig = this.web3.eth.accounts.sign(hash, this.privateKey).signature;
-            return { call, nonce, sig };
+            const hash = '';
+            return this.web3.eth.accounts.sign(hash as any, this.privateKey).signature;
         } else {
+            const nonce = await this.web3.eth.getTransactionCount(this.address);
+            const message = createTypedMessage(msg, 'THX Web Wallet', String(nonce), this.chainId);
             const provider = this.web3?.currentProvider as any;
-            const sig = await provider.request({
-                method: 'eth_sign',
-                params: [this.address, hash],
+            const signature = await provider.request({
+                method: 'eth_signTypedData_v4',
+                params: [this.address, message],
+                from: this.address,
             });
-            return { call, nonce, sig };
+
+            return { signature, message };
         }
     }
 

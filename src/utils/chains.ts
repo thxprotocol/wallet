@@ -8,6 +8,7 @@ const chainInfo: { [chainId: number]: ChainInfo } = {
         name: 'Ethereum',
         logo: require('@/assets/thx_logo_ethereum.svg'),
         blockExplorer: 'https://mumbai.polygonscan.com',
+        relayer: '',
     },
     42161: {
         disabled: true,
@@ -15,6 +16,7 @@ const chainInfo: { [chainId: number]: ChainInfo } = {
         name: 'Arbitrum',
         logo: require('@/assets/thx_logo_arbitrum.svg'),
         blockExplorer: 'https://mumbai.polygonscan.com',
+        relayer: '0xf8a2f1e8fb38a6463a19b838d82a35340678390c',
     },
     56: {
         disabled: true,
@@ -22,6 +24,7 @@ const chainInfo: { [chainId: number]: ChainInfo } = {
         name: 'Binance Smart Chain',
         logo: require('@/assets/thx_logo_bsc.svg'),
         blockExplorer: 'https://mumbai.polygonscan.com',
+        relayer: '',
     },
     80001: {
         disabled: false,
@@ -29,6 +32,7 @@ const chainInfo: { [chainId: number]: ChainInfo } = {
         name: 'Polygon Mumbai',
         logo: require('@/assets/thx_logo_polygon.svg'),
         blockExplorer: 'https://mumbai.polygonscan.com',
+        relayer: '',
     },
     137: {
         disabled: false,
@@ -36,6 +40,7 @@ const chainInfo: { [chainId: number]: ChainInfo } = {
         name: 'Polygon',
         logo: require('@/assets/thx_logo_polygon.svg'),
         blockExplorer: 'https://polygonscan.com',
+        relayer: '0x1ece1975d2372c881d0c27c36f3c4f2df055ee40',
     },
 };
 
@@ -46,6 +51,7 @@ if (process.env.NODE_ENV !== 'production') {
         name: 'Hardhat',
         logo: require('@/assets/thx_logo_hardhat.svg'),
         blockExplorer: 'https://hardhatscan.com',
+        relayer: '0x08302CF8648A961c607e3e7Bd7B7Ec3230c2A6c5',
     };
 }
 

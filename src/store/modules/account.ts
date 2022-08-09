@@ -160,8 +160,8 @@ class AccountModule extends VuexModule {
     }
 
     @Action({ rawError: true })
-    async signoutRedirect() {
-        await this.userManager.signoutRedirect({});
+    async signoutRedirect(toPath: string) {
+        await this.userManager.signoutRedirect({ state: { toPath } });
     }
 
     @Action({ rawError: true })
