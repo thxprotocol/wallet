@@ -1,19 +1,26 @@
 <template>
     <div class="d-flex align-items-center justify-content-center bg-dark p-5">
         <div class="flex-row text-white">
-            <b-spinner v-if="!claim && !isClaimInvalid && !isClaimFailed" variant="secondary" large />
+            <b-spinner v-if="!claim && !isClaimInvalid && !isClaimFailed && !error" variant="secondary" large />
             <template v-else>
-                <b-alert show variant="info" v-if="isClaimInvalid">
-                    {{ error }}
-                </b-alert>
+                <template v-if="isClaimInvalid">
+                    <b-alert show variant="info">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        {{ error }}
+                    </b-alert>
+                    <b-button block variant="primary" class="rounded-pill" to="/memberships">
+                        Continue
+                    </b-button>
+                </template>
 
-                <b-alert show variant="danger" v-if="isClaimFailed">
-                    Oops, we did not manage to claim your token reward at this time, please try again later.
-                </b-alert>
-
-                <b-button block variant="primary" class="rounded-pill" @click="claimReward()" v-if="isClaimFailed">
-                    Try again
-                </b-button>
+                <template v-if="isClaimFailed">
+                    <b-alert show variant="danger">
+                        Oops, we did not manage to claim your token reward at this time, please try again later.
+                    </b-alert>
+                    <b-button block variant="primary" class="rounded-pill" @click="claimReward()">
+                        Try again
+                    </b-button>
+                </template>
             </template>
 
             <template v-if="claim">
@@ -116,11 +123,10 @@ export default class Collect extends Vue {
             }
         } catch (e) {
             const res = (e as AxiosError).response;
+            this.isClaimFailed = res?.status === 500;
+            this.isClaimInvalid = res?.status === 403;
             if (res?.status === 403) {
                 this.error = res?.data.error.message;
-            } else {
-                this.isClaimFailed = res?.status === 500;
-                this.isClaimInvalid = res?.status === 403;
             }
         }
     }
