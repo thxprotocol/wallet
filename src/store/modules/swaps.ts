@@ -17,16 +17,6 @@ class ERC20SwapsModule extends VuexModule {
         amountInInWei: string;
         tokenInAddress: string;
     }) {
-        const { call, nonce, sig } = await this.context.dispatch(
-            'network/sign',
-            {
-                poolAddress: membership.poolAddress,
-                name: 'swap',
-                params: [amountInInWei, tokenInAddress],
-            },
-            { root: true },
-        );
-
         await axios({
             method: 'POST',
             url: '/swaps',
@@ -34,16 +24,11 @@ class ERC20SwapsModule extends VuexModule {
                 'X-PoolId': membership.poolId,
             },
             data: {
-                call,
-                nonce,
-                sig,
                 swapRuleId: swapRule._id,
                 amountIn: amountInInWei,
                 tokenInAddress,
             },
         });
-
-        return true;
     }
 }
 

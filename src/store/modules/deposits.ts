@@ -2,7 +2,6 @@ import axios from 'axios';
 import { Vue } from 'vue-property-decorator';
 import { Module, VuexModule, Action, Mutation } from 'vuex-module-decorators';
 import { TMembership } from './memberships';
-import { toWei } from 'web3-utils';
 
 export type TDeposit = {
     id: string;
@@ -55,8 +54,6 @@ class DepositsModule extends VuexModule {
         });
 
         this.context.commit('set', { deposit: data, membership });
-
-        return { deposit: data };
     }
 }
 

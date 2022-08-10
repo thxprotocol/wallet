@@ -47,6 +47,7 @@ Vue.use(VueClipboard);
 Vue.use(VueConfetti);
 
 Vue.config.errorHandler = (error: Error, vm: Vue) => {
+    console.error(error);
     vm.$bvToast.toast(error.message, {
         variant: 'danger',
         title: 'Error',

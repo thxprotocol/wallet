@@ -21,7 +21,7 @@
                 A balance of <strong>{{ maticBalance }} MATIC</strong> is not enough to pay for gas.
             </b-alert>
             <form @submit.prevent="swap()" id="formAmount">
-                <b-form-input autofocus size="lg" v-model="amount" type="number" :v-on="updateSwapProvisioning()" />
+                <b-form-input autofocus size="lg" v-model="amount" type="number" @input="onTokenInAmountChange()" />
             </form>
             <p class="small text-muted mt-2 mb-0">
                 Your balance: <strong>{{ tokenIn.balance }} {{ tokenIn.symbol }}</strong> (
@@ -48,23 +48,22 @@
 </template>
 
 <script lang="ts">
-import { UserProfile } from '@/store/modules/account';
 import { IERC20s } from '@/store/modules/erc20';
 import { TMembership } from '@/store/modules/memberships';
 import { TNetworks } from '@/store/modules/network';
 import { ChainId } from '@/types/enums/ChainId';
 import { TSwapRule } from '@/types/SwapRules';
-import { MAX_UINT256 } from '@/utils/network';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
-import { fromWei, toWei } from 'web3-utils';
+import Web3 from 'web3';
+import { toWei } from 'web3-utils';
 
 @Component({
     computed: {
-        ...mapState('erc20', ['erc20s']),
+        ...mapState('erc20', ['contracts']),
+        ...mapState('network', ['address', 'web3']),
         ...mapGetters({
             profile: 'account/profile',
-            networks: 'network/all',
             privateKey: 'account/privateKey',
         }),
     },
@@ -75,23 +74,24 @@ export default class BaseModalERC20Swap extends Vue {
     balance = 0;
     allowance = 0;
     amount = 0;
-    maticBalance = 0;
+    maticBalance = '0';
     tokenInPrevisionedAmount = 0;
 
     // getters
-    profile!: UserProfile;
+    web3!: Web3;
+    address!: string;
     networks!: TNetworks;
-    erc20s!: IERC20s;
+    contracts!: IERC20s;
 
     @Prop() membership!: TMembership;
     @Prop() swapRule!: TSwapRule;
 
     get tokenOut() {
-        return this.erc20s[this.membership.erc20Id];
+        return this.contracts[this.membership.erc20Id];
     }
 
     get tokenIn() {
-        return this.erc20s[this.swapRule.tokenInId];
+        return this.contracts[this.swapRule.tokenInId];
     }
 
     get hasInsufficientBalance() {
@@ -99,18 +99,15 @@ export default class BaseModalERC20Swap extends Vue {
     }
 
     get hasInsufficientMATICBalance() {
-        return this.membership.chainId != ChainId.Hardhat && this.maticBalance == 0;
+        return this.membership.chainId !== ChainId.Hardhat && this.maticBalance === '0';
     }
 
     async onShow() {
-        const web3 = this.networks[this.membership.chainId];
-        this.maticBalance = Number(fromWei(await web3.eth.getBalance(this.profile.address)));
-
-        const wei = await this.tokenIn.contract.methods.balanceOf(this.profile.address).call();
-        this.tokenIn.balance = fromWei(wei);
+        this.maticBalance = await this.web3.eth.getBalance(this.address);
+        await this.$store.dispatch('erc20/balanceOf', this.tokenIn);
     }
 
-    updateSwapProvisioning() {
+    onTokenInAmountChange() {
         this.tokenInPrevisionedAmount = this.amount > 0 ? this.amount * this.swapRule.tokenMultiplier : 0;
     }
 
@@ -118,8 +115,8 @@ export default class BaseModalERC20Swap extends Vue {
         this.busy = true;
 
         const allowance = await this.$store.dispatch('erc20/allowance', {
-            token: this.tokenIn,
-            owner: this.profile.address,
+            contract: this.tokenIn.contract,
+            owner: this.address,
             spender: this.membership.poolAddress,
         });
         this.allowance = Number(allowance);
@@ -130,7 +127,7 @@ export default class BaseModalERC20Swap extends Vue {
                 contract: this.tokenIn.contract,
                 to: this.membership.poolAddress,
                 poolId: this.membership.poolId,
-                amount: MAX_UINT256,
+                amount: amountInInWei,
             });
         }
 
@@ -143,7 +140,6 @@ export default class BaseModalERC20Swap extends Vue {
 
         this.$bvModal.hide(`modalERC20Swap-${this.swapRule._id}`);
         this.busy = false;
-        this.$router.push({ path: '/wallet' });
     }
 }
 </script>

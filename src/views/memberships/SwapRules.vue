@@ -10,7 +10,7 @@
             <div class="mb-3 text-center">
                 <strong>Available Swaps</strong>
             </div>
-            <b-alert variant="info" show class="mb-3" v-if="!filteredERC20SwapRules.length">
+            <b-alert variant="info" show class="mb-3" v-if="!swapRulesByPage.length">
                 There are no Swap Rules set yet.
             </b-alert>
             <div class="mb-auto" v-else>
@@ -18,13 +18,13 @@
                     :membership="membership"
                     :swap-rule="swapRule"
                     :key="key"
-                    v-for="(swapRule, key) of filteredERC20SwapRules"
+                    v-for="(swapRule, key) of swapRulesByPage"
                 />
                 <b-pagination
                     class="mt-3"
                     v-if="total > perPage"
                     @change="onChange"
-                    v-model="currentPage"
+                    v-model="page"
                     :per-page="perPage"
                     :total-rows="total"
                     align="fill"
@@ -39,7 +39,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import { ISwapRules, TSwapRule } from '@/types/SwapRules';
 import { IMemberships } from '@/store/modules/memberships';
 import { UserProfile } from '@/store/modules/account';
@@ -49,49 +49,55 @@ import BaseListGroupItemSwapRule from '@/components/list-items/BaseListGroupItem
     components: {
         BaseListGroupItemSwapRule,
     },
-    computed: mapGetters({
-        profile: 'account/profile',
-        swaprules: 'swaprules/all',
-        memberships: 'memberships/all',
-    }),
+    computed: {
+        ...mapState('swaprules', ['totals']),
+        ...mapGetters({
+            profile: 'account/profile',
+            swaprules: 'swaprules/all',
+            memberships: 'memberships/all',
+        }),
+    },
 })
 export default class MembershipERC20SwapRulesView extends Vue {
     busy = true;
     error = '';
-    currentPage = 1;
+    page = 1;
     perPage = 10;
-    total = 0;
 
     // getters
     profile!: UserProfile;
-    swaprules!: ISwapRules;
     memberships!: IMemberships;
 
     get membership() {
         return this.memberships[this.$route.params.id];
     }
 
-    get filteredERC20SwapRules() {
+    swaprules!: ISwapRules;
+    totals!: { [poolId: string]: number };
+
+    get swapRulesByPage() {
         if (!this.swaprules[this.$route.params.id]) return [];
-        const result = Object.values(this.swaprules[this.$route.params.id]).filter(
-            (swapRule: TSwapRule) => swapRule.page === this.currentPage,
-        );
-        return result;
+        return Object.values(this.swaprules[this.$route.params.id])
+            .filter((client: TSwapRule) => client.page === this.page)
+            .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))
+            .slice(0, 5);
+    }
+
+    get total() {
+        return this.totals[this.$route.params.id];
     }
 
     async onChange(page: number) {
-        const { pagination, error } = await this.$store.dispatch('swaprules/filter', {
+        await this.$store.dispatch('swaprules/filter', {
             membership: this.membership,
             page,
             limit: this.perPage,
         });
-        this.total = pagination?.total;
-        this.error = error;
     }
 
     mounted() {
         this.$store.dispatch('memberships/get', this.$route.params.id).then(async () => {
-            this.onChange(this.currentPage);
+            this.onChange(this.page);
             this.busy = false;
             this.$store.dispatch('erc20/getContract', this.membership.erc20Id);
         });

@@ -7,6 +7,7 @@ import { ISwapRules, TSwapRule } from '@/types/SwapRules';
 @Module({ namespaced: true })
 class ERC20SwapRuleModule extends VuexModule {
     _all: ISwapRules = {};
+    totals: { [membershipId: string]: number } = {};
 
     get all() {
         return this._all;
@@ -18,6 +19,11 @@ class ERC20SwapRuleModule extends VuexModule {
             Vue.set(this._all, membership._id, {});
         }
         Vue.set(this._all[membership._id], swapRule._id, swapRule);
+    }
+
+    @Mutation
+    setTotal({ membership, total }: { membership: TMembership; total: number }) {
+        Vue.set(this.totals, membership._id, total);
     }
 
     @Mutation
@@ -37,6 +43,8 @@ class ERC20SwapRuleModule extends VuexModule {
             params,
             headers: { 'X-PoolId': membership.poolId },
         });
+
+        this.context.commit('setTotal', { membership, total: data.total });
 
         data.results.forEach((swapRule: TSwapRule) => {
             swapRule.page = page;

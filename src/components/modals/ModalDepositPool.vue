@@ -50,7 +50,6 @@
 import { UserProfile } from '@/store/modules/account';
 import { TERC20 } from '@/store/modules/erc20';
 import { TMembership } from '@/store/modules/memberships';
-import { MAX_UINT256 } from '@/utils/network';
 import { Component, Prop, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
 import Web3 from 'web3';
@@ -100,30 +99,32 @@ export default class BaseModalDepositPool extends Vue {
         this.$store.dispatch('erc20/balanceOf', this.erc20);
     }
 
+    onInput() {
+        this.amount = toWei(this.amount);
+    }
+
     async deposit() {
         this.busy = true;
-
+        const amountInInWei = toWei(this.amount);
         const allowance = await this.$store.dispatch('erc20/allowance', {
-            erc20: this.erc20,
+            contract: this.erc20.contract,
             owner: this.profile.address,
             spender: this.membership.poolAddress,
         });
         this.allowance = Number(allowance);
 
-        if (this.allowance < Number(this.amount)) {
+        if (this.allowance < Number(amountInInWei)) {
             await this.$store.dispatch('erc20/approve', {
                 contract: this.erc20.contract,
                 to: this.membership.poolAddress,
-                amount: toWei(this.amount, 'ether') || MAX_UINT256,
+                amount: amountInInWei,
                 poolId: this.membership.poolId,
             });
         }
-
         await this.$store.dispatch('deposits/create', {
             membership: this.membership,
-            amount: this.amount,
+            amount: amountInInWei,
         });
-
         this.$store.dispatch('memberships/get', this.membership._id);
         this.$bvModal.hide(`modalDepositPool-${this.membership._id}`);
         this.busy = false;

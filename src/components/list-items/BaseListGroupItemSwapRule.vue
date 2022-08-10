@@ -7,7 +7,7 @@
         <b-button variant="light" size="sm" @click.stop="$bvModal.show(`modalERC20Swap-${swapRule._id}`)">
             <i class="fas fa-sync ml-0"></i>
         </b-button>
-        <BaseModalERC20Swap :swap-rule="swapRule" :membership="membership" />
+        <BaseModalERC20Swap :swap-rule="swapRule" :erc20="erc20" :membership="membership" />
     </b-list-group-item>
 </template>
 
@@ -26,17 +26,17 @@ import { IERC20s } from '@/store/modules/erc20';
         BaseModalERC20Swap,
         BaseIdenticon,
     },
-    computed: mapState('erc20', ['erc20s']),
+    computed: mapState('erc20', ['contracts']),
 })
 export default class BaseListGroupItemSwapRule extends Vue {
     ChainId = ChainId;
-    erc20s!: IERC20s;
+    contracts!: IERC20s;
 
     @Prop() swapRule!: TSwapRule;
     @Prop() membership!: TMembership;
 
     get erc20() {
-        return this.erc20s[this.swapRule.tokenInId];
+        return this.contracts[this.swapRule.tokenInId];
     }
 
     mounted() {

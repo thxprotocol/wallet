@@ -7,7 +7,7 @@
             <p>
                 Transfer tokens from your THX Web Wallet to another wallet address.
             </p>
-            <b-alert variant="info" show v-if="balance > 0.01">
+            <b-alert variant="info" show v-if="balance <= 0.01">
                 <i class="fas fa-info-circle mr-1"></i>
                 You hold <strong>{{ balance }} MATIC</strong> which is less than the <strong>0.01 MATIC</strong> we
                 suggest for this ERC20 transfer.
