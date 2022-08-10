@@ -17,8 +17,6 @@ import { User } from 'oidc-client-ts';
 import { chainInfo } from '@/utils/chains';
 import { ChainInfo } from '@/types/ChainInfo';
 import { AccountVariant } from '@/types/Accounts';
-import { soliditySha3 } from 'web3-utils';
-import { default as defaultPoolDiamondAbi } from '@thxnetwork/artifacts/dist/exports/abis/defaultPoolDiamond.json';
 import { TorusKey } from '@toruslabs/customauth';
 import { createTypedMessage } from '@/utils/typedData';
 
