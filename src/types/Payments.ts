@@ -1,3 +1,4 @@
+import { TERC721Metadata } from '@/store/modules/erc721';
 import { ChainId } from './enums/ChainId';
 
 export enum PaymentState {
@@ -29,4 +30,6 @@ export type TPayment = {
     cancelUrl: string;
     createdAt: Date;
     updatedAt: Date;
+    metadataId?: string;
+    metadata?: TERC721Metadata;
 };

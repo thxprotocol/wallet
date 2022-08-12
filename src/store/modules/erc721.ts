@@ -37,7 +37,12 @@ export type TERC721Token = {
     metadata: TERC721Metadata;
 };
 
-export type TERC721Metadata = { [key: string]: string };
+export type TERC721Metadata = {
+    erc721: string;
+    title: string;
+    description: string;
+    attributes: { [key: string]: string };
+};
 
 @Module({ namespaced: true })
 class ERC721Module extends VuexModule {
@@ -56,8 +61,8 @@ class ERC721Module extends VuexModule {
     }
 
     @Mutation
-    setMetadata({ token, metadata }: { token: TERC721Token; metadata: TERC721Metadata }) {
-        Vue.set(this.metadata, token._id, metadata);
+    setMetadata({ tokenId, metadata }: { tokenId: string; metadata: TERC721Metadata }) {
+        Vue.set(this.metadata, tokenId, metadata);
     }
 
     @Mutation
@@ -128,8 +133,7 @@ class ERC721Module extends VuexModule {
             method: 'GET',
             url: token.tokenUri,
         });
-
-        this.context.commit('setMetadata', { token, metadata: data });
+        this.context.commit('setMetadata', { tokenId: token._id, metadata: data });
     }
 }
 
