@@ -1,14 +1,14 @@
 <template>
     <div class="d-flex align-items-center justify-content-center bg-dark p-5">
         <div class="flex-row text-white">
-            <b-spinner v-if="!claim && !isClaimInvalid && !isClaimFailed && !error" variant="secondary" large />
+            <b-spinner v-if="isLoading && !error" variant="secondary" large />
             <template v-else>
                 <template v-if="isClaimInvalid">
                     <b-alert show variant="info">
                         <i class="fas fa-info-circle mr-2"></i>
                         {{ error }}
                     </b-alert>
-                    <b-button block variant="primary" class="rounded-pill" to="/memberships">
+                    <b-button block variant="primary" class="rounded-pill" to="/wallet">
                         Continue
                     </b-button>
                 </template>
@@ -51,7 +51,8 @@
                         </p>
                     </b-col>
                 </b-row>
-                <b-button class="rounded-pill" block variant="primary" @click="goToMemberships" type="submit">
+                <hr />
+                <b-button class="rounded-pill" block variant="primary" @click="goToWallet" type="submit">
                     Continue
                 </b-button>
             </template>
@@ -83,6 +84,7 @@ export default class Collect extends Vue {
     format = format;
     imgUrl = require('@/assets/img/thx_treasure.png');
     error = '';
+    isLoading = true;
     isClaimFailed = false;
     isClaimInvalid = false;
     info = 'Claiming your token reward...';
@@ -101,7 +103,9 @@ export default class Collect extends Vue {
     }
 
     async claimReward() {
-        if (!this.user) this.$router.push('/memberships');
+        this.isLoading = true;
+
+        if (!this.user) this.$router.push({ path: 'memberships' });
 
         try {
             const state: any = this.user.state;
@@ -128,6 +132,8 @@ export default class Collect extends Vue {
             if (res?.status === 403) {
                 this.error = res?.data.error.message;
             }
+        } finally {
+            this.isLoading = false;
         }
     }
 
@@ -150,9 +156,10 @@ export default class Collect extends Vue {
         });
     }
 
-    goToMemberships() {
+    goToWallet() {
         (this as any).$confetti.stop();
-        this.$router.push('/memberships');
+        const path = this.erc721 ? 'collectibles' : 'tokens';
+        this.$router.push({ path });
     }
 }
 </script>
