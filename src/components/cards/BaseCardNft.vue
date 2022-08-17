@@ -2,20 +2,23 @@
     <b-card class="mb-3" :img-src="imgUrl" img-alt="Image" img-top>
         <strong class="mr-2">{{ token.erc721.name }} #{{ token.tokenId }}</strong>
         <hr />
-        <b-form-group label="Description" label-class="text-muted">{{ token.erc721.description }}</b-form-group>
-        <b-form-group label="Attributes" label-class="text-muted">
-            <b-badge
-                variant="darker"
-                v-b-tooltip
-                :title="value"
-                class="p-2 mr-1 mb-1 rounded-pill"
-                :key="key"
-                v-for="(value, key) in mdata"
-            >
-                {{ key }}
-            </b-badge>
-        </b-form-group>
-        <hr />
+        <div v-if="mdata">
+            <b-form-group label="Title" label-class="text-muted">{{ mdata.title }}</b-form-group>
+            <b-form-group label="Description" label-class="text-muted">{{ mdata.description }}</b-form-group>
+            <b-form-group label="Attributes" label-class="text-muted">
+                <b-badge
+                    variant="darker"
+                    v-b-tooltip
+                    :title="value"
+                    class="p-2 mr-1 mb-1 rounded-pill"
+                    :key="key"
+                    v-for="(value, key) in mdata.attributes"
+                >
+                    {{ key }}
+                </b-badge>
+            </b-form-group>
+            <hr />
+        </div>
         <b-button block class="rounded-pill" variant="primary" :href="token.tokenUri" target="_blank">
             Metadata
             <i class="fas fa-photo-video ml-2"></i>
@@ -62,7 +65,7 @@ export default class BaseCardNFT extends Vue {
         this.token.erc721.properties.forEach(p => {
             if (!this.mdata) return null;
             if (p.propType === 'image') {
-                url = this.mdata[p.name];
+                url = this.mdata.attributes[p.name];
             }
         });
         return url;
