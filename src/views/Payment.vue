@@ -61,6 +61,15 @@
                                 <small class="text-muted">Balance:</small><br />
                                 <strong class="text-primary">{{ balance }} {{ payment.tokenSymbol }}</strong>
                             </p>
+                            <p
+                                class="text-left"
+                                v-if="payment.metadata && (payment.metadata.title || payment.metadata.description)"
+                            >
+                                <small class="text-muted">Nft</small><br />
+                                <strong class="text-primary"
+                                    >{{ payment.metadata.title }} {{ payment.metadata.description }}</strong
+                                >
+                            </p>
                         </div>
                     </div>
                     <b-button

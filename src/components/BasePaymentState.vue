@@ -7,6 +7,26 @@
         <div class="text-center" v-if="payment.state === PaymentState.Completed">
             <i class="fas fa-thumbs-up text-success mb-3" style="font-size: 3rem;"></i>
             <p class="text-gray"><strong>THX!</strong> This payment has been completed.</p>
+            <div class="d-flex justify-content-between" v-if="payment.metadata">
+                <div>
+                    <p class="text-gray">The <strong>NFT</strong> has been minted</p>
+                </div>
+                <div class="text-gray">
+                    {{ payment.metadata.title || 'No Title' }}
+                </div>
+                <div class="text-gray">
+                    <b-badge
+                        :key="key"
+                        v-for="(key, value) in payment.metadata.attributes"
+                        variant="dark"
+                        v-b-tooltip
+                        :title="key"
+                        class="mr-2 text-gray"
+                    >
+                        {{ value }}
+                    </b-badge>
+                </div>
+            </div>
             <b-button class="rounded-pill" variant="primary" :href="payment.successUrl">
                 Continue to merchant
                 <i class="fas fa-chevron-right ml-2"></i>
