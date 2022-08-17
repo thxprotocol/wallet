@@ -5,7 +5,6 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import axios from 'axios';
 import { chainInfo } from '@/utils/chains';
 import { ChainId } from '@/types/enums/ChainId';
-import { TMembership } from './memberships';
 
 export interface ERC721 {
     _id: string;
