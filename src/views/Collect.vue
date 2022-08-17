@@ -1,7 +1,10 @@
 <template>
     <div class="d-flex align-items-center justify-content-center bg-dark p-5">
         <div class="flex-row text-white">
-            <b-spinner v-if="isLoading && !error" variant="secondary" large />
+            <template v-if="isLoading && !error">
+                <b-spinner variant="secondary" large />
+                <span class="text-muted mt-2">{{ info }}</span>
+            </template>
             <template v-else>
                 <template v-if="isClaimInvalid">
                     <b-alert show variant="info">

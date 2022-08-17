@@ -5,6 +5,7 @@ import { Action, Module, Mutation, VuexModule } from 'vuex-module-decorators';
 import axios from 'axios';
 import { chainInfo } from '@/utils/chains';
 import { ChainId } from '@/types/enums/ChainId';
+import { TMembership } from './memberships';
 
 export interface ERC721 {
     _id: string;
@@ -131,7 +132,7 @@ class ERC721Module extends VuexModule {
     async getMetadata(token: TERC721Token) {
         const { data } = await axios({
             method: 'GET',
-            url: token.tokenUri,
+            url: `/erc721/${token.erc721Id}/metadata/${token.metadataId}`,
         });
         this.context.commit('setMetadata', { tokenId: token._id, metadata: data });
     }
