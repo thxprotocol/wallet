@@ -1,10 +1,10 @@
 <template>
     <div class="d-flex align-items-center justify-content-center bg-dark p-5">
         <div class="flex-row text-white">
-            <template v-if="isLoading && !error">
-                <b-spinner variant="secondary" large />
+            <div v-if="isLoading && !error" class="text-center">
+                <b-spinner variant="secondary" large /><br />
                 <span class="text-muted mt-2">{{ info }}</span>
-            </template>
+            </div>
             <template v-else>
                 <template v-if="isClaimInvalid">
                     <b-alert show variant="info">
@@ -90,7 +90,7 @@ export default class Collect extends Vue {
     isLoading = true;
     isClaimFailed = false;
     isClaimInvalid = false;
-    info = 'Claiming your token reward...';
+    info = 'Claiming your reward...';
     claim: (Withdrawal & TERC721Token) | null = null;
 
     erc721s!: { [id: string]: ERC721 };
