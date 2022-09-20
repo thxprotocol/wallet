@@ -14,6 +14,7 @@ export interface IPayments {
 
 export type TPayment = {
     _id: string;
+    id: string;
     amount: string;
     tokenSymbol: string;
     tokenAddress: string;
