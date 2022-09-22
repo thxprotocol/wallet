@@ -19,8 +19,12 @@
             </b-form-group>
             <hr />
         </div>
-        <b-button block class="rounded-pill" variant="primary" :href="token.tokenUri" target="_blank">
-            Metadata
+        <b-button block class="rounded-pill" variant="primary" :href="token.erc721.blockExplorerUrl" target="_blank">
+            Visit Block Explorer
+            <i class="fas fa-external-link-alt ml-2"></i>
+        </b-button>
+        <b-button block class="rounded-pill" variant="link" :href="token.tokenUri" target="_blank">
+            View metadata
             <i class="fas fa-photo-video ml-2"></i>
         </b-button>
     </b-card>
