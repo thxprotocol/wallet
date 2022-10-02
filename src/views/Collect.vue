@@ -11,7 +11,7 @@
                         <i class="fas fa-info-circle mr-2"></i>
                         {{ error }}
                     </b-alert>
-                    <b-button block variant="primary" class="rounded-pill" to="/wallet">
+                    <b-button block variant="primary" class="rounded-pill" to="/tokens">
                         Continue
                     </b-button>
                 </template>
