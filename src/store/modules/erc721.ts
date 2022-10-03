@@ -92,7 +92,7 @@ class ERC721Module extends VuexModule {
                     const web3 = this.context.rootState.network.web3;
                     const from = this.context.rootGetters['account/profile'].address;
 
-                    token.erc721.blockExplorerUrl = `${chainInfo[token.erc721.chainId].blockExplorer}/address/${
+                    token.erc721.blockExplorerUrl = `${chainInfo[token.erc721.chainId].blockExplorer}/token/${
                         token.erc721.address
                     }`;
                     token.erc721.logoURI = `https://avatars.dicebear.com/api/identicon/${token.erc721._id}.svg`;
@@ -119,7 +119,7 @@ class ERC721Module extends VuexModule {
             ...data,
             contract,
             balance: 0,
-            blockExplorerUrl: `${chainInfo[data.chainId].blockExplorer}/address/${data.address}`,
+            blockExplorerUrl: `${chainInfo[data.chainId].blockExplorer}/token/${data.address}`,
             logoURI: `https://avatars.dicebear.com/api/identicon/${data._id}.svg`,
         };
 
