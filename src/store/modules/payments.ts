@@ -21,16 +21,6 @@ class PaymentModule extends VuexModule {
             },
         });
 
-        if (r.data.metadataId) {
-            const { data } = await axios({
-                method: 'GET',
-                url: `/metadata/${r.data.metadataId}`,
-            });
-            if (data) {
-                r.data.metadata = data;
-            }
-        }
-
         this.context.commit('set', r.data);
 
         return r.data;
