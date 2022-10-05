@@ -26,6 +26,7 @@ class AssetPoolModule extends VuexModule {
 
         return r.data;
     }
+
     @Action({ rawError: true })
     async getClaim({ rewardHash, claimId }: { rewardHash: string; claimId: string }) {
         if (rewardHash) {
@@ -51,6 +52,7 @@ class AssetPoolModule extends VuexModule {
             method: 'POST',
             url: `/claims/${claim._id}/collect`,
             headers: { 'X-PoolId': claim.poolId },
+            params: { forceSync: false },
         });
 
         return r.data;

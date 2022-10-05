@@ -95,6 +95,16 @@ class WithdrawalModule extends VuexModule {
     }
 
     @Action({ rawError: true })
+    async get({ poolId, id }: { poolId: string; id: string }) {
+        const r = await axios({
+            method: 'GET',
+            url: '/withdrawals/' + id,
+            headers: { 'X-PoolId': poolId },
+        });
+        return r.data;
+    }
+
+    @Action({ rawError: true })
     async withdraw({ membership, id }: { membership: TMembership; id: string }) {
         await axios({
             method: 'POST',
