@@ -1,4 +1,5 @@
 import { TERC721Metadata } from '@/store/modules/erc721';
+import { TMembership } from '@/store/modules/memberships';
 import { TPromotion } from '@/store/modules/promotions';
 import { ChainId } from './enums/ChainId';
 
@@ -15,6 +16,7 @@ export interface IPayments {
 
 export type TPayment = {
     _id: string;
+    id: string;
     amount: string;
     tokenSymbol: string;
     tokenAddress: string;
@@ -34,4 +36,5 @@ export type TPayment = {
     metadataId?: string;
     metadata?: TERC721Metadata;
     promotion?: TPromotion;
+    membership?: TMembership;
 };

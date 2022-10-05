@@ -12,7 +12,7 @@
                 </p>
             </div>
         </div>
-        <div class="text-center">
+        <!-- <div class="text-center">
             <b-button
                 v-if="membership && !promotion.value && erc20"
                 variant="primary"
@@ -21,7 +21,7 @@
             >
                 Pay <strong>{{ promotion.price }} {{ erc20.symbol }}</strong>
             </b-button>
-        </div>
+        </div> -->
         <template v-if="promotion.value">
             <b-alert class="w-100 m-0 mr-3" show variant="warning">
                 <strong>Promotion unlocked:</strong><br />

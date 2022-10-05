@@ -185,7 +185,7 @@ export default class Payment extends Vue {
     waitForPaymentCompleted() {
         const taskFn = async () => {
             const payment = await this.$store.dispatch('payments/read', {
-                paymentId: this.payment._id,
+                paymentId: this.payment.id,
                 accessToken: this.payment.token,
             });
 
@@ -227,7 +227,7 @@ export default class Payment extends Vue {
             this.error = String(error);
 
             await this.$store.dispatch('payments/read', {
-                paymentId: this.payment._id,
+                paymentId: this.payment.id,
                 accessToken: this.payment.token,
             });
 
