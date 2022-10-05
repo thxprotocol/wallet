@@ -49,7 +49,7 @@ class AssetPoolModule extends VuexModule {
         const claim = await this.context.dispatch('getClaim', { rewardHash, claimId });
         const r = await axios({
             method: 'POST',
-            url: `/claims/${claim._id}/collect`,
+            url: `/claims/${claim.id}/collect`,
             headers: { 'X-PoolId': claim.poolId },
         });
 
