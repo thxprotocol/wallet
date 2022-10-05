@@ -19,7 +19,13 @@
             </b-form-group>
             <hr />
         </div>
-        <b-button block class="rounded-pill" variant="primary" :href="token.erc721.blockExplorerUrl" target="_blank">
+        <b-button
+            block
+            class="rounded-pill"
+            variant="primary"
+            :href="token.erc721.blockExplorerUrl + `?a=${token.tokenId}#inventory`"
+            target="_blank"
+        >
             Visit Block Explorer
             <i class="fas fa-external-link-alt ml-2"></i>
         </b-button>
