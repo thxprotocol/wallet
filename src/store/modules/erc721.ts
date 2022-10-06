@@ -107,6 +107,30 @@ class ERC721Module extends VuexModule {
     }
 
     @Action({ rawError: true })
+    async getToken(id: string) {
+        try {
+            const { data } = await axios({
+                method: 'GET',
+                url: '/erc721/token/' + id,
+            });
+
+            const token = data;
+            const web3 = this.context.rootState.network.web3;
+            const from = this.context.rootGetters['account/profile'].address;
+
+            token.erc721.blockExplorerUrl = `${chainInfo[token.erc721.chainId].blockExplorer}/token/${
+                token.erc721.address
+            }`;
+            token.erc721.logoURI = `https://avatars.dicebear.com/api/identicon/${token.erc721._id}.svg`;
+            token.erc721.contract = new web3.eth.Contract(ERC721Abi as any, token.erc721.address, { from });
+
+            return token;
+        } catch (error) {
+            return { error };
+        }
+    }
+
+    @Action({ rawError: true })
     async get(id: string) {
         const { data } = await axios({
             method: 'GET',

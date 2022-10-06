@@ -65,12 +65,13 @@
 
 <script lang="ts">
 import { ERC721, TERC721Token } from '@/store/modules/erc721';
-import { Withdrawal } from '@/store/modules/withdrawals';
+import { Withdrawal, WithdrawalState } from '@/store/modules/withdrawals';
 import { AxiosError } from 'axios';
 import { format } from 'date-fns';
 import { User } from 'oidc-client-ts';
 import { Component, Vue } from 'vue-property-decorator';
 import { mapGetters, mapState } from 'vuex';
+import poll from 'promise-poller';
 
 @Component({
     computed: {
@@ -88,9 +89,9 @@ export default class Collect extends Vue {
     imgUrl = require('@/assets/img/thx_treasure.png');
     error = '';
     isLoading = true;
+    claimStarted = false;
     isClaimFailed = false;
     isClaimInvalid = false;
-    info = 'Claiming your reward...';
     claim: (Withdrawal & TERC721Token) | null = null;
 
     erc721s!: { [id: string]: ERC721 };
@@ -99,6 +100,10 @@ export default class Collect extends Vue {
     get erc721() {
         if (!this.claim) return null;
         return this.erc721s[this.claim.erc721Id];
+    }
+
+    get info() {
+        return this.claimStarted ? 'Claim transaction pending...' : 'Claiming your reward...';
     }
 
     mounted() {
@@ -112,10 +117,18 @@ export default class Collect extends Vue {
 
         try {
             const state: any = this.user.state;
-            this.claim = await this.$store.dispatch('assetpools/claimReward', {
+            const claim = await this.$store.dispatch('assetpools/claimReward', {
                 claimId: state.claimId,
                 rewardHash: state.rewardHash,
             });
+            this.claimStarted = true;
+
+            if (claim?.erc20) {
+                await this.waitForWithdrawn(claim);
+            } else {
+                await this.waitForMinted(claim);
+            }
+            this.claim = claim;
 
             this.startConfetti();
 
@@ -136,8 +149,41 @@ export default class Collect extends Vue {
                 this.error = res?.data.error.message;
             }
         } finally {
+            this.claimStarted = false;
             this.isLoading = false;
         }
+    }
+
+    async waitForWithdrawn(withdrawal: Withdrawal) {
+        const state: any = this.user.state;
+        const claim = await this.$store.dispatch('assetpools/getClaim', {
+            claimId: state.claimId,
+            rewardHash: state.rewardHash,
+        });
+
+        const taskFn = async () => {
+            const w = await this.$store.dispatch('withdrawals/get', { id: withdrawal._id, poolId: claim.poolId });
+            if (w && w.state === WithdrawalState.Withdrawn) {
+                return Promise.resolve(w);
+            } else {
+                return Promise.reject(w);
+            }
+        };
+
+        return poll({ taskFn, interval: 3000, retries: 10 });
+    }
+
+    async waitForMinted(token: TERC721Token) {
+        const taskFn = async () => {
+            const t = await this.$store.dispatch('erc721/getToken', token._id);
+            if (t && t.state !== 0) {
+                return Promise.resolve(t);
+            } else {
+                return Promise.reject(t);
+            }
+        };
+
+        return poll({ taskFn, interval: 3000, retries: 10 });
     }
 
     firstImageURL(metadata: any) {
