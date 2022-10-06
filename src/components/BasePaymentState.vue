@@ -52,5 +52,11 @@ export default class BasePaymentState extends Vue {
     PaymentState = PaymentState;
 
     @Prop() payment!: TPayment;
+
+    mounted() {
+        if (this.payment.state == PaymentState.Completed && this.payment.promotion && this.payment.membership) {
+            this.$router.push({ path: `/memberships/${this.payment.membership._id}/promotions` });
+        }
+    }
 }
 </script>

@@ -1,4 +1,6 @@
 import { TERC721Metadata } from '@/store/modules/erc721';
+import { TMembership } from '@/store/modules/memberships';
+import { TPromotion } from '@/store/modules/promotions';
 import { ChainId } from './enums/ChainId';
 
 export enum PaymentState {
@@ -33,4 +35,6 @@ export type TPayment = {
     updatedAt: Date;
     metadataId?: string;
     metadata?: TERC721Metadata;
+    promotion?: TPromotion;
+    membership?: TMembership;
 };

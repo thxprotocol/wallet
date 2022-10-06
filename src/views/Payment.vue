@@ -70,6 +70,12 @@
                                     >{{ payment.metadata.title }} {{ payment.metadata.description }}</strong
                                 >
                             </p>
+                            <p class="text-left" v-if="payment.promotion">
+                                <small class="text-muted">Promotion</small><br />
+                                <strong class="text-primary"
+                                    >{{ payment.promotion.title }} {{ payment.promotion.description }}</strong
+                                >
+                            </p>
                         </div>
                     </div>
                     <b-button

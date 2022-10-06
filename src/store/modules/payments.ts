@@ -21,16 +21,6 @@ class PaymentModule extends VuexModule {
             },
         });
 
-        if (r.data.metadataId) {
-            const { data } = await axios({
-                method: 'GET',
-                url: `/metadata/${r.data.metadataId}`,
-            });
-            if (data) {
-                r.data.metadata = data;
-            }
-        }
-
         this.context.commit('set', r.data);
 
         return r.data;
@@ -42,7 +32,7 @@ class PaymentModule extends VuexModule {
 
         const r = await axios({
             method: 'POST',
-            url: '/payments/' + this.payment._id + '/pay',
+            url: '/payments/' + this.payment.id + '/pay',
             headers: {
                 'X-PoolId': this.payment.poolId,
                 'X-Payment-Token': this.payment.token,
