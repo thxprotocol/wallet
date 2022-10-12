@@ -69,13 +69,15 @@ export default class BaseCardNFT extends Vue {
     }
 
     get imgUrl() {
-        if (!this.mdata) return null;
-
         let url = '';
         this.token.erc721.properties.forEach(p => {
-            if (!this.mdata) return null;
+            if (!this.metadata[this.token._id]) return;
             if (p.propType === 'image') {
-                url = this.mdata.attributes[p.name];
+                const attrs = this.metadata[this.token._id].attributes;
+                const attr: any = Object.values(attrs).find((a: any) => a.key === p.name);
+                if (attr) {
+                    url = attr.value;
+                }
             }
         });
         return url;
